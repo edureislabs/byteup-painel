@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Guild {
+  id           String        @id // ID do servidor Discord
+  name         String?
+  joinedAt     DateTime      @default(now())
+  config       GuildConfig?
+  economyUsers EconomyUser[]
+}
+
+model GuildConfig {
+  guildId          String  @id
+  guild            Guild   @relation(fields: [guildId], references: [id])
+  prefix           String  @default("!")
+  welcomeChannelId String?
+  logChannelId     String?
+  modules          String  @default("moderation,economy") // JSON array simples
+}
+
+model EconomyUser {
+  id      String @id @default(uuid())
+  guildId String
+  guild   Guild  @relation(fields: [guildId], references: [id])
+  userId  String
+  balance Int    @default(0)
+  bank    Int    @default(0)
+
+  @@unique([guildId, userId])
+}
