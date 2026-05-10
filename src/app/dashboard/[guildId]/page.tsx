@@ -48,8 +48,10 @@ async function saveConfigAction(guildId: string, formData: FormData) {
   "use server"
   const prefix = formData.get("prefix") as string
   const modules = formData.get("modules") as string
-  const logEnabled = formData.get("logEnabled") === "on"
+  const logEnabled = formData.get("logEnabled") === "true"
   const logChannelId = formData.get("logChannelId") as string || null
+
+  console.log("Salvando configuração:", { guildId, prefix, modules, logEnabled, logChannelId })
 
   const existing = await prisma.guildConfig.findUnique({ where: { guildId } })
   if (existing) {
