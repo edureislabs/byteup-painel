@@ -1,7 +1,6 @@
-// src/app/api/auth/[...nextauth]/route.ts
 import NextAuth from "next-auth"
 import DiscordProvider from "next-auth/providers/discord"
-import type { DefaultSession } from "next-auth"
+import type { DefaultSession, NextAuthOptions } from "next-auth"
 
 declare module "next-auth" {
   interface Session {
@@ -12,7 +11,7 @@ declare module "next-auth" {
   }
 }
 
-const handler = NextAuth({
+export const authOptions: NextAuthOptions = {
   providers: [
     DiscordProvider({
       clientId: process.env.DISCORD_CLIENT_ID!,
@@ -35,15 +34,13 @@ const handler = NextAuth({
       return session
     },
     async redirect({ url, baseUrl }) {
-      // Após o login, sempre vá para /dashboard
       if (url.startsWith(baseUrl)) return `${baseUrl}/dashboard`
-      // Se a URL for relativa, garanta que ela está no domínio correto
       if (url.startsWith("/")) return `${baseUrl}${url}`
       return url
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
-  debug: true,
-})
+}
 
+const handler = NextAuth(authOptions)
 export { handler as GET, handler as POST }

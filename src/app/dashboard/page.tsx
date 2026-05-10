@@ -1,14 +1,14 @@
 import { getServerSession } from "next-auth"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { redirect } from "next/navigation"
 
 export default async function DashboardPage() {
-  const session = await getServerSession()
+  const session = await getServerSession(authOptions)
 
   if (!session) {
-    redirect("/api/auth/signin")
+    redirect("/login")
   }
 
-  // Busca os servidores do usuário via Discord API
   const res = await fetch("https://discord.com/api/v10/users/@me/guilds", {
     headers: {
       Authorization: `Bearer ${(session as { accessToken?: string }).accessToken}`,
@@ -18,7 +18,6 @@ export default async function DashboardPage() {
   const guilds: { id: string; name: string; icon: string; owner: boolean }[] =
     await res.json()
 
-  // Filtra servidores onde o usuário é dono (pode ajustar)
   const ownedGuilds = guilds.filter((g) => g.owner)
 
   return (
@@ -30,9 +29,7 @@ export default async function DashboardPage() {
         <ul>
           {ownedGuilds.map((guild) => (
             <li key={guild.id}>
-              <a href={`/dashboard/${guild.id}`}>
-                {guild.name}
-              </a>
+              <a href={`/dashboard/${guild.id}`}>{guild.name}</a>
             </li>
           ))}
         </ul>
