@@ -20,7 +20,7 @@ const handler = NextAuth({
   pages: {
     signIn: "/",
   },
-  debug: true, // temporário para depuração
+  debug: true, // ajuda a ver logs detalhados no terminal da Vercel
 })
 
 export { handler as GET, handler as POST }
