@@ -4,9 +4,8 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { redirect } from "next/navigation"
 
-// Tipagem para a página
 type Props = {
-  params: { guildId: string }
+  params: Promise<{ guildId: string }>
 }
 
 async function getConfig(guildId: string) {
@@ -25,7 +24,6 @@ async function getConfig(guildId: string) {
   return config
 }
 
-// Server action separada que recebe guildId e os dados do formulário
 async function saveConfigAction(guildId: string, formData: FormData) {
   "use server"
   const prefix = formData.get("prefix") as string
@@ -49,68 +47,44 @@ async function saveConfigAction(guildId: string, formData: FormData) {
 }
 
 export default async function GuildConfigPage({ params }: Props) {
-  // Verifica autenticação
   const session = await getServerSession(authOptions)
   if (!session) redirect("/login")
 
-  const config = await getConfig(params.guildId)
+  // Aguarda a promise do params (Next.js 15+)
+  const { guildId } = await params
+  const config = await getConfig(guildId)
 
   return (
     <main style={{ padding: "2rem", fontFamily: "sans-serif" }}>
       <h1>Configurar Servidor</h1>
-      <form action={saveConfigAction.bind(null, params.guildId)}>
-        {/* Prefixo */}
+      <form action={saveConfigAction.bind(null, guildId)}>
         <label>
           Prefixo:
-          <input
-            name="prefix"
-            defaultValue={config.prefix}
-            style={{ marginLeft: "8px" }}
-          />
+          <input name="prefix" defaultValue={config.prefix} style={{ marginLeft: "8px" }} />
         </label>
         <br /><br />
 
-        {/* Módulos */}
         <label>
           Módulos (csv):
-          <input
-            name="modules"
-            defaultValue={config.modules}
-            style={{ marginLeft: "8px", width: "300px" }}
-          />
+          <input name="modules" defaultValue={config.modules} style={{ marginLeft: "8px", width: "300px" }} />
         </label>
         <br /><br />
 
-        {/* Checkbox de logs */}
         <label>
-          <input
-            type="checkbox"
-            name="logEnabled"
-            defaultChecked={config.logEnabled}
-          />
+          <input type="checkbox" name="logEnabled" defaultChecked={config.logEnabled} />
           Ativar Logs Detalhados
         </label>
         <br /><br />
 
-        {/* Canal de logs */}
         <label>
           Canal de Logs (ID):
-          <input
-            name="logChannelId"
-            defaultValue={config.logChannelId || ''}
-            placeholder="Ex: 1234567890123456789"
-            style={{ marginLeft: "8px" }}
-          />
+          <input name="logChannelId" defaultValue={config.logChannelId || ''} placeholder="Ex: 1234567890123456789" style={{ marginLeft: "8px" }} />
         </label>
         <br /><br />
 
-        <button type="submit" style={{ padding: "10px 20px" }}>
-          Salvar
-        </button>
+        <button type="submit" style={{ padding: "10px 20px" }}>Salvar</button>
       </form>
-      <p style={{ marginTop: "20px", color: "gray" }}>
-        Servidor ID: {params.guildId}
-      </p>
+      <p style={{ marginTop: "20px", color: "gray" }}>Servidor ID: {guildId}</p>
     </main>
   )
 }
