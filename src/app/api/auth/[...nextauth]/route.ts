@@ -17,10 +17,8 @@ const handler = NextAuth({
       return session
     },
   },
-  pages: {
-    signIn: "/",
-  },
-  debug: true, // ajuda a ver logs detalhados no terminal da Vercel
+  secret: process.env.NEXTAUTH_SECRET,
+  debug: true,
 })
 
 export { handler as GET, handler as POST }
