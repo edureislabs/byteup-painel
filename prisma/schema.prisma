@@ -7,7 +7,7 @@ datasource db {
 }
 
 model Guild {
-  id           String        @id // ID do servidor Discord
+  id           String        @id
   name         String?
   joinedAt     DateTime      @default(now())
   config       GuildConfig?
@@ -17,10 +17,20 @@ model Guild {
 model GuildConfig {
   guildId          String  @id
   guild            Guild   @relation(fields: [guildId], references: [id])
-  prefix           String  @default("!")
+  prefix           String  @default("/")
   welcomeChannelId String?
   logChannelId     String?
-  modules          String  @default("moderation,economy") // JSON array simples
+  logEnabled       Boolean @default(false)
+  modules          String  @default("fun,utility")
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  guildId   String
+  userId    String?
+  action    String
+  details   String?
+  createdAt DateTime @default(now())
 }
 
 model EconomyUser {
