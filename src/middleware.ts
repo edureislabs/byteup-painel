@@ -5,9 +5,10 @@ export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
 
   if (!token) {
-    const signInUrl = new URL("/api/auth/signin", req.url)
-    signInUrl.searchParams.set("callbackUrl", req.url)
-    return NextResponse.redirect(signInUrl)
+    // Redireciona direto para o provider Discord, sem passar pela página intermediária
+    const discordSignInUrl = new URL("/api/auth/signin/discord", req.url)
+    discordSignInUrl.searchParams.set("callbackUrl", "/dashboard")
+    return NextResponse.redirect(discordSignInUrl)
   }
 
   return NextResponse.next()
