@@ -35,34 +35,42 @@ async function getChannels(guildId: string) {
     headers: {
       Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
     },
-    next: { revalidate: 60 }, // cache por 60 segundos
+    next: { revalidate: 60 },
   })
 
   if (!res.ok) return []
   const channels: DiscordChannel[] = await res.json()
-  // Filtra apenas canais de texto (0) e canais de anúncios (5)
   return channels.filter(c => c.type === 0 || c.type === 5)
 }
 
+// 🟢 Server action com tratamento de erro e logs detalhados
 async function saveConfigAction(guildId: string, formData: FormData) {
   "use server"
   const prefix = formData.get("prefix") as string
   const modules = formData.get("modules") as string
+  // ✅ Agora sempre recebemos "true" ou "false" graças ao campo hidden
   const logEnabled = formData.get("logEnabled") === "true"
   const logChannelId = formData.get("logChannelId") as string || null
 
-  console.log("Salvando configuração:", { guildId, prefix, modules, logEnabled, logChannelId })
+  console.log("📥 Salvando configuração:", { guildId, prefix, modules, logEnabled, logChannelId })
 
-  const existing = await prisma.guildConfig.findUnique({ where: { guildId } })
-  if (existing) {
-    await prisma.guildConfig.update({
-      where: { guildId },
-      data: { prefix, modules, logEnabled, logChannelId },
-    })
-  } else {
-    await prisma.guildConfig.create({
-      data: { guildId, prefix, modules, logEnabled, logChannelId },
-    })
+  try {
+    const existing = await prisma.guildConfig.findUnique({ where: { guildId } })
+    if (existing) {
+      await prisma.guildConfig.update({
+        where: { guildId },
+        data: { prefix, modules, logEnabled, logChannelId },
+      })
+      console.log("✅ Configuração atualizada no banco")
+    } else {
+      await prisma.guildConfig.create({
+        data: { guildId, prefix, modules, logEnabled, logChannelId },
+      })
+      console.log("✅ Configuração criada no banco")
+    }
+  } catch (error: any) {
+    console.error("❌ Erro ao salvar no banco:", error)
+    throw new Error("Falha ao salvar configuração. Verifique os logs do servidor.")
   }
 
   revalidatePath(`/dashboard/${guildId}`)
@@ -92,8 +100,15 @@ export default async function GuildConfigPage({ params }: Props) {
         </label>
         <br /><br />
 
+        {/* 🔧 CAMPO HIDDEN + CHECKBOX: garante que o valor sempre seja enviado */}
+        <input type="hidden" name="logEnabled" value="false" />
         <label>
-          <input type="checkbox" name="logEnabled" defaultChecked={config.logEnabled} />
+          <input
+            type="checkbox"
+            name="logEnabled"
+            value="true"
+            defaultChecked={config.logEnabled === true}
+          />
           Ativar Logs Detalhados
         </label>
         <br /><br />
