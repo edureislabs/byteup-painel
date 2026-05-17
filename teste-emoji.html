@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Teste Adicionar Emoji - ByteUP</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #0e0f11;
+            color: #dbdee1;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #16181c;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 400px;
+            width: 100%;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border: 1px solid #1e2025;
+            background: #0e0f11;
+            color: #dbdee1;
+            box-sizing: border-box;
+        }
+        button {
+            background: #5865f2;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+        button:hover {
+            background: #4752c4;
+        }
+        pre {
+            background: #1e2025;
+            padding: 1rem;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Teste - Adicionar Emoji</h2>
+        <label>ID do Servidor:</label>
+        <input type="text" id="guildId" value="1386153816096903309">
+        
+        <label>Nome do Emoji:</label>
+        <input type="text" id="nome" value="teste_byteup">
+        
+        <label>Imagem (PNG, JPG, GIF):</label>
+        <input type="file" id="imagem" accept="image/*">
+        
+        <button onclick="adicionarEmoji()">Adicionar Emoji</button>
+        
+        <h3>Resposta:</h3>
+        <pre id="resposta">Aguardando...</pre>
+    </div>
+
+    <script>
+        async function adicionarEmoji() {
+            const guildId = document.getElementById('guildId').value;
+            const nome = document.getElementById('nome').value;
+            const fileInput = document.getElementById('imagem');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                document.getElementById('resposta').textContent = 'Selecione uma imagem.';
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = async function() {
+                const imagem = reader.result; // data URL (base64)
+                try {
+                    const res = await fetch(`/api/guilds/${guildId}/emojis/add`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name: nome, image: imagem }),
+                    });
+                    const data = await res.json();
+                    document.getElementById('resposta').textContent = JSON.stringify(data, null, 2);
+                } catch (err) {
+                    document.getElementById('resposta').textContent = 'Erro na requisição: ' + err.message;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    </script>
+</body>
+</html>
