@@ -19,7 +19,8 @@ export async function DELETE(
   try {
     await deleteGuildEmoji(guildId, emojiId);
     return NextResponse.json({ success: true });
-  } catch (error) {
-    return NextResponse.json({ error: 'Erro ao remover emoji' }, { status: 500 });
+  } catch (error: any) {
+    console.error('Erro ao remover emoji:', error);
+    return NextResponse.json({ error: error.message || 'Erro ao remover emoji' }, { status: 500 });
   }
 }

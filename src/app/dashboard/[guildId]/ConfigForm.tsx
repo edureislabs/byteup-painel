@@ -90,27 +90,25 @@ export default function ConfigForm({ guildId, config, channels, saveAction }: Pr
     }
   }
 
-  // Remover emoji
-  const handleRemoveEmoji = async () => {
-    setMessage('')
-    if (!selectedEmoji) return
-    try {
-      const res = await fetch(`/api/guilds/${guildId}/emojis/remove?id=${selectedEmoji.id}`, {
-        method: 'DELETE',
-      })
-      if (res.ok) {
-        setMessage(`Emoji ${selectedEmoji.name} removido com sucesso.`)
-        setSelectedEmoji(null)
-        setEmojiSearch('')
-      } else {
-        const data = await res.json()
-        setMessage(data.error || 'Erro ao remover emoji.')
-      }
-    } catch (err) {
-      setMessage('Erro de conexao.')
+const handleRemoveEmoji = async () => {
+  setMessage('');
+  if (!selectedEmoji) return;
+  try {
+    const res = await fetch(`/api/guilds/${guildId}/emojis/remove?id=${selectedEmoji.id}`, {
+      method: 'DELETE',
+    });
+    const data = await res.json();
+    if (res.ok) {
+      setMessage(`Emoji ${selectedEmoji.name} removido com sucesso.`);
+      setSelectedEmoji(null);
+      setEmojiSearch('');
+    } else {
+      setMessage(data.error || 'Erro ao remover emoji.');
     }
+  } catch (err) {
+    setMessage('Erro de conexao.');
   }
-
+};
   return (
     <>
       <style>{`
