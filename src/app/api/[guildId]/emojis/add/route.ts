@@ -19,7 +19,8 @@ export async function POST(
   try {
     const emoji = await createGuildEmoji(guildId, name, image);
     return NextResponse.json(emoji);
-  } catch (error) {
-    return NextResponse.json({ error: 'Erro ao criar emoji' }, { status: 500 });
+  } catch (error: any) {
+    console.error('Erro ao criar emoji:', error);
+    return NextResponse.json({ error: error.message || 'Erro ao criar emoji' }, { status: 500 });
   }
 }
