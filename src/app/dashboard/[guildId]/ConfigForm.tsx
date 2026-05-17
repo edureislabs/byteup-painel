@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 type Channel = {
   id: string
@@ -15,13 +15,101 @@ type Config = {
 }
 
 type Props = {
+  guildId: string                     // ← NOVA PROP
   config: Config
   channels: Channel[]
   saveAction: (formData: FormData) => Promise<void>
 }
 
-export default function ConfigForm({ config, channels, saveAction }: Props) {
+export default function ConfigForm({ guildId, config, channels, saveAction }: Props) {
+  // Estados existentes
   const [logsEnabled, setLogsEnabled] = useState(config.logEnabled)
+
+  // Novos estados para emojis
+  const [emojiSearch, setEmojiSearch] = useState('')
+  const [emojiList, setEmojiList] = useState<any[]>([])
+  const [selectedEmoji, setSelectedEmoji] = useState<any>(null)
+  const [addName, setAddName] = useState('')
+  const [addImage, setAddImage] = useState<File | null>(null)
+  const [addUrl, setAddUrl] = useState('')
+  const [message, setMessage] = useState('')
+
+  // Busca emojis ao digitar (autocomplete simples)
+  useEffect(() => {
+    if (emojiSearch.length < 2) {
+      setEmojiList([])
+      return
+    }
+    fetch(`/api/guilds/${guildId}/emojis`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setEmojiList(data.filter((e: any) => e.name.toLowerCase().includes(emojiSearch.toLowerCase())))
+        }
+      })
+      .catch(console.error)
+  }, [emojiSearch, guildId])
+
+  // Adicionar emoji
+  const handleAddEmoji = async () => {
+    setMessage('')
+    if (!addName || (!addImage && !addUrl)) {
+      setMessage('Preencha o nome e forneca uma imagem ou URL.')
+      return
+    }
+
+    if (addImage) {
+      const reader = new FileReader()
+      reader.onload = async () => {
+        await submitAdd(reader.result as string)
+      }
+      reader.readAsDataURL(addImage)
+    } else {
+      await submitAdd(addUrl)
+    }
+  }
+
+  const submitAdd = async (image: string) => {
+    try {
+      const res = await fetch(`/api/guilds/${guildId}/emojis/add`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: addName, image }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setMessage(`Emoji adicionado com sucesso! (${data.name})`)
+        setAddName('')
+        setAddImage(null)
+        setAddUrl('')
+      } else {
+        setMessage(data.error || 'Erro ao adicionar emoji.')
+      }
+    } catch (err) {
+      setMessage('Erro de conexao.')
+    }
+  }
+
+  // Remover emoji
+  const handleRemoveEmoji = async () => {
+    setMessage('')
+    if (!selectedEmoji) return
+    try {
+      const res = await fetch(`/api/guilds/${guildId}/emojis/remove?id=${selectedEmoji.id}`, {
+        method: 'DELETE',
+      })
+      if (res.ok) {
+        setMessage(`Emoji ${selectedEmoji.name} removido com sucesso.`)
+        setSelectedEmoji(null)
+        setEmojiSearch('')
+      } else {
+        const data = await res.json()
+        setMessage(data.error || 'Erro ao remover emoji.')
+      }
+    } catch (err) {
+      setMessage('Erro de conexao.')
+    }
+  }
 
   return (
     <>
@@ -241,6 +329,18 @@ export default function ConfigForm({ config, channels, saveAction }: Props) {
         .save-btn:active {
           transform: scale(0.99);
         }
+
+        .message-success {
+          color: #23a55a;
+          font-size: 13px;
+          margin-top: 8px;
+        }
+
+        .message-error {
+          color: #ed4245;
+          font-size: 13px;
+          margin-top: 8px;
+        }
       `}</style>
 
       <div className="config-root">
@@ -253,6 +353,7 @@ export default function ConfigForm({ config, channels, saveAction }: Props) {
           <form action={saveAction}>
             <div className="config-card">
 
+              {/* PREFIXO */}
               <div className="field-group">
                 <span className="field-label">Prefixo</span>
                 <input
@@ -263,6 +364,7 @@ export default function ConfigForm({ config, channels, saveAction }: Props) {
                 />
               </div>
 
+              {/* MODULOS */}
               <div className="field-group">
                 <span className="field-label">Modulos</span>
                 <input
@@ -275,6 +377,7 @@ export default function ConfigForm({ config, channels, saveAction }: Props) {
 
               <div className="divider" />
 
+              {/* LOGS */}
               <div className="field-group">
                 <span className="field-label">Logs de Atividade</span>
 
@@ -335,7 +438,121 @@ export default function ConfigForm({ config, channels, saveAction }: Props) {
                 </div>
               </div>
 
-              <button type="submit" className="save-btn">
+              <div className="divider" />
+
+              {/* GERENCIAR EMOJIS */}
+              <div className="field-group">
+                <span className="field-label">Gerenciar Emojis</span>
+
+                {/* Adicionar emoji */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
+                  <input
+                    className="field-input"
+                    placeholder="Nome do emoji"
+                    value={addName}
+                    onChange={e => setAddName(e.target.value)}
+                  />
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={e => setAddImage(e.target.files?.[0] || null)}
+                      style={{ color: '#dbdee1' }}
+                    />
+                    <span style={{ color: '#72767d', fontSize: '13px' }}>ou</span>
+                    <input
+                      className="field-input"
+                      placeholder="URL da imagem"
+                      value={addUrl}
+                      onChange={e => setAddUrl(e.target.value)}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="save-btn"
+                    onClick={handleAddEmoji}
+                    style={{ marginTop: '0' }}
+                  >
+                    Adicionar Emoji
+                  </button>
+                </div>
+
+                {/* Remover emoji */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
+                  <span className="field-label" style={{ marginBottom: '0' }}>Remover Emoji</span>
+                  <input
+                    className="field-input"
+                    placeholder="Buscar emoji pelo nome..."
+                    value={emojiSearch}
+                    onChange={e => {
+                      setEmojiSearch(e.target.value)
+                      setSelectedEmoji(null)
+                    }}
+                  />
+                  {emojiList.length > 0 && (
+                    <div style={{
+                      background: '#0e0f11',
+                      border: '1px solid #1e2025',
+                      borderRadius: '8px',
+                      maxHeight: '150px',
+                      overflow: 'auto',
+                      marginTop: '-4px',
+                    }}>
+                      {emojiList.map((emoji: any) => (
+                        <div
+                          key={emoji.id}
+                          onClick={() => {
+                            setSelectedEmoji(emoji)
+                            setEmojiSearch(`${emoji.name} (${emoji.id})`)
+                            setEmojiList([])
+                          }}
+                          style={{
+                            padding: '6px 12px',
+                            cursor: 'pointer',
+                            color: '#dbdee1',
+                            fontSize: '14px',
+                            borderBottom: '1px solid #1e2025',
+                          }}
+                        >
+                          {emoji.name} <span style={{ color: '#72767d', fontSize: '12px' }}>(ID: {emoji.id})</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {selectedEmoji && (
+                    <div style={{
+                      background: '#1e2025',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      fontSize: '14px',
+                      color: '#dbdee1',
+                    }}>
+                      <span>Remover:</span>
+                      <strong>{selectedEmoji.name}</strong>
+                      <button
+                        type="button"
+                        className="save-btn"
+                        onClick={handleRemoveEmoji}
+                        style={{ padding: '4px 14px', fontSize: '12px', width: 'auto', marginTop: '0' }}
+                      >
+                        Confirmar remocao
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Mensagem de feedback */}
+              {message && (
+                <div className={message.includes('sucesso') ? 'message-success' : 'message-error'}>
+                  {message}
+                </div>
+              )}
+
+              <button type="submit" className="save-btn" style={{ marginTop: '8px' }}>
                 Salvar alteracoes
               </button>
             </div>

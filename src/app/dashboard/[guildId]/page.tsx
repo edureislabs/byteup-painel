@@ -85,7 +85,9 @@ export default async function GuildConfigPage({ params }: Props) {
 
   return (
     <ConfigForm
+      guildId={guildId}
       config={{
+        
         prefix: config.prefix,
         modules: config.modules,
         logEnabled: config.logEnabled,
