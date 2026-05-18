@@ -51,26 +51,25 @@ async function saveConfigAction(guildId: string, formData: FormData) {
   const modules = formData.get("modules") as string
   const logEnabled = formData.get("logEnabled") === "true"
   const logChannelId = formData.get("logChannelId") as string || null
-  const birthdayEnabled = formData.get("birthdayEnabled") === "true";
-const birthdayChannelId = formData.get("birthdayChannelId") as string || null;
-const birthdayMessage = formData.get("birthdayMessage") as string;
+  const birthdayEnabled = formData.get("birthdayEnabled") === "true"
+  const birthdayChannelId = formData.get("birthdayChannelId") as string || null
+  const birthdayMessage = formData.get("birthdayMessage") as string
 
-  console.log("Salvando configuracao:", { guildId, prefix, modules, logEnabled, logChannelId })
+  console.log("Salvando configuracao:", { guildId, prefix, modules, logEnabled, logChannelId, birthdayEnabled, birthdayChannelId, birthdayMessage })
 
   try {
     const existing = await prisma.guildConfig.findUnique({ where: { guildId } })
     if (existing) {
       await prisma.guildConfig.update({
         where: { guildId },
-        data: { prefix, modules, logEnabled, logChannelId },
+        data: { prefix, modules, logEnabled, logChannelId, birthdayEnabled, birthdayChannelId, birthdayMessage },
       })
     } else {
-      await prisma.guildConfig.update({
-  where: { guildId },
-  data: { prefix, modules, logEnabled, logChannelId, birthdayEnabled, birthdayChannelId, birthdayMessage },
-});
+      await prisma.guildConfig.create({
+        data: { guildId, prefix, modules, logEnabled, logChannelId, birthdayEnabled, birthdayChannelId, birthdayMessage },
+      })
     }
-    console.log("Salvo com sucesso:", { logEnabled, logChannelId })
+    console.log("Salvo com sucesso:", { logEnabled, logChannelId, birthdayEnabled, birthdayChannelId })
   } catch (error: any) {
     console.error("Erro ao salvar:", error)
     throw new Error("Falha ao salvar configuracao.")
