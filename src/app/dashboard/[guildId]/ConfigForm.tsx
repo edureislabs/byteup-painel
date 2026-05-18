@@ -15,6 +15,7 @@ type Config = {
   birthdayEnabled: boolean
   birthdayMessage: string
   birthdayChannelId: string | null
+  gamesEnabled: boolean   
 }
 
 type Props = {
@@ -38,6 +39,7 @@ export default function ConfigForm({ guildId, config, channels, saveAction }: Pr
   const [message, setMessage] = useState('')
   const [birthdayEnabled, setBirthdayEnabled] = useState(config.birthdayEnabled || false);
 const [birthdayMessage, setBirthdayMessage] = useState(config.birthdayMessage || 'Feliz aniversario, {user}!');
+  const [gamesEnabled, setGamesEnabled] = useState(config.gamesEnabled || false);
 
   // Busca emojis ao digitar (autocomplete simples)
   useEffect(() => {
@@ -495,6 +497,27 @@ const handleRemoveEmoji = async () => {
                   disabled={!birthdayEnabled}
                 />
               </div>
+              <div className="field-group">
+  <span className="field-label">Jogos</span>
+
+  <div className="toggle-row">
+    <div className="toggle-info">
+      <span className="toggle-title">Ativar jogos</span>
+      <span className={`toggle-status ${config.gamesEnabled ? 'on' : ''}`}>
+        {config.gamesEnabled ? 'Ativo' : 'Desativado'}
+      </span>
+    </div>
+    <button
+      type="button"
+      className={`toggle-track ${config.gamesEnabled ? 'enabled' : ''}`}
+      onClick={() => setGamesEnabled(!gamesEnabled)}
+    >
+      <div className="toggle-thumb" />
+    </button>
+  </div>
+
+  <input type="hidden" name="gamesEnabled" value={gamesEnabled ? 'true' : 'false'} />
+</div>
               <div className="divider" />
 
               {/* GERENCIAR EMOJIS */}

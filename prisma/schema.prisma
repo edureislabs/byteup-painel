@@ -7,11 +7,14 @@ datasource db {
 }
 
 model Guild {
-  id           String        @id
-  name         String?
-  joinedAt     DateTime      @default(now())
-  config       GuildConfig?
-  economyUsers EconomyUser[]
+  id             String        @id
+  name           String?
+  joinedAt       DateTime      @default(now())
+  config         GuildConfig?
+  currencies     Currency[]
+  economyUsers   EconomyUser[]
+  coinflipStats  CoinflipStats[]
+  birthdays      Birthday[]
 }
 
 model GuildConfig {
@@ -25,6 +28,7 @@ model GuildConfig {
   birthdayEnabled    Boolean @default(false)
   birthdayChannelId  String?
   birthdayMessage    String  @default("Feliz aniversario, {user}!")
+  gamesEnabled       Boolean @default(true)
 }
 
 model ActivityLog {
@@ -36,13 +40,39 @@ model ActivityLog {
   createdAt DateTime @default(now())
 }
 
+model Currency {
+  id            String         @id @default(uuid())
+  guildId       String
+  guild         Guild          @relation(fields: [guildId], references: [id])
+  name          String
+  symbol        String         @default("$")
+  taxRate       Float          @default(0)
+  exchangeRate  Float          @default(1.0)
+  economyUsers  EconomyUser[]
+
+  @@unique([guildId, name])
+}
+
 model EconomyUser {
+  id         String   @id @default(uuid())
+  guildId    String
+  guild      Guild    @relation(fields: [guildId], references: [id])
+  userId     String
+  currencyId String
+  currency   Currency @relation(fields: [currencyId], references: [id])
+  balance    Int      @default(0)
+  bank       Int      @default(0)
+
+  @@unique([guildId, userId, currencyId])
+}
+
+model CoinflipStats {
   id      String @id @default(uuid())
   guildId String
-  guild   Guild  @relation(fields: [guildId], references: [id])
   userId  String
-  balance Int    @default(0)
-  bank    Int    @default(0)
+  wins    Int    @default(0)
+  total   Int    @default(0)
+  guild   Guild  @relation(fields: [guildId], references: [id])
 
   @@unique([guildId, userId])
 }
@@ -54,6 +84,7 @@ model Birthday {
   day       Int
   month     Int
   createdAt DateTime @default(now())
+  guild     Guild    @relation(fields: [guildId], references: [id])
 
   @@unique([guildId, userId])
 }

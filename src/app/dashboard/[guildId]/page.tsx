@@ -71,6 +71,7 @@ async function saveConfigAction(guildId: string, formData: FormData) {
   const birthdayEnabled = formData.get("birthdayEnabled") === "true"
   const birthdayChannelId = formData.get("birthdayChannelId") as string || null
   const birthdayMessage = formData.get("birthdayMessage") as string || 'Feliz aniversario, {user}!'
+  const gamesEnabled = formData.get("gamesEnabled") === "true"
 
   try {
     await prisma.guild.upsert({
@@ -83,7 +84,7 @@ async function saveConfigAction(guildId: string, formData: FormData) {
     if (existing) {
       await prisma.guildConfig.update({
         where: { guildId },
-        data: { prefix, modules, logEnabled, logChannelId, birthdayEnabled, birthdayChannelId, birthdayMessage },
+        data: { prefix, modules, logEnabled, logChannelId, birthdayEnabled, birthdayChannelId, birthdayMessage, gamesEnabled }
       })
     } else {
       await prisma.guildConfig.create({
@@ -127,14 +128,15 @@ export default async function GuildConfigPage({ params }: Props) {
     <ConfigForm
       guildId={guildId}
       config={{
-        prefix: config.prefix,
-        modules: config.modules,
-        logEnabled: config.logEnabled,
-        logChannelId: config.logChannelId,
-        birthdayEnabled: config.birthdayEnabled,
-        birthdayMessage: config.birthdayMessage,
-        birthdayChannelId: config.birthdayChannelId,
-      }}
+  prefix: config.prefix,
+  modules: config.modules,
+  logEnabled: config.logEnabled,
+  logChannelId: config.logChannelId,
+  birthdayEnabled: config.birthdayEnabled,
+  birthdayMessage: config.birthdayMessage,
+  birthdayChannelId: config.birthdayChannelId,
+  gamesEnabled: config.gamesEnabled,   // ← ADICIONE ESTA LINHA
+}}
       channels={channels.map(c => ({ id: c.id, name: c.name }))}
       saveAction={saveConfigAction.bind(null, guildId)}
     />
