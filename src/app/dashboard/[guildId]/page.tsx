@@ -25,10 +25,27 @@ async function getConfig(guildId: string) {
         modules: 'fun,utility',
         logEnabled: false,
         logChannelId: null,
+        birthdayEnabled: false,
+        birthdayChannelId: null,
+        birthdayMessage: 'Feliz aniversario, {user}!',
       },
     })
   }
   return config
+}
+
+async function getGuildInfo(guildId: string) {
+  try {
+    const res = await fetch(`https://discord.com/api/v10/guilds/${guildId}`, {
+      headers: {
+        Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
+      },
+      next: { revalidate: 60 },
+    })
+    return res.ok
+  } catch {
+    return false
+  }
 }
 
 async function getChannels(guildId: string) {
@@ -53,11 +70,15 @@ async function saveConfigAction(guildId: string, formData: FormData) {
   const logChannelId = formData.get("logChannelId") as string || null
   const birthdayEnabled = formData.get("birthdayEnabled") === "true"
   const birthdayChannelId = formData.get("birthdayChannelId") as string || null
-  const birthdayMessage = formData.get("birthdayMessage") as string
-
-  console.log("Salvando configuracao:", { guildId, prefix, modules, logEnabled, logChannelId, birthdayEnabled, birthdayChannelId, birthdayMessage })
+  const birthdayMessage = formData.get("birthdayMessage") as string || 'Feliz aniversario, {user}!'
 
   try {
+    await prisma.guild.upsert({
+      where: { id: guildId },
+      update: {},
+      create: { id: guildId },
+    })
+
     const existing = await prisma.guildConfig.findUnique({ where: { guildId } })
     if (existing) {
       await prisma.guildConfig.update({
@@ -69,7 +90,6 @@ async function saveConfigAction(guildId: string, formData: FormData) {
         data: { guildId, prefix, modules, logEnabled, logChannelId, birthdayEnabled, birthdayChannelId, birthdayMessage },
       })
     }
-    console.log("Salvo com sucesso:", { logEnabled, logChannelId, birthdayEnabled, birthdayChannelId })
   } catch (error: any) {
     console.error("Erro ao salvar:", error)
     throw new Error("Falha ao salvar configuracao.")
@@ -83,6 +103,23 @@ export default async function GuildConfigPage({ params }: Props) {
   if (!session) redirect("/login")
 
   const { guildId } = await params
+
+  const botInGuild = await getGuildInfo(guildId)
+
+  if (!botInGuild) {
+    return (
+      <main style={{ padding: "2rem", fontFamily: "sans-serif", color: "#dbdee1", background: "#0e0f11", minHeight: "100vh" }}>
+        <div style={{ maxWidth: "520px", margin: "0 auto" }}>
+          <h1 style={{ color: "#f2f3f5" }}>Bot nao esta no servidor</h1>
+          <p style={{ color: "#72767d" }}>
+            Para configurar este servidor, o ByteUP BOT precisa estar presente nele.
+          </p>
+          <a href="/dashboard" style={{ color: "#5865f2", textDecoration: "none" }}>Voltar para a lista de servidores</a>
+        </div>
+      </main>
+    )
+  }
+
   const config = await getConfig(guildId)
   const channels = await getChannels(guildId)
 
