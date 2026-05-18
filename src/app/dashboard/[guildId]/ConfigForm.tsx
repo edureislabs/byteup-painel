@@ -12,6 +12,9 @@ type Config = {
   modules: string
   logEnabled: boolean
   logChannelId: string | null
+  birthdayEnabled: boolean
+  birthdayMessage: string
+  birthdayChannelId: string | null
 }
 
 type Props = {
@@ -33,6 +36,8 @@ export default function ConfigForm({ guildId, config, channels, saveAction }: Pr
   const [addImage, setAddImage] = useState<File | null>(null)
   const [addUrl, setAddUrl] = useState('')
   const [message, setMessage] = useState('')
+  const [birthdayEnabled, setBirthdayEnabled] = useState(config.birthdayEnabled || false);
+const [birthdayMessage, setBirthdayMessage] = useState(config.birthdayMessage || 'Feliz aniversario, {user}!');
 
   // Busca emojis ao digitar (autocomplete simples)
   useEffect(() => {
@@ -435,7 +440,61 @@ const handleRemoveEmoji = async () => {
                   </svg>
                 </div>
               </div>
+              {/* ANIVERSARIOS */}
+              <div className="field-group">
+                <span className="field-label">Aniversarios</span>
 
+                <div className="toggle-row">
+                  <div className="toggle-info">
+                    <span className="toggle-title">Ativar felicitacoes</span>
+                    <span className={`toggle-status ${birthdayEnabled ? 'on' : ''}`}>
+                      {birthdayEnabled ? 'Ativo' : 'Desativado'}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className={`toggle-track ${birthdayEnabled ? 'enabled' : ''}`}
+                    onClick={() => setBirthdayEnabled(!birthdayEnabled)}
+                  >
+                    <div className="toggle-thumb" />
+                  </button>
+                </div>
+
+                <input type="hidden" name="birthdayEnabled" value={birthdayEnabled ? 'true' : 'false'} />
+
+                <span className="field-label" style={{ opacity: birthdayEnabled ? 1 : 0.4, marginTop: '12px' }}>
+                  Canal de Aniversarios
+                </span>
+                <div className="select-wrapper">
+                  <select
+                    className="field-select"
+                    name="birthdayChannelId"
+                    defaultValue={config.birthdayChannelId || ''}
+                    disabled={!birthdayEnabled}
+                  >
+                    <option value="">{birthdayEnabled ? 'Selecione um canal' : 'Ative os aniversarios primeiro'}</option>
+                    {channels.map(channel => (
+                      <option key={channel.id} value={channel.id}>
+                        # {channel.name}
+                      </option>
+                    ))}
+                  </select>
+                  <svg className={`select-chevron ${!birthdayEnabled ? 'disabled' : ''}`} width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+
+                <span className="field-label" style={{ opacity: birthdayEnabled ? 1 : 0.4, marginTop: '12px' }}>
+                  Mensagem de Aniversario
+                </span>
+                <input
+                  className="field-input"
+                  name="birthdayMessage"
+                  value={birthdayMessage}
+                  onChange={e => setBirthdayMessage(e.target.value)}
+                  disabled={!birthdayEnabled}
+                />
+              </div>
               <div className="divider" />
 
               {/* GERENCIAR EMOJIS */}

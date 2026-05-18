@@ -51,6 +51,9 @@ async function saveConfigAction(guildId: string, formData: FormData) {
   const modules = formData.get("modules") as string
   const logEnabled = formData.get("logEnabled") === "true"
   const logChannelId = formData.get("logChannelId") as string || null
+  const birthdayEnabled = formData.get("birthdayEnabled") === "true";
+const birthdayChannelId = formData.get("birthdayChannelId") as string || null;
+const birthdayMessage = formData.get("birthdayMessage") as string;
 
   console.log("Salvando configuracao:", { guildId, prefix, modules, logEnabled, logChannelId })
 
@@ -62,9 +65,10 @@ async function saveConfigAction(guildId: string, formData: FormData) {
         data: { prefix, modules, logEnabled, logChannelId },
       })
     } else {
-      await prisma.guildConfig.create({
-        data: { guildId, prefix, modules, logEnabled, logChannelId },
-      })
+      await prisma.guildConfig.update({
+  where: { guildId },
+  data: { prefix, modules, logEnabled, logChannelId, birthdayEnabled, birthdayChannelId, birthdayMessage },
+});
     }
     console.log("Salvo com sucesso:", { logEnabled, logChannelId })
   } catch (error: any) {
@@ -87,11 +91,13 @@ export default async function GuildConfigPage({ params }: Props) {
     <ConfigForm
       guildId={guildId}
       config={{
-        
         prefix: config.prefix,
         modules: config.modules,
         logEnabled: config.logEnabled,
         logChannelId: config.logChannelId,
+        birthdayEnabled: config.birthdayEnabled,
+        birthdayMessage: config.birthdayMessage,
+        birthdayChannelId: config.birthdayChannelId,
       }}
       channels={channels.map(c => ({ id: c.id, name: c.name }))}
       saveAction={saveConfigAction.bind(null, guildId)}

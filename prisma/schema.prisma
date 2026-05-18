@@ -15,13 +15,16 @@ model Guild {
 }
 
 model GuildConfig {
-  guildId          String  @id
-  guild            Guild   @relation(fields: [guildId], references: [id])
-  prefix           String  @default("/")
-  welcomeChannelId String?
-  logChannelId     String?
-  logEnabled       Boolean @default(false)
-  modules          String  @default("fun,utility")
+  guildId            String  @id
+  guild              Guild   @relation(fields: [guildId], references: [id])
+  prefix             String  @default("/")
+  welcomeChannelId   String?
+  logChannelId       String?
+  logEnabled         Boolean @default(false)
+  modules            String  @default("fun,utility")
+  birthdayEnabled    Boolean @default(false)
+  birthdayChannelId  String?
+  birthdayMessage    String  @default("Feliz aniversario, {user}!")
 }
 
 model ActivityLog {
@@ -40,6 +43,17 @@ model EconomyUser {
   userId  String
   balance Int    @default(0)
   bank    Int    @default(0)
+
+  @@unique([guildId, userId])
+}
+
+model Birthday {
+  id        String   @id @default(uuid())
+  guildId   String
+  userId    String
+  day       Int
+  month     Int
+  createdAt DateTime @default(now())
 
   @@unique([guildId, userId])
 }
