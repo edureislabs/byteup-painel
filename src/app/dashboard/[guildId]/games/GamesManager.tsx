@@ -14,8 +14,8 @@ type GameConfig = {
   id: string;
   gameName: string;
   enabled: boolean;
-  currencyId: string;
-  currency: Currency;
+  currencyId: string | null;
+  currency: Currency | null;
   minBet: number;
   maxBet: number;
   reward: number;
@@ -62,22 +62,17 @@ export default function GamesManager({ guildId }: Props) {
     }
   };
 
-  // Lista de jogos disponíveis (adicione mais conforme criar)
   const availableGames = ['caracoroa'];
 
   return (
     <div style={{ fontFamily: 'DM Sans, sans-serif', color: '#dbdee1', maxWidth: '600px' }}>
       <h2 style={{ color: '#f2f3f5', marginBottom: '24px' }}>Configuracao de Jogos</h2>
 
-      {currencies.length === 0 && (
-        <p style={{ color: '#72767d' }}>Nenhuma moeda configurada. Crie uma moeda na aba Economia primeiro.</p>
-      )}
-
       {availableGames.map(gameName => {
         const game = games.find(g => g.gameName === gameName) || {
           gameName,
           enabled: false,
-          currencyId: currencies[0]?.id || '',
+          currencyId: null,
           minBet: 10,
           maxBet: 1000,
           reward: 100,
@@ -102,7 +97,6 @@ export default function GamesManager({ guildId }: Props) {
                 </span>
                 <button
                   type="button"
-                  className="toggle-track"
                   style={{
                     width: '44px', height: '24px', borderRadius: '12px',
                     background: game.enabled ? '#5865f2' : '#2b2d31',
@@ -110,7 +104,7 @@ export default function GamesManager({ guildId }: Props) {
                   }}
                   onClick={() => updateGame(gameName, {
                     enabled: !game.enabled,
-                    currencyId: game.currencyId || currencies[0]?.id || '',
+                    currencyId: game.currencyId,
                     minBet: game.minBet,
                     maxBet: game.maxBet,
                     reward: game.reward,
@@ -129,18 +123,18 @@ export default function GamesManager({ guildId }: Props) {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div>
                   <label style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: '#72767d', display: 'block', marginBottom: '4px' }}>
-                    Moeda
+                    Moeda (opcional)
                   </label>
                   <select
-                    value={game.currencyId}
-                    onChange={e => updateGame(gameName, { ...game, currencyId: e.target.value })}
+                    value={game.currencyId || ''}
+                    onChange={e => updateGame(gameName, { ...game, currencyId: e.target.value || null })}
                     style={{
                       background: '#0e0f11', border: '1px solid #1e2025', borderRadius: '8px',
                       padding: '10px 14px', fontSize: '14px', color: '#dbdee1', width: '100%',
                       outline: 'none', cursor: 'pointer',
                     }}
                   >
-                    <option value="">Selecione uma moeda</option>
+                    <option value="">Nenhuma (recompensa em texto)</option>
                     {currencies.map(c => (
                       <option key={c.id} value={c.id}>{c.name} ({c.symbol})</option>
                     ))}

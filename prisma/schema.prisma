@@ -85,8 +85,8 @@ model GameConfig {
   guild      Guild    @relation(fields: [guildId], references: [id])
   gameName   String
   enabled    Boolean  @default(true)
-  currencyId String
-  currency   Currency @relation(fields: [currencyId], references: [id])
+  currencyId String?
+  currency   Currency? @relation(fields: [currencyId], references: [id])
   minBet     Int      @default(10)
   maxBet     Int      @default(1000)
   reward     Int      @default(100)
