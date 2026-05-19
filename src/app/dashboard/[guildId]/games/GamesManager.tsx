@@ -173,7 +173,7 @@ export default function GamesManager({ guildId }: Props) {
                   </div>
                   <div style={{ flex: 1 }}>
                     <label style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: '#72767d', display: 'block', marginBottom: '4px' }}>
-                      Recompensa
+                      Recompensa (bonus)
                     </label>
                     <input
                       type="number"
