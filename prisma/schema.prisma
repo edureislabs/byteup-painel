@@ -15,6 +15,7 @@ model Guild {
   economyUsers   EconomyUser[]
   coinflipStats  CoinflipStats[]
   birthdays      Birthday[]
+  gameConfigs    GameConfig[]
 }
 
 model GuildConfig {
@@ -49,6 +50,7 @@ model Currency {
   taxRate       Float          @default(0)
   exchangeRate  Float          @default(1.0)
   economyUsers  EconomyUser[]
+  gameConfigs   GameConfig[]
 
   @@unique([guildId, name])
 }
@@ -75,6 +77,21 @@ model CoinflipStats {
   guild   Guild  @relation(fields: [guildId], references: [id])
 
   @@unique([guildId, userId])
+}
+
+model GameConfig {
+  id         String   @id @default(uuid())
+  guildId    String
+  guild      Guild    @relation(fields: [guildId], references: [id])
+  gameName   String
+  enabled    Boolean  @default(true)
+  currencyId String
+  currency   Currency @relation(fields: [currencyId], references: [id])
+  minBet     Int      @default(10)
+  maxBet     Int      @default(1000)
+  reward     Int      @default(100)
+
+  @@unique([guildId, gameName])
 }
 
 model Birthday {

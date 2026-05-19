@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import EconomyTab from './EconomyTab';
+
 
 type Channel = {
   id: string
@@ -624,6 +626,7 @@ const handleRemoveEmoji = async () => {
                   )}
                 </div>
               </div>
+              <EconomyTab guildId={guildId} />
 
               {/* Mensagem de feedback */}
               {message && (
