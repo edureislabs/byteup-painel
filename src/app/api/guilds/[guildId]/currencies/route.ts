@@ -8,11 +8,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ guil
   if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
 
   const { guildId } = await params;
-
-  const currencies = await prisma.currency.findMany({
-    where: { guildId },
-  });
-
+  const currencies = await prisma.currency.findMany({ where: { guildId } });
   return NextResponse.json(currencies);
 }
 
@@ -27,6 +23,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ gui
   if (!name) return NextResponse.json({ error: 'Nome da moeda é obrigatório' }, { status: 400 });
 
   try {
+    // Garante que a Guild existe antes de criar a Currency
+    await prisma.guild.upsert({
+      where: { id: guildId },
+      update: {},
+      create: { id: guildId },
+    });
+
     const currency = await prisma.currency.create({
       data: {
         guildId,
@@ -36,6 +39,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ gui
         exchangeRate: exchangeRate || 1.0,
       },
     });
+
     return NextResponse.json(currency);
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Erro ao criar moeda' }, { status: 500 });

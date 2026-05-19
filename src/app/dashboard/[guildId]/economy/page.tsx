@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 
 type Currency = {
   id: string;
@@ -18,20 +18,25 @@ type GameConfig = {
 };
 
 type Props = {
-  guildId: string;
+  params: Promise<{ guildId: string }>;
 };
 
-export default function EconomyPage({ guildId }: Props) {
+export default function EconomyPage({ params }: Props) {
+  // Resolve a Promise antes de renderizar
+  const { guildId } = use(params);
+
+  // Estados locais
   const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [games, setGames] = useState<GameConfig[]>([]);
   const [newName, setNewName] = useState('');
   const [newSymbol, setNewSymbol] = useState('$');
   const [message, setMessage] = useState('');
 
+  // Busca inicial
   useEffect(() => {
     fetchCurrencies();
     fetchGames();
-  }, []);
+  }, [guildId]);
 
   const fetchCurrencies = async () => {
     const res = await fetch(`/api/guilds/${guildId}/currencies`);
@@ -66,6 +71,7 @@ export default function EconomyPage({ guildId }: Props) {
       setNewName('');
       setNewSymbol('$');
       fetchCurrencies();
+      fetchGames();
     } else {
       setMessage(data.error || 'Erro ao criar moeda.');
     }
@@ -175,7 +181,7 @@ export default function EconomyPage({ guildId }: Props) {
           marginTop: '16px',
           padding: '10px',
           borderRadius: '8px',
-          background: message.includes('Erro') ? '#3a1a1a' : '#1a3a2a',
+          background: message.includes('Erro') ? '#3a1a2a' : '#1a3a2a',
           color: message.includes('Erro') ? '#ed4245' : '#23a55a',
           fontSize: '13px',
         }}>
