@@ -105,3 +105,14 @@ model Birthday {
 
   @@unique([guildId, userId])
 }
+model GameTransaction {
+  id        String   @id @default(uuid())
+  guildId   String
+  userId    String
+  gameName  String
+  currencyId String?
+  bet       Int
+  result    String   // "win" ou "lose"
+  reward    Int
+  createdAt DateTime @default(now())
+}

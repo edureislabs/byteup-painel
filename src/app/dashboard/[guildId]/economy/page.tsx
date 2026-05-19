@@ -36,6 +36,7 @@ export default function EconomyPage({ params }: Props) {
   const [games, setGames] = useState<GameConfig[]>([]);
   const [users, setUsers] = useState<EconomyUser[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<EconomyUser[]>([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
   const [newName, setNewName] = useState('');
   const [newSymbol, setNewSymbol] = useState('$');
   const [message, setMessage] = useState('');
@@ -46,6 +47,11 @@ export default function EconomyPage({ params }: Props) {
   const [sortBy, setSortBy] = useState<'balance' | 'bank' | 'total'>('total');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [searchTerm, setSearchTerm] = useState('');
+  useEffect(() => {
+  fetch(`/api/guilds/${guildId}/economy/transactions`)
+    .then(res => res.json())
+    .then(data => { if (Array.isArray(data)) setTransactions(data); });
+}, [guildId]);
 
   useEffect(() => {
     fetchCurrencies();
@@ -277,6 +283,49 @@ export default function EconomyPage({ params }: Props) {
             </tbody>
           </table>
         </div>
+        <div style={{ marginTop: '32px' }}>
+  <label className="field-label" style={{ marginBottom: '12px' }}>Histórico de Partidas</label>
+  <div style={{ background: '#16181c', border: '1px solid #1e2025', borderRadius: '12px', overflow: 'auto' }}>
+    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+      <thead>
+        <tr style={{ borderBottom: '1px solid #1e2025' }}>
+          <th style={{ padding: '12px 16px', textAlign: 'left' }}>Data</th>
+          <th style={{ padding: '12px 16px', textAlign: 'left' }}>Jogador</th>
+          <th style={{ padding: '12px 16px', textAlign: 'left' }}>Jogo</th>
+          <th style={{ padding: '12px 16px', textAlign: 'left' }}>Resultado</th>
+          <th style={{ padding: '12px 16px', textAlign: 'right' }}>Aposta</th>
+          <th style={{ padding: '12px 16px', textAlign: 'right' }}>Recompensa</th>
+        </tr>
+      </thead>
+      <tbody>
+        {transactions.length === 0 && (
+          <tr>
+            <td colSpan={6} style={{ padding: '24px', textAlign: 'center', color: '#72767d' }}>
+              Nenhuma partida registrada ainda.
+            </td>
+          </tr>
+        )}
+        {transactions.map((tx: any) => (
+          <tr key={tx.id} style={{ borderBottom: '1px solid #1e2025' }}>
+            <td style={{ padding: '12px 16px', fontSize: '12px', color: '#72767d' }}>
+              {new Date(tx.createdAt).toLocaleString('pt-BR')}
+            </td>
+            <td style={{ padding: '12px 16px', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>{tx.userId}</td>
+            <td style={{ padding: '12px 16px' }}>{tx.gameName === 'caracoroa' ? 'Cara ou Coroa' : tx.gameName}</td>
+            <td style={{ padding: '12px 16px', color: tx.result === 'win' ? '#23a55a' : '#ed4245', fontWeight: 500 }}>
+              {tx.result === 'win' ? 'Venceu' : 'Perdeu'}
+            </td>
+            <td style={{ padding: '12px 16px', textAlign: 'right' }}>{tx.bet.toLocaleString()}</td>
+            <td style={{ padding: '12px 16px', textAlign: 'right', color: tx.reward > 0 ? '#23a55a' : '#72767d' }}>
+              {tx.reward > 0 ? `+${tx.reward.toLocaleString()}` : '0'}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
       </div>
 
       {message && (
