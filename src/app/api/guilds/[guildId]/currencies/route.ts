@@ -23,12 +23,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ gui
   if (!name) return NextResponse.json({ error: 'Nome da moeda é obrigatório' }, { status: 400 });
 
   try {
-    // Garante que a Guild existe antes de criar a Currency
-    await prisma.guild.upsert({
-      where: { id: guildId },
-      update: {},
-      create: { id: guildId },
-    });
+    // Garante que a Guild existe
+    let guild = await prisma.guild.findUnique({ where: { id: guildId } });
+    if (!guild) {
+      guild = await prisma.guild.create({ data: { id: guildId } });
+    }
 
     const currency = await prisma.currency.create({
       data: {

@@ -9,7 +9,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ guil
 
   const { guildId } = await params;
 
-  const games = await prisma.gameConfigs.findMany({
+  const games = await prisma.gameConfig.findMany({
     where: { guildId },
     include: { currency: true },
   });
@@ -28,11 +28,22 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ gui
   if (!gameName || !currencyId) return NextResponse.json({ error: 'gameName e currencyId são obrigatórios' }, { status: 400 });
 
   try {
-    const game = await prisma.gameConfig.upsert({
+    // Busca ou cria configuração de jogo
+    let game = await prisma.gameConfig.findUnique({
       where: { guildId_gameName: { guildId, gameName } },
-      update: { enabled, currencyId, minBet, maxBet, reward },
-      create: { guildId, gameName, enabled, currencyId, minBet, maxBet, reward },
     });
+
+    if (game) {
+      game = await prisma.gameConfig.update({
+        where: { id: game.id },
+        data: { enabled, currencyId, minBet, maxBet, reward },
+      });
+    } else {
+      game = await prisma.gameConfig.create({
+        data: { guildId, gameName, enabled, currencyId, minBet, maxBet, reward },
+      });
+    }
+
     return NextResponse.json(game);
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Erro ao configurar jogo' }, { status: 500 });
