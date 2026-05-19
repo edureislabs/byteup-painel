@@ -25,10 +25,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ gui
   const body = await req.json();
   const { gameName, enabled, currencyId, minBet, maxBet, reward } = body;
 
-  if (!gameName || !currencyId) return NextResponse.json({ error: 'gameName e currencyId são obrigatórios' }, { status: 400 });
+  if (!gameName) {
+    return NextResponse.json({ error: 'gameName é obrigatório' }, { status: 400 });
+  }
 
   try {
-    // Busca ou cria configuração de jogo
     let game = await prisma.gameConfig.findUnique({
       where: { guildId_gameName: { guildId, gameName } },
     });
@@ -36,11 +37,25 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ gui
     if (game) {
       game = await prisma.gameConfig.update({
         where: { id: game.id },
-        data: { enabled, currencyId, minBet, maxBet, reward },
+        data: {
+          enabled: enabled ?? game.enabled,
+          currencyId: currencyId !== undefined ? currencyId : game.currencyId,
+          minBet: minBet ?? game.minBet,
+          maxBet: maxBet ?? game.maxBet,
+          reward: reward ?? game.reward,
+        },
       });
     } else {
       game = await prisma.gameConfig.create({
-        data: { guildId, gameName, enabled, currencyId, minBet, maxBet, reward },
+        data: {
+          guildId,
+          gameName,
+          enabled: enabled ?? true,
+          currencyId: currencyId || null,
+          minBet: minBet || 10,
+          maxBet: maxBet || 1000,
+          reward: reward || 100,
+        },
       });
     }
 
