@@ -29,6 +29,7 @@ type Props = {
 export default function GamesManager({ guildId }: Props) {
   const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [games, setGames] = useState<GameConfig[]>([]);
+  const [localGames, setLocalGames] = useState<Record<string, Partial<GameConfig>>>({});
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -48,38 +49,68 @@ export default function GamesManager({ guildId }: Props) {
     if (Array.isArray(data)) setGames(data);
   };
 
-  const updateGame = async (gameName: string, updates: Partial<GameConfig>) => {
+  const getGame = (gameName: string) => {
+    const saved = games.find(g => g.gameName === gameName);
+    const local = localGames[gameName] || {};
+    return {
+      gameName,
+      enabled: false,
+      currencyId: null,
+      minBet: 10,
+      maxBet: 1000,
+      reward: 100,
+      dailyLimit: 0,
+      currency: null,
+      ...saved,
+      ...local,
+    };
+  };
+
+  const setLocal = (gameName: string, updates: Partial<GameConfig>) => {
+    setLocalGames(prev => ({
+      ...prev,
+      [gameName]: { ...prev[gameName], ...updates },
+    }));
+  };
+
+  const saveGame = async (gameName: string) => {
+    const local = localGames[gameName];
+    if (!local) return;
     const res = await fetch(`/api/guilds/${guildId}/games`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ gameName, ...updates }),
+      body: JSON.stringify({ gameName, ...local }),
     });
     if (res.ok) {
-      setMessage('Jogo atualizado.');
+      setMessage('Jogo salvo.');
+      setLocalGames(prev => ({ ...prev, [gameName]: {} }));
       fetchGames();
     } else {
       const data = await res.json();
-      setMessage(data.error || 'Erro ao atualizar jogo.');
+      setMessage(data.error || 'Erro ao salvar jogo.');
     }
   };
 
-const availableGames = ['caracoroa', 'roll'];
+  const toggleEnabled = async (gameName: string, current: boolean) => {
+    const res = await fetch(`/api/guilds/${guildId}/games`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ gameName, enabled: !current }),
+    });
+    if (res.ok) {
+      fetchGames();
+    }
+  };
+
+  const availableGames = ['caracoroa', 'roll'];
 
   return (
     <div style={{ fontFamily: 'DM Sans, sans-serif', color: '#dbdee1', maxWidth: '600px' }}>
       <h2 style={{ color: '#f2f3f5', marginBottom: '24px' }}>Configuracao de Jogos</h2>
 
       {availableGames.map(gameName => {
-        const game = games.find(g => g.gameName === gameName) || {
-          gameName,
-          enabled: false,
-          currencyId: null,
-          minBet: 10,
-          maxBet: 1000,
-          reward: 100,
-          dailyLimit: 0,
-          currency: null,
-        };
+        const game = getGame(gameName);
+        const isLocal = !!localGames[gameName] && Object.keys(localGames[gameName]).length > 0;
 
         return (
           <div key={gameName} style={{
@@ -91,7 +122,7 @@ const availableGames = ['caracoroa', 'roll'];
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <span style={{ fontWeight: 600, fontSize: '16px', color: '#f2f3f5' }}>
-                {gameName === 'caracoroa' ? 'Cara ou Coroa' : gameName}
+                {gameName === 'caracoroa' ? 'Cara ou Coroa' : gameName === 'roll' ? 'Rolar Dados' : gameName}
               </span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '12px', color: game.enabled ? '#23a55a' : '#72767d' }}>
@@ -104,13 +135,7 @@ const availableGames = ['caracoroa', 'roll'];
                     background: game.enabled ? '#5865f2' : '#2b2d31',
                     border: 'none', cursor: 'pointer', position: 'relative', padding: 0,
                   }}
-                  onClick={() => updateGame(gameName, {
-                    enabled: !game.enabled,
-                    currencyId: game.currencyId,
-                    minBet: game.minBet,
-                    maxBet: game.maxBet,
-                    reward: game.reward,
-                  })}
+                  onClick={() => toggleEnabled(gameName, game.enabled)}
                 >
                   <div style={{
                     position: 'absolute', width: '18px', height: '18px',
@@ -129,7 +154,7 @@ const availableGames = ['caracoroa', 'roll'];
                   </label>
                   <select
                     value={game.currencyId || ''}
-                    onChange={e => updateGame(gameName, { ...game, currencyId: e.target.value || null })}
+                    onChange={e => setLocal(gameName, { currencyId: e.target.value || null })}
                     style={{
                       background: '#0e0f11', border: '1px solid #1e2025', borderRadius: '8px',
                       padding: '10px 14px', fontSize: '14px', color: '#dbdee1', width: '100%',
@@ -150,7 +175,7 @@ const availableGames = ['caracoroa', 'roll'];
                     <input
                       type="number"
                       value={game.minBet}
-                      onChange={e => updateGame(gameName, { ...game, minBet: Number(e.target.value) })}
+                      onChange={e => setLocal(gameName, { minBet: Number(e.target.value) })}
                       style={{
                         background: '#0e0f11', border: '1px solid #1e2025', borderRadius: '8px',
                         padding: '10px 14px', fontSize: '14px', color: '#dbdee1', width: '100%',
@@ -165,7 +190,7 @@ const availableGames = ['caracoroa', 'roll'];
                     <input
                       type="number"
                       value={game.maxBet}
-                      onChange={e => updateGame(gameName, { ...game, maxBet: Number(e.target.value) })}
+                      onChange={e => setLocal(gameName, { maxBet: Number(e.target.value) })}
                       style={{
                         background: '#0e0f11', border: '1px solid #1e2025', borderRadius: '8px',
                         padding: '10px 14px', fontSize: '14px', color: '#dbdee1', width: '100%',
@@ -175,12 +200,12 @@ const availableGames = ['caracoroa', 'roll'];
                   </div>
                   <div style={{ flex: 1 }}>
                     <label style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: '#72767d', display: 'block', marginBottom: '4px' }}>
-                      Recompensa (bonus)
+                      Recompensa
                     </label>
                     <input
                       type="number"
                       value={game.reward}
-                      onChange={e => updateGame(gameName, { ...game, reward: Number(e.target.value) })}
+                      onChange={e => setLocal(gameName, { reward: Number(e.target.value) })}
                       style={{
                         background: '#0e0f11', border: '1px solid #1e2025', borderRadius: '8px',
                         padding: '10px 14px', fontSize: '14px', color: '#dbdee1', width: '100%',
@@ -189,21 +214,39 @@ const availableGames = ['caracoroa', 'roll'];
                     />
                   </div>
                   <div style={{ flex: 1 }}>
-  <label style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: '#72767d', display: 'block', marginBottom: '4px' }}>
-    Limite Diario
-  </label>
-  <input
-    type="number"
-    value={game.dailyLimit || 0}
-    onChange={e => updateGame(gameName, { ...game, dailyLimit: Number(e.target.value) })}
-    style={{
-      background: '#0e0f11', border: '1px solid #1e2025', borderRadius: '8px',
-      padding: '10px 14px', fontSize: '14px', color: '#dbdee1', width: '100%',
-      outline: 'none',
-    }}
-  />
-</div>
+                    <label style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: '#72767d', display: 'block', marginBottom: '4px' }}>
+                      Limite Diario
+                    </label>
+                    <input
+                      type="number"
+                      value={game.dailyLimit}
+                      onChange={e => setLocal(gameName, { dailyLimit: Number(e.target.value) })}
+                      style={{
+                        background: '#0e0f11', border: '1px solid #1e2025', borderRadius: '8px',
+                        padding: '10px 14px', fontSize: '14px', color: '#dbdee1', width: '100%',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
                 </div>
+                <button
+                  onClick={() => saveGame(gameName)}
+                  disabled={!isLocal}
+                  style={{
+                    background: isLocal ? '#5865f2' : '#2b2d31',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '10px 16px',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    cursor: isLocal ? 'pointer' : 'not-allowed',
+                    transition: 'background 0.15s',
+                    marginTop: '8px',
+                  }}
+                >
+                  Salvar
+                </button>
               </div>
             )}
           </div>
@@ -215,8 +258,8 @@ const availableGames = ['caracoroa', 'roll'];
           marginTop: '16px',
           padding: '10px',
           borderRadius: '8px',
-          background: message.includes('sucesso') || message.includes('atualizado') ? '#1a3a2a' : '#3a1a1a',
-          color: message.includes('sucesso') || message.includes('atualizado') ? '#23a55a' : '#ed4245',
+          background: message.includes('sucesso') || message.includes('salvo') ? '#1a3a2a' : '#3a1a1a',
+          color: message.includes('sucesso') || message.includes('salvo') ? '#23a55a' : '#ed4245',
           fontSize: '13px',
         }}>
           {message}
