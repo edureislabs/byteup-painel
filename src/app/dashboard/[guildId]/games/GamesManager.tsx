@@ -31,6 +31,7 @@ export default function GamesManager({ guildId }: Props) {
   const [games, setGames] = useState<GameConfig[]>([]);
   const [localGames, setLocalGames] = useState<Record<string, Partial<GameConfig>>>({});
   const [message, setMessage] = useState('');
+  const [tempValues, setTempValues] = useState<Record<string, any>>({});
 
   useEffect(() => {
     fetchCurrencies();
@@ -214,20 +215,29 @@ export default function GamesManager({ guildId }: Props) {
                     />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: '#72767d', display: 'block', marginBottom: '4px' }}>
-                      Limite Diario
-                    </label>
-                    <input
-                      type="number"
-                      value={game.dailyLimit}
-                      onChange={e => setLocal(gameName, { dailyLimit: Number(e.target.value) })}
-                      style={{
-                        background: '#0e0f11', border: '1px solid #1e2025', borderRadius: '8px',
-                        padding: '10px 14px', fontSize: '14px', color: '#dbdee1', width: '100%',
-                        outline: 'none',
-                      }}
-                    />
-                  </div>
+  <label style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: '#72767d', display: 'block', marginBottom: '4px' }}>
+    Limite Diario
+  </label>
+  <input
+    type="number"
+    value={tempValues[`${gameName}_dailyLimit`] ?? game.dailyLimit ?? ''}
+    onChange={e => {
+      const val = e.target.value;
+      setTempValues(prev => ({ ...prev, [`${gameName}_dailyLimit`]: val === '' ? '' : Number(val) }));
+    }}
+    onBlur={e => {
+      const val = e.target.value;
+      const num = val === '' ? 0 : Number(val);
+      setLocal(gameName, { dailyLimit: num });
+      setTempValues(prev => ({ ...prev, [`${gameName}_dailyLimit`]: undefined }));
+    }}
+    style={{
+      background: '#0e0f11', border: '1px solid #1e2025', borderRadius: '8px',
+      padding: '10px 14px', fontSize: '14px', color: '#dbdee1', width: '100%',
+      outline: 'none',
+    }}
+  />
+</div>
                 </div>
                 <button
                   onClick={() => saveGame(gameName)}
