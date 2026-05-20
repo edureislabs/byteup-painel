@@ -19,6 +19,7 @@ type GameConfig = {
   minBet: number;
   maxBet: number;
   reward: number;
+  dailyLimit: number;
 };
 
 type Props = {
@@ -76,6 +77,7 @@ const availableGames = ['caracoroa', 'roll'];
           minBet: 10,
           maxBet: 1000,
           reward: 100,
+          dailyLimit: 0,
           currency: null,
         };
 
@@ -186,6 +188,21 @@ const availableGames = ['caracoroa', 'roll'];
                       }}
                     />
                   </div>
+                  <div style={{ flex: 1 }}>
+  <label style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: '#72767d', display: 'block', marginBottom: '4px' }}>
+    Limite Diario
+  </label>
+  <input
+    type="number"
+    value={game.dailyLimit || 0}
+    onChange={e => updateGame(gameName, { ...game, dailyLimit: Number(e.target.value) })}
+    style={{
+      background: '#0e0f11', border: '1px solid #1e2025', borderRadius: '8px',
+      padding: '10px 14px', fontSize: '14px', color: '#dbdee1', width: '100%',
+      outline: 'none',
+    }}
+  />
+</div>
                 </div>
               </div>
             )}

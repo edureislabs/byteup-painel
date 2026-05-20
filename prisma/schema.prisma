@@ -90,6 +90,7 @@ model GameConfig {
   minBet     Int      @default(10)
   maxBet     Int      @default(1000)
   reward     Int      @default(100)
+  dailyLimit Int      @default(0)
 
   @@unique([guildId, gameName])
 }
@@ -115,4 +116,14 @@ model GameTransaction {
   result    String   // "win" ou "lose"
   reward    Int
   createdAt DateTime @default(now())
+}
+model DailyGameUsage {
+  id        String   @id @default(uuid())
+  guildId   String
+  userId    String
+  gameName  String
+  uses      Int      @default(0)
+  date      DateTime @default(now())
+
+  @@unique([guildId, userId, gameName, date])
 }
