@@ -9,6 +9,7 @@ const menuItems = [
   { label: 'Jogos', href: '/games' },
   { label: 'Economia', href: '/economy' },
   { label: 'Emojis', href: '/emojis' },
+  { label: 'Abraco', href: '/hug' },
 ];
 
 type Props = {

@@ -30,6 +30,9 @@ model GuildConfig {
   birthdayChannelId  String?
   birthdayMessage    String  @default("Feliz aniversario, {user}!")
   gamesEnabled       Boolean @default(true)
+  hugEnabled   Boolean  @default(true)
+  hugMessage   String   @default("{user} deu um abraco em {target}")
+  hugImageUrl  String   @default("https://usagif.com/wp-content/uploads/gif/anime-hug-38.gif")
 }
 
 model ActivityLog {
