@@ -62,7 +62,7 @@ export default function GamesManager({ guildId }: Props) {
     }
   };
 
-  const availableGames = ['caracoroa'];
+const availableGames = ['caracoroa', 'roll'];
 
   return (
     <div style={{ fontFamily: 'DM Sans, sans-serif', color: '#dbdee1', maxWidth: '600px' }}>
