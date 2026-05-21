@@ -46,6 +46,14 @@ model GuildConfig {
   slapThumbnail String?
   slapFooter    String?
   slapTimestamp Boolean  @default(true)
+  kissEnabled   Boolean  @default(true)
+  kissTitle     String   @default("Beijo")
+  kissColor     String   @default("#F472B6")
+  kissMessage   String   @default("{user} deu um beijo em {target}")
+  kissImageUrl  String   @default("https://i.pinimg.com/originals/37/df/fe/37dffeecf1a6162e5c6526bfa65b1ca1.gif")
+  kissThumbnail String?
+  kissFooter    String?
+  kissTimestamp Boolean  @default(true)
 }
 
 

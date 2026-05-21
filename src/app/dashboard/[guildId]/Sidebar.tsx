@@ -11,6 +11,7 @@ const menuItems = [
   { label: 'Emojis', href: '/emojis' },
   { label: 'Abraco', href: '/hug' },
   { label: 'Tapa', href: '/slap' },
+  { label: 'Beijo', href: '/kiss' },
 ];
 
 type Props = {
