@@ -152,3 +152,14 @@ model DailyGameUsage {
 
   @@unique([guildId, userId, gameName, date])
 }
+model ModAction {
+  id         String   @id @default(uuid())
+  guildId    String
+  userId     String
+  moderatorId String
+  action     String
+  reason     String?
+  duration   Int?
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime?
+}
