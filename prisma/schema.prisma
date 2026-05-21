@@ -38,6 +38,14 @@ model GuildConfig {
   hugThumbnail String?
   hugFooter    String?
   hugTimestamp Boolean  @default(true)
+  slapEnabled   Boolean  @default(true)
+  slapTitle     String   @default("Tapa")
+  slapColor     String   @default("#ED4245")
+  slapMessage   String   @default("{user} deu um tapa em {target}")
+  slapImageUrl  String   @default("https://gifdb.com/images/high/up-close-angry-anime-slap-lf84tjs2sgx8obdr.gif")
+  slapThumbnail String?
+  slapFooter    String?
+  slapTimestamp Boolean  @default(true)
 }
 
 
