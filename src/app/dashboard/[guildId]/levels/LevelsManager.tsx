@@ -48,6 +48,7 @@ export default function LevelsManager({ guildId }: { guildId: string }) {
   const [requirements, setRequirements] = useState<LevelRequirement[]>([]);
   const [rewards, setRewards] = useState<LevelReward[]>([]);
   const [message, setMessage] = useState('');
+  const [editingLevel, setEditingLevel] = useState<number | null>(null);
 
   // Estados para multiplicadores e bloqueios
   const [channelMults, setChannelMults] = useState<Record<string, number>>({});
@@ -168,24 +169,31 @@ export default function LevelsManager({ guildId }: { guildId: string }) {
   };
 
   const saveReward = async () => {
-    if (!newReward.level) return;
-    const res = await fetch(`/api/guilds/${guildId}/levels/rewards`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newReward),
-    });
-    if (res.ok) {
-      fetchRewards();
-      setMessage('Recompensa salva.');
-      setNewReward({ level: (rewards.length > 0 ? Math.max(...rewards.map(r => r.level)) : 0) + 1, roleId: null, currencyId: null, rewardAmount: 0, imageUrl: null, message: null });
-    } else setMessage('Erro ao salvar recompensa.');
-  };
+  if (!newReward.level) return;
+  const res = await fetch(`/api/guilds/${guildId}/levels/rewards`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(newReward),
+  });
+  if (res.ok) {
+    fetchRewards();
+    setMessage('Recompensa salva.');
+    setEditingLevel(null);
+    setNewReward({ level: (rewards.length > 0 ? Math.max(...rewards.map(r => r.level)) : 0) + 1, roleId: null, currencyId: null, rewardAmount: 0, imageUrl: null, message: null });
+  } else setMessage('Erro ao salvar recompensa.');
+};
 
   const deleteReward = async (level: number) => {
-    const res = await fetch(`/api/guilds/${guildId}/levels/rewards?level=${level}`, { method: 'DELETE' });
-    if (res.ok) { fetchRewards(); setMessage('Recompensa removida.'); }
-    else setMessage('Erro ao remover.');
-  };
+  const res = await fetch(`/api/guilds/${guildId}/levels/rewards?level=${level}`, { method: 'DELETE' });
+  if (res.ok) { 
+    fetchRewards(); 
+    setMessage('Recompensa removida.'); 
+    if (editingLevel === level) {
+      setEditingLevel(null);
+      setNewReward({ level: (rewards.length > 0 ? Math.max(...rewards.map(r => r.level)) : 0) + 1, roleId: null, currencyId: null, rewardAmount: 0, imageUrl: null, message: null });
+    }
+  } else setMessage('Erro ao remover.');
+};
 
   return (
     <div style={{ fontFamily: 'DM Sans, sans-serif', maxWidth: '800px', color: '#dbdee1' }}>
@@ -275,20 +283,43 @@ export default function LevelsManager({ guildId }: { guildId: string }) {
             </select>
           </div>
 
-          {/* ==================== RECOMPENSAS POR NÍVEL ==================== */}
+                    {/* ==================== RECOMPENSAS POR NÍVEL ==================== */}
           <div style={{ background: '#16181c', border: '1px solid #1e2025', borderRadius: '12px', padding: '20px' }}>
             <label className="field-label" style={{ marginBottom: '12px' }}>Recompensas por Nivel (Personalizadas)</label>
             
             {/* Lista de níveis já configurados */}
             {rewards.map(r => (
-              <div key={r.id || r.level} style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', marginBottom: '12px', background: '#0e0f11', padding: '10px', borderRadius: '8px' }}>
+              <div key={r.id || r.level} 
+                onClick={() => {
+                  setNewReward({
+                    level: r.level,
+                    roleId: r.roleId,
+                    currencyId: r.currencyId,
+                    rewardAmount: r.rewardAmount,
+                    imageUrl: r.imageUrl,
+                    message: r.message,
+                  });
+                  // Marca que está editando
+                  setEditingLevel(r.level);
+                }}
+                style={{ 
+                  display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', marginBottom: '12px', 
+                  background: '#0e0f11', padding: '10px', borderRadius: '8px', cursor: 'pointer',
+                  border: editingLevel === r.level ? '1px solid #5865f2' : '1px solid transparent',
+                }}>
                 <span style={{ fontWeight: 600, minWidth: '60px' }}>Nivel {r.level}</span>
                 <span style={{ fontSize: '12px', color: '#72767d' }}>
                   {r.roleId ? (roles.find(ro => ro.id === r.roleId)?.name || r.roleId) : 'Sem cargo'} 
                   {r.currencyId ? ` | ${currencies.find(c => c.id === r.currencyId)?.symbol || '?'} ${r.rewardAmount}` : ''}
                   {r.message ? ` | Msg: "${r.message.slice(0, 30)}..."` : ''}
                 </span>
-                <button className="save-btn" onClick={() => deleteReward(r.level)} style={{ background: '#ed4245', width: 'auto', padding: '4px 12px', marginTop: 0, marginLeft: 'auto' }}>Remover</button>
+                <button 
+                  className="save-btn" 
+                  onClick={(e) => { e.stopPropagation(); deleteReward(r.level); }} 
+                  style={{ background: '#ed4245', width: 'auto', padding: '4px 12px', marginTop: 0, marginLeft: 'auto' }}
+                >
+                  Remover
+                </button>
               </div>
             ))}
 
@@ -296,7 +327,14 @@ export default function LevelsManager({ guildId }: { guildId: string }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                 <label className="field-label" style={{ margin: 0 }}>Nivel:</label>
-                <input className="field-input" type="number" value={newReward.level} onChange={e => setNewReward({ ...newReward, level: Number(e.target.value) })} style={{ width: '70px' }} />
+                <input 
+                  className="field-input" 
+                  type="number" 
+                  value={newReward.level} 
+                  onChange={e => setNewReward({ ...newReward, level: Number(e.target.value) })} 
+                  style={{ width: '70px' }} 
+                  disabled={editingLevel !== null}
+                />
               </div>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <div style={{ flex: 1 }}>
@@ -327,9 +365,23 @@ export default function LevelsManager({ guildId }: { guildId: string }) {
                 <input className="field-input" value={newReward.message || ''} onChange={e => setNewReward({ ...newReward, message: e.target.value || null })} />
                 <p style={{ fontSize: '11px', color: '#72767d', marginTop: '4px' }}>Use {'{user}'} e {'{level}'}. Se vazio, usa a mensagem padrao.</p>
               </div>
-              <button className="save-btn" onClick={saveReward} style={{ width: 'auto', padding: '8px 20px', marginTop: '4px' }}>
-                Salvar Recompensa para Nivel {newReward.level}
-              </button>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button className="save-btn" onClick={saveReward} style={{ flex: 1, padding: '8px 20px', marginTop: '4px' }}>
+                  {editingLevel !== null ? `Atualizar Nivel ${editingLevel}` : `Salvar Recompensa para Nivel ${newReward.level}`}
+                </button>
+                {editingLevel !== null && (
+                  <button 
+                    className="save-btn" 
+                    onClick={() => {
+                      setEditingLevel(null);
+                      setNewReward({ level: (rewards.length > 0 ? Math.max(...rewards.map(r => r.level)) : 0) + 1, roleId: null, currencyId: null, rewardAmount: 0, imageUrl: null, message: null });
+                    }} 
+                    style={{ background: '#2b2d31', flex: 0, padding: '8px 16px', marginTop: '4px' }}
+                  >
+                    Cancelar
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
