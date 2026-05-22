@@ -192,6 +192,7 @@ model LevelConfig {
   maxXpPerMessage      Int      @default(25)
   cooldownSeconds      Int      @default(60)
   levelUpChannelId     String?
+  dailyXpLimit         Int      @default(0)
 }
 
 model LevelRequirement {
@@ -211,4 +212,13 @@ model LevelReward {
   rewardAmount Int     @default(0)
   imageUrl     String?
   message      String?
+}
+model DailyXp {
+  id        String   @id @default(uuid())
+  guildId   String
+  userId    String
+  xp        Int      @default(0)
+  date      DateTime @default(now())
+
+  @@unique([guildId, userId, date])
 }

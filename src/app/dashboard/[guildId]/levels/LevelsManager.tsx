@@ -31,17 +31,19 @@ type LevelConfig = {
   roleMultipliers: string;
   blockedChannels: string;
   blockedRoles: string;
+  dailyXpLimit: number;
 };
 
 export default function LevelsManager({ guildId }: { guildId: string }) {
   const [config, setConfig] = useState<LevelConfig>({
-    enabled: false, xpMode: 'formula', baseXP: 100, exponent: 2.0,
-    minXpPerMessage: 15, maxXpPerMessage: 25, cooldownSeconds: 60,
-    message: '{user} subiu para o nivel {level}!', imageUrl: null,
-    levelUpChannelId: null,
-    channelMultipliers: '{}', roleMultipliers: '{}',
-    blockedChannels: '[]', blockedRoles: '[]',
-  });
+  enabled: false, xpMode: 'formula', baseXP: 100, exponent: 2.0,
+  minXpPerMessage: 15, maxXpPerMessage: 25, cooldownSeconds: 60,
+  message: '{user} subiu para o nivel {level}!', imageUrl: null,
+  levelUpChannelId: null,
+  channelMultipliers: '{}', roleMultipliers: '{}',
+  blockedChannels: '[]', blockedRoles: '[]',
+  dailyXpLimit: 0,   // ← ADICIONE ESTA LINHA
+});
   const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [channels, setChannels] = useState<Channel[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -262,7 +264,16 @@ export default function LevelsManager({ guildId }: { guildId: string }) {
               <input className="field-input" type="number" value={config.cooldownSeconds} onChange={e => saveConfig({ cooldownSeconds: Number(e.target.value) })} />
             </div>
           </div>
-
+          <div style={{ flex: 1 }}>
+  <label className="field-label">Limite Diario de XP</label>
+  <input
+    className="field-input"
+    type="number"
+    value={config.dailyXpLimit || 0}
+    onChange={e => saveConfig({ dailyXpLimit: Number(e.target.value) })}
+  />
+  <p style={{ fontSize: '11px', color: '#72767d', marginTop: '4px' }}>0 = sem limite</p>
+</div>
           {/* Configurações globais de mensagem e imagem (fallback) */}
           <div>
             <label className="field-label">Mensagem Padrao de Level Up</label>
