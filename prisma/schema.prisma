@@ -155,11 +155,50 @@ model DailyGameUsage {
 model ModAction {
   id         String   @id @default(uuid())
   guildId    String
-  userId     String
+  userId     String?
   moderatorId String
   action     String
   reason     String?
   duration   Int?
   createdAt  DateTime @default(now())
   expiresAt  DateTime?
+}
+model LevelUser {
+  id      String @id @default(uuid())
+  guildId String
+  userId  String
+  xp      Int    @default(0)
+  level   Int    @default(1)
+
+  @@unique([guildId, userId])
+}
+
+model LevelConfig {
+  guildId              String   @id
+  enabled              Boolean  @default(true)
+  message              String   @default("{user} subiu para o nivel {level}!")
+  imageUrl             String?
+  rewardCurrencyId     String?
+  rewardAmount         Int      @default(0)
+  channelMultipliers   String?  // JSON: { "channelId": 2.0 }
+  roleMultipliers      String?  // JSON: { "roleId": 1.5 }
+  blockedChannels      String?  // JSON: ["channelId1"]
+  blockedRoles         String?  // JSON: ["roleId1"]
+  roleByLevel          String?  // JSON: { "5": "roleId1" }
+  xpMode               String   @default("formula") // "formula" ou "table"
+  baseXP               Int      @default(100)
+  exponent             Float    @default(2.0)
+  minXpPerMessage      Int      @default(15)
+  maxXpPerMessage      Int      @default(25)
+  cooldownSeconds      Int      @default(60)
+  levelUpChannelId     String?
+}
+
+model LevelRequirement {
+  id        String @id @default(uuid())
+  guildId   String
+  level     Int
+  xpNeeded  Int
+
+  @@unique([guildId, level])
 }

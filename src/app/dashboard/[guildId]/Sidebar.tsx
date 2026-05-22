@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 
 const menuItems = [
   { label: 'Geral', href: '' },
+  { label: 'Niveis (XP)', href: '/levels' },
   { label: 'Aniversarios', href: '/birthday' },
   { label: 'Jogos', href: '/games' },
   { label: 'Economia', href: '/economy' },
