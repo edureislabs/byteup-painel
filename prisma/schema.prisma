@@ -202,3 +202,13 @@ model LevelRequirement {
 
   @@unique([guildId, level])
 }
+model LevelReward {
+  id           String  @id @default(uuid())
+  guildId      String
+  level        Int
+  roleId       String?
+  currencyId   String?
+  rewardAmount Int     @default(0)
+  imageUrl     String?
+  message      String?
+}

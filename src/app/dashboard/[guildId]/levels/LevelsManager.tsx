@@ -6,6 +6,15 @@ type Currency = { id: string; name: string; symbol: string };
 type Channel = { id: string; name: string };
 type Role = { id: string; name: string };
 type LevelRequirement = { id?: string; level: number; xpNeeded: number };
+type LevelReward = {
+  id?: string;
+  level: number;
+  roleId?: string | null;
+  currencyId?: string | null;
+  rewardAmount: number;
+  imageUrl?: string | null;
+  message?: string | null;
+};
 
 type LevelConfig = {
   enabled: boolean;
@@ -18,13 +27,10 @@ type LevelConfig = {
   message: string;
   imageUrl: string | null;
   levelUpChannelId: string | null;
-  rewardCurrencyId: string | null;
-  rewardAmount: number;
   channelMultipliers: string;
   roleMultipliers: string;
   blockedChannels: string;
   blockedRoles: string;
-  roleByLevel: string;
 };
 
 export default function LevelsManager({ guildId }: { guildId: string }) {
@@ -32,20 +38,32 @@ export default function LevelsManager({ guildId }: { guildId: string }) {
     enabled: false, xpMode: 'formula', baseXP: 100, exponent: 2.0,
     minXpPerMessage: 15, maxXpPerMessage: 25, cooldownSeconds: 60,
     message: '{user} subiu para o nivel {level}!', imageUrl: null,
-    levelUpChannelId: null, rewardCurrencyId: null, rewardAmount: 0,
+    levelUpChannelId: null,
     channelMultipliers: '{}', roleMultipliers: '{}',
-    blockedChannels: '[]', blockedRoles: '[]', roleByLevel: '{}',
+    blockedChannels: '[]', blockedRoles: '[]',
   });
   const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [channels, setChannels] = useState<Channel[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [requirements, setRequirements] = useState<LevelRequirement[]>([]);
+  const [rewards, setRewards] = useState<LevelReward[]>([]);
   const [message, setMessage] = useState('');
-  const [roleByLevel, setRoleByLevel] = useState<Record<string, string>>({});
+
+  // Estados para multiplicadores e bloqueios
   const [channelMults, setChannelMults] = useState<Record<string, number>>({});
   const [roleMults, setRoleMults] = useState<Record<string, number>>({});
   const [blockedChannels, setBlockedChannels] = useState<string[]>([]);
   const [blockedRoles, setBlockedRoles] = useState<string[]>([]);
+
+  // Estado para o formulário de novo nível / edição
+  const [newReward, setNewReward] = useState<LevelReward>({
+    level: 1,
+    roleId: null,
+    currencyId: null,
+    rewardAmount: 0,
+    imageUrl: null,
+    message: null,
+  });
 
   useEffect(() => {
     fetchConfig();
@@ -53,6 +71,7 @@ export default function LevelsManager({ guildId }: { guildId: string }) {
     fetchChannels();
     fetchRoles();
     fetchRequirements();
+    fetchRewards();
   }, [guildId]);
 
   const fetchConfig = async () => {
@@ -60,7 +79,6 @@ export default function LevelsManager({ guildId }: { guildId: string }) {
     const data = await res.json();
     if (data && !data.error) {
       setConfig(data);
-      setRoleByLevel(JSON.parse(data.roleByLevel || '{}'));
       setChannelMults(JSON.parse(data.channelMultipliers || '{}'));
       setRoleMults(JSON.parse(data.roleMultipliers || '{}'));
       setBlockedChannels(JSON.parse(data.blockedChannels || '[]'));
@@ -92,6 +110,12 @@ export default function LevelsManager({ guildId }: { guildId: string }) {
     if (Array.isArray(data)) setRequirements(data);
   };
 
+  const fetchRewards = async () => {
+    const res = await fetch(`/api/guilds/${guildId}/levels/rewards`);
+    const data = await res.json();
+    if (Array.isArray(data)) setRewards(data);
+  };
+
   const saveConfig = async (updates: Partial<LevelConfig>) => {
     const newConfig = { ...config, ...updates };
     setConfig(newConfig);
@@ -110,7 +134,6 @@ export default function LevelsManager({ guildId }: { guildId: string }) {
       roleMultipliers: JSON.stringify(roleMults),
       blockedChannels: JSON.stringify(blockedChannels),
       blockedRoles: JSON.stringify(blockedRoles),
-      roleByLevel: JSON.stringify(roleByLevel),
     });
   };
 
@@ -144,8 +167,28 @@ export default function LevelsManager({ guildId }: { guildId: string }) {
     else setMessage('Erro ao remover.');
   };
 
+  const saveReward = async () => {
+    if (!newReward.level) return;
+    const res = await fetch(`/api/guilds/${guildId}/levels/rewards`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newReward),
+    });
+    if (res.ok) {
+      fetchRewards();
+      setMessage('Recompensa salva.');
+      setNewReward({ level: (rewards.length > 0 ? Math.max(...rewards.map(r => r.level)) : 0) + 1, roleId: null, currencyId: null, rewardAmount: 0, imageUrl: null, message: null });
+    } else setMessage('Erro ao salvar recompensa.');
+  };
+
+  const deleteReward = async (level: number) => {
+    const res = await fetch(`/api/guilds/${guildId}/levels/rewards?level=${level}`, { method: 'DELETE' });
+    if (res.ok) { fetchRewards(); setMessage('Recompensa removida.'); }
+    else setMessage('Erro ao remover.');
+  };
+
   return (
-    <div style={{ fontFamily: 'DM Sans, sans-serif', maxWidth: '700px', color: '#dbdee1' }}>
+    <div style={{ fontFamily: 'DM Sans, sans-serif', maxWidth: '800px', color: '#dbdee1' }}>
       <h2 style={{ color: '#f2f3f5', marginBottom: '24px' }}>Sistema de Niveis (XP)</h2>
 
       {/* Toggle principal */}
@@ -157,7 +200,7 @@ export default function LevelsManager({ guildId }: { guildId: string }) {
       </div>
 
       {config.enabled && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {/* Modo de XP */}
           <div>
             <label className="field-label">Modo de Calculo</label>
@@ -212,16 +255,14 @@ export default function LevelsManager({ guildId }: { guildId: string }) {
             </div>
           </div>
 
-          {/* Mensagem de level up */}
+          {/* Configurações globais de mensagem e imagem (fallback) */}
           <div>
-            <label className="field-label">Mensagem de Level Up</label>
+            <label className="field-label">Mensagem Padrao de Level Up</label>
             <input className="field-input" value={config.message} onChange={e => saveConfig({ message: e.target.value })} />
-            <p style={{ fontSize: '11px', color: '#72767d', marginTop: '4px' }}>Use {'{user}'} e {'{level}'}</p>
+            <p style={{ fontSize: '11px', color: '#72767d', marginTop: '4px' }}>Use {'{user}'} e {'{level}'}. Essa mensagem sera usada se o nivel nao tiver uma personalizada.</p>
           </div>
-
-          {/* Imagem de level up */}
           <div>
-            <label className="field-label">URL da Imagem/GIF de Level Up</label>
+            <label className="field-label">Imagem/GIF Padrao</label>
             <input className="field-input" value={config.imageUrl || ''} onChange={e => saveConfig({ imageUrl: e.target.value || null })} />
           </div>
 
@@ -234,48 +275,65 @@ export default function LevelsManager({ guildId }: { guildId: string }) {
             </select>
           </div>
 
-          {/* Recompensa */}
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <div style={{ flex: 1 }}>
-              <label className="field-label">Moeda de Recompensa</label>
-              <select className="field-select" value={config.rewardCurrencyId || ''} onChange={e => saveConfig({ rewardCurrencyId: e.target.value || null })}>
-                <option value="">Nenhuma</option>
-                {currencies.map(c => <option key={c.id} value={c.id}>{c.name} ({c.symbol})</option>)}
-              </select>
-            </div>
-            <div style={{ flex: 1 }}>
-              <label className="field-label">Quantidade</label>
-              <input className="field-input" type="number" value={config.rewardAmount} onChange={e => saveConfig({ rewardAmount: Number(e.target.value) })} />
-            </div>
-          </div>
-
-          {/* Cargos por nível */}
-          <div>
-            <label className="field-label">Cargos por Nivel</label>
-            {Object.entries(roleByLevel).map(([level, roleId]) => (
-              <div key={level} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
-                <span>Nivel {level}:</span>
-                <select className="field-select" value={roleId} onChange={e => {
-                  const newRB = { ...roleByLevel, [level]: e.target.value };
-                  setRoleByLevel(newRB);
-                }} style={{ flex: 1 }}>
-                  <option value="">Selecione</option>
-                  {roles.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-                </select>
-                <button className="save-btn" onClick={() => {
-                  const newRB = { ...roleByLevel };
-                  delete newRB[level];
-                  setRoleByLevel(newRB);
-                }} style={{ background: '#ed4245', width: 'auto', padding: '4px 12px', marginTop: 0 }}>X</button>
+          {/* ==================== RECOMPENSAS POR NÍVEL ==================== */}
+          <div style={{ background: '#16181c', border: '1px solid #1e2025', borderRadius: '12px', padding: '20px' }}>
+            <label className="field-label" style={{ marginBottom: '12px' }}>Recompensas por Nivel (Personalizadas)</label>
+            
+            {/* Lista de níveis já configurados */}
+            {rewards.map(r => (
+              <div key={r.id || r.level} style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', marginBottom: '12px', background: '#0e0f11', padding: '10px', borderRadius: '8px' }}>
+                <span style={{ fontWeight: 600, minWidth: '60px' }}>Nivel {r.level}</span>
+                <span style={{ fontSize: '12px', color: '#72767d' }}>
+                  {r.roleId ? (roles.find(ro => ro.id === r.roleId)?.name || r.roleId) : 'Sem cargo'} 
+                  {r.currencyId ? ` | ${currencies.find(c => c.id === r.currencyId)?.symbol || '?'} ${r.rewardAmount}` : ''}
+                  {r.message ? ` | Msg: "${r.message.slice(0, 30)}..."` : ''}
+                </span>
+                <button className="save-btn" onClick={() => deleteReward(r.level)} style={{ background: '#ed4245', width: 'auto', padding: '4px 12px', marginTop: 0, marginLeft: 'auto' }}>Remover</button>
               </div>
             ))}
-            <button className="save-btn" onClick={() => {
-              const newLevel = (Object.keys(roleByLevel).length > 0 ? Math.max(...Object.keys(roleByLevel).map(Number)) : 0) + 1;
-              setRoleByLevel({ ...roleByLevel, [newLevel]: '' });
-            }} style={{ width: 'auto', padding: '8px 16px', marginTop: '8px' }}>Adicionar Cargo por Nivel</button>
+
+            {/* Formulário para adicionar/editar recompensa */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <label className="field-label" style={{ margin: 0 }}>Nivel:</label>
+                <input className="field-input" type="number" value={newReward.level} onChange={e => setNewReward({ ...newReward, level: Number(e.target.value) })} style={{ width: '70px' }} />
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <div style={{ flex: 1 }}>
+                  <label className="field-label">Cargo (opcional)</label>
+                  <select className="field-select" value={newReward.roleId || ''} onChange={e => setNewReward({ ...newReward, roleId: e.target.value || null })}>
+                    <option value="">Nenhum</option>
+                    {roles.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+                  </select>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label className="field-label">Moeda (opcional)</label>
+                  <select className="field-select" value={newReward.currencyId || ''} onChange={e => setNewReward({ ...newReward, currencyId: e.target.value || null })}>
+                    <option value="">Nenhuma</option>
+                    {currencies.map(c => <option key={c.id} value={c.id}>{c.name} ({c.symbol})</option>)}
+                  </select>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label className="field-label">Quantidade</label>
+                  <input className="field-input" type="number" value={newReward.rewardAmount} onChange={e => setNewReward({ ...newReward, rewardAmount: Number(e.target.value) })} />
+                </div>
+              </div>
+              <div>
+                <label className="field-label">Imagem/GIF (opcional)</label>
+                <input className="field-input" value={newReward.imageUrl || ''} onChange={e => setNewReward({ ...newReward, imageUrl: e.target.value || null })} />
+              </div>
+              <div>
+                <label className="field-label">Mensagem Personalizada (opcional)</label>
+                <input className="field-input" value={newReward.message || ''} onChange={e => setNewReward({ ...newReward, message: e.target.value || null })} />
+                <p style={{ fontSize: '11px', color: '#72767d', marginTop: '4px' }}>Use {'{user}'} e {'{level}'}. Se vazio, usa a mensagem padrao.</p>
+              </div>
+              <button className="save-btn" onClick={saveReward} style={{ width: 'auto', padding: '8px 20px', marginTop: '4px' }}>
+                Salvar Recompensa para Nivel {newReward.level}
+              </button>
+            </div>
           </div>
 
-          {/* Multiplicadores de canal */}
+          {/* ==================== MULTIPLICADORES E BLOQUEIOS ==================== */}
           <div>
             <label className="field-label">Multiplicadores de Canal</label>
             {Object.entries(channelMults).map(([chId, mult]) => (
@@ -291,7 +349,6 @@ export default function LevelsManager({ guildId }: { guildId: string }) {
             </select>
           </div>
 
-          {/* Multiplicadores de cargo */}
           <div>
             <label className="field-label">Multiplicadores de Cargo</label>
             {Object.entries(roleMults).map(([roleId, mult]) => (
@@ -307,7 +364,6 @@ export default function LevelsManager({ guildId }: { guildId: string }) {
             </select>
           </div>
 
-          {/* Canais bloqueados */}
           <div>
             <label className="field-label">Canais Bloqueados (sem XP)</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
@@ -324,7 +380,6 @@ export default function LevelsManager({ guildId }: { guildId: string }) {
             </select>
           </div>
 
-          {/* Cargos bloqueados */}
           <div>
             <label className="field-label">Cargos Bloqueados (sem XP)</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
@@ -341,7 +396,9 @@ export default function LevelsManager({ guildId }: { guildId: string }) {
             </select>
           </div>
 
-          <button className="save-btn" onClick={saveMultipliers}>Salvar Multiplicadores e Bloqueios</button>
+          <button className="save-btn" onClick={saveMultipliers} style={{ width: 'auto', padding: '12px 24px' }}>
+            Salvar Multiplicadores e Bloqueios
+          </button>
         </div>
       )}
 
