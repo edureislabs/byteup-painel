@@ -60,7 +60,7 @@ export default function LevelsManager({ guildId }: { guildId: string }) {
 
   // Estado para o formulário de novo nível / edição
   const [newReward, setNewReward] = useState<LevelReward>({
-    level: 1,
+    level: 0,
     roleId: null,
     currencyId: null,
     rewardAmount: 0,

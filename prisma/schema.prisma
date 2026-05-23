@@ -168,7 +168,7 @@ model LevelUser {
   guildId String
   userId  String
   xp      Int    @default(0)
-  level   Int    @default(1)
+  level   Int    @default(0)
 
   @@unique([guildId, userId])
 }
