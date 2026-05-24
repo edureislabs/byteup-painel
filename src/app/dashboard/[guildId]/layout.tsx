@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
-import { isGuildOwner } from "@/lib/permissions";
+import { canAccessPanel } from "@/lib/permissions";
 import Sidebar from "./Sidebar";
 
 export default async function GuildLayout({
@@ -16,8 +16,8 @@ export default async function GuildLayout({
 
   const { guildId } = await params;
 
-  const owner = await isGuildOwner(guildId);
-  if (!owner) {
+  const hasAccess = await canAccessPanel(guildId);
+  if (!hasAccess) {
     return (
       <div style={{
         minHeight: "100vh",
@@ -34,7 +34,6 @@ export default async function GuildLayout({
           width: "100%",
           textAlign: "center",
         }}>
-          {/* Ícone decorativo */}
           <div style={{
             width: "64px",
             height: "64px",
@@ -68,7 +67,7 @@ export default async function GuildLayout({
             margin: "0 0 32px 0",
             lineHeight: "1.6",
           }}>
-            Voce precisa ser o <strong style={{ color: "#dbdee1" }}>dono</strong> deste servidor para acessar o painel de controle.
+            Voce precisa ser o <strong style={{ color: "#dbdee1" }}>dono</strong>, ter cargo de <strong style={{ color: "#dbdee1" }}>Administrador</strong> ou estar na lista de acesso para acessar este painel.
           </p>
 
           <a href="/dashboard" style={{

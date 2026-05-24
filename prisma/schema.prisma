@@ -5,6 +5,15 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+model PanelAccess {
+  id        String   @id @default(uuid())
+  guildId   String
+  userId    String
+  addedBy   String
+  createdAt DateTime @default(now())
+
+  @@unique([guildId, userId])
+}
 
 model Guild {
   id             String        @id
