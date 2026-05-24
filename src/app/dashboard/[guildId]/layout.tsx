@@ -16,17 +16,81 @@ export default async function GuildLayout({
 
   const { guildId } = await params;
 
-  // Verifica se é dono do servidor
   const owner = await isGuildOwner(guildId);
   if (!owner) {
     return (
-      <main style={{ padding: "2rem", fontFamily: "sans-serif", color: "#dbdee1", background: "#0e0f11", minHeight: "100vh" }}>
-        <div style={{ maxWidth: "520px", margin: "0 auto" }}>
-          <h1 style={{ color: "#f2f3f5" }}>Acesso negado</h1>
-          <p style={{ color: "#72767d" }}>Voce nao e o dono deste servidor.</p>
-          <a href="/dashboard" style={{ color: "#5865f2", textDecoration: "none" }}>Voltar para a lista de servidores</a>
+      <div style={{
+        minHeight: "100vh",
+        background: "#0e0f11",
+        backgroundImage: "radial-gradient(ellipse at 30% 0%, rgba(237, 66, 69, 0.06) 0%, transparent 60%), radial-gradient(ellipse at 70% 100%, rgba(88, 101, 242, 0.04) 0%, transparent 60%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: "'DM Sans', sans-serif",
+        padding: "24px",
+      }}>
+        <div style={{
+          maxWidth: "480px",
+          width: "100%",
+          textAlign: "center",
+        }}>
+          {/* Ícone decorativo */}
+          <div style={{
+            width: "64px",
+            height: "64px",
+            borderRadius: "50%",
+            background: "rgba(237, 66, 69, 0.1)",
+            border: "1px solid rgba(237, 66, 69, 0.2)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0 auto 24px auto",
+          }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ed4245" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+
+          <h1 style={{
+            fontSize: "24px",
+            fontWeight: 600,
+            color: "#f2f3f5",
+            margin: "0 0 8px 0",
+            letterSpacing: "-0.3px",
+          }}>
+            Acesso negado
+          </h1>
+
+          <p style={{
+            fontSize: "14px",
+            color: "#72767d",
+            margin: "0 0 32px 0",
+            lineHeight: "1.6",
+          }}>
+            Voce precisa ser o <strong style={{ color: "#dbdee1" }}>dono</strong> deste servidor para acessar o painel de controle.
+          </p>
+
+          <a href="/dashboard" style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            background: "#5865f2",
+            color: "#ffffff",
+            padding: "10px 24px",
+            borderRadius: "8px",
+            textDecoration: "none",
+            fontSize: "14px",
+            fontWeight: 600,
+            transition: "background 0.15s",
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Voltar para meus servidores
+          </a>
         </div>
-      </main>
+      </div>
     );
   }
 
