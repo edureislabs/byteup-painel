@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
+import { guardApi } from '@/lib/apiGuard';
+import { rateLimit } from '@/lib/rateLimit';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ guildId: string }> }) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-
   const { guildId } = await params;
+
+  const accessError = await guardApi(guildId);
+  if (accessError) return accessError;
+
+  const limitError = rateLimit(req);
+  if (limitError) return limitError;
+
   const rewards = await prisma.levelReward.findMany({
     where: { guildId },
     orderBy: { level: 'asc' },
@@ -16,10 +20,14 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ guil
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ guildId: string }> }) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-
   const { guildId } = await params;
+
+  const accessError = await guardApi(guildId);
+  if (accessError) return accessError;
+
+  const limitError = rateLimit(req);
+  if (limitError) return limitError;
+
   const body = await req.json();
   const { level, roleId, currencyId, rewardAmount, imageUrl, message } = body;
 
@@ -48,10 +56,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ gui
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ guildId: string }> }) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-
   const { guildId } = await params;
+
+  const accessError = await guardApi(guildId);
+  if (accessError) return accessError;
+
+  const limitError = rateLimit(req);
+  if (limitError) return limitError;
+
   const { searchParams } = new URL(req.url);
   const level = parseInt(searchParams.get('level') || '');
 
