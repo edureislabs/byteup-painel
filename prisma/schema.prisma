@@ -74,6 +74,13 @@ model GuildConfig {
   timezone           String   @default("America/Sao_Paulo")
   autoroleId         String?
   inviteLink         String?
+  automodEnabled         Boolean  @default(false)
+  automodBannedWords     String?  // JSON: ["palavra1", "palavra2"]
+  automodLinkBlocklist   String?  // JSON: ["regex1", "regex2"]
+  automodLinkWhitelist   String?  // JSON: ["regexSegura1"]  (ex: "imgur\\.com")
+  automodBypassRoles     String?  // JSON: ["roleId1"]
+  automodBypassUsers     String?  // JSON: ["userId1"]
+  automodIgnoredChannels String?  // JSON: ["channelId1"]
 }
 
 
