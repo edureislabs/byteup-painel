@@ -67,6 +67,10 @@ model GuildConfig {
   kissThumbnail String?
   kissFooter    String?
   kissTimestamp Boolean  @default(true)
+  blockedCommandChannels  String?  // JSON: ["channelId1", "channelId2"]
+  blockedCommandMessage   String   @default("Voce nao pode executar comandos neste canal!")
+  blockedCommandNotify    Boolean  @default(true)
+
 }
 
 
