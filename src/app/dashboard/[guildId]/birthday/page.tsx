@@ -31,7 +31,12 @@ async function saveBirthdayAction(guildId: string, formData: FormData) {
   const birthdayChannelId = (formData.get("birthdayChannelId") as string) || null;
   const birthdayMessage = (formData.get("birthdayMessage") as string) || "Feliz aniversario, {user}!";
   try {
-    await prisma.guild.upsert({ where: { id: guildId }, update: {}, create: { id: guildId } });
+    // Garante que a Guild existe (sem upsert)
+    let guild = await prisma.guild.findUnique({ where: { id: guildId } });
+    if (!guild) {
+      guild = await prisma.guild.create({ data: { id: guildId } });
+    }
+
     const existing = await prisma.guildConfig.findUnique({ where: { guildId } });
     if (existing) {
       await prisma.guildConfig.update({ where: { guildId }, data: { birthdayEnabled, birthdayChannelId, birthdayMessage } });

@@ -26,7 +26,7 @@ function rateLimit(req: NextRequest, maxRequests = 30, windowMs = 60000) {
   return null;
 }
 
-// Limpa o mapa a cada 5 minutos
+
 setInterval(() => {
   const now = Date.now();
   for (const [key, entry] of rateLimitMap.entries()) {
@@ -37,13 +37,13 @@ setInterval(() => {
 }, 5 * 60 * 1000);
 
 export async function middleware(req: NextRequest) {
-  // Rate limiting para APIs
+
   if (req.nextUrl.pathname.startsWith('/api/')) {
     const limitError = rateLimit(req);
     if (limitError) return limitError;
   }
 
-  // Verificação de autenticação para dashboard e APIs
+
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
   if (!token) {
