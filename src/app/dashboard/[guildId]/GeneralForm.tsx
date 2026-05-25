@@ -130,15 +130,7 @@ export default function GeneralForm({ guildId, config, channels, roles, stats, s
           </Section>
         </div>
 
-        {/* Cargo Automático */}
-        <Section>
-          <label className="field-label">Cargo Automatico (Autorole)</label>
-          <select className="field-select" name="autoroleId" value={autoroleId} onChange={e => setAutoroleId(e.target.value)}>
-            <option value="">Nenhum</option>
-            {roles.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-          </select>
-          <Hint>Cargo dado automaticamente quando um novo membro entra no servidor.</Hint>
-        </Section>
+
 
         {/* Link de Convite */}
         <Section>
