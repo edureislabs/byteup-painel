@@ -4,23 +4,48 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-const menuItems = [
-  { label: 'Geral', href: '', icon: 'settings' },
-  { label: 'Comandos', href: '/commands', icon: 'slash' },
-  { label: 'Niveis (XP)', href: '/levels', icon: 'level' },
-  { label: 'Aniversarios', href: '/birthday', icon: 'birthday' },
-  { label: 'Jogos', href: '/games', icon: 'games' },
-  { label: 'Economia', href: '/economy', icon: 'economy' },
-  { label: 'Emojis', href: '/emojis', icon: 'emoji' },
-  { label: 'Abraco', href: '/hug', icon: 'hug' },
-  { label: 'Tapa', href: '/slap', icon: 'slap' },
-  { label: 'Beijo', href: '/kiss', icon: 'kiss' },
-  { label: 'Logs', href: '/logs', icon: 'logs' },
+const menuCategories = [
+  {
+    label: 'Principal',
+    items: [
+      { label: 'Visao Geral', href: '', icon: 'home' },
+      { label: 'Logs', href: '/logs', icon: 'logs' },
+    ],
+  },
+  {
+    label: 'Moderacao',
+    items: [
+      { label: 'Comandos', href: '/commands', icon: 'slash' },
+    ],
+  },
+  {
+    label: 'Engajamento',
+    items: [
+      { label: 'Niveis (XP)', href: '/levels', icon: 'level' },
+      { label: 'Aniversarios', href: '/birthday', icon: 'birthday' },
+      { label: 'Jogos', href: '/games', icon: 'games' },
+      { label: 'Economia', href: '/economy', icon: 'economy' },
+    ],
+  },
+  {
+    label: 'Interacoes',
+    items: [
+      { label: 'Abraco', href: '/hug', icon: 'hug' },
+      { label: 'Tapa', href: '/slap', icon: 'slap' },
+      { label: 'Beijo', href: '/kiss', icon: 'kiss' },
+    ],
+  },
+  {
+    label: 'Personalizacao',
+    items: [
+      { label: 'Emojis', href: '/emojis', icon: 'emoji' },
+    ],
+  },
 ];
 
 const iconPaths: Record<string, string> = {
+  home: 'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM9 22V12h6v10',
   slash: 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5',
-  settings: 'M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z',
   level: 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5',
   birthday: 'M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6M12 2v20M6 8h12',
   games: 'M15 4l-6 6 6 6M9 4l-6 6 6 6',
@@ -41,202 +66,269 @@ export default function Sidebar({ guildId }: Props) {
   const basePath = `/dashboard/${guildId}`;
   const [guild, setGuild] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-  fetch('/api/auth/session')
-    .then(res => res.json())
-    .then(data => {
-      if (data?.user) {
-        setUser(data.user);
-      }
-    })
-    .catch(() => {});
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
-  fetch(`/api/guilds/${guildId}/info`)
-    .then(res => res.json())
-    .then(g => {
-      if (!g.error) setGuild(g);
-    })
-    .catch(() => {});
-}, [guildId]);
+  useEffect(() => {
+    fetch('/api/auth/session')
+      .then(res => res.json())
+      .then(data => { if (data?.user) setUser(data.user); })
+      .catch(() => {});
+    fetch(`/api/guilds/${guildId}/info`)
+      .then(res => res.json())
+      .then(g => { if (!g.error) setGuild(g); })
+      .catch(() => {});
+  }, [guildId]);
 
-  return (
-    <aside style={{
-      width: '260px',
-      minHeight: '100vh',
-      background: '#090011',
-      backgroundImage: 'linear-gradient(180deg, #090011 0%, #140020 100%)',
-      borderRight: '1px solid rgba(193, 0, 255, 0.1)',
-      display: 'flex',
-      flexDirection: 'column',
-      fontFamily: "'DM Sans', sans-serif",
-      position: 'sticky',
-      top: 0,
-    }}>
+  const sidebarContent = (
+    <>
       {/* Cabeçalho do Servidor */}
       <div style={{
-        padding: '20px 16px',
+        padding: collapsed ? '16px 10px' : '20px 16px',
         borderBottom: '1px solid rgba(193, 0, 255, 0.08)',
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: collapsed ? 'column' : 'column',
+        alignItems: collapsed ? 'center' : 'stretch',
         gap: '12px',
       }}>
-        {/* Logo + Nome do Servidor */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: collapsed ? '0' : '12px',
+          flexDirection: collapsed ? 'column' : 'row',
+        }}>
           <div style={{
-            width: '40px',
-            height: '40px',
+            width: collapsed ? '36px' : '40px',
+            height: collapsed ? '36px' : '40px',
             borderRadius: '12px',
+            flexShrink: 0,
             background: guild?.icon
               ? `url(https://cdn.discordapp.com/icons/${guildId}/${guild.icon}.png?size=80) center/cover`
               : 'linear-gradient(135deg, #C100FF 0%, #8A2BFF 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '16px',
+            fontSize: collapsed ? '14px' : '16px',
             fontWeight: 700,
             color: '#F5F5F5',
             boxShadow: '0 0 15px rgba(193, 0, 255, 0.2)',
           }}>
             {!guild?.icon && (guild?.name?.charAt(0) || 'B')}
           </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{
-              fontSize: '13px',
-              fontWeight: 600,
-              color: '#F5F5F5',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}>
-              {guild?.name || 'Carregando...'}
+          {!collapsed && (
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{
+                fontSize: '13px', fontWeight: 600, color: '#F5F5F5',
+                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+              }}>
+                {guild?.name || 'Carregando...'}
+              </div>
+              <Link href="/dashboard" style={{
+                fontSize: '11px', color: '#8A2BFF', textDecoration: 'none',
+                display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px',
+              }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Trocar servidor
+              </Link>
             </div>
-            <Link
-              href="/dashboard"
-              style={{
-                fontSize: '11px',
-                color: '#8A2BFF',
-                textDecoration: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                marginTop: '2px',
-              }}
-            >
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-              </svg>
-              Trocar servidor
-            </Link>
-          </div>
+          )}
         </div>
       </div>
 
-      {/* Menu de Navegação */}
-      <nav style={{
-        flex: 1,
-        padding: '8px 0',
-        overflowY: 'auto',
-      }}>
-        {menuItems.map(item => {
-          const href = item.href ? `${basePath}${item.href}` : basePath;
-          const isActive = item.href
-            ? pathname === href
-            : pathname === basePath;
+      {/* Menu de Navegação por Categorias */}
+      <nav style={{ flex: 1, padding: '8px 0', overflowY: 'auto', overflowX: 'hidden' }}>
+        {menuCategories.map((category) => (
+          <div key={category.label} style={{ marginBottom: '4px' }}>
+            {!collapsed && (
+              <div style={{
+                padding: '8px 20px 4px',
+                fontSize: '10px',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+                color: 'rgba(138, 43, 255, 0.6)',
+              }}>
+                {category.label}
+              </div>
+            )}
+            {category.items.map((item) => {
+              const href = item.href ? `${basePath}${item.href}` : basePath;
+              const isActive = item.href ? pathname === href : pathname === basePath;
 
-          return (
-            <Link
-              key={item.label}
-              href={href}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                padding: '10px 20px',
-                color: isActive ? '#F5F5F5' : 'rgba(245, 245, 245, 0.5)',
-                background: isActive ? 'rgba(193, 0, 255, 0.08)' : 'transparent',
-                borderLeft: isActive ? '3px solid #C100FF' : '3px solid transparent',
-                textDecoration: 'none',
-                fontSize: '13px',
-                fontWeight: 500,
-                transition: 'all 0.15s ease',
-                boxShadow: isActive ? 'inset 0 0 20px rgba(193, 0, 255, 0.05)' : 'none',
-              }}
-              onMouseEnter={(e) => {
-                if (!isActive) {
-                  e.currentTarget.style.background = 'rgba(193, 0, 255, 0.04)';
-                  e.currentTarget.style.color = '#F5F5F5';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isActive) {
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.color = 'rgba(245, 245, 245, 0.5)';
-                }
-              }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                stroke={isActive ? '#C100FF' : 'rgba(245, 245, 245, 0.3)'}
-                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                style={{ flexShrink: 0 }}
-              >
-                {iconPaths[item.icon]
-                  ? <path d={iconPaths[item.icon]} />
-                  : <circle cx="12" cy="12" r="10"/>}
-              </svg>
-              {item.label}
-            </Link>
-          );
-        })}
+              return (
+                <Link
+                  key={item.label}
+                  href={href}
+                  title={collapsed ? item.label : undefined}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: collapsed ? '10px 0' : '10px 20px',
+                    justifyContent: collapsed ? 'center' : 'flex-start',
+                    color: isActive ? '#F5F5F5' : 'rgba(245, 245, 245, 0.5)',
+                    background: isActive ? 'rgba(193, 0, 255, 0.08)' : 'transparent',
+                    borderLeft: isActive ? '3px solid #C100FF' : '3px solid transparent',
+                    textDecoration: 'none',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    transition: 'all 0.15s ease',
+                    boxShadow: isActive ? 'inset 0 0 20px rgba(193, 0, 255, 0.05)' : 'none',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.background = 'rgba(193, 0, 255, 0.04)';
+                      e.currentTarget.style.color = '#F5F5F5';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.background = 'transparent';
+                      e.currentTarget.style.color = 'rgba(245, 245, 245, 0.5)';
+                    }
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke={isActive ? '#C100FF' : 'rgba(245, 245, 245, 0.3)'}
+                    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                    style={{ flexShrink: 0 }}
+                  >
+                    {iconPaths[item.icon] ? <path d={iconPaths[item.icon]} /> : <circle cx="12" cy="12" r="10"/>}
+                  </svg>
+                  {!collapsed && item.label}
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </nav>
+
+      {/* Botão de colapsar (apenas desktop) */}
+      {!isMobile && (
+        <div style={{
+          padding: '8px',
+          borderTop: '1px solid rgba(193, 0, 255, 0.08)',
+          display: 'flex', justifyContent: 'center',
+        }}>
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: 'rgba(245, 245, 245, 0.3)', padding: '4px',
+              borderRadius: '4px', transition: 'color 0.15s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.color = '#F5F5F5'}
+            onMouseLeave={e => e.currentTarget.style.color = 'rgba(245, 245, 245, 0.3)'}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+              style={{ transform: collapsed ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+          </button>
+        </div>
+      )}
 
       {/* Rodapé com Usuário */}
       <div style={{
-        padding: '16px 20px',
+        padding: collapsed ? '12px 8px' : '12px 16px',
         borderTop: '1px solid rgba(193, 0, 255, 0.08)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
+        display: 'flex', alignItems: 'center', gap: '8px',
+        justifyContent: collapsed ? 'center' : 'flex-start',
       }}>
         <img
           src={user?.image || ''}
           alt=""
           style={{
-            width: '32px',
-            height: '32px',
+            width: collapsed ? '28px' : '32px',
+            height: collapsed ? '28px' : '32px',
             borderRadius: '50%',
             border: '2px solid rgba(193, 0, 255, 0.3)',
           }}
         />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{
-            fontSize: '12px',
-            fontWeight: 600,
-            color: '#F5F5F5',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}>
-            {user?.name || 'Usuário'}
-          </div>
-        </div>
-        <a
-          href="/api/auth/signout"
-          style={{
-            color: 'rgba(245, 245, 245, 0.4)',
-            textDecoration: 'none',
-            display: 'flex',
-            alignItems: 'center',
-          }}
-          title="Sair"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-            <polyline points="16 17 21 12 16 7"/>
-            <line x1="21" y1="12" x2="9" y2="12"/>
-          </svg>
-        </a>
+        {!collapsed && (
+          <>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{
+                fontSize: '12px', fontWeight: 600, color: '#F5F5F5',
+                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+              }}>
+                {user?.name || 'Usuário'}
+              </div>
+            </div>
+            <a href="/api/auth/signout" style={{ color: 'rgba(245, 245, 245, 0.4)', textDecoration: 'none' }} title="Sair">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+            </a>
+          </>
+        )}
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Botão de menu mobile */}
+      {isMobile && (
+        <button
+          onClick={() => setMobileOpen(!mobileOpen)}
+          style={{
+            position: 'fixed', top: '12px', left: '12px', zIndex: 100,
+            background: '#090011', border: '1px solid rgba(193, 0, 255, 0.2)',
+            borderRadius: '8px', width: '36px', height: '36px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', color: '#F5F5F5',
+            boxShadow: '0 0 15px rgba(193, 0, 255, 0.3)',
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            {mobileOpen ? <path d="M18 6L6 18M6 6l12 12"/> : <path d="M3 12h18M3 6h18M3 18h18"/>}
+          </svg>
+        </button>
+      )}
+
+      {/* Overlay mobile */}
+      {isMobile && mobileOpen && (
+        <div
+          onClick={() => setMobileOpen(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 40,
+            background: 'rgba(0,0,0,0.5)',
+          }}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside style={{
+        width: isMobile ? '260px' : (collapsed ? '60px' : '260px'),
+        minHeight: '100vh',
+        background: '#090011',
+        backgroundImage: 'linear-gradient(180deg, #090011 0%, #140020 100%)',
+        borderRight: '1px solid rgba(193, 0, 255, 0.1)',
+        display: 'flex',
+        flexDirection: 'column',
+        fontFamily: "'DM Sans', sans-serif",
+        position: isMobile ? 'fixed' : 'sticky',
+        top: 0,
+        left: isMobile ? (mobileOpen ? 0 : '-260px') : 0,
+        zIndex: 50,
+        transition: 'width 0.2s ease, left 0.2s ease',
+        overflow: 'hidden',
+      }}>
+        {sidebarContent}
+      </aside>
+    </>
   );
 }

@@ -70,7 +70,10 @@ model GuildConfig {
   blockedCommandChannels  String?  // JSON: ["channelId1", "channelId2"]
   blockedCommandMessage   String   @default("Voce nao pode executar comandos neste canal!")
   blockedCommandNotify    Boolean  @default(true)
-
+  language           String   @default("pt-BR")
+  timezone           String   @default("America/Sao_Paulo")
+  autoroleId         String?
+  inviteLink         String?
 }
 
 
