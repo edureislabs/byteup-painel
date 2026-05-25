@@ -12,13 +12,21 @@ export default async function DashboardPage() {
   const userAvatar = (session as any).user?.image;
   const userName = (session as any).user?.name;
 
-  const res = await fetch("https://discord.com/api/v10/users/@me/guilds", {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
+  let guilds: any[] = [];
+  const accessibleGuilds: any[] = [];
 
-  const guilds: any[] = await res.json();
+  try {
+    const res = await fetch("https://discord.com/api/v10/users/@me/guilds", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
 
-  const accessibleGuilds = [];
+    if (res.ok) {
+      guilds = await res.json();
+      if (!Array.isArray(guilds)) guilds = [];
+    }
+  } catch {
+    guilds = [];
+  }
 
   for (const guild of guilds) {
     if (guild.owner) {
@@ -26,19 +34,22 @@ export default async function DashboardPage() {
       continue;
     }
 
-    const hasAdmin = (guild.permissions & 0x8) === 0x8;
+    const permissions = typeof guild.permissions === 'string' ? parseInt(guild.permissions) : guild.permissions;
+    const hasAdmin = (permissions & 0x8) === 0x8;
     if (hasAdmin) {
       accessibleGuilds.push({ ...guild, accessType: 'Administrador' });
       continue;
     }
 
-    const panelAccess = await prisma.panelAccess.findUnique({
-      where: { guildId_userId: { guildId: guild.id, userId } },
-    });
+    try {
+      const panelAccess = await prisma.panelAccess.findUnique({
+        where: { guildId_userId: { guildId: guild.id, userId } },
+      });
 
-    if (panelAccess) {
-      accessibleGuilds.push({ ...guild, accessType: 'Convidado' });
-    }
+      if (panelAccess) {
+        accessibleGuilds.push({ ...guild, accessType: 'Convidado' });
+      }
+    } catch {}
   }
 
   return (
@@ -48,7 +59,6 @@ export default async function DashboardPage() {
       fontFamily: "'DM Sans', sans-serif",
       color: "#dbdee1",
     }}>
-      {/* Header com perfil do usuário */}
       <header style={{
         background: "#16181c",
         borderBottom: "1px solid #1e2025",
@@ -95,7 +105,6 @@ export default async function DashboardPage() {
         </a>
       </header>
 
-      {/* Conteúdo principal */}
       <div style={{ padding: "32px" }}>
         <div style={{ maxWidth: "600px", margin: "0 auto" }}>
           <h1 style={{ color: "#f2f3f5", fontSize: "24px", fontWeight: 600, marginBottom: "24px" }}>
