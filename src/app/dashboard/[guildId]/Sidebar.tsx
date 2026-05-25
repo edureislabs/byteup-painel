@@ -41,22 +41,22 @@ export default function Sidebar({ guildId }: Props) {
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    fetch('/api/auth/session')
-      .then(res => res.json())
-      .then(data => {
-        if (data?.user) {
-          setUser(data.user);
-          // Busca a guild pelo ID armazenado
-          fetch(`https://discord.com/api/v10/guilds/${guildId}`, {
-            headers: { Authorization: `Bot ${process.env.NEXT_PUBLIC_BOT_TOKEN || ''}` },
-          })
-            .then(res => res.json())
-            .then(g => setGuild(g))
-            .catch(() => {});
-        }
-      })
-      .catch(() => {});
-  }, [guildId]);
+  fetch('/api/auth/session')
+    .then(res => res.json())
+    .then(data => {
+      if (data?.user) {
+        setUser(data.user);
+      }
+    })
+    .catch(() => {});
+
+  fetch(`/api/guilds/${guildId}/info`)
+    .then(res => res.json())
+    .then(g => {
+      if (!g.error) setGuild(g);
+    })
+    .catch(() => {});
+}, [guildId]);
 
   return (
     <aside style={{
