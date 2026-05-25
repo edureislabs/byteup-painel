@@ -38,6 +38,10 @@ model GuildConfig {
   birthdayEnabled    Boolean @default(false)
   birthdayChannelId  String?
   birthdayMessage    String  @default("Feliz aniversario, {user}!")
+  birthdayRoleId        String?
+  birthdayCurrencyId    String?
+  birthdayRewardAmount  Int      @default(0)
+  birthdayImageUrl      String?
   gamesEnabled       Boolean @default(true)
   hugEnabled   Boolean  @default(true)
   hugTitle     String   @default("Abraco")
