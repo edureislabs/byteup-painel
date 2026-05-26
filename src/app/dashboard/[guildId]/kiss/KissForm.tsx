@@ -204,19 +204,20 @@ export default function KissForm({ config, saveAction }: Props) {
       </div>
 
       <style jsx>{`
-        .field-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #72767d; display: block; margin-bottom: 4px; }
-        .field-input { background: #0e0f11; border: 1px solid #1e2025; border-radius: 8px; padding: 10px 14px; font-size: 14px; color: #dbdee1; width: 100%; outline: none; box-sizing: border-box; }
-        .save-btn { background: #5865f2; color: white; border: none; border-radius: 8px; padding: 11px 16px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
-        .save-btn:hover { background: #4752c4; }
-        .save-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-      `}</style>
+  .field-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #72767d; display: block; margin-bottom: 4px; }
+  .field-input { background: #0e0f11; border: 1px solid #1e2025; border-radius: 8px; padding: 10px 14px; font-size: 14px; color: #dbdee1; width: 100%; outline: none; box-sizing: border-box; }
+  .field-input:focus { border-color: #C100FF; }
+  .save-btn { background: #C100FF; color: white; border: none; border-radius: 8px; padding: 11px 16px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+  .save-btn:hover { background: #8A2BFF; }
+  .save-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+`}</style>
     </div>
   );
 }
 
 const toggleStyle = (enabled: boolean): React.CSSProperties => ({
   width: '44px', height: '24px', borderRadius: '12px',
-  background: enabled ? '#5865f2' : '#2b2d31',
+  background: enabled ? '#C100FF' : '#2b2d31',
   border: 'none', cursor: 'pointer', position: 'relative', padding: 0,
 });
 

@@ -1,4 +1,3 @@
-// src/app/dashboard/[guildId]/automod/page.tsx
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
@@ -25,6 +24,14 @@ async function saveAutomodAction(guildId: string, formData: FormData) {
   const automodBypassRoles = (formData.get("automodBypassRoles") as string) || '[]';
   const automodBypassUsers = (formData.get("automodBypassUsers") as string) || '[]';
   const automodIgnoredChannels = (formData.get("automodIgnoredChannels") as string) || '[]';
+  const automodMaxMentions = parseInt(formData.get("automodMaxMentions") as string) || 5;
+  const automodMaxLines = parseInt(formData.get("automodMaxLines") as string) || 15;
+  const automodMaxZalgo = formData.get("automodMaxZalgo") === "true";
+  const automodInviteBlock = formData.get("automodInviteBlock") === "true";
+  const automodAction = (formData.get("automodAction") as string) || "delete";
+  const automodWarnThreshold = parseInt(formData.get("automodWarnThreshold") as string) || 3;
+  const automodMuteDuration = parseInt(formData.get("automodMuteDuration") as string) || 300;
+  const automodLogChannel = (formData.get("automodLogChannel") as string) || null;
 
   try {
     let guild = await prisma.guild.findUnique({ where: { id: guildId } });
@@ -43,6 +50,14 @@ async function saveAutomodAction(guildId: string, formData: FormData) {
           automodBypassRoles,
           automodBypassUsers,
           automodIgnoredChannels,
+          automodMaxMentions,
+          automodMaxLines,
+          automodMaxZalgo,
+          automodInviteBlock,
+          automodAction,
+          automodWarnThreshold,
+          automodMuteDuration,
+          automodLogChannel,
         },
       });
     } else {
@@ -56,12 +71,20 @@ async function saveAutomodAction(guildId: string, formData: FormData) {
           automodBypassRoles,
           automodBypassUsers,
           automodIgnoredChannels,
+          automodMaxMentions,
+          automodMaxLines,
+          automodMaxZalgo,
+          automodInviteBlock,
+          automodAction,
+          automodWarnThreshold,
+          automodMuteDuration,
+          automodLogChannel,
         },
       });
     }
   } catch (error) {
     console.error(error);
-    throw new Error("Falha ao salvar configurações do automod.");
+    throw new Error("Falha ao salvar configuracoes do automod.");
   }
   revalidatePath(`/dashboard/${guildId}/automod`);
 }
@@ -72,7 +95,6 @@ export default async function AutomodPage({ params }: Props) {
   const { guildId } = await params;
   const config = await getConfig(guildId);
 
-  // Buscar canais (para select de canais ignorados)
   const channelsRes = await fetch(`https://discord.com/api/v10/guilds/${guildId}/channels`, {
     headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` },
     next: { revalidate: 60 },
@@ -94,6 +116,14 @@ export default async function AutomodPage({ params }: Props) {
         automodBypassRoles: config.automodBypassRoles || '[]',
         automodBypassUsers: config.automodBypassUsers || '[]',
         automodIgnoredChannels: config.automodIgnoredChannels || '[]',
+        automodMaxMentions: config.automodMaxMentions || 5,
+        automodMaxLines: config.automodMaxLines || 15,
+        automodMaxZalgo: config.automodMaxZalgo ?? true,
+        automodInviteBlock: config.automodInviteBlock ?? true,
+        automodAction: config.automodAction || "delete",
+        automodWarnThreshold: config.automodWarnThreshold || 3,
+        automodMuteDuration: config.automodMuteDuration || 300,
+        automodLogChannel: config.automodLogChannel || "",
       }}
       channels={channels}
       saveAction={saveAutomodAction.bind(null, guildId)}

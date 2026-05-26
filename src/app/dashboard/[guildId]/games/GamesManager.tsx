@@ -130,20 +130,20 @@ export default function GamesManager({ guildId }: Props) {
                   {game.enabled ? 'Ativo' : 'Desativado'}
                 </span>
                 <button
-                  type="button"
-                  style={{
-                    width: '44px', height: '24px', borderRadius: '12px',
-                    background: game.enabled ? '#5865f2' : '#2b2d31',
-                    border: 'none', cursor: 'pointer', position: 'relative', padding: 0,
-                  }}
-                  onClick={() => toggleEnabled(gameName, game.enabled)}
-                >
-                  <div style={{
-                    position: 'absolute', width: '18px', height: '18px',
-                    borderRadius: '50%', background: 'white', top: '3px',
-                    left: game.enabled ? '23px' : '3px', transition: 'left 0.2s',
-                  }} />
-                </button>
+  type="button"
+  style={{
+    width: '44px', height: '24px', borderRadius: '12px',
+    background: game.enabled ? '#C100FF' : '#2b2d31',
+    border: 'none', cursor: 'pointer', position: 'relative', padding: 0,
+  }}
+  onClick={() => toggleEnabled(gameName, game.enabled)}
+>
+  <div style={{
+    position: 'absolute', width: '18px', height: '18px',
+    borderRadius: '50%', background: 'white', top: '3px',
+    left: game.enabled ? '23px' : '3px', transition: 'left 0.2s',
+  }} />
+</button>
               </div>
             </div>
 
@@ -240,29 +240,37 @@ export default function GamesManager({ guildId }: Props) {
 </div>
                 </div>
                 <button
-                  onClick={() => saveGame(gameName)}
-                  disabled={!isLocal}
-                  style={{
-                    background: isLocal ? '#5865f2' : '#2b2d31',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    padding: '10px 16px',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    cursor: isLocal ? 'pointer' : 'not-allowed',
-                    transition: 'background 0.15s',
-                    marginTop: '8px',
-                  }}
-                >
-                  Salvar
-                </button>
+  onClick={() => saveGame(gameName)}
+  disabled={!isLocal}
+  style={{
+    background: isLocal ? '#C100FF' : '#2b2d31',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    padding: '10px 16px',
+    fontSize: '14px',
+    fontWeight: 600,
+    cursor: isLocal ? 'pointer' : 'not-allowed',
+    transition: 'background 0.15s',
+    marginTop: '8px',
+  }}
+>
+  Salvar
+</button>
               </div>
             )}
           </div>
         );
       })}
-
+<style jsx>{`
+  .field-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #72767d; display: block; margin-bottom: 4px; }
+  .field-input, .field-select { background: #0e0f11; border: 1px solid #1e2025; border-radius: 8px; padding: 10px 14px; font-size: 14px; color: #dbdee1; width: 100%; outline: none; box-sizing: border-box; }
+  .field-input:focus, .field-select:focus { border-color: #C100FF; }
+  .field-select { cursor: pointer; }
+  .save-btn { background: #C100FF; color: white; border: none; border-radius: 8px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+  .save-btn:hover { background: #8A2BFF; }
+  .save-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+`}</style>
       {message && (
         <div style={{
           marginTop: '16px',

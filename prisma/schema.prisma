@@ -81,6 +81,14 @@ model GuildConfig {
   automodBypassRoles     String?  // JSON: ["roleId1"]
   automodBypassUsers     String?  // JSON: ["userId1"]
   automodIgnoredChannels String?  // JSON: ["channelId1"]
+  automodMaxMentions     Int      @default(5)    // Máximo de menções por mensagem
+  automodMaxLines        Int      @default(15)   // Máximo de linhas
+  automodMaxZalgo        Boolean  @default(true) // Bloquear texto Zalgo
+  automodInviteBlock     Boolean  @default(true) // Bloquear convites
+  automodLogChannel      String?                 // Canal para logs do AutoMod
+  automodAction          String   @default("delete") // delete, mute, warn
+  automodWarnThreshold   Int      @default(3)    // Quantos warns antes de mutar
+  automodMuteDuration    Int      @default(300)  // Duração do mute em segundos
 }
 
 

@@ -183,14 +183,14 @@ export default function CommandsForm({ config, channels, saveAction }: Props) {
             marginBottom: notify ? '16px' : '0',
           }}>
             <div style={{
-              width: '40px', height: '24px', borderRadius: '12px',
-              background: notify ? '#5865f2' : '#2b2d31',
-              border: 'none', cursor: 'pointer', position: 'relative',
-              flexShrink: 0, marginTop: '2px',
-              transition: 'background 0.2s',
-            }}
-              onClick={() => setNotify(!notify)}
-            >
+  width: '40px', height: '24px', borderRadius: '12px',
+  background: notify ? '#C100FF' : '#2b2d31',
+  border: 'none', cursor: 'pointer', position: 'relative',
+  flexShrink: 0, marginTop: '2px',
+  transition: 'background 0.2s',
+}}
+  onClick={() => setNotify(!notify)}
+>
               <div style={{
                 position: 'absolute', width: '18px', height: '18px',
                 borderRadius: '50%', background: 'white', top: '3px',
@@ -242,13 +242,13 @@ export default function CommandsForm({ config, channels, saveAction }: Props) {
 
               {/* Preview do embed */}
               <div style={{
-                background: '#1e2025',
-                borderRadius: '8px',
-                padding: '12px 16px',
-                borderLeft: '4px solid #5865f2',
-                fontSize: '13px',
-                lineHeight: '1.5',
-              }}>
+  background: '#1e2025',
+  borderRadius: '8px',
+  padding: '12px 16px',
+  borderLeft: '4px solid #C100FF',
+  fontSize: '13px',
+  lineHeight: '1.5',
+}}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                   <img src="/byteup-avatar.png" alt="" style={{ width: '20px', height: '20px', borderRadius: '50%' }} />
                   <span style={{ fontWeight: 600, color: '#f2f3f5', fontSize: '12px' }}>ByteUP BOT</span>
@@ -267,21 +267,21 @@ export default function CommandsForm({ config, channels, saveAction }: Props) {
       </form>
 
       <style jsx>{`
-        .field-input, .field-select {
-          background: #0e0f11; border: 1px solid #1e2025; border-radius: 8px;
-          padding: 10px 14px; font-size: 14px; color: #dbdee1;
-          width: 100%; outline: none; box-sizing: border-box;
-          transition: border-color 0.15s;
-        }
-        .field-input:focus, .field-select:focus { border-color: #5865f2; }
-        .field-select { cursor: pointer; appearance: none; }
-        .save-btn {
-          background: #5865f2; color: white; border: none; border-radius: 8px;
-          padding: 12px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
-          width: 100%; transition: background 0.15s;
-        }
-        .save-btn:hover { background: #4752c4; }
-      `}</style>
+  .field-input, .field-select {
+    background: #0e0f11; border: 1px solid #1e2025; border-radius: 8px;
+    padding: 10px 14px; font-size: 14px; color: #dbdee1;
+    width: 100%; outline: none; box-sizing: border-box;
+    transition: border-color 0.15s;
+  }
+  .field-input:focus, .field-select:focus { border-color: #C100FF; }
+  .field-select { cursor: pointer; appearance: none; }
+  .save-btn {
+    background: #C100FF; color: white; border: none; border-radius: 8px;
+    padding: 12px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+    width: 100%; transition: background 0.15s;
+  }
+  .save-btn:hover { background: #8A2BFF; }
+`}</style>
     </div>
   );
 }

@@ -174,8 +174,31 @@ export default function GeneralForm({ guildId, config, channels, roles, stats, s
         .field-input, .field-select { background: #0e0f11; border: 1px solid #1e2025; border-radius: 8px; padding: 10px 14px; font-size: 14px; color: #dbdee1; width: 100%; outline: none; box-sizing: border-box; transition: border-color 0.15s; }
         .field-input:focus, .field-select:focus { border-color: #5865f2; }
         .field-select { cursor: pointer; appearance: none; }
-        .save-btn { background: #5865f2; color: white; border: none; border-radius: 8px; padding: 12px 20px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; transition: background 0.15s; }
-        .save-btn:hover { background: #4752c4; }
+        .save-btn { 
+  background: #C100FF; 
+  color: white; 
+  border: none; 
+  border-radius: 8px; 
+  padding: 12px 20px; 
+  font-size: 14px; 
+  font-weight: 600; 
+  cursor: pointer; 
+  width: 100%; 
+  transition: background 0.15s; 
+}
+.save-btn:hover { 
+  background: #8A2BFF; 
+}
+
+button[type="button"].save-btn { 
+  background: #2b2d31; 
+  color: #C100FF; 
+  border: 1px solid rgba(193, 0, 255, 0.3); 
+}
+button[type="button"].save-btn:hover { 
+  background: rgba(193, 0, 255, 0.1); 
+  border-color: #C100FF; 
+}
       `}</style>
     </div>
   );
@@ -202,7 +225,7 @@ function Toggle({ enabled, setEnabled, title, description }: { enabled: boolean;
     <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
       <button type="button" style={{
         width: "40px", height: "24px", borderRadius: "12px",
-        background: enabled ? "#5865f2" : "#2b2d31",
+        background: enabled ? "#C100FF" : "#2b2d31",
         border: "none", cursor: "pointer", position: "relative",
         flexShrink: 0, marginTop: "2px", transition: "background 0.2s",
       }} onClick={() => setEnabled(!enabled)}>

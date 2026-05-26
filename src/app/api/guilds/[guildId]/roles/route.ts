@@ -15,5 +15,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ guil
   if (!res.ok) return NextResponse.json({ error: 'Erro ao buscar cargos' }, { status: 500 });
 
   const roles = await res.json();
-  return NextResponse.json(roles.map((r: any) => ({ id: r.id, name: r.name })));
+  
+  const formattedRoles = roles
+    .filter((r: any) => r.name !== "@everyone")
+    .map((r: any) => ({ id: r.id, name: r.name, position: r.position, color: r.color }))
+    .sort((a: any, b: any) => b.position - a.position);
+  
+  return NextResponse.json(formattedRoles);
 }

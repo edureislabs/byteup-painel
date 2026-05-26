@@ -198,7 +198,13 @@ export default function EconomyPage({ params }: Props) {
                     <p style={{ fontSize: '12px', color: '#72767d', margin: '6px 0 0 0' }}>Nenhum jogo usa esta moeda.</p>
                   )}
                 </div>
-                <button className="save-btn" onClick={() => deleteCurrency(c.id)} style={{ background: '#ed4245', width: 'auto', padding: '4px 12px', fontSize: '12px', marginTop: 0 }}>Remover</button>
+                <button 
+  className="save-btn" 
+  onClick={() => deleteCurrency(c.id)} 
+  style={{ background: '#C100FF', width: 'auto', padding: '4px 12px', fontSize: '12px', marginTop: 0 }}
+>
+  Remover
+</button>
               </div>
             </div>
           );
@@ -339,22 +345,23 @@ export default function EconomyPage({ params }: Props) {
       )}
 
       <style jsx>{`
-        .field-input, .field-select {
-          background: #0e0f11; border: 1px solid #1e2025; border-radius: 8px;
-          padding: 10px 14px; font-size: 14px; color: #dbdee1; outline: none; box-sizing: border-box;
-        }
-        .field-select { cursor: pointer; }
-        .save-btn {
-          background: #5865f2; color: white; border: none; border-radius: 8px;
-          padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer;
-          transition: background 0.15s;
-        }
-        .save-btn:hover { background: #4752c4; }
-        .field-label {
-          font-size: 11px; font-weight: 600; text-transform: uppercase;
-          letter-spacing: 0.8px; color: #72767d; display: block;
-        }
-      `}</style>
+  .field-input, .field-select {
+    background: #0e0f11; border: 1px solid #1e2025; border-radius: 8px;
+    padding: 10px 14px; font-size: 14px; color: #dbdee1; outline: none; box-sizing: border-box;
+  }
+  .field-select { cursor: pointer; }
+  .field-input:focus, .field-select:focus { border-color: #C100FF; }
+  .save-btn {
+    background: #C100FF; color: white; border: none; border-radius: 8px;
+    padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .save-btn:hover { background: #8A2BFF; }
+  .field-label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.8px; color: #72767d; display: block;
+  }
+`}</style>
     </div>
   );
 }

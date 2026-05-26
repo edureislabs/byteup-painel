@@ -382,15 +382,15 @@ export default function LevelsManager({ guildId }: { guildId: string }) {
                 </button>
                 {editingLevel !== null && (
                   <button 
-                    className="save-btn" 
-                    onClick={() => {
-                      setEditingLevel(null);
-                      setNewReward({ level: (rewards.length > 0 ? Math.max(...rewards.map(r => r.level)) : 0) + 1, roleId: null, currencyId: null, rewardAmount: 0, imageUrl: null, message: null });
-                    }} 
-                    style={{ background: '#2b2d31', flex: 0, padding: '8px 16px', marginTop: '4px' }}
-                  >
-                    Cancelar
-                  </button>
+  className="save-btn" 
+  onClick={() => {
+    setEditingLevel(null);
+    setNewReward({ level: (rewards.length > 0 ? Math.max(...rewards.map(r => r.level)) : 0) + 1, roleId: null, currencyId: null, rewardAmount: 0, imageUrl: null, message: null });
+  }} 
+  style={{ background: '#2b2d31', color: '#C100FF', border: '1px solid rgba(193, 0, 255, 0.3)', flex: 0, padding: '8px 16px', marginTop: '4px' }}
+>
+  Cancelar
+</button>
                 )}
               </div>
             </div>
@@ -470,19 +470,20 @@ export default function LevelsManager({ guildId }: { guildId: string }) {
       )}
 
       <style jsx>{`
-        .field-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #72767d; display: block; margin-bottom: 4px; }
-        .field-input, .field-select { background: #0e0f11; border: 1px solid #1e2025; border-radius: 8px; padding: 10px 14px; font-size: 14px; color: #dbdee1; width: 100%; outline: none; box-sizing: border-box; }
-        .field-select { cursor: pointer; }
-        .save-btn { background: #5865f2; color: white; border: none; border-radius: 8px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
-        .save-btn:hover { background: #4752c4; }
-      `}</style>
+  .field-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #72767d; display: block; margin-bottom: 4px; }
+  .field-input, .field-select { background: #0e0f11; border: 1px solid #1e2025; border-radius: 8px; padding: 10px 14px; font-size: 14px; color: #dbdee1; width: 100%; outline: none; box-sizing: border-box; }
+  .field-input:focus, .field-select:focus { border-color: #C100FF; }
+  .field-select { cursor: pointer; }
+  .save-btn { background: #C100FF; color: white; border: none; border-radius: 8px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+  .save-btn:hover { background: #8A2BFF; }
+`}</style>
     </div>
   );
 }
 
 const toggleStyle = (enabled: boolean): React.CSSProperties => ({
   width: '44px', height: '24px', borderRadius: '12px',
-  background: enabled ? '#5865f2' : '#2b2d31',
+  background: enabled ? '#C100FF' : '#2b2d31',
   border: 'none', cursor: 'pointer', position: 'relative', padding: 0,
 });
 

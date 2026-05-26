@@ -1,8 +1,9 @@
-// src/app/dashboard/[guildId]/automod/AutomodForm.tsx
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import UserSearchInput from "./UserSearchInput";
 
 type Channel = { id: string; name: string };
+type UserInfo = { id: string; name: string; discriminator: string; avatar: string | null };
 type Config = {
   automodEnabled: boolean;
   automodBannedWords: string;
@@ -11,6 +12,14 @@ type Config = {
   automodBypassRoles: string;
   automodBypassUsers: string;
   automodIgnoredChannels: string;
+  automodMaxMentions?: number;
+  automodMaxLines?: number;
+  automodMaxZalgo?: boolean;
+  automodInviteBlock?: boolean;
+  automodAction?: string;
+  automodWarnThreshold?: number;
+  automodMuteDuration?: number;
+  automodLogChannel?: string;
 };
 
 type Props = {
@@ -20,7 +29,19 @@ type Props = {
   saveAction: (formData: FormData) => Promise<void>;
 };
 
-// Componentes reutilizáveis (mesmos do GeneralForm)
+const PRESET_BANNED_WORDS = [
+  "filhodaputa", "caralho", "porra", "buceta", "arrombado",
+  "macaco", "crioulo", "nazista", "hitler",
+  "viado", "bicha", "sapatao", "veado"
+];
+
+const PRESET_LINK_BLOCKLIST = [
+  "discord\\.gg\\/[a-zA-Z0-9]+",
+  "discord\\.com\\/invite\\/[a-zA-Z0-9]+",
+  "tenor\\.com\\/view\\/.*",
+  "giphy\\.com\\/gifs\\/.*"
+];
+
 function Section({ children }: { children: React.ReactNode }) {
   return (
     <div style={{
@@ -62,13 +83,89 @@ export default function AutomodForm({ guildId, config, channels, saveAction }: P
   const [bypassRoles, setBypassRoles] = useState<string[]>(JSON.parse(config.automodBypassRoles || '[]'));
   const [bypassUsers, setBypassUsers] = useState<string[]>(JSON.parse(config.automodBypassUsers || '[]'));
   const [ignoredChannels, setIgnoredChannels] = useState<string[]>(JSON.parse(config.automodIgnoredChannels || '[]'));
+  
+  const [maxMentions, setMaxMentions] = useState(config.automodMaxMentions || 5);
+  const [maxLines, setMaxLines] = useState(config.automodMaxLines || 15);
+  const [blockZalgo, setBlockZalgo] = useState(config.automodMaxZalgo ?? true);
+  const [blockInvites, setBlockInvites] = useState(config.automodInviteBlock ?? true);
+  const [action, setAction] = useState(config.automodAction || "delete");
+  const [warnThreshold, setWarnThreshold] = useState(config.automodWarnThreshold || 3);
+  const [muteDuration, setMuteDuration] = useState(config.automodMuteDuration || 300);
+  const [logChannel, setLogChannel] = useState(config.automodLogChannel || "");
 
-  // Inputs temporários para adicionar
   const [newWord, setNewWord] = useState("");
   const [newBlockRegex, setNewBlockRegex] = useState("");
   const [newAllowRegex, setNewAllowRegex] = useState("");
-  const [newBypassRole, setNewBypassRole] = useState("");
-  const [newBypassUser, setNewBypassUser] = useState("");
+  
+  const [usersInfo, setUsersInfo] = useState<Map<string, UserInfo>>(new Map());
+  const [rolesList, setRolesList] = useState<{ id: string; name: string; color: number }[]>([]);
+
+  useEffect(() => {
+    async function fetchGuildData() {
+      const [membersRes, rolesRes] = await Promise.all([
+        fetch(`/api/guilds/${guildId}/members`),
+        fetch(`/api/guilds/${guildId}/roles`)
+      ]);
+      
+      if (membersRes.ok) {
+        const data = await membersRes.json();
+        const usersMap = new Map();
+        data.users.forEach((user: any) => {
+          usersMap.set(user.id, {
+            id: user.id,
+            name: user.name,
+            discriminator: user.discriminator,
+            avatar: user.avatar
+          });
+        });
+        setUsersInfo(usersMap);
+      }
+      
+      if (rolesRes.ok) {
+        const roles = await rolesRes.json();
+        setRolesList(roles);
+      }
+    }
+    fetchGuildData();
+  }, [guildId]);
+
+  const getUserDisplay = (userId: string) => {
+    const user = usersInfo.get(userId);
+    if (user) {
+      return `${user.name}${user.discriminator !== '0' ? `#${user.discriminator}` : ''} (${userId})`;
+    }
+    return `${userId} (Carregando...)`;
+  };
+
+  const getRoleDisplay = (roleId: string) => {
+    const role = rolesList.find(r => r.id === roleId);
+    if (role) {
+      return `${role.name} (${roleId})`;
+    }
+    return `${roleId} (Carregando...)`;
+  };
+
+  const loadPreset = () => {
+    if (confirm("Aplicar configuracoes padrao do AutoMod? Isso substituira suas configuracoes atuais.")) {
+      setEnabled(true);
+      setBannedWords(PRESET_BANNED_WORDS);
+      setLinkBlocklist(PRESET_LINK_BLOCKLIST);
+      setLinkWhitelist([]);
+      setMaxMentions(5);
+      setMaxLines(15);
+      setBlockZalgo(true);
+      setBlockInvites(true);
+      setAction("delete");
+      setWarnThreshold(3);
+      setMuteDuration(300);
+    }
+  };
+
+  const handleAddUser = (userId: string, userName: string) => {
+    if (!bypassUsers.includes(userId)) {
+      setBypassUsers([...bypassUsers, userId]);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -80,6 +177,14 @@ export default function AutomodForm({ guildId, config, channels, saveAction }: P
     formData.set("automodBypassRoles", JSON.stringify(bypassRoles));
     formData.set("automodBypassUsers", JSON.stringify(bypassUsers));
     formData.set("automodIgnoredChannels", JSON.stringify(ignoredChannels));
+    formData.set("automodMaxMentions", maxMentions.toString());
+    formData.set("automodMaxLines", maxLines.toString());
+    formData.set("automodMaxZalgo", blockZalgo ? "true" : "false");
+    formData.set("automodInviteBlock", blockInvites ? "true" : "false");
+    formData.set("automodAction", action);
+    formData.set("automodWarnThreshold", warnThreshold.toString());
+    formData.set("automodMuteDuration", muteDuration.toString());
+    formData.set("automodLogChannel", logChannel);
     saveAction(formData);
   };
 
@@ -90,12 +195,10 @@ export default function AutomodForm({ guildId, config, channels, saveAction }: P
       </h2>
 
       <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-        {/* Toggle geral */}
         <Section>
-          <Toggle enabled={enabled} setEnabled={setEnabled} title="Ativar Automod" description="O bot moderará mensagens automaticamente." />
+          <Toggle enabled={enabled} setEnabled={setEnabled} title="Ativar Automod" description="O bot moderara mensagens automaticamente." />
         </Section>
 
-        {/* Palavras proibidas */}
         <Section>
           <label className="field-label">Palavras Proibidas</label>
           <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
@@ -112,7 +215,6 @@ export default function AutomodForm({ guildId, config, channels, saveAction }: P
           </div>
         </Section>
 
-        {/* Bloqueio de links */}
         <Section>
           <label className="field-label">Links Bloqueados (regex)</label>
           <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
@@ -129,9 +231,8 @@ export default function AutomodForm({ guildId, config, channels, saveAction }: P
           </div>
         </Section>
 
-        {/* Whitelist de links (permitidos) */}
         <Section>
-          <label className="field-label">Links Permitidos (whitelist) – mesmo se estiverem na blocklist</label>
+          <label className="field-label">Links Permitidos (whitelist)</label>
           <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
             <input className="field-input" value={newAllowRegex} onChange={e => setNewAllowRegex(e.target.value)} placeholder="Regex (ex: imgur\.com)" style={{ flex: 1 }} />
             <button type="button" className="add-btn" onClick={() => { if (newAllowRegex) { setLinkWhitelist([...linkWhitelist, newAllowRegex]); setNewAllowRegex(""); } }}>Adicionar</button>
@@ -146,40 +247,102 @@ export default function AutomodForm({ guildId, config, channels, saveAction }: P
           </div>
         </Section>
 
-        {/* Bypass (cargos e usuários) */}
         <Section>
-          <label className="field-label">Bypass – Cargos imunes</label>
-          <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
-            <input className="field-input" value={newBypassRole} onChange={e => setNewBypassRole(e.target.value)} placeholder="ID do cargo" style={{ flex: 1 }} />
-            <button type="button" className="add-btn" onClick={() => { if (newBypassRole) { setBypassRoles([...bypassRoles, newBypassRole]); setNewBypassRole(""); } }}>Adicionar</button>
+          <label className="field-label">Configuracoes Avancadas</label>
+          
+          <div style={{ marginBottom: "12px" }}>
+            <label className="field-label">Maximo de Mencoes</label>
+            <input type="number" className="field-input" value={maxMentions} onChange={e => setMaxMentions(parseInt(e.target.value))} min="1" max="20" />
           </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+
+          <div style={{ marginBottom: "12px" }}>
+            <label className="field-label">Maximo de Linhas</label>
+            <input type="number" className="field-input" value={maxLines} onChange={e => setMaxLines(parseInt(e.target.value))} min="1" max="50" />
+          </div>
+
+          <div style={{ marginBottom: "12px" }}>
+            <Toggle enabled={blockZalgo} setEnabled={setBlockZalgo} title="Bloquear Texto Zalgo" description="Bloqueia texto com caracteres corrompidos" />
+          </div>
+
+          <div style={{ marginBottom: "12px" }}>
+            <Toggle enabled={blockInvites} setEnabled={setBlockInvites} title="Bloquear Convites" description="Bloqueia convites para outros servidores do Discord" />
+          </div>
+
+          <div style={{ marginBottom: "12px" }}>
+            <label className="field-label">Acao do AutoMod</label>
+            <select className="field-select" value={action} onChange={e => setAction(e.target.value)}>
+              <option value="delete">Apenas Deletar</option>
+              <option value="mute">Mutar</option>
+              <option value="warn">Apenas Avisar</option>
+            </select>
+          </div>
+
+          <div style={{ marginBottom: "12px" }}>
+            <label className="field-label">Limite de Warns (antes de mutar)</label>
+            <input type="number" className="field-input" value={warnThreshold} onChange={e => setWarnThreshold(parseInt(e.target.value))} min="1" max="10" />
+          </div>
+
+          <div style={{ marginBottom: "12px" }}>
+            <label className="field-label">Duracao do Mute (segundos)</label>
+            <input type="number" className="field-input" value={muteDuration} onChange={e => setMuteDuration(parseInt(e.target.value))} min="30" max="3600" />
+          </div>
+
+          <div>
+            <label className="field-label">Canal de Logs</label>
+            <select className="field-select" value={logChannel} onChange={e => setLogChannel(e.target.value)}>
+              <option value="">Desativado</option>
+              {channels.map(c => (
+                <option key={c.id} value={c.id}># {c.name}</option>
+              ))}
+            </select>
+          </div>
+        </Section>
+
+        <Section>
+          <label className="field-label">Bypass Cargos Imunes</label>
+          <select
+            className="field-select"
+            value=""
+            onChange={e => { 
+              if (e.target.value && !bypassRoles.includes(e.target.value)) {
+                setBypassRoles([...bypassRoles, e.target.value]);
+              }
+            }}
+          >
+            <option value="">Adicionar cargo...</option>
+            {rolesList.filter(r => !bypassRoles.includes(r.id) && r.name !== "@everyone").map(r => (
+              <option key={r.id} value={r.id}>{r.name}</option>
+            ))}
+          </select>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "8px" }}>
             {bypassRoles.map((roleId, i) => (
-              <span key={i} style={{ background: "#1e2025", borderRadius: "6px", padding: "4px 10px", display: "flex", alignItems: "center", gap: "6px" }}>
-                {roleId}
-                <button type="button" onClick={() => setBypassRoles(bypassRoles.filter(id => id !== roleId))} style={{ background: "none", border: "none", color: "#ed4245", cursor: "pointer" }}>×</button>
+              <span key={i} style={{ background: "rgba(193,0,255,0.1)", border: "1px solid rgba(193,0,255,0.2)", borderRadius: "6px", padding: "4px 10px", display: "flex", alignItems: "center", gap: "6px" }}>
+                {getRoleDisplay(roleId)}
+                <button type="button" onClick={() => setBypassRoles(bypassRoles.filter(id => id !== roleId))} style={{ background: "none", border: "none", color: "#C100FF", cursor: "pointer" }}>×</button>
               </span>
             ))}
           </div>
         </Section>
 
         <Section>
-          <label className="field-label">Bypass – Usuários imunes</label>
-          <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
-            <input className="field-input" value={newBypassUser} onChange={e => setNewBypassUser(e.target.value)} placeholder="ID do usuário" style={{ flex: 1 }} />
-            <button type="button" className="add-btn" onClick={() => { if (newBypassUser) { setBypassUsers([...bypassUsers, newBypassUser]); setNewBypassUser(""); } }}>Adicionar</button>
+          <label className="field-label">Bypass Usuarios Imunes</label>
+          <div style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center" }}>
+            <UserSearchInput 
+              guildId={guildId} 
+              onSelect={handleAddUser}
+              placeholder="Buscar usuario por nome..."
+            />
           </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "8px" }}>
             {bypassUsers.map((userId, i) => (
-              <span key={i} style={{ background: "#1e2025", borderRadius: "6px", padding: "4px 10px", display: "flex", alignItems: "center", gap: "6px" }}>
-                {userId}
-                <button type="button" onClick={() => setBypassUsers(bypassUsers.filter(id => id !== userId))} style={{ background: "none", border: "none", color: "#ed4245", cursor: "pointer" }}>×</button>
+              <span key={i} style={{ background: "rgba(193,0,255,0.1)", border: "1px solid rgba(193,0,255,0.2)", borderRadius: "6px", padding: "4px 10px", display: "flex", alignItems: "center", gap: "6px" }}>
+                {getUserDisplay(userId)}
+                <button type="button" onClick={() => setBypassUsers(bypassUsers.filter(id => id !== userId))} style={{ background: "none", border: "none", color: "#C100FF", cursor: "pointer" }}>×</button>
               </span>
             ))}
           </div>
         </Section>
 
-        {/* Canais ignorados */}
         <Section>
           <label className="field-label">Canais Ignorados</label>
           <select
@@ -202,6 +365,10 @@ export default function AutomodForm({ guildId, config, channels, saveAction }: P
           </div>
         </Section>
 
+        <button type="button" className="preset-btn" onClick={loadPreset}>
+          Carregar Pre definicoes Padrao
+        </button>
+
         <button type="submit" className="save-btn">Salvar configuracoes</button>
       </form>
 
@@ -211,8 +378,10 @@ export default function AutomodForm({ guildId, config, channels, saveAction }: P
         .field-select { cursor: pointer; appearance: none; }
         .add-btn { background: #C100FF; color: white; border: none; border-radius: 8px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
         .add-btn:hover { background: #8A2BFF; }
-        .save-btn { background: #C100FF; color: white; border: none; border-radius: 8px; padding: 12px 20px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; transition: background 0.15s; }
+        .save-btn { background: #C100FF; color: white; border: none; border-radius: 8px; padding: 12px 20px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; transition: background 0.15s; margin-top: 8px; }
         .save-btn:hover { background: #8A2BFF; }
+        .preset-btn { background: #2b2d31; color: #C100FF; border: 1px solid rgba(193, 0, 255, 0.3); border-radius: 8px; padding: 12px 20px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; transition: all 0.15s; margin-bottom: 8px; }
+        .preset-btn:hover { background: rgba(193, 0, 255, 0.1); border-color: #C100FF; }
       `}</style>
     </div>
   );

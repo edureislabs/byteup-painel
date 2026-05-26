@@ -116,7 +116,14 @@ export default function EconomyTab({ guildId }: Props) {
           {currencies.map(c => (
             <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #1e2025' }}>
               <span style={{ color: '#dbdee1' }}>{c.name} ({c.symbol}) - Taxa: {c.taxRate}% - Cotação: {c.exchangeRate}</span>
-              <button type="button" className="save-btn" onClick={() => deleteCurrency(c.id)} style={{ width: 'auto', padding: '4px 12px', fontSize: '12px', marginTop: '0', background: '#ed4245' }}>Remover</button>
+            <button 
+  type="button" 
+  className="save-btn" 
+  onClick={() => deleteCurrency(c.id)} 
+  style={{ width: 'auto', padding: '4px 12px', fontSize: '12px', marginTop: '0', background: '#ed4245' }}
+>
+  Remover
+</button>
             </div>
           ))}
         </div>
@@ -165,6 +172,98 @@ export default function EconomyTab({ guildId }: Props) {
       </div>
 
       {message && <div className={message.includes('sucesso') || message.includes('criada') || message.includes('atualizado') ? 'message-success' : 'message-error'}>{message}</div>}
-    </div>
+    <style jsx>{`
+  .field-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #72767d;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .field-input, .field-select {
+    background: #0e0f11;
+    border: 1px solid #1e2025;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: #dbdee1;
+    width: 100%;
+    outline: none;
+    box-sizing: border-box;
+  }
+  .field-input:focus, .field-select:focus {
+    border-color: #C100FF;
+  }
+  .field-select {
+    cursor: pointer;
+  }
+  .save-btn {
+    background: #C100FF;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-top: 0;
+  }
+  .save-btn:hover {
+    background: #8A2BFF;
+  }
+  .field-group {
+    background: #16181c;
+    border: 1px solid #1e2025;
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .toggle-track {
+    width: 44px;
+    height: 24px;
+    border-radius: 12px;
+    background: #2b2d31;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    padding: 0;
+    transition: background 0.2s;
+  }
+  .toggle-track.enabled {
+    background: #C100FF;
+  }
+  .toggle-thumb {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: white;
+    top: 3px;
+    left: 3px;
+    transition: left 0.2s;
+  }
+  .toggle-track.enabled .toggle-thumb {
+    left: 23px;
+  }
+  .message-success {
+    margin-top: 16px;
+    padding: 10px;
+    border-radius: 8px;
+    background: #1a3a2a;
+    color: #23a55a;
+    font-size: 13px;
+  }
+  .message-error {
+    margin-top: 16px;
+    padding: 10px;
+    border-radius: 8px;
+    background: #3a1a1a;
+    color: #ed4245;
+    font-size: 13px;
+  }
+`}</style></div>
+    
   );
 }

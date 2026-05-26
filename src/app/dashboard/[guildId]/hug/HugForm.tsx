@@ -112,9 +112,21 @@ export default function HugForm({ config, saveAction }: Props) {
       <form action={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ color: '#dbdee1' }}>Ativar comando de abraco</span>
-          <button type="button" style={{ width: '44px', height: '24px', borderRadius: '12px', background: enabled ? '#5865f2' : '#2b2d31', border: 'none', cursor: 'pointer', position: 'relative', padding: 0 }} onClick={() => setEnabled(!enabled)}>
-            <div style={{ position: 'absolute', width: '18px', height: '18px', borderRadius: '50%', background: 'white', top: '3px', left: enabled ? '23px' : '3px', transition: 'left 0.2s' }} />
-          </button>
+          <button 
+  type="button" 
+  style={{ 
+    width: '44px', height: '24px', borderRadius: '12px', 
+    background: enabled ? '#C100FF' : '#2b2d31', 
+    border: 'none', cursor: 'pointer', position: 'relative', padding: 0 
+  }} 
+  onClick={() => setEnabled(!enabled)}
+>
+  <div style={{ 
+    position: 'absolute', width: '18px', height: '18px', 
+    borderRadius: '50%', background: 'white', top: '3px', 
+    left: enabled ? '23px' : '3px', transition: 'left 0.2s' 
+  }} />
+</button>
         </div>
 
         <div style={{ opacity: enabled ? 1 : 0.4, display: 'flex', flexDirection: 'column', gap: '20px', pointerEvents: enabled ? 'auto' : 'none' }}>
@@ -217,12 +229,13 @@ export default function HugForm({ config, saveAction }: Props) {
       </div>
 
       <style jsx>{`
-        .field-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #72767d; display: block; margin-bottom: 4px; }
-        .field-input { background: #0e0f11; border: 1px solid #1e2025; border-radius: 8px; padding: 10px 14px; font-size: 14px; color: #dbdee1; width: 100%; outline: none; box-sizing: border-box; }
-        .save-btn { background: #5865f2; color: white; border: none; border-radius: 8px; padding: 11px 16px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
-        .save-btn:hover { background: #4752c4; }
-        .save-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-      `}</style>
+  .field-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #72767d; display: block; margin-bottom: 4px; }
+  .field-input { background: #0e0f11; border: 1px solid #1e2025; border-radius: 8px; padding: 10px 14px; font-size: 14px; color: #dbdee1; width: 100%; outline: none; box-sizing: border-box; }
+  .field-input:focus { border-color: #C100FF; }
+  .save-btn { background: #C100FF; color: white; border: none; border-radius: 8px; padding: 11px 16px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+  .save-btn:hover { background: #8A2BFF; }
+  .save-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+`}</style>
     </div>
   );
 }

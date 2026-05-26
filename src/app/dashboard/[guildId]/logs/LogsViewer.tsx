@@ -132,13 +132,41 @@ export default function LogsViewer({ guildId, initialLogs }: { guildId: string; 
       )}
 
       <style jsx>{`
-        .field-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #72767d; display: block; margin-bottom: 4px; }
-        .field-input, .field-select { background: #0e0f11; border: 1px solid #1e2025; border-radius: 8px; padding: 10px 14px; font-size: 14px; color: #dbdee1; outline: none; box-sizing: border-box; }
-        .field-select { cursor: pointer; }
-        .save-btn { background: #5865f2; color: white; border: none; border-radius: 8px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
-        .save-btn:hover { background: #4752c4; }
-        .save-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-      `}</style>
+        .save-btn { 
+  background: #C100FF; 
+  color: white; 
+  border: none; 
+  border-radius: 8px; 
+  padding: 10px 16px; 
+  font-size: 14px; 
+  font-weight: 600; 
+  cursor: pointer; 
+  transition: background 0.15s; 
+}
+.save-btn:hover { 
+  background: #8A2BFF; 
+}
+.save-btn:disabled { 
+  opacity: 0.35; 
+  cursor: not-allowed; 
+}
+
+.field-input, .field-select { 
+  background: #0e0f11; 
+  border: 1px solid #1e2025; 
+  border-radius: 8px; 
+  padding: 10px 14px; 
+  font-size: 14px; 
+  color: #dbdee1; 
+  outline: none; 
+  box-sizing: border-box; 
+}
+.field-select { 
+  cursor: pointer; 
+}
+.field-input:focus, .field-select:focus { 
+  border-color: #C100FF; 
+}    `}</style>
     </div>
   );
 }
