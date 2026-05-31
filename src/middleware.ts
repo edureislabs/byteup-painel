@@ -17,7 +17,7 @@ function rateLimit(req: NextRequest, maxRequests = 30, windowMs = 60000) {
 
   if (entry.count >= maxRequests) {
     return NextResponse.json(
-      { error: "Muitas requisições. Tente novamente mais tarde." },
+      { error: "Muitas requisicoes. Tente novamente mais tarde." },
       { status: 429 }
     );
   }
@@ -25,7 +25,6 @@ function rateLimit(req: NextRequest, maxRequests = 30, windowMs = 60000) {
   entry.count++;
   return null;
 }
-
 
 setInterval(() => {
   const now = Date.now();
@@ -37,12 +36,16 @@ setInterval(() => {
 }, 5 * 60 * 1000);
 
 export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
 
-  if (req.nextUrl.pathname.startsWith('/api/')) {
+  if (pathname.match(/\/api\/guilds\/[^/]+\/welcome\/send/)) {
+    return NextResponse.next();
+  }
+
+  if (pathname.startsWith('/api/')) {
     const limitError = rateLimit(req);
     if (limitError) return limitError;
   }
-
 
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 

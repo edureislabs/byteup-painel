@@ -17,6 +17,7 @@ const menuCategories = [
     items: [
       { label: 'Comandos', href: '/commands', icon: 'slash' },
       { label: 'Automod', href: '/automod', icon: 'shield' },
+      { label: 'Boas-vindas', href: '/welcome', icon: 'welcome' }, // <-- ADICIONADO
     ],
   },
   {
@@ -57,6 +58,7 @@ const iconPaths: Record<string, string> = {
   slap: 'M18 2l-6 6M6 2l6 6M12 8v14M5 22h14a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2z',
   kiss: 'M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z',
   logs: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8',
+  welcome: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z', // Ícone de presente/boas-vindas
 };
 
 type Props = {

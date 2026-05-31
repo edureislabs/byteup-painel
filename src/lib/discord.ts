@@ -1,57 +1,109 @@
-const DISCORD_API = 'https://discord.com/api/v10';
+// src/lib/discord.ts
+const DISCORD_API = 'https://discord.com/api/v10'
+const botToken = process.env.DISCORD_BOT_TOKEN
 
-if (!process.env.DISCORD_BOT_TOKEN) {
-  throw new Error('DISCORD_BOT_TOKEN não configurado');
+if (!botToken) {
+  throw new Error('DISCORD_BOT_TOKEN não configurado')
 }
-
-const botToken = process.env.DISCORD_BOT_TOKEN;
 
 async function discordFetch(endpoint: string, options?: RequestInit) {
   const headers: Record<string, string> = {
     Authorization: `Bot ${botToken}`,
     ...(options?.headers as Record<string, string>),
-  };
+  }
 
-  // Só define Content-Type se houver corpo na requisição
   if (options?.body) {
-    headers['Content-Type'] = 'application/json';
+    headers['Content-Type'] = 'application/json'
   }
 
   const res = await fetch(`${DISCORD_API}${endpoint}`, {
     ...options,
     headers,
-  });
+  })
 
   if (!res.ok) {
-    const text = await res.text();
-    let error: any;
+    const text = await res.text()
+    let error: any
     try {
-      error = JSON.parse(text);
+      error = JSON.parse(text)
     } catch {
-      error = { message: text };
+      error = { message: text }
     }
-    throw new Error(error.message || `Erro ${res.status} na API do Discord`);
+    throw new Error(error.message || `Erro ${res.status} na API do Discord`)
   }
 
-  // DELETE e outras operações podem retornar 204 No Content
-  if (res.status === 204) return null;
-  return res.json();
+  if (res.status === 204) return null
+  return res.json()
+}
+
+export async function getGuilds(accessToken: string) {
+  try {
+    if (!accessToken) return []
+    const response = await fetch("https://discord.com/api/users/@me/guilds", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      cache: "no-store"
+    })
+    if (!response.ok) return []
+    return response.json()
+  } catch {
+    return []
+  }
+}
+
+export async function getBotGuilds() {
+  try {
+    const response = await fetch("https://discord.com/api/users/@me/guilds", {
+      headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` },
+      cache: "no-store"
+    })
+    if (!response.ok) return []
+    return response.json()
+  } catch {
+    return []
+  }
+}
+
+export function isAdmin(permissions: string | number) {
+  try {
+    const permsStr = permissions.toString()
+    const permsBigInt = BigInt(permsStr)
+    return (permsBigInt & BigInt(0x8)) === BigInt(0x8)
+  } catch {
+    return false
+  }
+}
+
+export function getGuildIcon(guildId: string, icon: string | null) {
+  if (!icon) return null
+  return `https://cdn.discordapp.com/icons/${guildId}/${icon}.png`
+}
+
+export async function getDiscordUser(userId: string) {
+  try {
+    const response = await fetch(`https://discord.com/api/users/${userId}`, {
+      headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` },
+      cache: "no-store"
+    })
+    if (!response.ok) return null
+    return response.json()
+  } catch {
+    return null
+  }
 }
 
 export async function getGuildEmojis(guildId: string) {
-  return discordFetch(`/guilds/${guildId}/emojis`);
+  return discordFetch(`/guilds/${guildId}/emojis`)
 }
 
 export async function createGuildEmoji(guildId: string, name: string, image: string) {
   return discordFetch(`/guilds/${guildId}/emojis`, {
     method: 'POST',
     body: JSON.stringify({ name, image }),
-  });
+  })
 }
 
 export async function deleteGuildEmoji(guildId: string, emojiId: string) {
   return discordFetch(`/guilds/${guildId}/emojis/${emojiId}`, {
     method: 'DELETE',
-    // Sem body → sem Content-Type
-  });
+  })
 }

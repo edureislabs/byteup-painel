@@ -25,6 +25,7 @@ model Guild {
   coinflipStats  CoinflipStats[]
   birthdays      Birthday[]
   gameConfigs    GameConfig[]
+  welcome        Welcome?
 }
 
 model GuildConfig {
@@ -256,4 +257,19 @@ model DailyXp {
   date      DateTime @default(now())
 
   @@unique([guildId, userId, date])
+}
+model Welcome {
+  guildId      String   @id
+  channelId    String?
+  message      String?
+  enabled      Boolean  @default(true)
+  autoroleId   String?
+  templateJson Json?
+  bgImage      String?
+  sendType     String?  @default("image_embed")
+  embedJson    Json?
+  buttonsJson  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  guild        Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
 }
