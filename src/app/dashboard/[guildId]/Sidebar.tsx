@@ -17,7 +17,9 @@ const menuCategories = [
     items: [
       { label: 'Comandos', href: '/commands', icon: 'slash' },
       { label: 'Automod', href: '/automod', icon: 'shield' },
-      { label: 'Boas-vindas', href: '/welcome', icon: 'welcome' }, // <-- ADICIONADO
+      { label: 'Boas-vindas', href: '/welcome', icon: 'welcome' }, 
+      { label: 'Saiu do Servidor', href: '/goodbye', icon: 'goodbye' },
+      { label: 'Tickets', href: '/tickets', icon: 'ticket' },
     ],
   },
   {
@@ -51,7 +53,9 @@ const iconPaths: Record<string, string> = {
   slash: 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5',
   level: 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5',
   birthday: 'M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6M12 2v20M6 8h12',
+  goodbye: 'M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h4a3 3 0 0 1 3 3v1',
   games: 'M15 4l-6 6 6 6M9 4l-6 6 6 6',
+  ticket: 'M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z',
   economy: 'M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6',
   emoji: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-4-8c.55 0 1-.45 1-1s-.45-1-1-1-1 .45-1 1 .45 1 1 1zm8 0c.55 0 1-.45 1-1s-.45-1-1-1-1 .45-1 1 .45 1 1 1zm-4 5c1.66 0 3-1.34 3-3H9c0 1.66 1.34 3 3 3z',
   hug: 'M14.5 17.5L12 20l-2.5-2.5M12 4v16M8 8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 2.21-1.79 4-4 4s-4-1.79-4-4z',

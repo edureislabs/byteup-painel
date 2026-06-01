@@ -16,9 +16,9 @@ model PanelAccess {
 }
 
 model Guild {
-  id             String        @id
+  id             String         @id
   name           String?
-  joinedAt       DateTime      @default(now())
+  joinedAt       DateTime       @default(now())
   config         GuildConfig?
   currencies     Currency[]
   economyUsers   EconomyUser[]
@@ -26,72 +26,75 @@ model Guild {
   birthdays      Birthday[]
   gameConfigs    GameConfig[]
   welcome        Welcome?
+  goodbye        Goodbye?
+  ticketConfig   TicketConfig?
+  ticketPanels   TicketPanel[]
+  tickets        Ticket[]
 }
 
 model GuildConfig {
-  guildId            String  @id
-  guild              Guild   @relation(fields: [guildId], references: [id])
-  prefix             String  @default("/")
-  welcomeChannelId   String?
-  logChannelId       String?
-  logEnabled         Boolean @default(false)
-  modules            String  @default("fun,utility")
-  birthdayEnabled    Boolean @default(false)
-  birthdayChannelId  String?
-  birthdayMessage    String  @default("Feliz aniversario, {user}!")
-  birthdayRoleId        String?
-  birthdayCurrencyId    String?
-  birthdayRewardAmount  Int      @default(0)
-  birthdayImageUrl      String?
-  gamesEnabled       Boolean @default(true)
-  hugEnabled   Boolean  @default(true)
-  hugTitle     String   @default("Abraco")
-  hugColor     String   @default("#F472B6")
-  hugMessage   String   @default("{user} deu um abraco em {target}")
-  hugImageUrl  String   @default("https://usagif.com/wp-content/uploads/gif/anime-hug-38.gif")
-  hugThumbnail String?
-  hugFooter    String?
-  hugTimestamp Boolean  @default(true)
-  slapEnabled   Boolean  @default(true)
-  slapTitle     String   @default("Tapa")
-  slapColor     String   @default("#ED4245")
-  slapMessage   String   @default("{user} deu um tapa em {target}")
-  slapImageUrl  String   @default("https://gifdb.com/images/high/up-close-angry-anime-slap-lf84tjs2sgx8obdr.gif")
-  slapThumbnail String?
-  slapFooter    String?
-  slapTimestamp Boolean  @default(true)
-  kissEnabled   Boolean  @default(true)
-  kissTitle     String   @default("Beijo")
-  kissColor     String   @default("#F472B6")
-  kissMessage   String   @default("{user} deu um beijo em {target}")
-  kissImageUrl  String   @default("https://i.pinimg.com/originals/37/df/fe/37dffeecf1a6162e5c6526bfa65b1ca1.gif")
-  kissThumbnail String?
-  kissFooter    String?
-  kissTimestamp Boolean  @default(true)
-  blockedCommandChannels  String?  // JSON: ["channelId1", "channelId2"]
+  guildId                 String   @id
+  guild                   Guild    @relation(fields: [guildId], references: [id])
+  prefix                  String   @default("/")
+  welcomeChannelId        String?
+  logChannelId            String?
+  logEnabled              Boolean  @default(false)
+  modules                 String   @default("fun,utility")
+  birthdayEnabled         Boolean  @default(false)
+  birthdayChannelId       String?
+  birthdayMessage         String   @default("Feliz aniversario, {user}!")
+  birthdayRoleId          String?
+  birthdayCurrencyId      String?
+  birthdayRewardAmount    Int      @default(0)
+  birthdayImageUrl        String?
+  gamesEnabled            Boolean  @default(true)
+  hugEnabled              Boolean  @default(true)
+  hugTitle                String   @default("Abraco")
+  hugColor                String   @default("#F472B6")
+  hugMessage              String   @default("{user} deu um abraco em {target}")
+  hugImageUrl             String   @default("https://usagif.com/wp-content/uploads/gif/anime-hug-38.gif")
+  hugThumbnail            String?
+  hugFooter               String?
+  hugTimestamp            Boolean  @default(true)
+  slapEnabled             Boolean  @default(true)
+  slapTitle               String   @default("Tapa")
+  slapColor               String   @default("#ED4245")
+  slapMessage             String   @default("{user} deu um tapa em {target}")
+  slapImageUrl            String   @default("https://gifdb.com/images/high/up-close-angry-anime-slap-lf84tjs2sgx8obdr.gif")
+  slapThumbnail           String?
+  slapFooter              String?
+  slapTimestamp           Boolean  @default(true)
+  kissEnabled             Boolean  @default(true)
+  kissTitle               String   @default("Beijo")
+  kissColor               String   @default("#F472B6")
+  kissMessage             String   @default("{user} deu um beijo em {target}")
+  kissImageUrl            String   @default("https://i.pinimg.com/originals/37/df/fe/37dffeecf1a6162e5c6526bfa65b1ca1.gif")
+  kissThumbnail           String?
+  kissFooter              String?
+  kissTimestamp           Boolean  @default(true)
+  blockedCommandChannels  String?
   blockedCommandMessage   String   @default("Voce nao pode executar comandos neste canal!")
   blockedCommandNotify    Boolean  @default(true)
-  language           String   @default("pt-BR")
-  timezone           String   @default("America/Sao_Paulo")
-  autoroleId         String?
-  inviteLink         String?
-  automodEnabled         Boolean  @default(false)
-  automodBannedWords     String?  // JSON: ["palavra1", "palavra2"]
-  automodLinkBlocklist   String?  // JSON: ["regex1", "regex2"]
-  automodLinkWhitelist   String?  // JSON: ["regexSegura1"]  (ex: "imgur\\.com")
-  automodBypassRoles     String?  // JSON: ["roleId1"]
-  automodBypassUsers     String?  // JSON: ["userId1"]
-  automodIgnoredChannels String?  // JSON: ["channelId1"]
-  automodMaxMentions     Int      @default(5)    // Máximo de menções por mensagem
-  automodMaxLines        Int      @default(15)   // Máximo de linhas
-  automodMaxZalgo        Boolean  @default(true) // Bloquear texto Zalgo
-  automodInviteBlock     Boolean  @default(true) // Bloquear convites
-  automodLogChannel      String?                 // Canal para logs do AutoMod
-  automodAction          String   @default("delete") // delete, mute, warn
-  automodWarnThreshold   Int      @default(3)    // Quantos warns antes de mutar
-  automodMuteDuration    Int      @default(300)  // Duração do mute em segundos
+  language                String   @default("pt-BR")
+  timezone                String   @default("America/Sao_Paulo")
+  autoroleId              String?
+  inviteLink              String?
+  automodEnabled          Boolean  @default(false)
+  automodBannedWords      String?
+  automodLinkBlocklist    String?
+  automodLinkWhitelist    String?
+  automodBypassRoles      String?
+  automodBypassUsers      String?
+  automodIgnoredChannels  String?
+  automodMaxMentions      Int      @default(5)
+  automodMaxLines         Int      @default(15)
+  automodMaxZalgo         Boolean  @default(true)
+  automodInviteBlock      Boolean  @default(true)
+  automodLogChannel       String?
+  automodAction           String   @default("delete")
+  automodWarnThreshold    Int      @default(3)
+  automodMuteDuration     Int      @default(300)
 }
-
 
 model ActivityLog {
   id        String   @id @default(uuid())
@@ -167,17 +170,19 @@ model Birthday {
 
   @@unique([guildId, userId])
 }
+
 model GameTransaction {
-  id        String   @id @default(uuid())
-  guildId   String
-  userId    String
-  gameName  String
+  id         String   @id @default(uuid())
+  guildId    String
+  userId     String
+  gameName   String
   currencyId String?
-  bet       Int
-  result    String   // "win" ou "lose"
-  reward    Int
-  createdAt DateTime @default(now())
+  bet        Int
+  result     String
+  reward     Int
+  createdAt  DateTime @default(now())
 }
+
 model DailyGameUsage {
   id        String   @id @default(uuid())
   guildId   String
@@ -188,17 +193,19 @@ model DailyGameUsage {
 
   @@unique([guildId, userId, gameName, date])
 }
+
 model ModAction {
-  id         String   @id @default(uuid())
-  guildId    String
-  userId     String?
+  id          String   @id @default(uuid())
+  guildId     String
+  userId      String?
   moderatorId String
-  action     String
-  reason     String?
-  duration   Int?
-  createdAt  DateTime @default(now())
-  expiresAt  DateTime?
+  action      String
+  reason      String?
+  duration    Int?
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime?
 }
+
 model LevelUser {
   id      String @id @default(uuid())
   guildId String
@@ -216,12 +223,12 @@ model LevelConfig {
   imageUrl             String?
   rewardCurrencyId     String?
   rewardAmount         Int      @default(0)
-  channelMultipliers   String?  // JSON: { "channelId": 2.0 }
-  roleMultipliers      String?  // JSON: { "roleId": 1.5 }
-  blockedChannels      String?  // JSON: ["channelId1"]
-  blockedRoles         String?  // JSON: ["roleId1"]
-  roleByLevel          String?  // JSON: { "5": "roleId1" }
-  xpMode               String   @default("formula") // "formula" ou "table"
+  channelMultipliers   String?
+  roleMultipliers      String?
+  blockedChannels      String?
+  blockedRoles         String?
+  roleByLevel          String?
+  xpMode               String   @default("formula")
   baseXP               Int      @default(100)
   exponent             Float    @default(2.0)
   minXpPerMessage      Int      @default(15)
@@ -239,6 +246,7 @@ model LevelRequirement {
 
   @@unique([guildId, level])
 }
+
 model LevelReward {
   id           String  @id @default(uuid())
   guildId      String
@@ -249,6 +257,7 @@ model LevelReward {
   imageUrl     String?
   message      String?
 }
+
 model DailyXp {
   id        String   @id @default(uuid())
   guildId   String
@@ -258,6 +267,7 @@ model DailyXp {
 
   @@unique([guildId, userId, date])
 }
+
 model Welcome {
   guildId      String   @id
   channelId    String?
@@ -272,4 +282,65 @@ model Welcome {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   guild        Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+}
+
+model Goodbye {
+  guildId      String   @id
+  channelId    String?
+  message      String?
+  enabled      Boolean  @default(true)
+  sendType     String?  @default("text_only")
+  embedJson    Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  guild        Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+}
+
+model TicketConfig {
+  guildId      String        @id
+  enabled      Boolean       @default(false)
+  panels       TicketPanel[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  guild        Guild         @relation(fields: [guildId], references: [id], onDelete: Cascade)
+}
+
+model TicketPanel {
+  id              String        @id @default(uuid())
+  guildId         String
+  name            String        @default("Novo Painel")
+  description     String?
+  categoryId      String?       
+  channelId       String?       
+  sendType        String        @default("panel")
+  openMessage     String?       
+  closeMessage    String?       
+  staffRoles      String?       
+  maxTickets      Int           @default(5)
+  ticketLimit     Int           @default(1)
+  enabled         Boolean       @default(true)
+  closeInTwoSteps Boolean       @default(false)   
+  ticketPadding   Int           @default(4)       
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  config          TicketConfig  @relation(fields: [guildId], references: [guildId], onDelete: Cascade, map: "TicketPanel_config_fkey")
+  guild           Guild         @relation(fields: [guildId], references: [id], onDelete: Cascade, map: "TicketPanel_guild_fkey")
+  tickets         Ticket[]
+  
+  @@unique([guildId, id])
+}
+
+model Ticket {
+  id           String        @id @default(uuid())
+  guildId      String
+  panelId      String
+  userId       String
+  channelId    String
+  status       String        @default("open")
+  createdAt    DateTime      @default(now())
+  closedAt     DateTime?
+  closedBy     String?
+  panel        TicketPanel   @relation(fields: [panelId], references: [id], onDelete: Cascade)
+  guild        Guild         @relation(fields: [guildId], references: [id], onDelete: Cascade)
 }

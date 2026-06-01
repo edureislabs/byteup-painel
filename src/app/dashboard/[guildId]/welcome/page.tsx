@@ -351,24 +351,20 @@ export default function WelcomeConfig() {
           {/* Coluna de configurações */}
           <div className="space-y-6">
             {/* Status */}
-            <div className="bg-[#1a1a1a] rounded-xl p-6">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={config.enabled}
-                  onChange={(e) =>
-                    setConfig((prev) => ({ ...prev, enabled: e.target.checked }))
-                  }
-                  className="w-5 h-5 rounded"
-                />
-                <div>
-                  <span className="font-semibold">Ativar sistema de boas-vindas</span>
-                  <p className="text-gray-400 text-sm">
-                    Quando ativado, o bot enviará uma mensagem para novos membros
-                  </p>
-                </div>
-              </label>
-            </div>
+            <div className="bg-[#1a1a1a] rounded-xl p-5 border border-[#2b2b2b]">
+  <div className="flex items-start justify-between">
+    <div>
+      <div className="font-medium">Ativar sistema de boas-vindas</div>
+      <div className="text-sm text-gray-400">Quando ativado, o bot enviará uma mensagem para novos membros</div>
+    </div>
+    <button
+      onClick={() => setConfig(prev => ({ ...prev, enabled: !prev.enabled }))}
+      className={`w-11 h-6 rounded-full transition-colors ${config.enabled ? "bg-[#C100FF]" : "bg-[#2b2b2b]"} relative`}
+    >
+      <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all ${config.enabled ? "left-5" : "left-0.5"}`} />
+    </button>
+  </div>
+</div>
 
             {/* Canal */}
             <div className="bg-[#1a1a1a] rounded-xl p-6">
@@ -403,10 +399,10 @@ export default function WelcomeConfig() {
                   <label
                     key={type.id}
                     className={`flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                      config.sendType === type.id
-                        ? "bg-[#5865F2]/20 border border-[#5865F2]"
-                        : "bg-[#0e0e0e]"
-                    }`}
+  config.sendType === type.id
+    ? "bg-[#C100FF]/20 border border-[#C100FF]"
+    : "bg-[#0e0e0e]"
+}`}
                   >
                     <input
                       type="radio"
@@ -515,7 +511,7 @@ export default function WelcomeConfig() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2">
+                      <label className="text-[#C100FF] text-sm font-medium">
                         👤 Author (opcional)
                       </label>
                       <input
@@ -647,7 +643,7 @@ export default function WelcomeConfig() {
                   <div className="space-y-4 mt-4">
                     <button
                       onClick={addButton}
-                      className="w-full bg-[#5865F2] hover:bg-[#4752c4] text-white text-sm py-2 rounded-lg transition-colors"
+                      className="w-full bg-[#C100FF] hover:bg-[#8A2BFF] text-white text-sm py-2 rounded-lg transition-colors"
                     >
                       ➕ Adicionar Botão
                     </button>
@@ -912,7 +908,7 @@ export default function WelcomeConfig() {
     await salvar();
     router.push(`/dashboard/${guildId}/welcome/editor`);
   }}
-  className="bg-[#5865F2] hover:bg-[#4752c4] text-white px-4 py-2 rounded-lg transition-colors"
+  className="bg-[#C100FF] hover:bg-[#8A2BFF] text-white px-4 py-2 rounded-lg transition-colors"
 >
   Abrir editor →
 </button>
@@ -931,7 +927,7 @@ export default function WelcomeConfig() {
               <button
                 onClick={salvar}
                 disabled={saving}
-                className="flex-1 bg-[#5865F2] hover:bg-[#4752c4] text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50"
+                className="flex-1 bg-[#C100FF] hover:bg-[#8A2BFF] text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50"
               >
                 {saving ? "💾 Salvando..." : "💾 Salvar configurações"}
               </button>
@@ -980,8 +976,7 @@ export default function WelcomeConfig() {
                     <div className="flex gap-4">
                       {embedConfig.thumbnail && (
                         <div className="flex-shrink-0">
-                          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#5865F2] to-[#eb459e] flex items-center justify-center text-4xl shadow-lg ring-2 ring-[#5865F2]/30">
-                            👤
+                          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#C100FF] to-[#8A2BFF] flex items-center justify-center text-4xl shadow-lg ring-2 ring-[#C100FF]/30">
                           </div>
                         </div>
                       )}
@@ -989,14 +984,14 @@ export default function WelcomeConfig() {
                       <div className="flex-1 min-w-0 relative">
                         <div
                           className="absolute left-0 top-0 bottom-0 w-1 rounded-l"
-                          style={{ backgroundColor: embedConfig.color }}
+style={{ backgroundColor: "#C100FF" }}
                         />
 
                         <div className="pl-3">
                           {embedConfig.author && (
                             <div className="flex items-center gap-2 mb-1">
                               {embedConfig.authorIcon && (
-                                <div className="w-5 h-5 rounded-full bg-[#5865F2] flex items-center justify-center text-[10px]">
+                                <div className="w-5 h-5 rounded-full bg-[#C100FF] flex items-center justify-center text-[10px]">
                                   👤
                                 </div>
                               )}
@@ -1024,7 +1019,7 @@ export default function WelcomeConfig() {
                           {(embedConfig.footer || embedConfig.timestamp) && (
                             <div className="flex items-center gap-2 text-xs text-[#949ba4] mt-2">
                               {embedConfig.footerIcon && (
-                                <div className="w-4 h-4 rounded-full bg-[#5865F2] flex items-center justify-center text-[8px]">
+                                <div className="w-4 h-4 rounded-full bg-[#C100FF] flex items-center justify-center text-[8px]">
                                   🏠
                                 </div>
                               )}
