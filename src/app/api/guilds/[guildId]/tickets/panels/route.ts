@@ -9,19 +9,38 @@ export async function POST(
   { params }: { params: Promise<{ guildId: string }> }
 ) {
   const session = await getServerSession(authOptions);
-  if (!session?.accessToken) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+
+  if (!session?.accessToken) {
+    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  }
 
   const { guildId } = await params;
+
   const hasAccess = await canAccessPanel(guildId);
-  if (!hasAccess) return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
+
+  if (!hasAccess) {
+    return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
+  }
 
   const body = await request.json();
+
+  await prisma.ticketConfig.upsert({
+    where: {
+      guildId,
+    },
+    update: {},
+    create: {
+      guildId,
+      enabled: true,
+    },
+  });
 
   const panel = await prisma.ticketPanel.create({
     data: {
       guildId,
       name: body.name || "Novo Painel",
       description: body.description || "",
+      ticketChannelName: "ticket-{count}",
     },
   });
 

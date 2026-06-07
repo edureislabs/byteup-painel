@@ -306,28 +306,58 @@ model TicketConfig {
 }
 
 model TicketPanel {
-  id              String        @id @default(uuid())
-  guildId         String
-  name            String        @default("Novo Painel")
-  description     String?
-  categoryId      String?       
-  channelId       String?       
-  sendType        String        @default("panel")
-  openMessage     String?       
-  closeMessage    String?       
-  staffRoles      String?       
-  maxTickets      Int           @default(5)
-  ticketLimit     Int           @default(1)
-  enabled         Boolean       @default(true)
-  closeInTwoSteps Boolean       @default(false)   
-  ticketPadding   Int           @default(4)       
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id                String        @id @default(uuid())
+  guildId           String
+  name              String        @default("Novo Painel")
+  description       String?
+  categoryId        String?
+  channelId         String?
+  sendType          String        @default("panel")
+
+  // Painel público enviado no canal de suporte
+  openMessage       String?
+  embedJson         Json?
+  componentsJson    Json?
+
+  // Mensagem enviada dentro do canal criado do ticket
+  ticketMessage        String?
+  ticketEmbedJson      Json?
+  ticketComponentsJson Json?
+
+  // Mensagens auxiliares
+  closeMessage      String?
+
+  // Configurações de cargos/permissões
+  staffRoles        String?
+  addRolesOnOpen    String?
+  removeRolesOnOpen String?
+
+  // Compatibilidade antiga
+  buttonsJson       String?
+
+  // Configurações gerais do ticket
+  ticketChannelName String        @default("ticket-{count}")
+  maxTickets        Int           @default(5)
+  ticketLimit       Int           @default(1)
+  enabled           Boolean       @default(true)
+  closeInTwoSteps   Boolean       @default(false)
+  ticketPadding     Int           @default(4)
+
+  // Configurações da aba moderador
+  moderatorOptionsJson Json?
+
+  permissionsJson Json?
+  formsJson       Json?
+  limitsJson      Json?
+  messagesJson    Json?
   
-  config          TicketConfig  @relation(fields: [guildId], references: [guildId], onDelete: Cascade, map: "TicketPanel_config_fkey")
-  guild           Guild         @relation(fields: [guildId], references: [id], onDelete: Cascade, map: "TicketPanel_guild_fkey")
-  tickets         Ticket[]
-  
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  config            TicketConfig  @relation(fields: [guildId], references: [guildId], onDelete: Cascade, map: "TicketPanel_config_fkey")
+  guild             Guild         @relation(fields: [guildId], references: [id], onDelete: Cascade, map: "TicketPanel_guild_fkey")
+  tickets           Ticket[]
+
   @@unique([guildId, id])
 }
 

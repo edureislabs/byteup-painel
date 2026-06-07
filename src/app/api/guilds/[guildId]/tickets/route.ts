@@ -20,12 +20,12 @@ export async function GET(
     include: { panels: true }
   });
 
-  const channelsRes = await fetch(`https://discord.com/api/guilds/${guildId}/channels`, {
+  const channelsRes = await fetch(`https://discord.com/api/v10/guilds/${guildId}/channels`, {
     headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` }
   });
   const channels = channelsRes.ok ? await channelsRes.json() : [];
 
-  const rolesRes = await fetch(`https://discord.com/api/guilds/${guildId}/roles`, {
+  const rolesRes = await fetch(`https://discord.com/api/v10/guilds/${guildId}/roles`, {
     headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` }
   });
   const roles = rolesRes.ok ? await rolesRes.json() : [];
