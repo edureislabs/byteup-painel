@@ -1,0 +1,17 @@
+﻿export const variables = [
+  { name: "{user}", description: "Menção do usuário." },
+  { name: "{username}", description: "Nome do usuário." },
+  { name: "{server}", description: "Nome do servidor." },
+  { name: "{channel}", description: "Menção ou nome do canal." },
+  { name: "{ticketId}", description: "ID interno do ticket." },
+  { name: "{panel}", description: "Nome do painel de ticket." },
+  { name: "{staff}", description: "Staff responsável pela ação." },
+  { name: "{member}", description: "Membro adicionado ou removido." },
+  { name: "{reason}", description: "Motivo informado." },
+  { name: "{oldName}", description: "Nome antigo do canal." },
+  { name: "{newName}", description: "Novo nome do canal." },
+  { name: "{time}", description: "Tempo configurado." },
+  { name: "{limit}", description: "Limite configurado." },
+  { name: "{cooldown}", description: "Tempo restante do cooldown." },
+  { name: "{count}", description: "Número sequencial do ticket." },
+];
