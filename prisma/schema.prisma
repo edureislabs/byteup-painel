@@ -1,0 +1,470 @@
+generator client {
+  provider   = "prisma-client"
+  output     = "../src/generated/prisma"
+  runtime    = "nodejs"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model PanelAccess {
+  id        String   @id @default(uuid())
+  guildId   String
+  userId    String
+  addedBy   String
+  createdAt DateTime @default(now())
+
+  @@unique([guildId, userId])
+}
+
+model Guild {
+  id             String         @id
+  name           String?
+  joinedAt       DateTime       @default(now())
+  config         GuildConfig?
+  currencies     Currency[]
+  economyUsers   EconomyUser[]
+  coinflipStats  CoinflipStats[]
+  birthdays      Birthday[]
+  gameConfigs    GameConfig[]
+  welcome        Welcome?
+  goodbye        Goodbye?
+  ticketConfig   TicketConfig?
+  ticketPanels   TicketPanel[]
+  tickets        Ticket[]
+}
+
+model GuildConfig {
+  guildId                 String   @id
+  guild                   Guild    @relation(fields: [guildId], references: [id])
+  prefix                  String   @default("/")
+  welcomeChannelId        String?
+  logChannelId            String?
+  logEnabled              Boolean  @default(false)
+  modules                 String   @default("fun,utility")
+  birthdayEnabled         Boolean  @default(false)
+  birthdayChannelId       String?
+  birthdayMessage         String   @default("Feliz aniversario, {user}!")
+  birthdayRoleId          String?
+  birthdayCurrencyId      String?
+  birthdayRewardAmount    Int      @default(0)
+  birthdayImageUrl        String?
+  gamesEnabled            Boolean  @default(true)
+  hugEnabled              Boolean  @default(true)
+  hugTitle                String   @default("Abraco")
+  hugColor                String   @default("#F472B6")
+  hugMessage              String   @default("{user} deu um abraco em {target}")
+  hugImageUrl             String   @default("https://usagif.com/wp-content/uploads/gif/anime-hug-38.gif")
+  hugThumbnail            String?
+  hugFooter               String?
+  hugTimestamp            Boolean  @default(true)
+  slapEnabled             Boolean  @default(true)
+  slapTitle               String   @default("Tapa")
+  slapColor               String   @default("#ED4245")
+  slapMessage             String   @default("{user} deu um tapa em {target}")
+  slapImageUrl            String   @default("https://gifdb.com/images/high/up-close-angry-anime-slap-lf84tjs2sgx8obdr.gif")
+  slapThumbnail           String?
+  slapFooter              String?
+  slapTimestamp           Boolean  @default(true)
+  kissEnabled             Boolean  @default(true)
+  kissTitle               String   @default("Beijo")
+  kissColor               String   @default("#F472B6")
+  kissMessage             String   @default("{user} deu um beijo em {target}")
+  kissImageUrl            String   @default("https://i.pinimg.com/originals/37/df/fe/37dffeecf1a6162e5c6526bfa65b1ca1.gif")
+  kissThumbnail           String?
+  kissFooter              String?
+  kissTimestamp           Boolean  @default(true)
+  blockedCommandChannels  String?
+  blockedCommandMessage   String   @default("Voce nao pode executar comandos neste canal!")
+  blockedCommandNotify    Boolean  @default(true)
+  blockedCommandAsEmbed   Boolean  @default(false)
+  counterEnabled          Boolean  @default(false)
+  counterChannelId        String?
+  counterTemplate         String   @default("Membros: {contmember}")
+  language                String   @default("pt-BR")
+  timezone                String   @default("America/Sao_Paulo")
+  autoroleId              String?
+  inviteLink              String?
+  automodEnabled          Boolean  @default(false)
+  automodBannedWords      String?
+  automodLinkBlocklist    String?
+  automodLinkWhitelist    String?
+  automodBypassRoles      String?
+  automodBypassUsers      String?
+  automodIgnoredChannels  String?
+  automodMaxMentions      Int      @default(5)
+  automodMaxLines         Int      @default(15)
+  automodMaxZalgo         Boolean  @default(true)
+  automodInviteBlock      Boolean  @default(true)
+  automodLogChannel       String?
+  automodAction           String   @default("delete")
+  automodWarnThreshold    Int      @default(3)
+  automodMuteDuration     Int      @default(300)
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  guildId   String
+  userId    String?
+  action    String
+  details   String?
+  createdAt DateTime @default(now())
+}
+
+model Currency {
+  id            String         @id @default(uuid())
+  guildId       String
+  guild         Guild          @relation(fields: [guildId], references: [id])
+  name          String
+  symbol        String         @default("$")
+  taxRate       Float          @default(0)
+  exchangeRate  Float          @default(1.0)
+  economyUsers  EconomyUser[]
+  gameConfigs   GameConfig[]
+
+  @@unique([guildId, name])
+}
+
+model EconomyUser {
+  id         String   @id @default(uuid())
+  guildId    String
+  guild      Guild    @relation(fields: [guildId], references: [id])
+  userId     String
+  currencyId String
+  currency   Currency @relation(fields: [currencyId], references: [id])
+  balance    Int      @default(0)
+  bank       Int      @default(0)
+
+  @@unique([guildId, userId, currencyId])
+}
+
+model CoinflipStats {
+  id      String @id @default(uuid())
+  guildId String
+  userId  String
+  wins    Int    @default(0)
+  total   Int    @default(0)
+  guild   Guild  @relation(fields: [guildId], references: [id])
+
+  @@unique([guildId, userId])
+}
+
+model GameConfig {
+  id         String   @id @default(uuid())
+  guildId    String
+  guild      Guild    @relation(fields: [guildId], references: [id])
+  gameName   String
+  enabled    Boolean  @default(true)
+  currencyId String?
+  currency   Currency? @relation(fields: [currencyId], references: [id])
+  minBet     Int      @default(10)
+  maxBet     Int      @default(1000)
+  reward     Int      @default(100)
+  dailyLimit Int      @default(0)
+
+  @@unique([guildId, gameName])
+}
+
+model Birthday {
+  id        String   @id @default(uuid())
+  guildId   String
+  userId    String
+  day       Int
+  month     Int
+  createdAt DateTime @default(now())
+  guild     Guild    @relation(fields: [guildId], references: [id])
+
+  @@unique([guildId, userId])
+}
+
+model GameTransaction {
+  id         String   @id @default(uuid())
+  guildId    String
+  userId     String
+  gameName   String
+  currencyId String?
+  bet        Int
+  result     String
+  reward     Int
+  createdAt  DateTime @default(now())
+}
+
+model DailyGameUsage {
+  id        String   @id @default(uuid())
+  guildId   String
+  userId    String
+  gameName  String
+  uses      Int      @default(0)
+  date      DateTime @default(now())
+
+  @@unique([guildId, userId, gameName, date])
+}
+
+model ModAction {
+  id          String   @id @default(uuid())
+  guildId     String
+  userId      String?
+  moderatorId String
+  action      String
+  reason      String?
+  duration    Int?
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime?
+}
+
+model LevelUser {
+  id      String @id @default(uuid())
+  guildId String
+  userId  String
+  xp      Int    @default(0)
+  level   Int    @default(0)
+
+  @@unique([guildId, userId])
+}
+
+model LevelConfig {
+  guildId              String   @id
+  enabled              Boolean  @default(true)
+  message              String   @default("{user} subiu para o nivel {level}!")
+  imageUrl             String?
+  rewardCurrencyId     String?
+  rewardAmount         Int      @default(0)
+  channelMultipliers   String?
+  roleMultipliers      String?
+  blockedChannels      String?
+  blockedRoles         String?
+  roleByLevel          String?
+  xpMode               String   @default("formula")
+  baseXP               Int      @default(100)
+  exponent             Float    @default(2.0)
+  minXpPerMessage      Int      @default(15)
+  maxXpPerMessage      Int      @default(25)
+  cooldownSeconds      Int      @default(60)
+  levelUpChannelId     String?
+  dailyXpLimit         Int      @default(0)
+}
+
+model LevelRequirement {
+  id        String @id @default(uuid())
+  guildId   String
+  level     Int
+  xpNeeded  Int
+
+  @@unique([guildId, level])
+}
+
+model LevelReward {
+  id           String  @id @default(uuid())
+  guildId      String
+  level        Int
+  roleId       String?
+  currencyId   String?
+  rewardAmount Int     @default(0)
+  imageUrl     String?
+  message      String?
+}
+
+model DailyXp {
+  id        String   @id @default(uuid())
+  guildId   String
+  userId    String
+  xp        Int      @default(0)
+  date      DateTime @default(now())
+
+  @@unique([guildId, userId, date])
+}
+
+model Welcome {
+  guildId      String   @id
+  channelId    String?
+  message      String?
+  enabled      Boolean  @default(true)
+  autoroleId   String?
+  templateJson Json?
+  bgImage      String?
+  sendType     String?  @default("image_embed")
+  embedJson    Json?
+  buttonsJson  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  guild        Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+}
+
+model Goodbye {
+  guildId      String   @id
+  channelId    String?
+  message      String?
+  enabled      Boolean  @default(true)
+  sendType     String?  @default("text_only")
+  embedJson    Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  guild        Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+}
+
+model TicketConfig {
+  guildId      String        @id
+  enabled      Boolean       @default(false)
+  panels       TicketPanel[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  guild        Guild         @relation(fields: [guildId], references: [id], onDelete: Cascade)
+}
+
+model TicketPanel {
+  id                String        @id @default(uuid())
+  guildId           String
+  name              String        @default("Novo Painel")
+  description       String?
+  categoryId        String?
+  channelId         String?
+  sendType          String        @default("panel")
+
+  // Painel público enviado no canal de suporte
+  openMessage       String?
+  embedJson         Json?
+  componentsJson    Json?
+
+  // Mensagem enviada dentro do canal criado do ticket
+  ticketMessage        String?
+  ticketEmbedJson      Json?
+  ticketComponentsJson Json?
+
+  // Mensagens auxiliares
+  closeMessage      String?
+
+  // Configurações de cargos/permissões
+  staffRoles        String?
+  addRolesOnOpen    String?
+  removeRolesOnOpen String?
+
+  // Compatibilidade antiga
+  buttonsJson       String?
+
+  // Configurações gerais do ticket
+  ticketChannelName String        @default("ticket-{count}")
+  maxTickets        Int           @default(5)
+  ticketLimit       Int           @default(1)
+  enabled           Boolean       @default(true)
+  closeInTwoSteps   Boolean       @default(false)
+  ticketPadding     Int           @default(4)
+
+  // Configurações da aba moderador
+  moderatorOptionsJson Json?
+
+  permissionsJson Json?
+  formsJson       Json?
+  limitsJson      Json?
+  messagesJson    Json?
+
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  config            TicketConfig  @relation(fields: [guildId], references: [guildId], onDelete: Cascade, map: "TicketPanel_config_fkey")
+  guild             Guild         @relation(fields: [guildId], references: [id], onDelete: Cascade, map: "TicketPanel_guild_fkey")
+  tickets           Ticket[]
+
+  @@unique([guildId, id])
+}
+
+model Ticket {
+  id           String        @id @default(uuid())
+  guildId      String
+  panelId      String
+  userId       String
+  channelId    String
+  status       String        @default("open")
+  createdAt    DateTime      @default(now())
+  closedAt     DateTime?
+  closedBy     String?
+  panel        TicketPanel   @relation(fields: [panelId], references: [id], onDelete: Cascade)
+  guild        Guild         @relation(fields: [guildId], references: [id], onDelete: Cascade)
+}
+model BotHeartbeat {
+  id            String   @id
+  status        String   @default("offline")
+  clientId      String?
+  tag           String?
+  guildCount    Int      @default(0)
+  userCount     Int      @default(0)
+  ping          Int      @default(0)
+  uptimeSeconds Int      @default(0)
+  startedAt     DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+model Report {
+  id            String   @id @default(uuid())
+  guildId       String
+  reporterId    String
+  targetId      String
+  reason        String
+  description   String?
+  imageUrl      String?
+  status        String   @default("pending") // pending | resolved | ignored
+  resolvedBy    String?
+  resolvedAt    DateTime?
+  createdAt     DateTime @default(now())
+
+  @@index([guildId, status])
+  @@index([guildId, createdAt])
+}
+
+model ReportConfig {
+  guildId      String   @id
+  enabled      Boolean  @default(false)
+  channelId    String?
+  mentionStaff Boolean  @default(true)
+  staffRoleId  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+model Suggestion {
+  id            String   @id @default(uuid())
+  guildId       String
+  authorId      String
+  title         String
+  description   String
+  status        String   @default("pending")
+  upvotes       Int      @default(0)
+  downvotes     Int      @default(0)
+  messageId     String?
+  channelId     String?
+  staffComment  String?
+  reviewedBy    String?
+  reviewedAt    DateTime?
+  expiresAt     DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  votes         SuggestionVote[]
+
+  @@index([guildId, status])
+  @@index([guildId, createdAt])
+}
+
+model SuggestionConfig {
+  guildId         String   @id
+  enabled         Boolean  @default(false)
+  channelId       String?
+  anonymous       Boolean  @default(false)
+  autoApprove     Boolean  @default(false)
+  duration        String   @default("1d")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model SuggestionVote {
+  id            String   @id @default(uuid())
+  suggestionId  String
+  userId        String
+  voteType      String
+  createdAt     DateTime @default(now())
+
+  suggestion    Suggestion @relation(fields: [suggestionId], references: [id], onDelete: Cascade)
+
+  @@unique([suggestionId, userId])
+  @@index([suggestionId])
+}
