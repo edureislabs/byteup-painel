@@ -7,7 +7,7 @@ interface TicketMessageTabProps {
   panel: any;
   setPanel: (panel: any) => void;
   savePanel: (updates: any) => Promise<void>;
-  saving: boolean;
+  saveStatus: "idle" | "saving" | "saved" | "error";
 }
 
 type ButtonStyle = "primary" | "secondary" | "success" | "danger";
@@ -42,12 +42,10 @@ interface MessageComponent {
   style?: ButtonStyle;
   customId?: string;
   disabled?: boolean;
-
   isLink?: boolean;
   linkType?: "url" | "channel";
   url?: string;
   channelId?: string;
-
   placeholder?: string;
   minValues?: number;
   maxValues?: number;
@@ -174,7 +172,7 @@ export default function TicketMessageTab({
   panel,
   setPanel,
   savePanel,
-  saving,
+  saveStatus,
 }: TicketMessageTabProps) {
   const embed = parseEmbed(panel?.ticketEmbedJson);
   const components = parseComponents(panel?.ticketComponentsJson);
@@ -182,6 +180,22 @@ export default function TicketMessageTab({
   const [channels, setChannels] = useState<DiscordChannel[]>([]);
   const [emojis, setEmojis] = useState<GuildEmoji[]>([]);
   const [loadingAssets, setLoadingAssets] = useState(false);
+
+  const buttonLabel =
+    saveStatus === "saving"
+      ? "Salvando..."
+      : saveStatus === "saved"
+      ? "Salvo"
+      : saveStatus === "error"
+      ? "Erro ao salvar"
+      : "Salvar mensagem do ticket";
+
+  const buttonClass =
+    saveStatus === "saved"
+      ? "bg-[#2b8a3e]"
+      : saveStatus === "error"
+      ? "bg-[#c92a2a]"
+      : "bg-[#C100FF] hover:bg-[#8A2BFF]";
 
   useEffect(() => {
     async function loadAssets() {
@@ -1204,10 +1218,10 @@ export default function TicketMessageTab({
           <button
             type="button"
             onClick={saveTicketMessage}
-            disabled={saving}
-            className="bg-[#C100FF] hover:bg-[#8A2BFF] text-white px-6 py-2 rounded-lg transition-colors disabled:opacity-50"
+            disabled={saveStatus === "saving"}
+            className={`${buttonClass} text-white px-6 py-2 rounded-lg transition-colors disabled:opacity-50`}
           >
-            {saving ? "Salvando..." : "Salvar mensagem do ticket"}
+            {buttonLabel}
           </button>
         </div>
 

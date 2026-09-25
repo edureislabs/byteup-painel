@@ -4,7 +4,7 @@ interface FormsTabProps {
   panel: any;
   setPanel: (panel: any) => void;
   savePanel: (updates: any) => Promise<void>;
-  saving: boolean;
+  saveStatus: "idle" | "saving" | "saved" | "error";
 }
 
 type FormFieldType = "short_text" | "paragraph" | "number";
@@ -57,9 +57,25 @@ export default function FormsTab({
   panel,
   setPanel,
   savePanel,
-  saving,
+  saveStatus,
 }: FormsTabProps) {
   const forms = parseForms(panel?.formsJson);
+
+  const buttonLabel =
+    saveStatus === "saving"
+      ? "Salvando..."
+      : saveStatus === "saved"
+      ? "Salvo"
+      : saveStatus === "error"
+      ? "Erro ao salvar"
+      : "Salvar formulário";
+
+  const buttonClass =
+    saveStatus === "saved"
+      ? "bg-[#2b8a3e]"
+      : saveStatus === "error"
+      ? "bg-[#c92a2a]"
+      : "bg-[#C100FF] hover:bg-[#8A2BFF]";
 
   const updateForms = (nextForms: FormsConfig) => {
     setPanel({
@@ -344,10 +360,10 @@ export default function FormsTab({
           <button
             type="button"
             onClick={saveForms}
-            disabled={saving}
-            className="rounded-lg bg-[#C100FF] px-6 py-2 text-white transition-colors hover:bg-[#8A2BFF] disabled:opacity-50"
+            disabled={saveStatus === "saving"}
+            className={`${buttonClass} text-white px-6 py-2 rounded-lg transition-colors disabled:opacity-50`}
           >
-            {saving ? "Salvando..." : "Salvar formulário"}
+            {buttonLabel}
           </button>
         </div>
 

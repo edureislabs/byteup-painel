@@ -4,7 +4,7 @@ interface ModeratorTabProps {
   panel: any;
   setPanel: (panel: any) => void;
   savePanel: (updates: any) => Promise<void>;
-  saving: boolean;
+  saveStatus: "idle" | "saving" | "saved" | "error";
 }
 
 interface ModeratorOptions {
@@ -39,50 +39,42 @@ const MODERATOR_OPTIONS: ModeratorOptionItem[] = [
   {
     key: "temporaryCall",
     title: "Call temporária",
-    description:
-      "Permite criar uma chamada temporária vinculada ao ticket.",
+    description: "Permite criar uma chamada temporária vinculada ao ticket.",
   },
   {
     key: "addMember",
     title: "Adicionar membro",
-    description:
-      "Permite adicionar outros usuários ao canal do ticket.",
+    description: "Permite adicionar outros usuários ao canal do ticket.",
   },
   {
     key: "removeMember",
     title: "Remover membro",
-    description:
-      "Permite remover usuários adicionados ao ticket.",
+    description: "Permite remover usuários adicionados ao ticket.",
   },
   {
     key: "renameTicket",
     title: "Renomear ticket",
-    description:
-      "Permite alterar o nome do canal do ticket.",
+    description: "Permite alterar o nome do canal do ticket.",
   },
   {
     key: "claimTicket",
     title: "Assumir ticket",
-    description:
-      "Permite que um membro da staff assuma o atendimento.",
+    description: "Permite que um membro da staff assuma o atendimento.",
   },
   {
     key: "closeTicket",
     title: "Fechar ticket",
-    description:
-      "Permite fechar o ticket pelo sistema.",
+    description: "Permite fechar o ticket pelo sistema.",
   },
   {
     key: "notifyStaff",
     title: "Notificar staff",
-    description:
-      "Notifica a equipe quando um ticket for aberto.",
+    description: "Notifica a equipe quando um ticket for aberto.",
   },
   {
     key: "notifyUser",
     title: "Notificar usuário",
-    description:
-      "Notifica o usuário sobre ações importantes do ticket.",
+    description: "Notifica o usuário sobre ações importantes do ticket.",
   },
 ];
 
@@ -105,9 +97,25 @@ export default function ModeratorTab({
   panel,
   setPanel,
   savePanel,
-  saving,
+  saveStatus,
 }: ModeratorTabProps) {
   const options = parseModeratorOptions(panel?.moderatorOptionsJson);
+
+  const buttonLabel =
+    saveStatus === "saving"
+      ? "Salvando..."
+      : saveStatus === "saved"
+      ? "Salvo"
+      : saveStatus === "error"
+      ? "Erro ao salvar"
+      : "Salvar";
+
+  const buttonClass =
+    saveStatus === "saved"
+      ? "bg-[#2b8a3e]"
+      : saveStatus === "error"
+      ? "bg-[#c92a2a]"
+      : "bg-[#C100FF] hover:bg-[#8A2BFF]";
 
   const updateOptions = (nextOptions: ModeratorOptions) => {
     setPanel({
@@ -183,9 +191,7 @@ export default function ModeratorTab({
       </div>
 
       <div className="rounded-xl border border-[#2b2b2b] bg-[#0e0e0e] p-5">
-        <h4 className="font-semibold text-white mb-2">
-          Observações
-        </h4>
+        <h4 className="font-semibold text-white mb-2">Observações</h4>
 
         <ul className="space-y-2 text-sm text-gray-400">
           <li>
@@ -198,10 +204,10 @@ export default function ModeratorTab({
       <button
         type="button"
         onClick={saveModeratorOptions}
-        disabled={saving}
-        className="bg-[#C100FF] hover:bg-[#8A2BFF] text-white px-6 py-2 rounded-lg transition-colors disabled:opacity-50"
+        disabled={saveStatus === "saving"}
+        className={`${buttonClass} text-white px-6 py-2 rounded-lg transition-colors disabled:opacity-50`}
       >
-        {saving ? "Salvando..." : "Salvar"}
+        {buttonLabel}
       </button>
     </div>
   );

@@ -3,7 +3,7 @@ interface TicketTabProps {
   setPanel: (panel: any) => void;
   categories: any[];
   savePanel: (updates: any) => Promise<void>;
-  saving: boolean;
+  saveStatus: "idle" | "saving" | "saved" | "error";
   onOpenMessages: () => void;
 }
 
@@ -12,10 +12,24 @@ export default function TicketTab({
   setPanel,
   categories,
   savePanel,
-  saving,
+  saveStatus,
   onOpenMessages,
 }: TicketTabProps) {
+  const buttonLabel =
+    saveStatus === "saving"
+      ? "Salvando..."
+      : saveStatus === "saved"
+      ? "Salvo"
+      : saveStatus === "error"
+      ? "Erro ao salvar"
+      : "Salvar";
 
+  const buttonClass =
+    saveStatus === "saved"
+      ? "bg-[#2b8a3e]"
+      : saveStatus === "error"
+      ? "bg-[#c92a2a]"
+      : "bg-[#C100FF] hover:bg-[#8A2BFF]";
 
   return (
     <div className="space-y-4">
@@ -135,10 +149,10 @@ export default function TicketTab({
             ticketChannelName: panel?.ticketChannelName || "ticket-{count}",
           })
         }
-        disabled={saving}
-        className="bg-[#C100FF] hover:bg-[#8A2BFF] text-white px-6 py-2 rounded-lg transition-colors disabled:opacity-50"
+        disabled={saveStatus === "saving"}
+        className={`${buttonClass} text-white px-6 py-2 rounded-lg transition-colors disabled:opacity-50`}
       >
-        {saving ? "Salvando..." : "Salvar"}
+        {buttonLabel}
       </button>
     </div>
   );

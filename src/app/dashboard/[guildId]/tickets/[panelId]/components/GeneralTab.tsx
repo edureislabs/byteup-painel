@@ -3,7 +3,7 @@ interface GeneralTabProps {
   setPanel: (panel: any) => void;
   channels: any[];
   savePanel: (updates: any) => Promise<void>;
-  saving: boolean;
+  saveStatus: "idle" | "saving" | "saved" | "error";
 }
 
 export default function GeneralTab({
@@ -11,8 +11,24 @@ export default function GeneralTab({
   setPanel,
   channels,
   savePanel,
-  saving,
+  saveStatus,
 }: GeneralTabProps) {
+  const buttonLabel =
+    saveStatus === "saving"
+      ? "Salvando..."
+      : saveStatus === "saved"
+      ? "Salvo"
+      : saveStatus === "error"
+      ? "Erro ao salvar"
+      : "Salvar";
+
+  const buttonClass =
+    saveStatus === "saved"
+      ? "bg-[#2b8a3e]"
+      : saveStatus === "error"
+      ? "bg-[#c92a2a]"
+      : "bg-[#C100FF] hover:bg-[#8A2BFF]";
+
   return (
     <div className="space-y-6">
       <h3 className="font-semibold text-lg">Configurações Gerais</h3>
@@ -37,7 +53,6 @@ export default function GeneralTab({
         />
       </div>
 
-    
       <div className="bg-[#0e0e0e] rounded-lg p-4">
         <div className="flex items-start justify-between">
           <div>
@@ -116,16 +131,16 @@ export default function GeneralTab({
       <button
         onClick={() =>
           savePanel({
-  name: panel?.name,
-  description: panel?.description,
-  closeInTwoSteps: panel?.closeInTwoSteps,
-  ticketPadding: panel?.ticketPadding,
-})
+            name: panel?.name,
+            description: panel?.description,
+            closeInTwoSteps: panel?.closeInTwoSteps,
+            ticketPadding: panel?.ticketPadding,
+          })
         }
-        disabled={saving}
-        className="bg-[#C100FF] hover:bg-[#8A2BFF] text-white px-6 py-2 rounded-lg transition-colors disabled:opacity-50"
+        disabled={saveStatus === "saving"}
+        className={`${buttonClass} text-white px-6 py-2 rounded-lg transition-colors disabled:opacity-50`}
       >
-        {saving ? "Salvando..." : "Salvar"}
+        {buttonLabel}
       </button>
     </div>
   );

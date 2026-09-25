@@ -6,7 +6,7 @@ interface MessagesConfigTabProps {
   panel: any;
   setPanel: (panel: any) => void;
   savePanel: (updates: any) => Promise<void>;
-  saving: boolean;
+  saveStatus: "idle" | "saving" | "saved" | "error";
 }
 
 type MessageMode = "text" | "embed";
@@ -74,7 +74,8 @@ const MESSAGE_GROUPS: MessageGroup[] = [
       {
         key: "invalidPanelChannel",
         label: "Canal do painel inválido",
-        description: "Quando o canal configurado para enviar o painel não é válido.",
+        description:
+          "Quando o canal configurado para enviar o painel não é válido.",
         defaultContent: "Canal do painel inválido.",
         defaultEmbedTitle: "Canal inválido",
         variables: ["{server}", "{panel}"],
@@ -85,7 +86,13 @@ const MESSAGE_GROUPS: MessageGroup[] = [
         description: "Resposta privada enviada quando o ticket é criado.",
         defaultContent: "Ticket criado com sucesso: {channel}",
         defaultEmbedTitle: "Ticket criado",
-        variables: ["{user}", "{username}", "{channel}", "{ticketId}", "{panel}"],
+        variables: [
+          "{user}",
+          "{username}",
+          "{channel}",
+          "{ticketId}",
+          "{panel}",
+        ],
       },
       {
         key: "ticketAlreadyOpen",
@@ -107,7 +114,8 @@ const MESSAGE_GROUPS: MessageGroup[] = [
         key: "roleBlocked",
         label: "Cargo bloqueado",
         description: "Quando o usuário possui um cargo bloqueado.",
-        defaultContent: "Você possui um cargo bloqueado para abrir tickets neste painel.",
+        defaultContent:
+          "Você possui um cargo bloqueado para abrir tickets neste painel.",
         defaultEmbedTitle: "Cargo bloqueado",
         variables: ["{user}", "{panel}"],
       },
@@ -123,15 +131,18 @@ const MESSAGE_GROUPS: MessageGroup[] = [
         key: "panelLimitReached",
         label: "Limite máximo do painel",
         description: "Quando o painel atingiu o máximo de tickets abertos.",
-        defaultContent: "Este painel atingiu o limite máximo de tickets abertos.",
+        defaultContent:
+          "Este painel atingiu o limite máximo de tickets abertos.",
         defaultEmbedTitle: "Painel cheio",
         variables: ["{panel}", "{limit}"],
       },
       {
         key: "cooldownActive",
         label: "Cooldown ativo",
-        description: "Quando o usuário precisa aguardar para abrir outro ticket.",
-        defaultContent: "Você precisa aguardar mais {cooldown} para abrir outro ticket neste painel.",
+        description:
+          "Quando o usuário precisa aguardar para abrir outro ticket.",
+        defaultContent:
+          "Você precisa aguardar mais {cooldown} para abrir outro ticket neste painel.",
         defaultEmbedTitle: "Aguarde um pouco",
         variables: ["{user}", "{cooldown}", "{panel}"],
       },
@@ -139,7 +150,8 @@ const MESSAGE_GROUPS: MessageGroup[] = [
         key: "dailyLimitReached",
         label: "Limite diário atingido",
         description: "Quando o usuário atingiu o limite diário de tickets.",
-        defaultContent: "Você atingiu o limite diário de {limit} ticket(s) neste painel.",
+        defaultContent:
+          "Você atingiu o limite diário de {limit} ticket(s) neste painel.",
         defaultEmbedTitle: "Limite diário atingido",
         variables: ["{user}", "{limit}", "{panel}"],
       },
@@ -168,8 +180,10 @@ const MESSAGE_GROUPS: MessageGroup[] = [
       {
         key: "ownerCannotClaim",
         label: "Dono não pode assumir",
-        description: "Quando o dono do ticket tenta assumir o próprio ticket.",
-        defaultContent: "O dono do ticket não pode assumir o próprio atendimento.",
+        description:
+          "Quando o dono do ticket tenta assumir o próprio ticket.",
+        defaultContent:
+          "O dono do ticket não pode assumir o próprio atendimento.",
         defaultEmbedTitle: "Ação não permitida",
         variables: ["{user}", "{ticketId}"],
       },
@@ -193,7 +207,8 @@ const MESSAGE_GROUPS: MessageGroup[] = [
         key: "memberNotInTicket",
         label: "Membro não está no ticket",
         description: "Quando tentam remover alguém que não está no ticket.",
-        defaultContent: "Esse usuário não está adicionado diretamente neste ticket.",
+        defaultContent:
+          "Esse usuário não está adicionado diretamente neste ticket.",
         defaultEmbedTitle: "Membro não encontrado",
         variables: ["{member}", "{ticketId}"],
       },
@@ -209,7 +224,8 @@ const MESSAGE_GROUPS: MessageGroup[] = [
         key: "ticketRenamed",
         label: "Ticket renomeado",
         description: "Quando o canal do ticket é renomeado.",
-        defaultContent: "Este ticket foi renomeado por {staff}: {oldName} → {newName}",
+        defaultContent:
+          "Este ticket foi renomeado por {staff}: {oldName} → {newName}",
         defaultEmbedTitle: "Ticket renomeado",
         variables: ["{staff}", "{oldName}", "{newName}", "{ticketId}"],
       },
@@ -217,7 +233,8 @@ const MESSAGE_GROUPS: MessageGroup[] = [
         key: "invalidTicketName",
         label: "Nome inválido",
         description: "Quando o novo nome do ticket é inválido.",
-        defaultContent: "Nome inválido. Tente usar letras, números, hífen ou underline.",
+        defaultContent:
+          "Nome inválido. Tente usar letras, números, hífen ou underline.",
         defaultEmbedTitle: "Nome inválido",
         variables: ["{staff}", "{ticketId}"],
       },
@@ -248,7 +265,8 @@ const MESSAGE_GROUPS: MessageGroup[] = [
         key: "ticketClosed",
         label: "Ticket fechado",
         description: "Mensagem enviada quando o ticket é fechado.",
-        defaultContent: "Ticket fechado. O canal será deletado em 5 segundos.",
+        defaultContent:
+          "Ticket fechado. O canal será deletado em 5 segundos.",
         defaultEmbedTitle: "Ticket fechado",
         variables: ["{user}", "{staff}", "{ticketId}"],
       },
@@ -263,7 +281,8 @@ const MESSAGE_GROUPS: MessageGroup[] = [
       {
         key: "inactiveClosed",
         label: "Fechado por inatividade",
-        description: "Quando o ticket é fechado automaticamente por inatividade.",
+        description:
+          "Quando o ticket é fechado automaticamente por inatividade.",
         defaultContent:
           "Este ticket foi fechado automaticamente por inatividade de {time}.",
         defaultEmbedTitle: "Ticket fechado por inatividade",
@@ -318,7 +337,8 @@ const MESSAGE_GROUPS: MessageGroup[] = [
       {
         key: "transcriptDm",
         label: "Transcript no privado",
-        description: "Mensagem enviada no privado do usuário com o transcript.",
+        description:
+          "Mensagem enviada no privado do usuário com o transcript.",
         defaultContent:
           "Seu ticket foi fechado. O transcript HTML do atendimento está anexado abaixo.",
         defaultEmbedTitle: "Transcript do ticket",
@@ -328,7 +348,8 @@ const MESSAGE_GROUPS: MessageGroup[] = [
         key: "transcriptLog",
         label: "Transcript no log",
         description: "Mensagem enviada no canal de logs com o transcript.",
-        defaultContent: "O transcript HTML do ticket está anexado nesta mensagem.",
+        defaultContent:
+          "O transcript HTML do ticket está anexado nesta mensagem.",
         defaultEmbedTitle: "Transcript do ticket",
         variables: ["{user}", "{staff}", "{ticketId}", "{panel}"],
       },
@@ -398,12 +419,28 @@ export default function MessagesConfigTab({
   panel,
   setPanel,
   savePanel,
-  saving,
+  saveStatus,
 }: MessagesConfigTabProps) {
   const parsedMessages = parseMessages(panel?.messagesJson);
   const [openKey, setOpenKey] = useState<string>(
     MESSAGE_GROUPS[0]?.items[0]?.key || ""
   );
+
+  const buttonLabel =
+    saveStatus === "saving"
+      ? "Salvando..."
+      : saveStatus === "saved"
+      ? "Salvo"
+      : saveStatus === "error"
+      ? "Erro ao salvar"
+      : "Salvar mensagens";
+
+  const buttonClass =
+    saveStatus === "saved"
+      ? "bg-[#2b8a3e]"
+      : saveStatus === "error"
+      ? "bg-[#c92a2a]"
+      : "bg-[#C100FF] hover:bg-[#8A2BFF]";
 
   const getMessage = (item: MessageItem): MessageConfig => {
     return {
@@ -423,7 +460,10 @@ export default function MessagesConfigTab({
     });
   };
 
-  const updateMessage = (item: MessageItem, updates: Partial<MessageConfig>) => {
+  const updateMessage = (
+    item: MessageItem,
+    updates: Partial<MessageConfig>
+  ) => {
     const current = getMessage(item);
 
     updateMessages({
@@ -524,7 +564,9 @@ export default function MessagesConfigTab({
               const previewEmbed = {
                 ...message.embed,
                 title: replacePreviewVariables(message.embed.title),
-                description: replacePreviewVariables(message.embed.description),
+                description: replacePreviewVariables(
+                  message.embed.description
+                ),
                 footerText: replacePreviewVariables(message.embed.footerText),
               };
 
@@ -707,7 +749,8 @@ export default function MessagesConfigTab({
                           <div
                             className="w-1 flex-shrink-0 rounded-full"
                             style={{
-                              backgroundColor: previewEmbed.color || "#C100FF",
+                              backgroundColor:
+                                previewEmbed.color || "#C100FF",
                             }}
                           />
 
@@ -770,10 +813,10 @@ export default function MessagesConfigTab({
       <button
         type="button"
         onClick={saveMessages}
-        disabled={saving}
-        className="rounded-lg bg-[#C100FF] px-6 py-2 text-white transition-colors hover:bg-[#8A2BFF] disabled:opacity-50"
+        disabled={saveStatus === "saving"}
+        className={`${buttonClass} text-white px-6 py-2 rounded-lg transition-colors disabled:opacity-50`}
       >
-        {saving ? "Salvando..." : "Salvar mensagens"}
+        {buttonLabel}
       </button>
     </div>
   );

@@ -13,13 +13,7 @@ import FormsTab from "./components/FormsTab";
 import LimitsTab from "./components/LimitsTab";
 import MessagesConfigTab from "./components/MessagesConfigTab";
 
-type ToastType = "success" | "error" | "info";
-
-type Toast = {
-  type: ToastType;
-  message: string;
-  id: number;
-};
+type SaveStatus = "idle" | "saving" | "saved" | "error";
 
 export default function EditPanelPage() {
   const params = useParams();
@@ -32,9 +26,8 @@ export default function EditPanelPage() {
   const [panel, setPanel] = useState<any>(null);
   const [channels, setChannels] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
-  const [toast, setToast] = useState<Toast | null>(null);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
 
   const tabs = [
     { id: "geral", label: "Geral" },
@@ -49,14 +42,17 @@ export default function EditPanelPage() {
   ];
 
   useEffect(() => {
-    if (!toast) return;
+    if (saveStatus !== "saved" && saveStatus !== "error") return;
 
-    const timeout = setTimeout(() => {
-      setToast(null);
-    }, 4000);
+    const timeout = setTimeout(
+      () => {
+        setSaveStatus("idle");
+      },
+      saveStatus === "saved" ? 2000 : 3000
+    );
 
     return () => clearTimeout(timeout);
-  }, [toast]);
+  }, [saveStatus]);
 
   useEffect(() => {
     async function loadPanel() {
@@ -96,7 +92,7 @@ export default function EditPanelPage() {
   }, [guildId, panelId]);
 
   const savePanel = async (updates: any) => {
-    setSaving(true);
+    setSaveStatus("saving");
 
     try {
       const res = await fetch(
@@ -117,21 +113,10 @@ export default function EditPanelPage() {
       }
 
       setPanel(data);
-      setToast({
-        type: "success",
-        message: "Salvo com sucesso!",
-        id: Date.now(),
-      });
+      setSaveStatus("saved");
     } catch (error) {
       console.error("Erro ao salvar painel:", error);
-      setToast({
-        type: "error",
-        message:
-          error instanceof Error ? error.message : "Erro ao salvar painel",
-        id: Date.now(),
-      });
-    } finally {
-      setSaving(false);
+      setSaveStatus("error");
     }
   };
 
@@ -185,7 +170,7 @@ export default function EditPanelPage() {
               setPanel={setPanel}
               channels={channels}
               savePanel={savePanel}
-              saving={saving}
+              saveStatus={saveStatus}
             />
           )}
 
@@ -195,7 +180,7 @@ export default function EditPanelPage() {
               setPanel={setPanel}
               categories={categories}
               savePanel={savePanel}
-              saving={saving}
+              saveStatus={saveStatus}
               onOpenMessages={() => setActiveTab("ticketMessage")}
             />
           )}
@@ -206,7 +191,7 @@ export default function EditPanelPage() {
               panel={panel}
               setPanel={setPanel}
               savePanel={savePanel}
-              saving={saving}
+              saveStatus={saveStatus}
             />
           )}
 
@@ -216,7 +201,7 @@ export default function EditPanelPage() {
               panel={panel}
               setPanel={setPanel}
               savePanel={savePanel}
-              saving={saving}
+              saveStatus={saveStatus}
             />
           )}
 
@@ -225,7 +210,7 @@ export default function EditPanelPage() {
               panel={panel}
               setPanel={setPanel}
               savePanel={savePanel}
-              saving={saving}
+              saveStatus={saveStatus}
             />
           )}
 
@@ -235,7 +220,7 @@ export default function EditPanelPage() {
               panel={panel}
               setPanel={setPanel}
               savePanel={savePanel}
-              saving={saving}
+              saveStatus={saveStatus}
             />
           )}
 
@@ -244,7 +229,7 @@ export default function EditPanelPage() {
               panel={panel}
               setPanel={setPanel}
               savePanel={savePanel}
-              saving={saving}
+              saveStatus={saveStatus}
             />
           )}
 
@@ -253,7 +238,7 @@ export default function EditPanelPage() {
               panel={panel}
               setPanel={setPanel}
               savePanel={savePanel}
-              saving={saving}
+              saveStatus={saveStatus}
             />
           )}
 
@@ -262,7 +247,7 @@ export default function EditPanelPage() {
               panel={panel}
               setPanel={setPanel}
               savePanel={savePanel}
-              saving={saving}
+              saveStatus={saveStatus}
             />
           )}
 
@@ -286,115 +271,6 @@ export default function EditPanelPage() {
           )}
         </div>
       </div>
-
-      {toast && <ToastView toast={toast} onClose={() => setToast(null)} />}
-    </div>
-  );
-}
-
-function ToastView({
-  toast,
-  onClose,
-}: {
-  toast: Toast;
-  onClose: () => void;
-}) {
-  const colors: Record<ToastType, { bg: string; border: string; text: string }> = {
-    success: {
-      bg: "#0f2a1a",
-      border: "#22c55e",
-      text: "#86efac",
-    },
-    error: {
-      bg: "#2a0f0f",
-      border: "#ef4444",
-      text: "#fca5a5",
-    },
-    info: {
-      bg: "#0f1a2a",
-      border: "#3b82f6",
-      text: "#93c5fd",
-    },
-  };
-
-  const c = colors[toast.type];
-
-  const icon =
-    toast.type === "success" ? "✓" : toast.type === "error" ? "✕" : "ℹ";
-
-  return (
-    <div
-      key={toast.id}
-      style={{
-        position: "fixed",
-        bottom: "24px",
-        right: "24px",
-        zIndex: 1000,
-        display: "flex",
-        alignItems: "center",
-        gap: "12px",
-        minWidth: "280px",
-        maxWidth: "420px",
-        padding: "14px 18px",
-        background: c.bg,
-        border: `1px solid ${c.border}40`,
-        borderLeft: `3px solid ${c.border}`,
-        borderRadius: "10px",
-        color: c.text,
-        fontFamily: "DM Sans, sans-serif",
-        fontSize: "14px",
-        boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
-        animation: "toast-slide-in 0.25s ease-out",
-      }}
-    >
-      <div
-        style={{
-          width: "22px",
-          height: "22px",
-          borderRadius: "50%",
-          background: `${c.border}30`,
-          border: `1px solid ${c.border}`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontWeight: 700,
-          fontSize: "12px",
-          flexShrink: 0,
-        }}
-      >
-        {icon}
-      </div>
-
-      <div style={{ flex: 1, lineHeight: 1.4 }}>{toast.message}</div>
-
-      <button
-        onClick={onClose}
-        style={{
-          background: "none",
-          border: "none",
-          color: c.text,
-          opacity: 0.6,
-          cursor: "pointer",
-          fontSize: "16px",
-          padding: 0,
-          lineHeight: 1,
-        }}
-      >
-        ×
-      </button>
-
-      <style jsx>{`
-        @keyframes toast-slide-in {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </div>
   );
 }

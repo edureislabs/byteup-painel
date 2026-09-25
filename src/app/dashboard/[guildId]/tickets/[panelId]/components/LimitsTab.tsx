@@ -4,7 +4,7 @@ interface LimitsTabProps {
   panel: any;
   setPanel: (panel: any) => void;
   savePanel: (updates: any) => Promise<void>;
-  saving: boolean;
+  saveStatus: "idle" | "saving" | "saved" | "error";
 }
 
 interface LimitsConfig {
@@ -44,9 +44,25 @@ export default function LimitsTab({
   panel,
   setPanel,
   savePanel,
-  saving,
+  saveStatus,
 }: LimitsTabProps) {
   const limits = parseLimits(panel?.limitsJson);
+
+  const buttonLabel =
+    saveStatus === "saving"
+      ? "Salvando..."
+      : saveStatus === "saved"
+      ? "Salvo"
+      : saveStatus === "error"
+      ? "Erro ao salvar"
+      : "Salvar limites";
+
+  const buttonClass =
+    saveStatus === "saved"
+      ? "bg-[#2b8a3e]"
+      : saveStatus === "error"
+      ? "bg-[#c92a2a]"
+      : "bg-[#C100FF] hover:bg-[#8A2BFF]";
 
   const updateLimits = (nextLimits: LimitsConfig) => {
     setPanel({
@@ -267,10 +283,10 @@ export default function LimitsTab({
       <button
         type="button"
         onClick={saveLimits}
-        disabled={saving}
-        className="rounded-lg bg-[#C100FF] px-6 py-2 text-white transition-colors hover:bg-[#8A2BFF] disabled:opacity-50"
+        disabled={saveStatus === "saving"}
+        className={`${buttonClass} text-white px-6 py-2 rounded-lg transition-colors disabled:opacity-50`}
       >
-        {saving ? "Salvando..." : "Salvar limites"}
+        {buttonLabel}
       </button>
     </div>
   );
