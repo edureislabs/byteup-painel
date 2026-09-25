@@ -9,8 +9,6 @@ interface LimitsTabProps {
 
 interface LimitsConfig {
   cooldownSeconds: number;
-  inactivityCloseEnabled: boolean;
-  inactivityCloseMinutes: number;
   userDailyLimitEnabled: boolean;
   userDailyLimit: number;
   blockIfAlreadyOpen: boolean;
@@ -18,8 +16,6 @@ interface LimitsConfig {
 
 const DEFAULT_LIMITS: LimitsConfig = {
   cooldownSeconds: 0,
-  inactivityCloseEnabled: false,
-  inactivityCloseMinutes: 60,
   userDailyLimitEnabled: false,
   userDailyLimit: 3,
   blockIfAlreadyOpen: true,
@@ -72,10 +68,7 @@ export default function LimitsTab({
   };
 
   const toggleLimit = (
-    field:
-      | "inactivityCloseEnabled"
-      | "userDailyLimitEnabled"
-      | "blockIfAlreadyOpen"
+    field: "userDailyLimitEnabled" | "blockIfAlreadyOpen"
   ) => {
     updateLimits({
       ...limits,
@@ -139,7 +132,7 @@ export default function LimitsTab({
       <div>
         <h3 className="text-lg font-semibold">Limites</h3>
         <p className="mt-1 text-sm text-gray-400">
-          Configure limites de abertura, cooldown e fechamento automático.
+          Configure limites de abertura e cooldown dos tickets.
         </p>
       </div>
 
@@ -215,7 +208,7 @@ export default function LimitsTab({
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <ToggleCard
           title="Bloquear se já tiver ticket aberto"
           description="Impede o usuário de abrir um novo ticket enquanto já tiver outro aberto."
@@ -228,13 +221,6 @@ export default function LimitsTab({
           description="Define uma quantidade máxima de tickets por usuário em um dia."
           enabled={limits.userDailyLimitEnabled}
           onToggle={() => toggleLimit("userDailyLimitEnabled")}
-        />
-
-        <ToggleCard
-          title="Fechar por inatividade"
-          description="Fecha automaticamente tickets sem movimentação após determinado tempo."
-          enabled={limits.inactivityCloseEnabled}
-          onToggle={() => toggleLimit("inactivityCloseEnabled")}
         />
       </div>
 
@@ -252,27 +238,6 @@ export default function LimitsTab({
               updateLimits({
                 ...limits,
                 userDailyLimit: Number(e.target.value),
-              })
-            }
-            className="w-full rounded-lg border border-[#2b2b2b] bg-[#111111] px-3 py-2 text-white focus:border-[#C100FF] focus:outline-none"
-          />
-        </div>
-      )}
-
-      {limits.inactivityCloseEnabled && (
-        <div className="rounded-xl border border-[#2b2b2b] bg-[#0e0e0e] p-5">
-          <label className="mb-2 block text-sm font-semibold text-white">
-            Minutos de inatividade
-          </label>
-
-          <input
-            type="number"
-            min={1}
-            value={limits.inactivityCloseMinutes}
-            onChange={(e) =>
-              updateLimits({
-                ...limits,
-                inactivityCloseMinutes: Number(e.target.value),
               })
             }
             className="w-full rounded-lg border border-[#2b2b2b] bg-[#111111] px-3 py-2 text-white focus:border-[#C100FF] focus:outline-none"
