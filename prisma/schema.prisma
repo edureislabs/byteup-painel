@@ -136,6 +136,7 @@ model EconomyUser {
   currency   Currency @relation(fields: [currencyId], references: [id])
   balance    Int      @default(0)
   bank       Int      @default(0)
+  lastDaily  DateTime?
 
   @@unique([guildId, userId, currencyId])
 }

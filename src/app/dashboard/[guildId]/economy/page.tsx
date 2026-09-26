@@ -47,10 +47,12 @@ export default function EconomyPage({ params }: Props) {
   const [sortBy, setSortBy] = useState<'balance' | 'bank' | 'total'>('total');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [searchTerm, setSearchTerm] = useState('');
-  useEffect(() => {
+useEffect(() => {
   fetch(`/api/guilds/${guildId}/economy/transactions`)
     .then(res => res.json())
-    .then(data => { if (Array.isArray(data)) setTransactions(data); });
+    .then(data => {
+      if (Array.isArray(data.transactions)) setTransactions(data.transactions);
+    });
 }, [guildId]);
 
   useEffect(() => {
@@ -78,7 +80,7 @@ export default function EconomyPage({ params }: Props) {
   const fetchUsers = async () => {
     const res = await fetch(`/api/guilds/${guildId}/economy/users`);
     const data = await res.json();
-    if (Array.isArray(data)) setUsers(data);
+if (Array.isArray(data.users)) setUsers(data.users);
   };
 
   const addCurrency = async () => {
@@ -321,10 +323,12 @@ export default function EconomyPage({ params }: Props) {
             <td style={{ padding: '12px 16px', color: tx.result === 'win' ? '#23a55a' : '#ed4245', fontWeight: 500 }}>
               {tx.result === 'win' ? 'Venceu' : 'Perdeu'}
             </td>
-            <td style={{ padding: '12px 16px', textAlign: 'right' }}>{tx.bet.toLocaleString()}</td>
-            <td style={{ padding: '12px 16px', textAlign: 'right', color: tx.reward > 0 ? '#23a55a' : '#72767d' }}>
-              {tx.reward > 0 ? `+${tx.reward.toLocaleString()}` : '0'}
-            </td>
+            <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+  {tx.currency?.symbol || '$'}{tx.bet.toLocaleString()}
+</td>
+<td style={{ padding: '12px 16px', textAlign: 'right', color: tx.reward > 0 ? '#23a55a' : '#72767d' }}>
+  {tx.reward > 0 ? `+${tx.currency?.symbol || '$'}${tx.reward.toLocaleString()}` : `${tx.currency?.symbol || '$'}0`}
+</td>
           </tr>
         ))}
       </tbody>
