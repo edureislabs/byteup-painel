@@ -37,9 +37,14 @@ const DEFAULT_OPTIONS: ModeratorOptions = {
 
 const MODERATOR_OPTIONS: ModeratorOptionItem[] = [
   {
-    key: "temporaryCall",
-    title: "Call temporária",
-    description: "Permite criar uma chamada temporária vinculada ao ticket.",
+    key: "closeTicket",
+    title: "Fechar ticket",
+    description: "Permite fechar o ticket pelo sistema.",
+  },
+  {
+    key: "claimTicket",
+    title: "Assumir ticket",
+    description: "Permite que um membro da staff assuma o atendimento.",
   },
   {
     key: "addMember",
@@ -57,14 +62,9 @@ const MODERATOR_OPTIONS: ModeratorOptionItem[] = [
     description: "Permite alterar o nome do canal do ticket.",
   },
   {
-    key: "claimTicket",
-    title: "Assumir ticket",
-    description: "Permite que um membro da staff assuma o atendimento.",
-  },
-  {
-    key: "closeTicket",
-    title: "Fechar ticket",
-    description: "Permite fechar o ticket pelo sistema.",
+    key: "temporaryCall",
+    title: "Call temporária",
+    description: "Permite criar uma chamada temporária vinculada ao ticket.",
   },
   {
     key: "notifyStaff",
@@ -142,8 +142,9 @@ export default function ModeratorTab({
       <div>
         <h3 className="font-semibold text-lg">Configurações do Moderador</h3>
         <p className="text-sm text-gray-400 mt-1">
-          Controle quais ações e automações estarão disponíveis dentro dos
-          tickets.
+          Ative ou desative os botões que aparecem dentro do canal do ticket.
+          Para personalizar emoji, texto e estilo, use a aba{" "}
+          <strong className="text-[#C100FF]">Botões do Ticket</strong>.
         </p>
       </div>
 
@@ -188,17 +189,6 @@ export default function ModeratorTab({
             </div>
           );
         })}
-      </div>
-
-      <div className="rounded-xl border border-[#2b2b2b] bg-[#0e0e0e] p-5">
-        <h4 className="font-semibold text-white mb-2">Observações</h4>
-
-        <ul className="space-y-2 text-sm text-gray-400">
-          <li>
-            • Transcript e avaliação não ficam aqui, porque serão enviados
-            automaticamente no fechamento do ticket.
-          </li>
-        </ul>
       </div>
 
       <button

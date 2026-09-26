@@ -60,48 +60,43 @@ export async function PUT(
   const body = await request.json();
 
   const allowedFields = [
-    "name",
-    "description",
-    "categoryId",
-    "channelId",
-    "sendType",
+  "name",
+  "description",
+  "categoryId",
+  "channelId",
+  "sendType",
 
-    // Painel público enviado no canal de suporte
-    "openMessage",
-    "embedJson",
-    "componentsJson",
+  "openMessage",
+  "embedJson",
+  "componentsJson",
 
-    // Mensagem enviada dentro do canal criado do ticket
-    "ticketMessage",
-    "ticketEmbedJson",
-    "ticketComponentsJson",
+  "ticketMessage",
+  "ticketEmbedJson",
+  "ticketComponentsJson",
+  "ticketButtonsJson",   // ← ADICIONA AQUI
 
-    // Mensagens auxiliares
-    "closeMessage",
+  "closeMessage",
 
-    // Configurações de cargos/permissões
-    "staffRoles",
-    "addRolesOnOpen",
-    "removeRolesOnOpen",
+  "staffRoles",
+  "addRolesOnOpen",
+  "removeRolesOnOpen",
 
-    // Compatibilidade antiga
-    "buttonsJson",
+  "buttonsJson",
 
-"permissionsJson",
-"formsJson",
-"limitsJson",
-"messagesJson",
-    // Configurações gerais do ticket
-    "ticketChannelName",
-    "maxTickets",
-    "ticketLimit",
-    "enabled",
-    "closeInTwoSteps",
-    "ticketPadding",
+  "permissionsJson",
+  "formsJson",
+  "limitsJson",
+  "messagesJson",
 
-    // Configurações da aba moderador
-    "moderatorOptionsJson",
-  ];
+  "ticketChannelName",
+  "maxTickets",
+  "ticketLimit",
+  "enabled",
+  "closeInTwoSteps",
+  "ticketPadding",
+
+  "moderatorOptionsJson",
+];
 
   const updateData: any = {};
 

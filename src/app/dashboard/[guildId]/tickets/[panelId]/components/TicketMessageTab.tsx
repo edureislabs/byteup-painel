@@ -10,8 +10,6 @@ interface TicketMessageTabProps {
   saveStatus: "idle" | "saving" | "saved" | "error";
 }
 
-type ButtonStyle = "primary" | "secondary" | "success" | "danger";
-
 interface EmbedConfig {
   enabled: boolean;
   color: string;
@@ -24,38 +22,6 @@ interface EmbedConfig {
   footerText: string;
   footerIconUrl: string;
   timestamp: boolean;
-}
-
-interface SelectOption {
-  id: string;
-  label: string;
-  value: string;
-  description: string;
-  emoji: string;
-}
-
-interface MessageComponent {
-  id: string;
-  type: "button" | "select";
-  label?: string;
-  emoji?: string;
-  style?: ButtonStyle;
-  customId?: string;
-  disabled?: boolean;
-  isLink?: boolean;
-  linkType?: "url" | "channel";
-  url?: string;
-  channelId?: string;
-  placeholder?: string;
-  minValues?: number;
-  maxValues?: number;
-  options?: SelectOption[];
-}
-
-interface DiscordChannel {
-  id: string;
-  name: string;
-  type?: number;
 }
 
 interface GuildEmoji {
@@ -144,29 +110,6 @@ function parseEmbed(embedJson: any): EmbedConfig {
   }
 }
 
-function parseComponents(componentsJson: any): MessageComponent[] {
-  if (!componentsJson) return [];
-
-  try {
-    const parsed =
-      typeof componentsJson === "string"
-        ? JSON.parse(componentsJson)
-        : componentsJson;
-
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-function getButtonPreviewClass(style?: ButtonStyle) {
-  if (style === "secondary") return "bg-[#4e5058] text-white";
-  if (style === "success") return "bg-[#248046] text-white";
-  if (style === "danger") return "bg-[#da373c] text-white";
-
-  return "bg-[#5865F2] text-white";
-}
-
 export default function TicketMessageTab({
   guildId,
   panel,
@@ -175,9 +118,7 @@ export default function TicketMessageTab({
   saveStatus,
 }: TicketMessageTabProps) {
   const embed = parseEmbed(panel?.ticketEmbedJson);
-  const components = parseComponents(panel?.ticketComponentsJson);
 
-  const [channels, setChannels] = useState<DiscordChannel[]>([]);
   const [emojis, setEmojis] = useState<GuildEmoji[]>([]);
   const [loadingAssets, setLoadingAssets] = useState(false);
 
@@ -198,36 +139,26 @@ export default function TicketMessageTab({
       : "bg-[#C100FF] hover:bg-[#8A2BFF]";
 
   useEffect(() => {
-    async function loadAssets() {
+    async function loadEmojis() {
       try {
         setLoadingAssets(true);
 
-        const [channelsRes, emojisRes] = await Promise.all([
-          fetch(`/api/guilds/${guildId}/channels`, {
-            credentials: "include",
-          }),
-          fetch(`/api/guilds/${guildId}/emojis`, {
-            credentials: "include",
-          }),
-        ]);
+        const res = await fetch(`/api/guilds/${guildId}/emojis`, {
+          credentials: "include",
+        });
 
-        if (channelsRes.ok) {
-          const channelsData = await channelsRes.json();
-          setChannels(Array.isArray(channelsData) ? channelsData : []);
-        }
-
-        if (emojisRes.ok) {
-          const emojisData = await emojisRes.json();
-          setEmojis(Array.isArray(emojisData) ? emojisData : []);
+        if (res.ok) {
+          const data = await res.json();
+          setEmojis(Array.isArray(data) ? data : []);
         }
       } catch (error) {
-        console.error("Erro ao buscar canais/emojis:", error);
+        console.error("Erro ao buscar emojis:", error);
       } finally {
         setLoadingAssets(false);
       }
     }
 
-    loadAssets();
+    loadEmojis();
   }, [guildId]);
 
   const updatePanel = (updates: any) => {
@@ -243,12 +174,6 @@ export default function TicketMessageTab({
         ...embed,
         ...updates,
       },
-    });
-  };
-
-  const updateComponents = (nextComponents: MessageComponent[]) => {
-    updatePanel({
-      ticketComponentsJson: nextComponents,
     });
   };
 
@@ -270,138 +195,10 @@ export default function TicketMessageTab({
     });
   };
 
-  const setButtonEmoji = (componentId: string, emoji: GuildEmoji) => {
-    updateComponent(componentId, {
-      emoji: formatGuildEmoji(emoji),
-    });
-  };
-
-  const getChannelUrl = (channelId?: string) => {
-    if (!channelId) return "";
-    return `https://discord.com/channels/${guildId}/${channelId}`;
-  };
-
-  const addButton = () => {
-    updateComponents([
-      ...components,
-      {
-        id: Date.now().toString(),
-        type: "button",
-        label: "Fechar ticket",
-        emoji: "🔒",
-        style: "danger",
-        customId: `ticket_close_${Date.now()}`,
-        disabled: false,
-        isLink: false,
-        linkType: "url",
-        url: "",
-        channelId: "",
-      },
-    ]);
-  };
-
-  const addSelect = () => {
-    updateComponents([
-      ...components,
-      {
-        id: Date.now().toString(),
-        type: "select",
-        placeholder: "Selecione uma ação",
-        customId: `ticket_action_${Date.now()}`,
-        minValues: 1,
-        maxValues: 1,
-        options: [
-          {
-            id: Date.now().toString(),
-            label: "Chamar staff",
-            value: "call_staff",
-            description: "Notificar equipe sobre este ticket",
-            emoji: "📢",
-          },
-        ],
-      },
-    ]);
-  };
-
-  const updateComponent = (id: string, updates: Partial<MessageComponent>) => {
-    updateComponents(
-      components.map((component) =>
-        component.id === id ? { ...component, ...updates } : component
-      )
-    );
-  };
-
-  const removeComponent = (id: string) => {
-    updateComponents(components.filter((component) => component.id !== id));
-  };
-
-  const addSelectOption = (componentId: string) => {
-    updateComponents(
-      components.map((component) => {
-        if (component.id !== componentId || component.type !== "select") {
-          return component;
-        }
-
-        return {
-          ...component,
-          options: [
-            ...(component.options || []),
-            {
-              id: Date.now().toString(),
-              label: "Nova opção",
-              value: `opcao_${Date.now()}`,
-              description: "",
-              emoji: "🎫",
-            },
-          ],
-        };
-      })
-    );
-  };
-
-  const updateSelectOption = (
-    componentId: string,
-    optionId: string,
-    updates: Partial<SelectOption>
-  ) => {
-    updateComponents(
-      components.map((component) => {
-        if (component.id !== componentId || component.type !== "select") {
-          return component;
-        }
-
-        return {
-          ...component,
-          options: (component.options || []).map((option) =>
-            option.id === optionId ? { ...option, ...updates } : option
-          ),
-        };
-      })
-    );
-  };
-
-  const removeSelectOption = (componentId: string, optionId: string) => {
-    updateComponents(
-      components.map((component) => {
-        if (component.id !== componentId || component.type !== "select") {
-          return component;
-        }
-
-        return {
-          ...component,
-          options: (component.options || []).filter(
-            (option) => option.id !== optionId
-          ),
-        };
-      })
-    );
-  };
-
   const saveTicketMessage = () => {
     savePanel({
       ticketMessage: panel?.ticketMessage || "",
       ticketEmbedJson: embed,
-      ticketComponentsJson: components,
     });
   };
 
@@ -410,7 +207,9 @@ export default function TicketMessageTab({
       <div>
         <h3 className="font-semibold text-lg">Mensagem do Ticket</h3>
         <p className="text-sm text-gray-400 mt-1">
-          Configure a mensagem enviada dentro do canal criado do ticket.
+          Configure a mensagem e o embed enviados dentro do canal criado do
+          ticket. Para configurar os botões, use a aba{" "}
+          <strong className="text-[#C100FF]">Botões do Ticket</strong>.
         </p>
       </div>
 
@@ -668,553 +467,6 @@ export default function TicketMessageTab({
             )}
           </div>
 
-          <div className="bg-[#0e0e0e] rounded-xl p-5 border border-[#2b2b2b]">
-            <div className="flex items-center justify-between gap-4 mb-4">
-              <div>
-                <h4 className="font-semibold text-white">
-                  Componentes internos
-                </h4>
-                <p className="text-xs text-gray-400 mt-1">
-                  Botões e selects exibidos dentro do canal do ticket.
-                </p>
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={addButton}
-                  className="bg-[#C100FF] hover:bg-[#8A2BFF] text-white text-xs px-3 py-2 rounded-lg transition-colors"
-                >
-                  + Botão
-                </button>
-
-                <button
-                  type="button"
-                  onClick={addSelect}
-                  className="bg-[#2b2b2b] hover:bg-[#3b3b3b] text-white text-xs px-3 py-2 rounded-lg transition-colors"
-                >
-                  + Select
-                </button>
-              </div>
-            </div>
-
-            {components.length === 0 ? (
-              <div className="text-center text-gray-500 py-8 border border-dashed border-[#2b2b2b] rounded-lg">
-                <p>Nenhum componente interno criado</p>
-                <p className="text-xs mt-1">
-                  Adicione botões ou menus de seleção para o ticket.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {components.map((component, index) => (
-                  <div
-                    key={component.id}
-                    className="bg-[#111111] rounded-lg p-4 border border-[#2b2b2b]"
-                  >
-                    <div className="flex items-center justify-between mb-4">
-                      <h5 className="font-semibold text-sm text-white">
-                        {component.type === "button"
-                          ? `Botão ${index + 1}`
-                          : `Select ${index + 1}`}
-                      </h5>
-
-                      <button
-                        type="button"
-                        onClick={() => removeComponent(component.id)}
-                        className="text-xs text-red-400 hover:text-red-300 transition-colors"
-                      >
-                        Remover
-                      </button>
-                    </div>
-
-                    {component.type === "button" && (
-                      <div className="space-y-3">
-                        <div className="grid grid-cols-1 gap-3">
-                          <div>
-                            <label className="block text-xs text-gray-400 mb-1">
-                              Emoji
-                            </label>
-
-                            <input
-                              type="text"
-                              value={component.emoji || ""}
-                              onChange={(e) =>
-                                updateComponent(component.id, {
-                                  emoji: e.target.value,
-                                })
-                              }
-                              placeholder="🔒 ou <:emoji:id>"
-                              className="w-full bg-[#0e0e0e] border border-[#2b2b2b] text-white rounded-lg px-3 py-2 focus:outline-none focus:border-[#C100FF]"
-                            />
-
-                            <div className="mt-2">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs text-gray-500">
-                                  Emojis do servidor
-                                </span>
-
-                                {loadingAssets && (
-                                  <span className="text-xs text-gray-500">
-                                    Carregando...
-                                  </span>
-                                )}
-                              </div>
-
-                              {emojis.length === 0 ? (
-                                <p className="text-xs text-gray-500">
-                                  Nenhum emoji encontrado.
-                                </p>
-                              ) : (
-                                <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto rounded-lg border border-[#2b2b2b] bg-[#111111] p-2">
-                                  {emojis.map((emoji) => (
-                                    <button
-                                      key={emoji.id}
-                                      type="button"
-                                      onClick={() =>
-                                        setButtonEmoji(component.id, emoji)
-                                      }
-                                      title={`:${emoji.name}:`}
-                                      className="flex h-8 w-8 items-center justify-center rounded-md border border-[#2b2b2b] bg-[#0e0e0e] transition-colors hover:border-[#C100FF] hover:bg-[#171017]"
-                                    >
-                                      <img
-                                        src={getGuildEmojiUrl(emoji)}
-                                        alt={`:${emoji.name}:`}
-                                        className="h-5 w-5 object-contain"
-                                        loading="lazy"
-                                      />
-                                    </button>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          <div>
-                            <label className="block text-xs text-gray-400 mb-1">
-                              Texto
-                            </label>
-                            <input
-                              type="text"
-                              value={component.label || ""}
-                              onChange={(e) =>
-                                updateComponent(component.id, {
-                                  label: e.target.value,
-                                })
-                              }
-                              className="w-full bg-[#0e0e0e] border border-[#2b2b2b] text-white rounded-lg px-3 py-2 focus:outline-none focus:border-[#C100FF]"
-                            />
-                          </div>
-                        </div>
-
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={component.isLink || false}
-                            onChange={(e) =>
-                              updateComponent(component.id, {
-                                isLink: e.target.checked,
-                                linkType: e.target.checked ? "url" : "url",
-                                url: e.target.checked
-                                  ? component.url || ""
-                                  : "",
-                                channelId: e.target.checked
-                                  ? component.channelId || ""
-                                  : "",
-                              })
-                            }
-                            className="rounded"
-                          />
-                          <span className="text-sm text-gray-300">
-                            Este botão redireciona para link/canal
-                          </span>
-                        </label>
-
-                        {component.isLink ? (
-                          <div className="space-y-3 rounded-lg border border-[#2b2b2b] bg-[#0e0e0e] p-3">
-                            <div>
-                              <label className="block text-xs text-gray-400 mb-1">
-                                Tipo de destino
-                              </label>
-
-                              <select
-                                value={component.linkType || "url"}
-                                onChange={(e) =>
-                                  updateComponent(component.id, {
-                                    linkType: e.target.value as
-                                      | "url"
-                                      | "channel",
-                                    url: "",
-                                    channelId: "",
-                                  })
-                                }
-                                className="w-full bg-[#111111] border border-[#2b2b2b] text-white rounded-lg px-3 py-2 focus:outline-none focus:border-[#C100FF]"
-                              >
-                                <option value="url">URL externa</option>
-                                <option value="channel">
-                                  Canal do Discord
-                                </option>
-                              </select>
-                            </div>
-
-                            {component.linkType === "channel" ? (
-                              <div>
-                                <label className="block text-xs text-gray-400 mb-1">
-                                  Canal
-                                </label>
-
-                                <select
-                                  value={component.channelId || ""}
-                                  onChange={(e) =>
-                                    updateComponent(component.id, {
-                                      channelId: e.target.value,
-                                      url: getChannelUrl(e.target.value),
-                                    })
-                                  }
-                                  className="w-full bg-[#111111] border border-[#2b2b2b] text-white rounded-lg px-3 py-2 focus:outline-none focus:border-[#C100FF]"
-                                >
-                                  <option value="">
-                                    — Selecione um canal —
-                                  </option>
-
-                                  {channels.map((channel) => (
-                                    <option
-                                      key={channel.id}
-                                      value={channel.id}
-                                    >
-                                      #{channel.name}
-                                    </option>
-                                  ))}
-                                </select>
-
-                                {component.channelId && (
-                                  <p className="text-xs text-gray-500 mt-1">
-                                    URL gerada:{" "}
-                                    {getChannelUrl(component.channelId)}
-                                  </p>
-                                )}
-                              </div>
-                            ) : (
-                              <div>
-                                <label className="block text-xs text-gray-400 mb-1">
-                                  URL
-                                </label>
-
-                                <input
-                                  type="url"
-                                  value={component.url || ""}
-                                  onChange={(e) =>
-                                    updateComponent(component.id, {
-                                      url: e.target.value,
-                                    })
-                                  }
-                                  placeholder="https://exemplo.com"
-                                  className="w-full bg-[#111111] border border-[#2b2b2b] text-white rounded-lg px-3 py-2 focus:outline-none focus:border-[#C100FF]"
-                                />
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div>
-                            <label className="block text-xs text-gray-400 mb-1">
-                              Custom ID
-                            </label>
-                            <input
-                              type="text"
-                              value={component.customId || ""}
-                              onChange={(e) =>
-                                updateComponent(component.id, {
-                                  customId: e.target.value,
-                                })
-                              }
-                              className="w-full bg-[#0e0e0e] border border-[#2b2b2b] text-white rounded-lg px-3 py-2 focus:outline-none focus:border-[#C100FF]"
-                            />
-                          </div>
-                        )}
-
-                        {!component.isLink && (
-                          <div>
-                            <label className="block text-xs text-gray-400 mb-1">
-                              Estilo
-                            </label>
-                            <select
-                              value={component.style || "primary"}
-                              onChange={(e) =>
-                                updateComponent(component.id, {
-                                  style: e.target.value as ButtonStyle,
-                                })
-                              }
-                              className="w-full bg-[#0e0e0e] border border-[#2b2b2b] text-white rounded-lg px-3 py-2 focus:outline-none focus:border-[#C100FF]"
-                            >
-                              <option value="primary">Azul / Principal</option>
-                              <option value="secondary">Cinza</option>
-                              <option value="success">Verde</option>
-                              <option value="danger">Vermelho</option>
-                            </select>
-                          </div>
-                        )}
-
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={component.disabled || false}
-                            onChange={(e) =>
-                              updateComponent(component.id, {
-                                disabled: e.target.checked,
-                              })
-                            }
-                            className="rounded"
-                          />
-                          <span className="text-xs text-gray-400">
-                            Desabilitado
-                          </span>
-                        </label>
-                      </div>
-                    )}
-
-                    {component.type === "select" && (
-                      <div className="space-y-3">
-                        <div>
-                          <label className="block text-xs text-gray-400 mb-1">
-                            Placeholder
-                          </label>
-                          <input
-                            type="text"
-                            value={component.placeholder || ""}
-                            onChange={(e) =>
-                              updateComponent(component.id, {
-                                placeholder: e.target.value,
-                              })
-                            }
-                            className="w-full bg-[#0e0e0e] border border-[#2b2b2b] text-white rounded-lg px-3 py-2 focus:outline-none focus:border-[#C100FF]"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs text-gray-400 mb-1">
-                            Custom ID
-                          </label>
-                          <input
-                            type="text"
-                            value={component.customId || ""}
-                            onChange={(e) =>
-                              updateComponent(component.id, {
-                                customId: e.target.value,
-                              })
-                            }
-                            className="w-full bg-[#0e0e0e] border border-[#2b2b2b] text-white rounded-lg px-3 py-2 focus:outline-none focus:border-[#C100FF]"
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-xs text-gray-400 mb-1">
-                              Mínimo
-                            </label>
-                            <input
-                              type="number"
-                              min={0}
-                              max={25}
-                              value={component.minValues ?? 1}
-                              onChange={(e) =>
-                                updateComponent(component.id, {
-                                  minValues: Number(e.target.value),
-                                })
-                              }
-                              className="w-full bg-[#0e0e0e] border border-[#2b2b2b] text-white rounded-lg px-3 py-2 focus:outline-none focus:border-[#C100FF]"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-xs text-gray-400 mb-1">
-                              Máximo
-                            </label>
-                            <input
-                              type="number"
-                              min={1}
-                              max={25}
-                              value={component.maxValues ?? 1}
-                              onChange={(e) =>
-                                updateComponent(component.id, {
-                                  maxValues: Number(e.target.value),
-                                })
-                              }
-                              className="w-full bg-[#0e0e0e] border border-[#2b2b2b] text-white rounded-lg px-3 py-2 focus:outline-none focus:border-[#C100FF]"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="pt-3 border-t border-[#2b2b2b]">
-                          <div className="flex items-center justify-between mb-3">
-                            <span className="text-sm font-semibold text-white">
-                              Opções
-                            </span>
-
-                            <button
-                              type="button"
-                              onClick={() => addSelectOption(component.id)}
-                              className="text-xs bg-[#C100FF] hover:bg-[#8A2BFF] text-white px-3 py-1.5 rounded-lg transition-colors"
-                            >
-                              + Opção
-                            </button>
-                          </div>
-
-                          <div className="space-y-3">
-                            {(component.options || []).map((option) => (
-                              <div
-                                key={option.id}
-                                className="bg-[#0e0e0e] rounded-lg p-3 border border-[#2b2b2b]"
-                              >
-                                <div className="flex justify-between gap-3 mb-3">
-                                  <span className="text-xs text-gray-400">
-                                    Opção
-                                  </span>
-
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      removeSelectOption(
-                                        component.id,
-                                        option.id
-                                      )
-                                    }
-                                    className="text-xs text-red-400 hover:text-red-300"
-                                  >
-                                    Remover
-                                  </button>
-                                </div>
-
-                                <div className="grid grid-cols-1 gap-3">
-                                  <div>
-                                    <label className="block text-xs text-gray-400 mb-1">
-                                      Emoji
-                                    </label>
-
-                                    <input
-                                      type="text"
-                                      value={option.emoji}
-                                      onChange={(e) =>
-                                        updateSelectOption(
-                                          component.id,
-                                          option.id,
-                                          {
-                                            emoji: e.target.value,
-                                          }
-                                        )
-                                      }
-                                      placeholder="🎫 ou <:emoji:id>"
-                                      className="w-full bg-[#111111] border border-[#2b2b2b] text-white rounded-lg px-3 py-2 focus:outline-none focus:border-[#C100FF]"
-                                    />
-
-                                    <div className="mt-2">
-                                      <div className="flex items-center justify-between mb-2">
-                                        <span className="text-xs text-gray-500">
-                                          Emojis do servidor
-                                        </span>
-
-                                        {loadingAssets && (
-                                          <span className="text-xs text-gray-500">
-                                            Carregando...
-                                          </span>
-                                        )}
-                                      </div>
-
-                                      {emojis.length === 0 ? (
-                                        <p className="text-xs text-gray-500">
-                                          Nenhum emoji encontrado.
-                                        </p>
-                                      ) : (
-                                        <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto rounded-lg border border-[#2b2b2b] bg-[#111111] p-2">
-                                          {emojis.map((emoji) => (
-                                            <button
-                                              key={emoji.id}
-                                              type="button"
-                                              onClick={() =>
-                                                updateSelectOption(
-                                                  component.id,
-                                                  option.id,
-                                                  {
-                                                    emoji:
-                                                      formatGuildEmoji(emoji),
-                                                  }
-                                                )
-                                              }
-                                              title={`:${emoji.name}:`}
-                                              className="flex h-8 w-8 items-center justify-center rounded-md border border-[#2b2b2b] bg-[#0e0e0e] transition-colors hover:border-[#C100FF] hover:bg-[#171017]"
-                                            >
-                                              <img
-                                                src={getGuildEmojiUrl(emoji)}
-                                                alt={`:${emoji.name}:`}
-                                                className="h-5 w-5 object-contain"
-                                                loading="lazy"
-                                              />
-                                            </button>
-                                          ))}
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-
-                                  <input
-                                    type="text"
-                                    value={option.label}
-                                    onChange={(e) =>
-                                      updateSelectOption(
-                                        component.id,
-                                        option.id,
-                                        {
-                                          label: e.target.value,
-                                        }
-                                      )
-                                    }
-                                    placeholder="Label"
-                                    className="w-full bg-[#111111] border border-[#2b2b2b] text-white rounded-lg px-3 py-2 focus:outline-none focus:border-[#C100FF]"
-                                  />
-
-                                  <input
-                                    type="text"
-                                    value={option.value}
-                                    onChange={(e) =>
-                                      updateSelectOption(
-                                        component.id,
-                                        option.id,
-                                        {
-                                          value: e.target.value,
-                                        }
-                                      )
-                                    }
-                                    placeholder="Valor"
-                                    className="w-full bg-[#111111] border border-[#2b2b2b] text-white rounded-lg px-3 py-2 focus:outline-none focus:border-[#C100FF]"
-                                  />
-
-                                  <input
-                                    type="text"
-                                    value={option.description}
-                                    onChange={(e) =>
-                                      updateSelectOption(
-                                        component.id,
-                                        option.id,
-                                        {
-                                          description: e.target.value,
-                                        }
-                                      )
-                                    }
-                                    placeholder="Descrição"
-                                    className="w-full bg-[#111111] border border-[#2b2b2b] text-white rounded-lg px-3 py-2 focus:outline-none focus:border-[#C100FF]"
-                                  />
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
           <button
             type="button"
             onClick={saveTicketMessage}
@@ -1317,137 +569,17 @@ export default function TicketMessageTab({
                 </div>
               )}
 
-              {components.length > 0 && (
-                <div className="mt-3 space-y-2">
-                  <div className="flex flex-wrap gap-2">
-                    {components
-                      .filter((component) => component.type === "button")
-                      .map((component) => (
-                        <button
-                          key={component.id}
-                          type="button"
-                          disabled={component.disabled}
-                          title={
-                            component.isLink
-                              ? component.linkType === "channel"
-                                ? getChannelUrl(component.channelId)
-                                : component.url || ""
-                              : component.customId || ""
-                          }
-                          className={`px-4 py-2 rounded text-sm font-medium transition-all ${
-                            component.disabled
-                              ? "opacity-50 cursor-not-allowed"
-                              : ""
-                          } ${
-                            component.isLink
-                              ? "bg-[#4e5058] text-white"
-                              : getButtonPreviewClass(component.style)
-                          }`}
-                        >
-                          {component.emoji && (
-                            <span className="mr-2 inline-flex items-center">
-                              {(() => {
-                                const emoji = parseDiscordEmoji(
-                                  component.emoji
-                                );
-
-                                if (!emoji) {
-                                  return component.emoji;
-                                }
-
-                                return (
-                                  <img
-                                    src={getDiscordEmojiUrl(emoji)}
-                                    alt={`:${emoji.name}:`}
-                                    title={`:${emoji.name}:`}
-                                    className="h-4 w-4 object-contain"
-                                    loading="lazy"
-                                  />
-                                );
-                              })()}
-                            </span>
-                          )}
-
-                          {component.label || "Botão"}
-
-                          {component.isLink && <span className="ml-2">↗</span>}
-                        </button>
-                      ))}
-                  </div>
-
-                  {components
-                    .filter((component) => component.type === "select")
-                    .map((component) => (
-                      <div
-                        key={component.id}
-                        className="bg-[#1e1f22] border border-[#3f4147] rounded px-3 py-2 text-sm text-[#dbdee1] max-w-md"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="text-gray-400">
-                            {component.placeholder || "Selecione uma opção"}
-                          </span>
-                          <span>⌄</span>
-                        </div>
-
-                        {(component.options || []).length > 0 && (
-                          <div className="mt-2 border-t border-[#3f4147] pt-2 space-y-1">
-                            {(component.options || []).map((option) => (
-                              <div
-                                key={option.id}
-                                className="text-xs text-gray-300"
-                              >
-                                {option.emoji && (
-                                  <span className="mr-1 inline-flex items-center">
-                                    {(() => {
-                                      const emoji = parseDiscordEmoji(
-                                        option.emoji
-                                      );
-
-                                      if (!emoji) {
-                                        return option.emoji;
-                                      }
-
-                                      return (
-                                        <img
-                                          src={getDiscordEmojiUrl(emoji)}
-                                          alt={`:${emoji.name}:`}
-                                          title={`:${emoji.name}:`}
-                                          className="h-4 w-4 object-contain"
-                                          loading="lazy"
-                                        />
-                                      );
-                                    })()}
-                                  </span>
-                                )}
-
-                                {option.label}
-
-                                {option.description && (
-                                  <span className="text-gray-500">
-                                    {" "}
-                                    — {option.description}
-                                  </span>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
+              {!panel?.ticketMessage && !embed.enabled && (
+                <div className="text-sm text-gray-400">
+                  Nada configurado ainda.
                 </div>
               )}
-
-              {!panel?.ticketMessage &&
-                !embed.enabled &&
-                components.length === 0 && (
-                  <div className="text-sm text-gray-400">
-                    Nada configurado ainda.
-                  </div>
-                )}
             </div>
 
             <p className="text-xs text-gray-500 mt-3">
-              Essa mensagem será enviada dentro do canal criado do ticket.
+              Essa mensagem será enviada dentro do canal criado do ticket. Os
+              botões são configurados na aba{" "}
+              <strong className="text-[#C100FF]">Botões do Ticket</strong>.
             </p>
           </div>
         </div>

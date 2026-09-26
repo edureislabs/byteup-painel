@@ -8,6 +8,7 @@ import TicketTab from "./components/TicketTab";
 import EmbedEditorTab from "./components/EmbedEditorTab";
 import ModeratorTab from "./components/ModeratorTab";
 import TicketMessageTab from "./components/TicketMessageTab";
+import TicketButtonsTab from "./components/TicketButtonsTab";
 import PermissionsTab from "./components/PermissionsTab";
 import FormsTab from "./components/FormsTab";
 import LimitsTab from "./components/LimitsTab";
@@ -34,6 +35,7 @@ export default function EditPanelPage() {
     { id: "ticket", label: "Ticket" },
     { id: "embed", label: "Editor de Embed" },
     { id: "ticketMessage", label: "Mensagem do Ticket" },
+    { id: "ticketButtons", label: "Botões do Ticket" },
     { id: "moderador", label: "Moderador" },
     { id: "permissoes", label: "Permissões" },
     { id: "formularios", label: "Formulários" },
@@ -205,6 +207,16 @@ export default function EditPanelPage() {
             />
           )}
 
+          {activeTab === "ticketButtons" && (
+            <TicketButtonsTab
+              guildId={guildId}
+              panel={panel}
+              setPanel={setPanel}
+              savePanel={savePanel}
+              saveStatus={saveStatus}
+            />
+          )}
+
           {activeTab === "moderador" && (
             <ModeratorTab
               panel={panel}
@@ -249,25 +261,6 @@ export default function EditPanelPage() {
               savePanel={savePanel}
               saveStatus={saveStatus}
             />
-          )}
-
-          {![
-            "geral",
-            "ticket",
-            "embed",
-            "ticketMessage",
-            "moderador",
-            "permissoes",
-            "formularios",
-            "limites",
-            "mensagens",
-          ].includes(activeTab) && (
-            <div className="text-center text-gray-500 py-12">
-              <p className="text-lg">Em breve</p>
-              <p className="text-sm">
-                Esta seção será implementada em breve.
-              </p>
-            </div>
           )}
         </div>
       </div>

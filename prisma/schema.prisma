@@ -321,6 +321,7 @@ model TicketPanel {
   categoryId        String?
   channelId         String?
   sendType          String        @default("panel")
+  ticketButtonsJson Json?
 
   // Painel público enviado no canal de suporte
   openMessage       String?
