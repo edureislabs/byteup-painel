@@ -427,7 +427,7 @@ const inputStyle: React.CSSProperties = {
   background: '#0e0f11',
   border: '1px solid #1e2025',
   borderRadius: '8px',
-  padding: '10px 14px',
+  padding: '10.1px 14px',
   fontSize: '14px',
   color: '#dbdee1',
   width: '100%',
