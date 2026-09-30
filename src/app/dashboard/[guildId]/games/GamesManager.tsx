@@ -9,13 +9,6 @@ type Currency = {
   isPrimary: boolean;
 };
 
-type GameCurrencyEntry = {
-  currencyId: string;
-  minBet: number | null;
-  maxBet: number | null;
-  reward: number | null;
-};
-
 type GameCurrencyWithCurrency = {
   id: string;
   currencyId: string;
@@ -48,12 +41,6 @@ const GAME_LABELS: Record<string, string> = {
 
 const AVAILABLE_GAMES = ['caracoroa', 'roll'];
 
-const MODE_LABELS = {
-  single: 'Moeda única',
-  multi_fixed: 'Múltiplas fixas (todas ao mesmo tempo)',
-  multi_user: 'Múltiplas livres (usuário escolhe)',
-};
-
 export default function GamesManager({ guildId }: Props) {
   const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [games, setGames] = useState<GameConfig[]>([]);
@@ -63,29 +50,31 @@ export default function GamesManager({ guildId }: Props) {
   const [loading, setLoading] = useState(true);
 
   // ===== FETCH =====
-const fetchCurrencies = useCallback(async () => {
-  try {
-    const res = await fetch(`/api/guilds/${guildId}/currencies`, {
-      cache: 'no-store',
-    });
-    const data = await res.json();
-    if (Array.isArray(data)) setCurrencies(data);
-  } catch (err) {
-    console.error('Erro ao buscar moedas:', err);
-  }
-}, [guildId]);
+  const fetchCurrencies = useCallback(async () => {
+    try {
+      const res = await fetch(
+        `/api/guilds/${guildId}/currencies?_t=${Date.now()}`,
+        { cache: 'no-store' }
+      );
+      const data = await res.json();
+      if (Array.isArray(data)) setCurrencies(data);
+    } catch (err) {
+      console.error('Erro ao buscar moedas:', err);
+    }
+  }, [guildId]);
 
-const fetchGames = useCallback(async () => {
-  try {
-    const res = await fetch(`/api/guilds/${guildId}/games`, {
-      cache: 'no-store',
-    });
-    const data = await res.json();
-    if (Array.isArray(data)) setGames(data);
-  } catch (err) {
-    console.error('Erro ao buscar jogos:', err);
-  }
-}, [guildId]);
+  const fetchGames = useCallback(async () => {
+    try {
+      const res = await fetch(
+        `/api/guilds/${guildId}/games?_t=${Date.now()}`,
+        { cache: 'no-store' }
+      );
+      const data = await res.json();
+      if (Array.isArray(data)) setGames(data);
+    } catch (err) {
+      console.error('Erro ao buscar jogos:', err);
+    }
+  }, [guildId]);
 
   useEffect(() => {
     Promise.all([fetchCurrencies(), fetchGames()]).finally(() =>
@@ -139,7 +128,6 @@ const fetchGames = useCallback(async () => {
       try {
         const payload: any = { gameName, ...local };
 
-        // Normaliza currencies se vierem do local
         if (local.currencies) {
           payload.currencies = local.currencies.map((c: any) => ({
             currencyId: c.currencyId,
@@ -152,6 +140,7 @@ const fetchGames = useCallback(async () => {
         const res = await fetch(`/api/guilds/${guildId}/games`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          cache: 'no-store',
           body: JSON.stringify(payload),
         });
 
@@ -160,6 +149,12 @@ const fetchGames = useCallback(async () => {
         if (res.ok) {
           setMessage(`${GAME_LABELS[gameName] || gameName} salvo com sucesso.`);
           setLocalGames((prev) => ({ ...prev, [gameName]: {} }));
+
+          // Atualização otimista
+          setGames((prev) =>
+            prev.map((g) => (g.gameName === gameName ? { ...g, ...data } : g))
+          );
+
           await fetchGames();
         } else {
           setMessage(data.error || 'Erro ao salvar jogo.');
@@ -184,12 +179,40 @@ const fetchGames = useCallback(async () => {
         const res = await fetch(`/api/guilds/${guildId}/games`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          cache: 'no-store',
           body: JSON.stringify({ gameName, enabled: !current }),
         });
 
         const data = await res.json();
 
         if (res.ok) {
+          // Atualização otimista
+          setGames((prev) => {
+            const exists = prev.find((g) => g.gameName === gameName);
+
+            if (exists) {
+              return prev.map((g) =>
+                g.gameName === gameName ? { ...g, enabled: !current } : g
+              );
+            }
+
+            // Se não existe, cria com defaults
+            return [
+              ...prev,
+              {
+                id: data.id || '',
+                gameName,
+                enabled: !current,
+                currencyMode: 'single',
+                minBet: 10,
+                maxBet: 1000,
+                reward: 100,
+                dailyLimit: 0,
+                currencies: [],
+              },
+            ];
+          });
+
           await fetchGames();
         } else {
           setMessage(data.error || 'Erro ao alterar status.');
@@ -301,7 +324,6 @@ const fetchGames = useCallback(async () => {
               marginBottom: '16px',
             }}
           >
-            {/* Cabeçalho */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: game.enabled ? '16px' : 0 }}>
               <div>
                 <span style={{ fontWeight: 600, fontSize: '16px', color: '#f2f3f5' }}>
@@ -350,7 +372,6 @@ const fetchGames = useCallback(async () => {
 
             {game.enabled && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {/* Modo de moeda */}
                 <div>
                   <label style={labelStyle}>Modo de moeda</label>
                   <select
@@ -364,7 +385,6 @@ const fetchGames = useCallback(async () => {
                   </select>
                 </div>
 
-                {/* Valores padrão do jogo */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '12px' }}>
                   <div>
                     <label style={labelStyle}>Aposta mín. padrão</label>
@@ -408,7 +428,6 @@ const fetchGames = useCallback(async () => {
                   </div>
                 </div>
 
-                {/* Se NÃO for single, mostra moedas */}
                 {game.currencyMode !== 'single' && (
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
@@ -434,14 +453,14 @@ const fetchGames = useCallback(async () => {
                     </div>
 
                     {currencies.length === 0 ? (
-  <p style={{ fontSize: '12px', color: '#ed4245', fontStyle: 'italic' }}>
-    Nenhuma moeda cadastrada no servidor. Vá em Economia → Criar Moeda.
-  </p>
-) : game.currencies.length === 0 ? (
-  <p style={{ fontSize: '12px', color: '#72767d', fontStyle: 'italic' }}>
-    Nenhuma moeda adicionada. Clique em "+ Adicionar moeda".
-  </p>
-) : (
+                      <p style={{ fontSize: '12px', color: '#ed4245', fontStyle: 'italic' }}>
+                        Nenhuma moeda cadastrada no servidor. Vá em Economia → Criar Moeda.
+                      </p>
+                    ) : game.currencies.length === 0 ? (
+                      <p style={{ fontSize: '12px', color: '#72767d', fontStyle: 'italic' }}>
+                        Nenhuma moeda adicionada. Clique em "+ Adicionar moeda".
+                      </p>
+                    ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         {game.currencies.map((entry: any) => {
                           const currency =
@@ -532,7 +551,6 @@ const fetchGames = useCallback(async () => {
                   </div>
                 )}
 
-                {/* Botões */}
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button
                     type="button"
