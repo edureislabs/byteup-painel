@@ -4,6 +4,12 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
 import { canAccessPanel } from '@/lib/permissions';
 
+const NO_CACHE = {
+  headers: {
+    'Cache-Control': 'no-store, max-age=0, must-revalidate',
+  },
+};
+
 // ===== GET — lista jogos com moedas =====
 export async function GET(
   req: NextRequest,
@@ -12,14 +18,20 @@ export async function GET(
   try {
     const session = await getServerSession(authOptions);
     if (!session?.accessToken) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Não autorizado' },
+        { status: 401, ...NO_CACHE }
+      );
     }
 
     const { guildId } = await params;
 
     const hasAccess = await canAccessPanel(guildId);
     if (!hasAccess) {
-      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Acesso negado' },
+        { status: 403, ...NO_CACHE }
+      );
     }
 
     const games = await prisma.gameConfig.findMany({
@@ -31,12 +43,12 @@ export async function GET(
       },
     });
 
-    return NextResponse.json(games);
+    return NextResponse.json(games, NO_CACHE);
   } catch (error: any) {
     console.error('[games GET] Erro:', error);
     return NextResponse.json(
       { error: error.message || 'Erro ao buscar jogos' },
-      { status: 500 }
+      { status: 500, ...NO_CACHE }
     );
   }
 }
@@ -49,14 +61,20 @@ export async function POST(
   try {
     const session = await getServerSession(authOptions);
     if (!session?.accessToken) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Não autorizado' },
+        { status: 401, ...NO_CACHE }
+      );
     }
 
     const { guildId } = await params;
 
     const hasAccess = await canAccessPanel(guildId);
     if (!hasAccess) {
-      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Acesso negado' },
+        { status: 403, ...NO_CACHE }
+      );
     }
 
     const body = await req.json();
@@ -68,37 +86,34 @@ export async function POST(
       maxBet,
       reward,
       dailyLimit,
-      currencies = [], // [{ currencyId, minBet, maxBet, reward }]
+      currencies = [],
     } = body;
 
     if (!gameName || typeof gameName !== 'string') {
       return NextResponse.json(
         { error: 'gameName é obrigatório' },
-        { status: 400 }
+        { status: 400, ...NO_CACHE }
       );
     }
 
-    // Validação: se não for modo single, precisa ter moedas
     if (currencyMode && currencyMode !== 'single' && currencies.length === 0) {
       return NextResponse.json(
         { error: 'Jogos com múltiplas moedas precisam ter pelo menos 1 moeda' },
-        { status: 400 }
+        { status: 400, ...NO_CACHE }
       );
     }
 
-    // Validação: minBet <= maxBet em cada moeda
     for (const c of currencies) {
       const cMin = c.minBet ?? minBet ?? 10;
       const cMax = c.maxBet ?? maxBet ?? 1000;
 
       if (cMin > cMax) {
         return NextResponse.json(
-          { error: `Em uma das moedas, a aposta mínima é maior que a máxima` },
-          { status: 400 }
+          { error: 'Em uma das moedas, a aposta mínima é maior que a máxima' },
+          { status: 400, ...NO_CACHE }
         );
       }
 
-      // Verifica se a moeda pertence à guild
       const currency = await prisma.currency.findFirst({
         where: { id: c.currencyId, guildId },
       });
@@ -106,12 +121,11 @@ export async function POST(
       if (!currency) {
         return NextResponse.json(
           { error: 'Uma das moedas não foi encontrada' },
-          { status: 400 }
+          { status: 400, ...NO_CACHE }
         );
       }
     }
 
-    // Garante guild
     let guild = await prisma.guild.findUnique({ where: { id: guildId } });
     if (!guild) {
       guild = await prisma.guild.create({ data: { id: guildId } });
@@ -125,7 +139,6 @@ export async function POST(
     let game: any;
 
     if (existing) {
-
       game = await prisma.gameConfig.update({
         where: { id: existing.id },
         data: {
@@ -138,7 +151,6 @@ export async function POST(
         },
       });
 
-      // Sincroniza as moedas: deleta todas e recria
       await prisma.gameCurrency.deleteMany({
         where: { gameConfigId: game.id },
       });
@@ -155,7 +167,6 @@ export async function POST(
         });
       }
     } else {
-      // Cria novo
       game = await prisma.gameConfig.create({
         data: {
           guildId,
@@ -182,7 +193,6 @@ export async function POST(
       }
     }
 
-    // Retorna com include
     const result = await prisma.gameConfig.findUnique({
       where: { id: game.id },
       include: {
@@ -192,12 +202,12 @@ export async function POST(
       },
     });
 
-    return NextResponse.json(result);
+    return NextResponse.json(result, NO_CACHE);
   } catch (error: any) {
     console.error('[games POST] Erro:', error);
     return NextResponse.json(
       { error: error.message || 'Erro ao salvar jogo' },
-      { status: 500 }
+      { status: 500, ...NO_CACHE }
     );
   }
 }

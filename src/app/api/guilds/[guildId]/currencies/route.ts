@@ -4,6 +4,12 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
 import { canAccessPanel } from '@/lib/permissions';
 
+const NO_CACHE = {
+  headers: {
+    'Cache-Control': 'no-store, max-age=0, must-revalidate',
+  },
+};
+
 // ===== GET — lista moedas da guild =====
 export async function GET(
   req: NextRequest,
@@ -12,14 +18,20 @@ export async function GET(
   try {
     const session = await getServerSession(authOptions);
     if (!session?.accessToken) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Não autorizado' },
+        { status: 401, ...NO_CACHE }
+      );
     }
 
     const { guildId } = await params;
 
     const hasAccess = await canAccessPanel(guildId);
     if (!hasAccess) {
-      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Acesso negado' },
+        { status: 403, ...NO_CACHE }
+      );
     }
 
     const currencies = await prisma.currency.findMany({
@@ -27,12 +39,12 @@ export async function GET(
       orderBy: [{ isPrimary: 'desc' }, { name: 'asc' }],
     });
 
-    return NextResponse.json(currencies);
+    return NextResponse.json(currencies, NO_CACHE);
   } catch (error: any) {
     console.error('[currencies GET] Erro:', error);
     return NextResponse.json(
       { error: error.message || 'Erro ao buscar moedas' },
-      { status: 500 }
+      { status: 500, ...NO_CACHE }
     );
   }
 }
@@ -45,14 +57,20 @@ export async function POST(
   try {
     const session = await getServerSession(authOptions);
     if (!session?.accessToken) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Não autorizado' },
+        { status: 401, ...NO_CACHE }
+      );
     }
 
     const { guildId } = await params;
 
     const hasAccess = await canAccessPanel(guildId);
     if (!hasAccess) {
-      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Acesso negado' },
+        { status: 403, ...NO_CACHE }
+      );
     }
 
     const body = await req.json();
@@ -61,17 +79,15 @@ export async function POST(
     if (!name) {
       return NextResponse.json(
         { error: 'Nome da moeda é obrigatório' },
-        { status: 400 }
+        { status: 400, ...NO_CACHE }
       );
     }
 
-    // Garante que a Guild existe
     let guild = await prisma.guild.findUnique({ where: { id: guildId } });
     if (!guild) {
       guild = await prisma.guild.create({ data: { id: guildId } });
     }
 
-    // Verifica se já existe moeda com esse nome
     const existing = await prisma.currency.findUnique({
       where: { guildId_name: { guildId, name } },
     });
@@ -79,11 +95,10 @@ export async function POST(
     if (existing) {
       return NextResponse.json(
         { error: 'Já existe uma moeda com esse nome' },
-        { status: 400 }
+        { status: 400, ...NO_CACHE }
       );
     }
 
-    // Se está marcando como primária, desmarca as outras
     if (isPrimary) {
       await prisma.currency.updateMany({
         where: { guildId, isPrimary: true },
@@ -91,7 +106,6 @@ export async function POST(
       });
     }
 
-    // Se for a PRIMEIRA moeda da guild, força isPrimary = true
     const count = await prisma.currency.count({ where: { guildId } });
     const shouldBePrimary = count === 0 ? true : Boolean(isPrimary);
 
@@ -106,12 +120,12 @@ export async function POST(
       },
     });
 
-    return NextResponse.json(currency);
+    return NextResponse.json(currency, NO_CACHE);
   } catch (error: any) {
     console.error('[currencies POST] Erro:', error);
     return NextResponse.json(
       { error: error.message || 'Erro ao criar moeda' },
-      { status: 500 }
+      { status: 500, ...NO_CACHE }
     );
   }
 }

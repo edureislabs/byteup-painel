@@ -14,7 +14,12 @@ export async function GET(
     if (!session?.accessToken) {
       return NextResponse.json(
         { error: 'Não autorizado' },
-        { status: 401 }
+        {
+          status: 401,
+          headers: {
+            'Cache-Control': 'no-store, max-age=0, must-revalidate',
+          },
+        }
       );
     }
 
@@ -24,7 +29,15 @@ export async function GET(
     const hasAccess = await canAccessPanel(guildId);
 
     if (!hasAccess) {
-      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Acesso negado' },
+        {
+          status: 403,
+          headers: {
+            'Cache-Control': 'no-store, max-age=0, must-revalidate',
+          },
+        }
+      );
     }
 
     // Parâmetros
@@ -81,17 +94,29 @@ export async function GET(
     // Total
     const total = await prisma.gameTransaction.count({ where });
 
-    return NextResponse.json({
-      transactions: enriched,
-      total,
-      limit,
-      offset,
-    });
+    return NextResponse.json(
+      {
+        transactions: enriched,
+        total,
+        limit,
+        offset,
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store, max-age=0, must-revalidate',
+        },
+      }
+    );
   } catch (error: any) {
     console.error('[economy/transactions] Erro:', error);
     return NextResponse.json(
       { error: error.message || 'Erro ao buscar transações' },
-      { status: 500 }
+      {
+        status: 500,
+        headers: {
+          'Cache-Control': 'no-store, max-age=0, must-revalidate',
+        },
+      }
     );
   }
 }

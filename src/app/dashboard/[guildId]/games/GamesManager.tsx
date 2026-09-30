@@ -63,25 +63,29 @@ export default function GamesManager({ guildId }: Props) {
   const [loading, setLoading] = useState(true);
 
   // ===== FETCH =====
-  const fetchCurrencies = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/guilds/${guildId}/currencies`);
-      const data = await res.json();
-      if (Array.isArray(data)) setCurrencies(data);
-    } catch (err) {
-      console.error('Erro ao buscar moedas:', err);
-    }
-  }, [guildId]);
+const fetchCurrencies = useCallback(async () => {
+  try {
+    const res = await fetch(`/api/guilds/${guildId}/currencies`, {
+      cache: 'no-store',
+    });
+    const data = await res.json();
+    if (Array.isArray(data)) setCurrencies(data);
+  } catch (err) {
+    console.error('Erro ao buscar moedas:', err);
+  }
+}, [guildId]);
 
-  const fetchGames = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/guilds/${guildId}/games`);
-      const data = await res.json();
-      if (Array.isArray(data)) setGames(data);
-    } catch (err) {
-      console.error('Erro ao buscar jogos:', err);
-    }
-  }, [guildId]);
+const fetchGames = useCallback(async () => {
+  try {
+    const res = await fetch(`/api/guilds/${guildId}/games`, {
+      cache: 'no-store',
+    });
+    const data = await res.json();
+    if (Array.isArray(data)) setGames(data);
+  } catch (err) {
+    console.error('Erro ao buscar jogos:', err);
+  }
+}, [guildId]);
 
   useEffect(() => {
     Promise.all([fetchCurrencies(), fetchGames()]).finally(() =>
