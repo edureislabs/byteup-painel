@@ -595,22 +595,16 @@ export default function GamesManager({ guildId }: Props) {
         );
       })}
 
-      {message && messageType && (
-        <div
-          style={{
-            marginTop: '16px',
-            padding: '12px 16px',
-            borderRadius: '8px',
-            background: messageType === 'success' ? '#1a3a2a' : '#3a1a1a',
-            color: messageType === 'success' ? '#23a55a' : '#ed4245',
-            fontSize: '13px',
-            border: `1px solid ${messageType === 'success' ? '#23a55a40' : '#ed424540'}`,
-          }}
-        >
-          {message}
-        </div>
-      )}
-    </div>
+    {message && (
+  <p style={{
+    marginTop: '12px',
+    fontSize: '12px',
+    color: '#72767d',
+    fontStyle: 'italic',
+  }}>
+    {message}
+  </p>
+)}    </div>
   );
 }
 

@@ -147,7 +147,7 @@ export default function EconomyPage({ params }: Props) {
     const data = await res.json();
 
     if (res.ok) {
-      setMessage(`Moeda "${data.name}" criada.`);
+  setMessage('salvo agora');
       setNewName('');
       setNewSymbol('$');
 
@@ -171,7 +171,7 @@ export default function EconomyPage({ params }: Props) {
     });
 
     if (res.ok) {
-      setMessage('Moeda removida.');
+      setMessage('salvo agora.');
       setCurrencies((prev) => prev.filter((c) => c.id !== id));
       await Promise.all([fetchCurrencies(), fetchGames(), fetchUsers()]);
     } else {
@@ -417,10 +417,15 @@ export default function EconomyPage({ params }: Props) {
       </div>
 
       {message && (
-        <div style={{ marginTop: '16px', padding: '10px', borderRadius: '8px', background: message.includes('Erro') || message.includes('obrigatório') ? '#3a1a1a' : '#1a3a2a', color: message.includes('Erro') || message.includes('obrigatório') ? '#ed4245' : '#23a55a', fontSize: '13px' }}>
-          {message}
-        </div>
-      )}
+  <p style={{
+    marginTop: '12px',
+    fontSize: '12px',
+    color: '#72767d',
+    fontStyle: 'italic',
+  }}>
+    {message}
+  </p>
+)}
 
       <style jsx>{`
         .field-input, .field-select { background: #0e0f11; border: 1px solid #1e2025; border-radius: 8px; padding: 10px 14px; font-size: 14px; color: #dbdee1; outline: none; box-sizing: border-box; }
