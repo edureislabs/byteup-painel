@@ -8,13 +8,21 @@ type Currency = {
   symbol: string;
   taxRate: number;
   exchangeRate: number;
+  isPrimary: boolean;
+};
+
+type GameCurrencyEntry = {
+  id: string;
+  currencyId: string;
+  currency: Currency;
 };
 
 type GameConfig = {
   id: string;
   gameName: string;
   enabled: boolean;
-  currencyId: string | null;
+  currencyMode: string;
+  currencies: GameCurrencyEntry[];
 };
 
 type EconomyUser = {
@@ -40,6 +48,7 @@ export default function EconomyPage({ params }: Props) {
   const [newName, setNewName] = useState('');
   const [newSymbol, setNewSymbol] = useState('$');
   const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(true);
 
   // Filtros
   const [selectedCurrency, setSelectedCurrency] = useState('all');
@@ -47,24 +56,21 @@ export default function EconomyPage({ params }: Props) {
   const [sortBy, setSortBy] = useState<'balance' | 'bank' | 'total'>('total');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [searchTerm, setSearchTerm] = useState('');
-useEffect(() => {
-  fetch(`/api/guilds/${guildId}/economy/transactions`)
-    .then(res => res.json())
-    .then(data => {
-      if (Array.isArray(data.transactions)) setTransactions(data.transactions);
-    });
-}, [guildId]);
 
   useEffect(() => {
-    fetchCurrencies();
-    fetchGames();
-    fetchUsers();
+    Promise.all([
+      fetchCurrencies(),
+      fetchGames(),
+      fetchUsers(),
+      fetchTransactions(),
+    ]).finally(() => setLoading(false));
   }, [guildId]);
 
   useEffect(() => {
     applyFilters();
   }, [users, selectedCurrency, selectedGame, sortBy, sortOrder, searchTerm]);
 
+  // ===== FETCH =====
   const fetchCurrencies = async () => {
     const res = await fetch(`/api/guilds/${guildId}/currencies`);
     const data = await res.json();
@@ -80,67 +86,100 @@ useEffect(() => {
   const fetchUsers = async () => {
     const res = await fetch(`/api/guilds/${guildId}/economy/users`);
     const data = await res.json();
-if (Array.isArray(data.users)) setUsers(data.users);
+    if (Array.isArray(data.users)) setUsers(data.users);
   };
 
+  const fetchTransactions = async () => {
+    const res = await fetch(`/api/guilds/${guildId}/economy/transactions`);
+    const data = await res.json();
+    if (Array.isArray(data.transactions)) setTransactions(data.transactions);
+  };
+
+  // ===== AÇÕES DE MOEDA =====
   const addCurrency = async () => {
     if (!newName.trim()) {
       setMessage('O nome da moeda é obrigatório.');
       return;
     }
+
+    const isFirst = currencies.length === 0;
+
     const res = await fetch(`/api/guilds/${guildId}/currencies`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: newName.trim(), symbol: newSymbol, taxRate: 0, exchangeRate: 1.0 }),
+      body: JSON.stringify({
+        name: newName.trim(),
+        symbol: newSymbol,
+        taxRate: 0,
+        exchangeRate: 1.0,
+        isPrimary: isFirst,   // ← primeira moeda vira primária
+      }),
     });
+
     const data = await res.json();
+
     if (res.ok) {
       setMessage(`Moeda "${data.name}" criada.`);
       setNewName('');
       setNewSymbol('$');
-      fetchCurrencies();
+      await fetchCurrencies();
     } else {
       setMessage(data.error || 'Erro ao criar moeda.');
     }
   };
 
   const deleteCurrency = async (id: string) => {
-    const res = await fetch(`/api/guilds/${guildId}/currencies/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/api/guilds/${guildId}/currencies/${id}`, {
+      method: 'DELETE',
+    });
     if (res.ok) {
       setMessage('Moeda removida.');
-      fetchCurrencies();
-      fetchGames();
-      fetchUsers();
+      await Promise.all([fetchCurrencies(), fetchGames(), fetchUsers()]);
     } else {
       const data = await res.json();
       setMessage(data.error || 'Erro ao remover moeda.');
     }
   };
 
+  const setPrimary = async (id: string) => {
+    const res = await fetch(`/api/guilds/${guildId}/currencies/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ isPrimary: true }),
+    });
+
+    if (res.ok) {
+      setMessage('Moeda primária atualizada.');
+      await fetchCurrencies();
+    } else {
+      const data = await res.json();
+      setMessage(data.error || 'Erro ao definir primária.');
+    }
+  };
+
+  // ===== FILTROS =====
   const applyFilters = () => {
     let result = [...users];
 
-    // Filtro por moeda
     if (selectedCurrency !== 'all') {
-      result = result.filter(u => u.currency.id === selectedCurrency);
+      result = result.filter((u) => u.currency.id === selectedCurrency);
     }
 
-    // Filtro por jogo (busca nos gameConfigs a moeda associada)
     if (selectedGame !== 'all') {
-      const game = games.find(g => g.gameName === selectedGame);
-      if (game && game.currencyId) {
-        result = result.filter(u => u.currency.id === game.currencyId);
+      const game = games.find((g) => g.gameName === selectedGame);
+
+      if (game && game.currencies && game.currencies.length > 0) {
+        const currencyIds = game.currencies.map((c) => c.currencyId);
+        result = result.filter((u) => currencyIds.includes(u.currency.id));
       } else {
         result = [];
       }
     }
 
-    // Busca por ID do usuário
     if (searchTerm.trim()) {
-      result = result.filter(u => u.userId.includes(searchTerm.trim()));
+      result = result.filter((u) => u.userId.includes(searchTerm.trim()));
     }
 
-    // Ordenação
     result.sort((a, b) => {
       const totalA = sortBy === 'total' ? a.balance + a.bank : a[sortBy];
       const totalB = sortBy === 'total' ? b.balance + b.bank : b[sortBy];
@@ -150,11 +189,29 @@ if (Array.isArray(data.users)) setUsers(data.users);
     setFilteredUsers(result);
   };
 
+  // ===== MAPA: moeda -> jogos que usam =====
   const gamesByCurrency: Record<string, GameConfig[]> = {};
+
   for (const game of games) {
-    if (!game.currencyId) continue;
-    if (!gamesByCurrency[game.currencyId]) gamesByCurrency[game.currencyId] = [];
-    gamesByCurrency[game.currencyId].push(game);
+    if (!game.currencies || game.currencies.length === 0) continue;
+
+    for (const entry of game.currencies) {
+      if (!gamesByCurrency[entry.currencyId]) {
+        gamesByCurrency[entry.currencyId] = [];
+      }
+      // Evita duplicar o mesmo jogo
+      if (!gamesByCurrency[entry.currencyId].find((g) => g.id === game.id)) {
+        gamesByCurrency[entry.currencyId].push(game);
+      }
+    }
+  }
+
+  if (loading) {
+    return (
+      <div style={{ fontFamily: 'DM Sans, sans-serif', color: '#72767d', padding: '40px', textAlign: 'center' }}>
+        Carregando economia...
+      </div>
+    );
   }
 
   return (
@@ -165,48 +222,89 @@ if (Array.isArray(data.users)) setUsers(data.users);
       <div style={{ background: '#16181c', border: '1px solid #1e2025', borderRadius: '12px', padding: '20px', marginBottom: '24px' }}>
         <label className="field-label" style={{ marginBottom: '8px' }}>Criar Moeda</label>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <input className="field-input" placeholder="Nome" value={newName} onChange={e => setNewName(e.target.value)} style={{ flex: 1 }} />
-          <input className="field-input" placeholder="Símbolo" value={newSymbol} onChange={e => setNewSymbol(e.target.value)} style={{ width: '80px' }} />
+          <input className="field-input" placeholder="Nome" value={newName} onChange={(e) => setNewName(e.target.value)} style={{ flex: 1 }} />
+          <input className="field-input" placeholder="Símbolo" value={newSymbol} onChange={(e) => setNewSymbol(e.target.value)} style={{ width: '80px' }} />
           <button className="save-btn" onClick={addCurrency} style={{ width: 'auto', padding: '10px 20px', marginTop: 0 }}>Criar</button>
         </div>
+        {currencies.length === 0 && (
+          <p style={{ fontSize: '12px', color: '#C100FF', marginTop: '8px' }}>
+            💡 A primeira moeda vira automaticamente a primária.
+          </p>
+        )}
       </div>
 
       {/* Lista de moedas */}
       <div style={{ marginBottom: '32px' }}>
         <label className="field-label" style={{ marginBottom: '12px' }}>Moedas existentes</label>
         {currencies.length === 0 && <p style={{ color: '#72767d' }}>Nenhuma moeda criada ainda.</p>}
-        {currencies.map(c => {
+        {currencies.map((c) => {
           const currencyGames = gamesByCurrency[c.id] || [];
           return (
             <div key={c.id} style={{ background: '#16181c', border: '1px solid #1e2025', borderRadius: '8px', padding: '16px', marginBottom: '8px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <span style={{ fontWeight: 600, fontSize: '16px' }}>{c.symbol} {c.name}</span>
-                  {currencyGames.length > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontWeight: 600, fontSize: '16px' }}>{c.symbol} {c.name}</span>
+                    {c.isPrimary ? (
+                      <span style={{
+                        background: '#C100FF20',
+                        color: '#C100FF',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        border: '1px solid #C100FF40',
+                      }}>
+                        ⭐ PRIMÁRIA
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => setPrimary(c.id)}
+                        style={{
+                          background: 'transparent',
+                          border: '1px solid #2b2d31',
+                          color: '#72767d',
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Tornar primária
+                      </button>
+                    )}
+                  </div>
+
+                  {currencyGames.length > 0 ? (
                     <div style={{ marginTop: '6px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                      {currencyGames.map(game => (
+                      {currencyGames.map((game) => (
                         <span key={game.id} style={{
                           background: game.enabled ? '#1a3a2a' : '#2b2d31',
                           color: game.enabled ? '#23a55a' : '#72767d',
-                          padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 500,
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          fontWeight: 500,
                         }}>
-                          {game.gameName === 'caracoroa' ? 'Cara ou Coroa' : game.gameName}
+                          {game.gameName === 'caracoroa' ? 'Cara ou Coroa' : game.gameName === 'roll' ? 'Rolar Dados' : game.gameName}
                           {game.enabled ? ' (ativo)' : ' (inativo)'}
                         </span>
                       ))}
                     </div>
-                  )}
-                  {currencyGames.length === 0 && (
-                    <p style={{ fontSize: '12px', color: '#72767d', margin: '6px 0 0 0' }}>Nenhum jogo usa esta moeda.</p>
+                  ) : (
+                    <p style={{ fontSize: '12px', color: '#72767d', margin: '6px 0 0 0' }}>
+                      Nenhum jogo usa esta moeda.
+                    </p>
                   )}
                 </div>
-                <button 
-  className="save-btn" 
-  onClick={() => deleteCurrency(c.id)} 
-  style={{ background: '#C100FF', width: 'auto', padding: '4px 12px', fontSize: '12px', marginTop: 0 }}
->
-  Remover
-</button>
+
+                <button
+                  className="save-btn"
+                  onClick={() => deleteCurrency(c.id)}
+                  style={{ background: '#C100FF', width: 'auto', padding: '4px 12px', fontSize: '12px', marginTop: 0 }}
+                >
+                  Remover
+                </button>
               </div>
             </div>
           );
@@ -217,44 +315,40 @@ if (Array.isArray(data.users)) setUsers(data.users);
       <div>
         <label className="field-label" style={{ marginBottom: '12px' }}>Ranking de Usuários</label>
 
-        {/* Filtros */}
         <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
-          <select className="field-select" value={selectedCurrency} onChange={e => setSelectedCurrency(e.target.value)} style={{ width: '180px' }}>
+          <select className="field-select" value={selectedCurrency} onChange={(e) => setSelectedCurrency(e.target.value)} style={{ width: '180px' }}>
             <option value="all">Todas as moedas</option>
-            {currencies.map(c => (
+            {currencies.map((c) => (
               <option key={c.id} value={c.id}>{c.symbol} {c.name}</option>
             ))}
           </select>
-          <select className="field-select" value={selectedGame} onChange={e => setSelectedGame(e.target.value)} style={{ width: '180px' }}>
+
+          <select className="field-select" value={selectedGame} onChange={(e) => setSelectedGame(e.target.value)} style={{ width: '180px' }}>
             <option value="all">Todos os jogos</option>
-            {games.map(g => (
+            {games.map((g) => (
               <option key={g.id} value={g.gameName}>
-                {g.gameName === 'caracoroa' ? 'Cara ou Coroa' : g.gameName}
+                {g.gameName === 'caracoroa' ? 'Cara ou Coroa' : g.gameName === 'roll' ? 'Rolar Dados' : g.gameName}
               </option>
             ))}
           </select>
-          <select className="field-select" value={sortBy} onChange={e => setSortBy(e.target.value as any)} style={{ width: '140px' }}>
+
+          <select className="field-select" value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} style={{ width: '140px' }}>
             <option value="total">Saldo Total</option>
             <option value="balance">Carteira</option>
             <option value="bank">Banco</option>
           </select>
+
           <button
             className="save-btn"
-            onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
+            onClick={() => setSortOrder((prev) => (prev === 'desc' ? 'asc' : 'desc'))}
             style={{ width: 'auto', padding: '8px 12px', fontSize: '12px', marginTop: 0 }}
           >
             {sortOrder === 'desc' ? 'Maior → Menor' : 'Menor → Maior'}
           </button>
-          <input
-            className="field-input"
-            placeholder="Buscar por ID..."
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            style={{ width: '200px' }}
-          />
+
+          <input className="field-input" placeholder="Buscar por ID..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} style={{ width: '200px' }} />
         </div>
 
-        {/* Tabela */}
         <div style={{ background: '#16181c', border: '1px solid #1e2025', borderRadius: '12px', overflow: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
             <thead>
@@ -291,81 +385,85 @@ if (Array.isArray(data.users)) setUsers(data.users);
             </tbody>
           </table>
         </div>
-        <div style={{ marginTop: '32px' }}>
-  <label className="field-label" style={{ marginBottom: '12px' }}>Histórico de Partidas</label>
-  <div style={{ background: '#16181c', border: '1px solid #1e2025', borderRadius: '12px', overflow: 'auto' }}>
-    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-      <thead>
-        <tr style={{ borderBottom: '1px solid #1e2025' }}>
-          <th style={{ padding: '12px 16px', textAlign: 'left' }}>Data</th>
-          <th style={{ padding: '12px 16px', textAlign: 'left' }}>Jogador</th>
-          <th style={{ padding: '12px 16px', textAlign: 'left' }}>Jogo</th>
-          <th style={{ padding: '12px 16px', textAlign: 'left' }}>Resultado</th>
-          <th style={{ padding: '12px 16px', textAlign: 'right' }}>Aposta</th>
-          <th style={{ padding: '12px 16px', textAlign: 'right' }}>Recompensa</th>
-        </tr>
-      </thead>
-      <tbody>
-        {transactions.length === 0 && (
-          <tr>
-            <td colSpan={6} style={{ padding: '24px', textAlign: 'center', color: '#72767d' }}>
-              Nenhuma partida registrada ainda.
-            </td>
-          </tr>
-        )}
-        {transactions.map((tx: any) => (
-          <tr key={tx.id} style={{ borderBottom: '1px solid #1e2025' }}>
-            <td style={{ padding: '12px 16px', fontSize: '12px', color: '#72767d' }}>
-              {new Date(tx.createdAt).toLocaleString('pt-BR')}
-            </td>
-            <td style={{ padding: '12px 16px', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>{tx.userId}</td>
-            <td style={{ padding: '12px 16px' }}>{tx.gameName === 'caracoroa' ? 'Cara ou Coroa' : tx.gameName}</td>
-            <td style={{ padding: '12px 16px', color: tx.result === 'win' ? '#23a55a' : '#ed4245', fontWeight: 500 }}>
-              {tx.result === 'win' ? 'Venceu' : 'Perdeu'}
-            </td>
-            <td style={{ padding: '12px 16px', textAlign: 'right' }}>
-  {tx.currency?.symbol || '$'}{tx.bet.toLocaleString()}
-</td>
-<td style={{ padding: '12px 16px', textAlign: 'right', color: tx.reward > 0 ? '#23a55a' : '#72767d' }}>
-  {tx.reward > 0 ? `+${tx.currency?.symbol || '$'}${tx.reward.toLocaleString()}` : `${tx.currency?.symbol || '$'}0`}
-</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-</div>
 
+        {/* Histórico */}
+        <div style={{ marginTop: '32px' }}>
+          <label className="field-label" style={{ marginBottom: '12px' }}>Histórico de Partidas</label>
+          <div style={{ background: '#16181c', border: '1px solid #1e2025', borderRadius: '12px', overflow: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid #1e2025' }}>
+                  <th style={{ padding: '12px 16px', textAlign: 'left' }}>Data</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'left' }}>Jogador</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'left' }}>Jogo</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'left' }}>Resultado</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'right' }}>Aposta</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'right' }}>Recompensa</th>
+                </tr>
+              </thead>
+              <tbody>
+                {transactions.length === 0 && (
+                  <tr>
+                    <td colSpan={6} style={{ padding: '24px', textAlign: 'center', color: '#72767d' }}>
+                      Nenhuma partida registrada ainda.
+                    </td>
+                  </tr>
+                )}
+                {transactions.map((tx: any) => (
+                  <tr key={tx.id} style={{ borderBottom: '1px solid #1e2025' }}>
+                    <td style={{ padding: '12px 16px', fontSize: '12px', color: '#72767d' }}>
+                      {new Date(tx.createdAt).toLocaleString('pt-BR')}
+                    </td>
+                    <td style={{ padding: '12px 16px', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>{tx.userId}</td>
+                    <td style={{ padding: '12px 16px' }}>
+                      {tx.gameName === 'caracoroa' ? 'Cara ou Coroa' : tx.gameName === 'roll' ? 'Rolar Dados' : tx.gameName}
+                    </td>
+                    <td style={{ padding: '12px 16px', color: tx.result === 'win' ? '#23a55a' : tx.result === 'draw' ? '#fee75c' : '#ed4245', fontWeight: 500 }}>
+                      {tx.result === 'win' ? 'Venceu' : tx.result === 'draw' ? 'Empate' : 'Perdeu'}
+                    </td>
+                    <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                      {tx.currency?.symbol || '$'}{tx.bet.toLocaleString()}
+                    </td>
+                    <td style={{ padding: '12px 16px', textAlign: 'right', color: tx.reward > 0 ? '#23a55a' : '#72767d' }}>
+                      {tx.reward > 0 ? `+${tx.currency?.symbol || '$'}${tx.reward.toLocaleString()}` : `${tx.currency?.symbol || '$'}0`}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       {message && (
         <div style={{
           marginTop: '16px', padding: '10px', borderRadius: '8px',
-          background: message.includes('Erro') ? '#3a1a1a' : '#1a3a2a',
-          color: message.includes('Erro') ? '#ed4245' : '#23a55a', fontSize: '13px',
+          background: message.includes('Erro') || message.includes('obrigatório') ? '#3a1a1a' : '#1a3a2a',
+          color: message.includes('Erro') || message.includes('obrigatório') ? '#ed4245' : '#23a55a',
+          fontSize: '13px',
         }}>
           {message}
         </div>
       )}
 
       <style jsx>{`
-  .field-input, .field-select {
-    background: #0e0f11; border: 1px solid #1e2025; border-radius: 8px;
-    padding: 10px 14px; font-size: 14px; color: #dbdee1; outline: none; box-sizing: border-box;
-  }
-  .field-select { cursor: pointer; }
-  .field-input:focus, .field-select:focus { border-color: #C100FF; }
-  .save-btn {
-    background: #C100FF; color: white; border: none; border-radius: 8px;
-    padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer;
-    transition: background 0.15s;
-  }
-  .save-btn:hover { background: #8A2BFF; }
-  .field-label {
-    font-size: 11px; font-weight: 600; text-transform: uppercase;
-    letter-spacing: 0.8px; color: #72767d; display: block;
-  }
-`}</style>
+        .field-input, .field-select {
+          background: #0e0f11; border: 1px solid #1e2025; border-radius: 8px;
+          padding: 10px 14px; font-size: 14px; color: #dbdee1; outline: none; box-sizing: border-box;
+        }
+        .field-select { cursor: pointer; }
+        .field-input:focus, .field-select:focus { border-color: #C100FF; }
+        .save-btn {
+          background: #C100FF; color: white; border: none; border-radius: 8px;
+          padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer;
+          transition: background 0.15s;
+        }
+        .save-btn:hover { background: #8A2BFF; }
+        .field-label {
+          font-size: 11px; font-weight: 600; text-transform: uppercase;
+          letter-spacing: 0.8px; color: #72767d; display: block;
+        }
+      `}</style>
     </div>
   );
 }

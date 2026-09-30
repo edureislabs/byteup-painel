@@ -125,7 +125,7 @@ export async function POST(
     let game: any;
 
     if (existing) {
-      // Atualiza o GameConfig
+
       game = await prisma.gameConfig.update({
         where: { id: existing.id },
         data: {

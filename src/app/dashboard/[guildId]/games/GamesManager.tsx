@@ -429,11 +429,15 @@ export default function GamesManager({ guildId }: Props) {
                       </button>
                     </div>
 
-                    {game.currencies.length === 0 ? (
-                      <p style={{ fontSize: '12px', color: '#72767d', fontStyle: 'italic' }}>
-                        Nenhuma moeda adicionada. Clique em "+ Adicionar moeda".
-                      </p>
-                    ) : (
+                    {currencies.length === 0 ? (
+  <p style={{ fontSize: '12px', color: '#ed4245', fontStyle: 'italic' }}>
+    Nenhuma moeda cadastrada no servidor. Vá em Economia → Criar Moeda.
+  </p>
+) : game.currencies.length === 0 ? (
+  <p style={{ fontSize: '12px', color: '#72767d', fontStyle: 'italic' }}>
+    Nenhuma moeda adicionada. Clique em "+ Adicionar moeda".
+  </p>
+) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         {game.currencies.map((entry: any) => {
                           const currency =
