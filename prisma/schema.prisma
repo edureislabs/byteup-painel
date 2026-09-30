@@ -28,7 +28,6 @@ model Guild {
   economyUsers   EconomyUser[]
   coinflipStats  CoinflipStats[]
   birthdays      Birthday[]
-  gameConfigs    GameConfig[]
   welcome        Welcome?
   goodbye        Goodbye?
   ticketConfig   TicketConfig?
@@ -121,8 +120,9 @@ model Currency {
   symbol        String         @default("$")
   taxRate       Float          @default(0)
   exchangeRate  Float          @default(1.0)
+  isPrimary     Boolean        @default(false)   // ← NOVO
   economyUsers  EconomyUser[]
-  gameConfigs   GameConfig[]
+  gameCurrencies GameCurrency[]
 
   @@unique([guildId, name])
 }
@@ -153,19 +153,34 @@ model CoinflipStats {
 }
 
 model GameConfig {
-  id         String   @id @default(uuid())
-  guildId    String
-  guild      Guild    @relation(fields: [guildId], references: [id])
-  gameName   String
-  enabled    Boolean  @default(true)
-  currencyId String?
-  currency   Currency? @relation(fields: [currencyId], references: [id])
-  minBet     Int      @default(10)
-  maxBet     Int      @default(1000)
-  reward     Int      @default(100)
-  dailyLimit Int      @default(0)
+  id          String   @id @default(uuid())
+  guildId     String
+  gameName    String
+  enabled     Boolean  @default(true)
+  minBet      Int      @default(10)
+  maxBet      Int      @default(1000)
+  reward      Int      @default(100)
+  dailyLimit  Int      @default(0)
+
+  currencyMode String  @default("single")
+
+  currencies  GameCurrency[]
 
   @@unique([guildId, gameName])
+}
+
+
+model GameCurrency {
+  id           String     @id @default(uuid())
+  gameConfigId String
+  gameConfig   GameConfig @relation(fields: [gameConfigId], references: [id], onDelete: Cascade)
+  currencyId   String
+  currency     Currency   @relation(fields: [currencyId], references: [id], onDelete: Cascade)
+  minBet       Int?    
+  maxBet       Int?
+  reward       Int?
+
+  @@unique([gameConfigId, currencyId])
 }
 
 model Birthday {
@@ -323,51 +338,33 @@ model TicketPanel {
   channelId         String?
   sendType          String        @default("panel")
   ticketButtonsJson Json?
-
-  // Painel público enviado no canal de suporte
   openMessage       String?
   embedJson         Json?
   componentsJson    Json?
-
-  // Mensagem enviada dentro do canal criado do ticket
   ticketMessage        String?
   ticketEmbedJson      Json?
   ticketComponentsJson Json?
-
-  // Mensagens auxiliares
   closeMessage      String?
-
-  // Configurações de cargos/permissões
   staffRoles        String?
   addRolesOnOpen    String?
   removeRolesOnOpen String?
-
-  // Compatibilidade antiga
   buttonsJson       String?
-
-  // Configurações gerais do ticket
   ticketChannelName String        @default("ticket-{count}")
   maxTickets        Int           @default(5)
   ticketLimit       Int           @default(1)
   enabled           Boolean       @default(true)
   closeInTwoSteps   Boolean       @default(false)
   ticketPadding     Int           @default(4)
-
-  // Configurações da aba moderador
   moderatorOptionsJson Json?
-
   permissionsJson Json?
   formsJson       Json?
   limitsJson      Json?
   messagesJson    Json?
-
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
-
   config            TicketConfig  @relation(fields: [guildId], references: [guildId], onDelete: Cascade, map: "TicketPanel_config_fkey")
   guild             Guild         @relation(fields: [guildId], references: [id], onDelete: Cascade, map: "TicketPanel_guild_fkey")
   tickets           Ticket[]
-
   @@unique([guildId, id])
 }
 

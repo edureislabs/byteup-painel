@@ -6,20 +6,35 @@ type Currency = {
   id: string;
   name: string;
   symbol: string;
-  taxRate: number;
-  exchangeRate: number;
+  isPrimary: boolean;
+};
+
+type GameCurrencyEntry = {
+  currencyId: string;
+  minBet: number | null;
+  maxBet: number | null;
+  reward: number | null;
+};
+
+type GameCurrencyWithCurrency = {
+  id: string;
+  currencyId: string;
+  currency: Currency;
+  minBet: number | null;
+  maxBet: number | null;
+  reward: number | null;
 };
 
 type GameConfig = {
   id: string;
   gameName: string;
   enabled: boolean;
-  currencyId: string | null;
-  currency: Currency | null;
+  currencyMode: 'single' | 'multi_fixed' | 'multi_user';
   minBet: number;
   maxBet: number;
   reward: number;
   dailyLimit: number;
+  currencies: GameCurrencyWithCurrency[];
 };
 
 type Props = {
@@ -33,10 +48,16 @@ const GAME_LABELS: Record<string, string> = {
 
 const AVAILABLE_GAMES = ['caracoroa', 'roll'];
 
+const MODE_LABELS = {
+  single: 'Moeda única',
+  multi_fixed: 'Múltiplas fixas (todas ao mesmo tempo)',
+  multi_user: 'Múltiplas livres (usuário escolhe)',
+};
+
 export default function GamesManager({ guildId }: Props) {
   const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [games, setGames] = useState<GameConfig[]>([]);
-  const [localGames, setLocalGames] = useState<Record<string, Partial<GameConfig>>>({});
+  const [localGames, setLocalGames] = useState<Record<string, any>>({});
   const [message, setMessage] = useState('');
   const [savingGame, setSavingGame] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -63,33 +84,39 @@ export default function GamesManager({ guildId }: Props) {
   }, [guildId]);
 
   useEffect(() => {
-    Promise.all([fetchCurrencies(), fetchGames()]).finally(() => setLoading(false));
+    Promise.all([fetchCurrencies(), fetchGames()]).finally(() =>
+      setLoading(false)
+    );
   }, [fetchCurrencies, fetchGames]);
 
-  // ===== GET GAME (mesclado) =====
+  // ===== GET GAME =====
   const getGame = useCallback(
     (gameName: string) => {
       const saved = games.find((g) => g.gameName === gameName);
       const local = localGames[gameName] || {};
 
-      return {
+      const base = {
         gameName,
         enabled: false,
-        currencyId: null as string | null,
+        currencyMode: 'single' as const,
         minBet: 10,
         maxBet: 1000,
         reward: 100,
         dailyLimit: 0,
-        currency: null,
+        currencies: [] as GameCurrencyWithCurrency[],
         ...saved,
+      };
+
+      return {
+        ...base,
         ...local,
+        currencies: local.currencies ?? base.currencies ?? [],
       };
     },
     [games, localGames]
   );
 
-  // ===== SET LOCAL =====
-  const setLocal = useCallback((gameName: string, updates: Partial<GameConfig>) => {
+  const setLocal = useCallback((gameName: string, updates: any) => {
     setLocalGames((prev) => ({
       ...prev,
       [gameName]: { ...prev[gameName], ...updates },
@@ -106,10 +133,22 @@ export default function GamesManager({ guildId }: Props) {
       setMessage('');
 
       try {
+        const payload: any = { gameName, ...local };
+
+        // Normaliza currencies se vierem do local
+        if (local.currencies) {
+          payload.currencies = local.currencies.map((c: any) => ({
+            currencyId: c.currencyId,
+            minBet: c.minBet ?? null,
+            maxBet: c.maxBet ?? null,
+            reward: c.reward ?? null,
+          }));
+        }
+
         const res = await fetch(`/api/guilds/${guildId}/games`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ gameName, ...local }),
+          body: JSON.stringify(payload),
         });
 
         const data = await res.json();
@@ -149,11 +188,11 @@ export default function GamesManager({ guildId }: Props) {
         if (res.ok) {
           await fetchGames();
         } else {
-          setMessage(data.error || 'Erro ao alterar status do jogo.');
+          setMessage(data.error || 'Erro ao alterar status.');
         }
       } catch (err) {
-        console.error('Erro ao alternar status:', err);
-        setMessage('Erro de rede ao alterar status.');
+        console.error('Erro:', err);
+        setMessage('Erro de rede.');
       } finally {
         setSavingGame(null);
       }
@@ -161,7 +200,54 @@ export default function GamesManager({ guildId }: Props) {
     [guildId, fetchGames]
   );
 
-  // ===== RESET LOCAL =====
+  // ===== CURRENCIES HELPERS =====
+  const addCurrencyToGame = useCallback(
+    (gameName: string, game: any) => {
+      const current = game.currencies || [];
+      const usedIds = current.map((c: any) => c.currencyId);
+      const available = currencies.find((c) => !usedIds.includes(c.id));
+
+      if (!available) {
+        setMessage('Todas as moedas já foram adicionadas.');
+        return;
+      }
+
+      const next = [
+        ...current,
+        {
+          currencyId: available.id,
+          currency: available,
+          minBet: null,
+          maxBet: null,
+          reward: null,
+        },
+      ];
+
+      setLocal(gameName, { currencies: next });
+    },
+    [currencies, setLocal]
+  );
+
+  const updateCurrencyInGame = useCallback(
+    (gameName: string, game: any, currencyId: string, updates: any) => {
+      const next = game.currencies.map((c: any) =>
+        c.currencyId === currencyId ? { ...c, ...updates } : c
+      );
+      setLocal(gameName, { currencies: next });
+    },
+    [setLocal]
+  );
+
+  const removeCurrencyFromGame = useCallback(
+    (gameName: string, game: any, currencyId: string) => {
+      const next = game.currencies.filter(
+        (c: any) => c.currencyId !== currencyId
+      );
+      setLocal(gameName, { currencies: next });
+    },
+    [setLocal]
+  );
+
   const resetLocal = useCallback((gameName: string) => {
     setLocalGames((prev) => ({ ...prev, [gameName]: {} }));
     setMessage('');
@@ -174,7 +260,6 @@ export default function GamesManager({ guildId }: Props) {
     return 'error';
   }, [message]);
 
-  // ===== AUTO-LIMPAR MENSAGEM =====
   useEffect(() => {
     if (!message) return;
     const timeout = setTimeout(() => setMessage(''), 4000);
@@ -190,10 +275,10 @@ export default function GamesManager({ guildId }: Props) {
   }
 
   return (
-    <div style={{ fontFamily: 'DM Sans, sans-serif', color: '#dbdee1', maxWidth: '640px' }}>
+    <div style={{ fontFamily: 'DM Sans, sans-serif', color: '#dbdee1', maxWidth: '720px' }}>
       <h2 style={{ color: '#f2f3f5', marginBottom: '8px' }}>Configuração de Jogos</h2>
       <p style={{ color: '#72767d', fontSize: '13px', marginBottom: '24px' }}>
-        Configure moeda, limites e recompensas para cada jogo.
+        Configure moedas, limites e recompensas para cada jogo.
       </p>
 
       {AVAILABLE_GAMES.map((gameName) => {
@@ -210,7 +295,6 @@ export default function GamesManager({ guildId }: Props) {
               borderRadius: '12px',
               padding: '20px',
               marginBottom: '16px',
-              transition: 'border-color 0.2s',
             }}
           >
             {/* Cabeçalho */}
@@ -241,7 +325,6 @@ export default function GamesManager({ guildId }: Props) {
                     cursor: isSaving ? 'wait' : 'pointer',
                     position: 'relative',
                     padding: 0,
-                    opacity: isSaving ? 0.6 : 1,
                   }}
                   onClick={() => toggleEnabled(gameName, game.enabled)}
                 >
@@ -261,35 +344,26 @@ export default function GamesManager({ guildId }: Props) {
               </div>
             </div>
 
-            {/* Campos (só quando ativo) */}
             {game.enabled && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {/* Moeda */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {/* Modo de moeda */}
                 <div>
-                  <label style={labelStyle}>Moeda</label>
+                  <label style={labelStyle}>Modo de moeda</label>
                   <select
-                    value={game.currencyId || ''}
-                    onChange={(e) => setLocal(gameName, { currencyId: e.target.value || null })}
+                    value={game.currencyMode}
+                    onChange={(e) => setLocal(gameName, { currencyMode: e.target.value })}
                     style={selectStyle}
                   >
-                    <option value="">Nenhuma (recompensa em texto)</option>
-                    {currencies.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name} ({c.symbol})
-                      </option>
-                    ))}
+                    <option value="single">Moeda única</option>
+                    <option value="multi_fixed">Múltiplas fixas (todas ao mesmo tempo)</option>
+                    <option value="multi_user">Múltiplas livres (usuário escolhe)</option>
                   </select>
-                  {currencies.length === 0 && (
-                    <p style={{ fontSize: '11px', color: '#ed4245', marginTop: '4px' }}>
-                      Nenhuma moeda cadastrada. Crie uma em Economia → Moedas.
-                    </p>
-                  )}
                 </div>
 
-                {/* Apostas + Recompensa + Limite */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                {/* Valores padrão do jogo */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '12px' }}>
                   <div>
-                    <label style={labelStyle}>Aposta Mínima</label>
+                    <label style={labelStyle}>Aposta mín. padrão</label>
                     <input
                       type="number"
                       min={0}
@@ -299,7 +373,7 @@ export default function GamesManager({ guildId }: Props) {
                     />
                   </div>
                   <div>
-                    <label style={labelStyle}>Aposta Máxima</label>
+                    <label style={labelStyle}>Aposta máx. padrão</label>
                     <input
                       type="number"
                       min={0}
@@ -309,7 +383,7 @@ export default function GamesManager({ guildId }: Props) {
                     />
                   </div>
                   <div>
-                    <label style={labelStyle}>Recompensa</label>
+                    <label style={labelStyle}>Recompensa padrão</label>
                     <input
                       type="number"
                       min={0}
@@ -319,41 +393,145 @@ export default function GamesManager({ guildId }: Props) {
                     />
                   </div>
                   <div>
-                    <label style={labelStyle}>Limite Diário</label>
+                    <label style={labelStyle}>Limite diário</label>
                     <input
                       type="number"
                       min={0}
-                      placeholder="0 = ilimitado"
-                      value={game.dailyLimit ?? ''}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setLocal(gameName, {
-                          dailyLimit: val === '' ? 0 : Number(val),
-                        });
-                      }}
+                      value={game.dailyLimit}
+                      onChange={(e) => setLocal(gameName, { dailyLimit: Number(e.target.value) })}
                       style={inputStyle}
                     />
-                    <p style={{ fontSize: '10px', color: '#72767d', marginTop: '4px' }}>
-                      0 = sem limite
-                    </p>
                   </div>
                 </div>
 
-                {/* Validação */}
-                {game.minBet > game.maxBet && (
-                  <p style={{ fontSize: '12px', color: '#ed4245' }}>
-                    ⚠️ Aposta mínima não pode ser maior que a máxima.
-                  </p>
+                {/* Se NÃO for single, mostra moedas */}
+                {game.currencyMode !== 'single' && (
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <label style={{ ...labelStyle, marginBottom: 0 }}>
+                        Moedas do jogo
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => addCurrencyToGame(gameName, game)}
+                        style={{
+                          background: '#C100FF',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          padding: '6px 12px',
+                          fontSize: '12px',
+                          cursor: 'pointer',
+                          fontWeight: 600,
+                        }}
+                      >
+                        + Adicionar moeda
+                      </button>
+                    </div>
+
+                    {game.currencies.length === 0 ? (
+                      <p style={{ fontSize: '12px', color: '#72767d', fontStyle: 'italic' }}>
+                        Nenhuma moeda adicionada. Clique em "+ Adicionar moeda".
+                      </p>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {game.currencies.map((entry: any) => {
+                          const currency =
+                            entry.currency ||
+                            currencies.find((c) => c.id === entry.currencyId);
+
+                          return (
+                            <div
+                              key={entry.currencyId}
+                              style={{
+                                background: '#0e0f11',
+                                border: '1px solid #1e2025',
+                                borderRadius: '8px',
+                                padding: '12px',
+                                display: 'grid',
+                                gridTemplateColumns: '1.5fr 1fr 1fr 1fr auto',
+                                gap: '8px',
+                                alignItems: 'center',
+                              }}
+                            >
+                              <span style={{ fontSize: '13px', color: '#dbdee1', fontWeight: 600 }}>
+                                {currency?.symbol} {currency?.name}
+                                {currency?.isPrimary && (
+                                  <span style={{ marginLeft: '6px', fontSize: '10px', color: '#C100FF' }}>
+                                    (primária)
+                                  </span>
+                                )}
+                              </span>
+                              <input
+                                type="number"
+                                placeholder={`${game.minBet}`}
+                                value={entry.minBet ?? ''}
+                                onChange={(e) =>
+                                  updateCurrencyInGame(gameName, game, entry.currencyId, {
+                                    minBet: e.target.value === '' ? null : Number(e.target.value),
+                                  })
+                                }
+                                style={smallInputStyle}
+                                title="Aposta mínima (vazio = usa padrão)"
+                              />
+                              <input
+                                type="number"
+                                placeholder={`${game.maxBet}`}
+                                value={entry.maxBet ?? ''}
+                                onChange={(e) =>
+                                  updateCurrencyInGame(gameName, game, entry.currencyId, {
+                                    maxBet: e.target.value === '' ? null : Number(e.target.value),
+                                  })
+                                }
+                                style={smallInputStyle}
+                                title="Aposta máxima (vazio = usa padrão)"
+                              />
+                              <input
+                                type="number"
+                                placeholder={`${game.reward}`}
+                                value={entry.reward ?? ''}
+                                onChange={(e) =>
+                                  updateCurrencyInGame(gameName, game, entry.currencyId, {
+                                    reward: e.target.value === '' ? null : Number(e.target.value),
+                                  })
+                                }
+                                style={smallInputStyle}
+                                title="Recompensa (vazio = usa padrão)"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeCurrencyFromGame(gameName, game, entry.currencyId)}
+                                style={{
+                                  background: 'transparent',
+                                  border: '1px solid #ed424540',
+                                  borderRadius: '6px',
+                                  color: '#ed4245',
+                                  padding: '6px 10px',
+                                  fontSize: '12px',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          );
+                        })}
+                        <p style={{ fontSize: '10px', color: '#72767d', marginTop: '4px' }}>
+                          Vazio = usa o valor padrão do jogo.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {/* Botões */}
-                <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                <div style={{ display: 'flex', gap: '8px' }}>
                   <button
                     type="button"
                     onClick={() => saveGame(gameName)}
-                    disabled={!isLocal || isSaving || game.minBet > game.maxBet}
+                    disabled={!isLocal || isSaving}
                     style={{
-                      background: isLocal && !isSaving && game.minBet <= game.maxBet ? '#C100FF' : '#2b2d31',
+                      background: isLocal && !isSaving ? '#C100FF' : '#2b2d31',
                       color: 'white',
                       border: 'none',
                       borderRadius: '8px',
@@ -361,7 +539,6 @@ export default function GamesManager({ guildId }: Props) {
                       fontSize: '14px',
                       fontWeight: 600,
                       cursor: isLocal && !isSaving ? 'pointer' : 'not-allowed',
-                      transition: 'background 0.15s',
                       flex: 1,
                     }}
                   >
@@ -392,7 +569,6 @@ export default function GamesManager({ guildId }: Props) {
         );
       })}
 
-      {/* Mensagem */}
       {message && messageType && (
         <div
           style={{
@@ -412,7 +588,6 @@ export default function GamesManager({ guildId }: Props) {
   );
 }
 
-// ===== ESTILOS =====
 const labelStyle: React.CSSProperties = {
   fontSize: '11px',
   fontWeight: 600,
@@ -427,7 +602,7 @@ const inputStyle: React.CSSProperties = {
   background: '#0e0f11',
   border: '1px solid #1e2025',
   borderRadius: '8px',
-  padding: '10.1px 14px',
+  padding: '10px 14px',
   fontSize: '14px',
   color: '#dbdee1',
   width: '100%',
@@ -438,4 +613,16 @@ const inputStyle: React.CSSProperties = {
 const selectStyle: React.CSSProperties = {
   ...inputStyle,
   cursor: 'pointer',
+};
+
+const smallInputStyle: React.CSSProperties = {
+  background: '#16181c',
+  border: '1px solid #1e2025',
+  borderRadius: '6px',
+  padding: '6px 8px',
+  fontSize: '12px',
+  color: '#dbdee1',
+  width: '100%',
+  outline: 'none',
+  boxSizing: 'border-box',
 };
