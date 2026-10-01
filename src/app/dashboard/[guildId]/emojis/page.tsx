@@ -1,7 +1,4 @@
-﻿export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
-"use client";
+﻿"use client";
 import { useState } from "react";
 
 type Props = { params: Promise<{ guildId: string }> };

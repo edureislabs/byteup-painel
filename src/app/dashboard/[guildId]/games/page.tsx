@@ -1,7 +1,4 @@
-﻿export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
-import GamesManager from './GamesManager';
+﻿import GamesManager from './GamesManager';
 
 type Props = {
   params: Promise<{ guildId: string }>;

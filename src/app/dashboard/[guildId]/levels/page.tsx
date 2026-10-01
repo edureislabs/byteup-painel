@@ -1,7 +1,4 @@
-﻿export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
-import LevelsManager from './LevelsManager';
+﻿import LevelsManager from './LevelsManager';
 
 type Props = {
   params: Promise<{ guildId: string }>;
