@@ -1,3 +1,7 @@
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
+
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
@@ -18,6 +22,7 @@ export default async function GuildLayout({
 
   const botInGuild = await fetch(`https://discord.com/api/v10/guilds/${guildId}`, {
     headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` },
+    cache: 'no-store',
   }).then(res => res.ok).catch(() => false);
 
   if (!botInGuild) {
@@ -55,88 +60,88 @@ export default async function GuildLayout({
           </h1>
 
           <p style={{
-  fontSize: "14px",
-  color: "rgba(245, 245, 245, 0.5)",
-  margin: "0 0 32px 0",
-  lineHeight: "1.6",
-}}>
-  O ByteUP BOT ainda não está neste servidor. Para configurar este painel,
-  adicione o bot ao servidor pelo botão abaixo e depois volte para tentar
-  novamente.
-</p>
+            fontSize: "14px",
+            color: "rgba(245, 245, 245, 0.5)",
+            margin: "0 0 32px 0",
+            lineHeight: "1.6",
+          }}>
+            O ByteUP BOT ainda não está neste servidor. Para configurar este painel,
+            adicione o bot ao servidor pelo botão abaixo e depois volte para tentar
+            novamente.
+          </p>
 
           <div style={{
-  display: "flex",
-  flexDirection: "column",
-  gap: "12px",
-  alignItems: "center",
-}}>
-  <a
-    href="https://discord.com/oauth2/authorize?client_id=1501767497119174847&permissions=8&integration_type=0&scope=bot+applications.commands"
-    target="_blank"
-    rel="noopener noreferrer"
-    style={{
-      display: "inline-flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: "8px",
-      background: "#C100FF",
-      color: "#F5F5F5",
-      padding: "12px 24px",
-      borderRadius: "8px",
-      textDecoration: "none",
-      fontSize: "14px",
-      fontWeight: 700,
-      boxShadow: "0 0 24px rgba(193, 0, 255, 0.25)",
-    }}
-  >
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12 5v14M5 12h14" />
-    </svg>
-    Adicionar ByteUP BOT
-  </a>
+            display: "flex",
+            flexDirection: "column",
+            gap: "12px",
+            alignItems: "center",
+          }}>
+            <a
+              href="https://discord.com/oauth2/authorize?client_id=1501767497119174847&permissions=8&integration_type=0&scope=bot+applications.commands"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                background: "#C100FF",
+                color: "#F5F5F5",
+                padding: "12px 24px",
+                borderRadius: "8px",
+                textDecoration: "none",
+                fontSize: "14px",
+                fontWeight: 700,
+                boxShadow: "0 0 24px rgba(193, 0, 255, 0.25)",
+              }}
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              Adicionar ByteUP BOT
+            </a>
 
-  <a
-    href="/dashboard"
-    style={{
-      display: "inline-flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: "8px",
-      background: "rgba(245, 245, 245, 0.06)",
-      color: "rgba(245, 245, 245, 0.75)",
-      padding: "10px 22px",
-      borderRadius: "8px",
-      textDecoration: "none",
-      fontSize: "14px",
-      fontWeight: 600,
-      border: "1px solid rgba(245, 245, 245, 0.08)",
-    }}
-  >
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M19 12H5M12 19l-7-7 7-7" />
-    </svg>
-    Voltar para meus servidores
-  </a>
-</div>
+            <a
+              href="/dashboard"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                background: "rgba(245, 245, 245, 0.06)",
+                color: "rgba(245, 245, 245, 0.75)",
+                padding: "10px 22px",
+                borderRadius: "8px",
+                textDecoration: "none",
+                fontSize: "14px",
+                fontWeight: 600,
+                border: "1px solid rgba(245, 245, 245, 0.08)",
+              }}
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+              Voltar para meus servidores
+            </a>
+          </div>
         </div>
       </div>
     );
