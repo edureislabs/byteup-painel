@@ -4,8 +4,9 @@ export const fetchCache = 'force-no-store';
 
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 import { canAccessPanel } from "@/lib/permissions";
+import { isSnowflake } from "@/lib/apiGuard";
 import Sidebar from "./Sidebar";
 
 export default async function GuildLayout({
@@ -19,6 +20,9 @@ export default async function GuildLayout({
   if (!session) redirect("/login");
 
   const { guildId } = await params;
+
+  // ID de servidor do Discord é só número. Qualquer outra coisa é 404.
+  if (!isSnowflake(guildId)) notFound();
 
   const botInGuild = await fetch(`https://discord.com/api/v10/guilds/${guildId}`, {
     headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` },

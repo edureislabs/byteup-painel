@@ -17,7 +17,7 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.accessToken) {
+    if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Não autorizado' },
         { status: 401, ...NO_CACHE }
@@ -56,7 +56,7 @@ export async function POST(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.accessToken) {
+    if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Não autorizado' },
         { status: 401, ...NO_CACHE }

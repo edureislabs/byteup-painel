@@ -9,7 +9,7 @@ export async function GET(
   { params }: { params: Promise<{ guildId: string }> }
 ) {
   const session = await getServerSession(authOptions);
-  if (!session?.accessToken) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  if (!session?.user?.id) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
 
   const { guildId } = await params;
   const hasAccess = await canAccessPanel(guildId);
@@ -24,7 +24,7 @@ export async function POST(
   { params }: { params: Promise<{ guildId: string }> }
 ) {
   const session = await getServerSession(authOptions);
-  if (!session?.accessToken) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  if (!session?.user?.id) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
 
   const { guildId } = await params;
   const hasAccess = await canAccessPanel(guildId);

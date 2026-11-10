@@ -1,4 +1,5 @@
 ﻿import { prisma } from "@/lib/prisma";
+import { assertGuildAccess } from "@/lib/apiGuard";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -17,6 +18,7 @@ async function getConfig(guildId: string) {
 
 async function saveAutomodAction(guildId: string, formData: FormData) {
   "use server";
+  await assertGuildAccess(guildId);
   const automodEnabled = formData.get("automodEnabled") === "true";
   const automodBannedWords = (formData.get("automodBannedWords") as string) || '[]';
   const automodLinkBlocklist = (formData.get("automodLinkBlocklist") as string) || '[]';

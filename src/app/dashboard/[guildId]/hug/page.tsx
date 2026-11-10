@@ -1,4 +1,5 @@
 ﻿import { prisma } from "@/lib/prisma";
+import { assertGuildAccess } from "@/lib/apiGuard";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -17,6 +18,7 @@ async function getConfig(guildId: string) {
 
 async function saveHugAction(guildId: string, formData: FormData) {
   "use server";
+  await assertGuildAccess(guildId);
   const hugEnabled = formData.get("hugEnabled") === "true";
   const hugTitle = (formData.get("hugTitle") as string) || "Abraco";
   const hugColor = (formData.get("hugColor") as string) || "#F472B6";

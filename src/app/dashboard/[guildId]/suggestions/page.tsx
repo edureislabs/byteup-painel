@@ -1,4 +1,5 @@
 ﻿import { prisma } from '@/lib/prisma';
+import { assertGuildAccess } from "@/lib/apiGuard";
 import { revalidatePath } from 'next/cache';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
@@ -17,6 +18,7 @@ async function getConfig(guildId: string) {
 
 async function saveSuggestionConfigAction(guildId: string, formData: FormData) {
   'use server';
+  await assertGuildAccess(guildId);
   const enabled = formData.get('enabled') === 'true';
   const channelId = (formData.get('channelId') as string) || null;
   const anonymous = formData.get('anonymous') === 'true';
@@ -36,15 +38,22 @@ async function updateSuggestionAction(
   guildId: string,
   suggestionId: string,
   status: string,
-  userId: string,
+  _clientUserId: string,
   staffComment: string | null
 ) {
   'use server';
-  await prisma.suggestion.update({
-    where: { id: suggestionId },
+  // O ID de quem revisou vem da sessão, nunca do navegador.
+  const userId = await assertGuildAccess(guildId);
+
+  const ALLOWED = ['pending', 'approved', 'denied', 'implemented'];
+  if (!ALLOWED.includes(status)) throw new Error('Status inválido');
+
+  // updateMany com guildId garante que a sugestão é deste servidor
+  await prisma.suggestion.updateMany({
+    where: { id: String(suggestionId), guildId },
     data: {
       status,
-      staffComment,
+      staffComment: staffComment ? String(staffComment).slice(0, 1000) : null,
       reviewedBy: userId,
       reviewedAt: new Date(),
     },

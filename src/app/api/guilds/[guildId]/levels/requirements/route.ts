@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { guardApi } from '@/lib/apiGuard';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ guildId: string }> }) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+function toLevel(value: unknown): number | null {
+  const n = Number(value);
+  return Number.isInteger(n) && n >= 1 && n <= 100_000 ? n : null;
+}
 
+export async function GET(req: NextRequest, { params }: { params: Promise<{ guildId: string }> }) {
   const { guildId } = await params;
+  const denied = await guardApi(guildId);
+  if (denied) return denied;
+
   const requirements = await prisma.levelRequirement.findMany({
     where: { guildId },
     orderBy: { level: 'asc' },
@@ -17,53 +21,49 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ guil
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ guildId: string }> }) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-
   const { guildId } = await params;
-  const body = await req.json();
-  const { level, xpNeeded } = body;
+  const denied = await guardApi(guildId);
+  if (denied) return denied;
 
-  if (!level || !xpNeeded) {
-    return NextResponse.json({ error: 'level e xpNeeded são obrigatórios' }, { status: 400 });
+  const body = await req.json().catch(() => ({}));
+  const level = toLevel(body.level);
+  const xpNeeded = Number(body.xpNeeded);
+
+  if (!level || !Number.isInteger(xpNeeded) || xpNeeded < 1 || xpNeeded > 2_000_000_000) {
+    return NextResponse.json(
+      { error: 'Nível e XP necessário precisam ser números inteiros positivos' },
+      { status: 400 }
+    );
   }
 
   try {
-    const existing = await prisma.levelRequirement.findUnique({
+    const saved = await prisma.levelRequirement.upsert({
       where: { guildId_level: { guildId, level } },
+      update: { xpNeeded },
+      create: { guildId, level, xpNeeded },
     });
-
-    if (existing) {
-      const updated = await prisma.levelRequirement.update({
-        where: { guildId_level: { guildId, level } },
-        data: { xpNeeded },
-      });
-      return NextResponse.json(updated);
-    } else {
-      const created = await prisma.levelRequirement.create({
-        data: { guildId, level, xpNeeded },
-      });
-      return NextResponse.json(created);
-    }
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Erro ao salvar requisito' }, { status: 500 });
+    return NextResponse.json(saved);
+  } catch (error) {
+    console.error('[levels/requirements POST] Erro:', error);
+    return NextResponse.json({ error: 'Erro ao salvar requisito' }, { status: 500 });
   }
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ guildId: string }> }) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-
   const { guildId } = await params;
-  const { searchParams } = new URL(req.url);
-  const level = parseInt(searchParams.get('level') || '');
+  const denied = await guardApi(guildId);
+  if (denied) return denied;
 
-  if (!level) return NextResponse.json({ error: 'Nível é obrigatório' }, { status: 400 });
+  const { searchParams } = new URL(req.url);
+  const level = toLevel(searchParams.get('level'));
+
+  if (!level) return NextResponse.json({ error: 'Nível inválido' }, { status: 400 });
 
   try {
     await prisma.levelRequirement.deleteMany({ where: { guildId, level } });
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Erro ao remover requisito' }, { status: 500 });
+  } catch (error) {
+    console.error('[levels/requirements DELETE] Erro:', error);
+    return NextResponse.json({ error: 'Erro ao remover requisito' }, { status: 500 });
   }
 }

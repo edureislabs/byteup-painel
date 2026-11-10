@@ -1,6 +1,7 @@
 ﻿"use client";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { escapeHtml } from "@/lib/escapehtml";
 
 interface WelcomeConfig {
   channelId: string | null;
@@ -262,7 +263,8 @@ export default function WelcomeConfig() {
 
   const processMarkdown = (text: string) => {
     if (!text) return "";
-    let processed = processPreview(text);
+    // Escapa o HTML antes do markdown para impedir XSS
+    let processed = escapeHtml(processPreview(text));
     processed = processed.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
     processed = processed.replace(/\*(.*?)\*/g, "<em>$1</em>");
     processed = processed.replace(/__(.*?)__/g, "<u>$1</u>");

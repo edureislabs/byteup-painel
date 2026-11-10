@@ -1,4 +1,5 @@
 ﻿import { prisma } from "@/lib/prisma";
+import { assertGuildAccess } from "@/lib/apiGuard";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -17,6 +18,7 @@ async function getConfig(guildId: string) {
 
 async function saveSlapAction(guildId: string, formData: FormData) {
   "use server";
+  await assertGuildAccess(guildId);
   const slapEnabled = formData.get("slapEnabled") === "true";
   const slapTitle = (formData.get("slapTitle") as string) || "Tapa";
   const slapColor = (formData.get("slapColor") as string) || "#ED4245";

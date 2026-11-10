@@ -1,4 +1,5 @@
 'use client';
+import { escapeHtml } from '@/lib/escapehtml';
 import { useState, useRef } from 'react';
 
 type Channel = { id: string; name: string };
@@ -18,7 +19,8 @@ type Props = {
 };
 
 function renderMarkdown(text: string) {
-  let html = text
+  // Escapa o HTML antes do markdown para impedir XSS
+  let html = escapeHtml(text)
     .replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>')
     .replace(/__\*\*(.*?)\*\*__/g, '<strong><u>$1</u></strong>')
     .replace(/__\*(.*?)\*__/g, '<em><u>$1</u></em>')

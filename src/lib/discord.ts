@@ -6,6 +6,14 @@ if (!botToken) {
   throw new Error('DISCORD_BOT_TOKEN não configurado')
 }
 
+function assertSnowflake(...ids: string[]) {
+  for (const id of ids) {
+    if (typeof id !== 'string' || !/^\d{17,20}$/.test(id)) {
+      throw new Error('ID inválido')
+    }
+  }
+}
+
 async function discordFetch(endpoint: string, options?: RequestInit) {
   const headers: Record<string, string> = {
     Authorization: `Bot ${botToken}`,
@@ -80,6 +88,7 @@ export function getGuildIcon(guildId: string, icon: string | null) {
 
 export async function getDiscordUser(userId: string) {
   try {
+    assertSnowflake(userId)
     const response = await fetch(`https://discord.com/api/users/${userId}`, {
       headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` },
       cache: "no-store"
@@ -92,10 +101,12 @@ export async function getDiscordUser(userId: string) {
 }
 
 export async function getGuildEmojis(guildId: string) {
+  assertSnowflake(guildId)
   return discordFetch(`/guilds/${guildId}/emojis`)
 }
 
 export async function createGuildEmoji(guildId: string, name: string, image: string) {
+  assertSnowflake(guildId)
   return discordFetch(`/guilds/${guildId}/emojis`, {
     method: 'POST',
     body: JSON.stringify({ name, image }),
@@ -103,6 +114,7 @@ export async function createGuildEmoji(guildId: string, name: string, image: str
 }
 
 export async function deleteGuildEmoji(guildId: string, emojiId: string) {
+  assertSnowflake(guildId, emojiId)
   return discordFetch(`/guilds/${guildId}/emojis/${emojiId}`, {
     method: 'DELETE',
   })

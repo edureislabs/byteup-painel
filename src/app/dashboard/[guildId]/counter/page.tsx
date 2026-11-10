@@ -1,4 +1,5 @@
 ﻿import { prisma } from '@/lib/prisma';
+import { assertGuildAccess } from "@/lib/apiGuard";
 import { revalidatePath } from 'next/cache';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
@@ -31,6 +32,7 @@ async function getChannels(guildId: string) {
 
 async function saveCounterAction(guildId: string, formData: FormData) {
   'use server';
+  await assertGuildAccess(guildId);
   const counterEnabled = formData.get('counterEnabled') === 'true';
   const counterChannelId = (formData.get('counterChannelId') as string) || null;
   const counterTemplate =

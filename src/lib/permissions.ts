@@ -1,11 +1,9 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
+import { getDiscordAccessToken } from "@/lib/discordtoken";
 
-export async function getDiscordAccessToken(): Promise<string | null> {
-  const session = await getServerSession(authOptions);
-  return (session as any)?.accessToken || null;
-}
+export { getDiscordAccessToken };
 
 // ===== CACHE EM MEMÓRIA =====
 // Chave: `${userId}:${guildId}` → { value, expiresAt }
@@ -69,8 +67,8 @@ async function fetchDiscordGuilds(accessToken: string): Promise<any[]> {
 
 export async function canAccessPanel(guildId: string): Promise<boolean> {
   const session = await getServerSession(authOptions);
-  const userId = (session?.user as any)?.id;
-  const accessToken = (session as any)?.accessToken;
+  const userId = session?.user?.id;
+  const accessToken = await getDiscordAccessToken();
 
   if (!accessToken || !userId) return false;
 

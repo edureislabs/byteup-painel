@@ -1,22 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { guardApi } from "@/lib/apiGuard";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ guildId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json(
-        { error: "Não autorizado" },
-        { status: 401 }
-      );
-    }
-
     const { guildId } = await params;
+    const denied = await guardApi(guildId);
+    if (denied) return denied;
 
     const res = await fetch(
       `https://discord.com/api/v10/guilds/${guildId}/channels`,
@@ -47,10 +39,8 @@ export async function GET(
       .sort((a: any, b: any) => a.position - b.position);
 
     return NextResponse.json(categories);
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || "Erro interno" },
-      { status: 500 }
-    );
+  } catch (error) {
+    console.error("[categories] Erro:", error);
+    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
   }
 }

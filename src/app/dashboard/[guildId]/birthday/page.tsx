@@ -1,4 +1,5 @@
 ﻿import { prisma } from "@/lib/prisma";
+import { assertGuildAccess } from "@/lib/apiGuard";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -40,6 +41,7 @@ async function getCurrencies(guildId: string) {
 
 async function saveBirthdayAction(guildId: string, formData: FormData) {
   "use server";
+  await assertGuildAccess(guildId);
   const birthdayEnabled = formData.get("birthdayEnabled") === "true";
   const birthdayChannelId = (formData.get("birthdayChannelId") as string) || null;
   const birthdayMessage = (formData.get("birthdayMessage") as string) || "Feliz aniversario, {user}!";

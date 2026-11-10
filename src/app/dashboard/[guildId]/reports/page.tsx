@@ -1,4 +1,5 @@
 ﻿import { prisma } from '@/lib/prisma';
+import { assertGuildAccess } from "@/lib/apiGuard";
 import { revalidatePath } from 'next/cache';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
@@ -17,6 +18,7 @@ async function getConfig(guildId: string) {
 
 async function saveReportConfigAction(guildId: string, formData: FormData) {
   'use server';
+  await assertGuildAccess(guildId);
   const enabled = formData.get('enabled') === 'true';
   const channelId = (formData.get('channelId') as string) || null;
   const mentionStaff = formData.get('mentionStaff') === 'true';
@@ -35,11 +37,18 @@ async function resolveReportAction(
   guildId: string,
   reportId: string,
   status: string,
-  userId: string
+  _clientUserId: string
 ) {
   'use server';
-  await prisma.report.update({
-    where: { id: reportId },
+  // O ID de quem resolveu vem da sessão, nunca do navegador.
+  const userId = await assertGuildAccess(guildId);
+
+  const ALLOWED = ['pending', 'resolved', 'ignored'];
+  if (!ALLOWED.includes(status)) throw new Error('Status inválido');
+
+  // updateMany com guildId garante que a denúncia é deste servidor
+  await prisma.report.updateMany({
+    where: { id: String(reportId), guildId },
     data: {
       status,
       resolvedBy: userId,

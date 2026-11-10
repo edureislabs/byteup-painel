@@ -4,7 +4,6 @@ import type { DefaultSession, NextAuthOptions } from "next-auth"
 
 declare module "next-auth" {
   interface Session {
-    accessToken?: string
     user: {
       id: string
     } & DefaultSession["user"]
@@ -27,7 +26,7 @@ export const authOptions: NextAuthOptions = {
       return token
     },
     async session({ session, token }) {
-      session.accessToken = token.accessToken as string
+
       if (session.user) {
         session.user.id = token.sub!
       }

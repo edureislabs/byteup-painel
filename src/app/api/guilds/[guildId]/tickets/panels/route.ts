@@ -11,7 +11,7 @@ export async function POST(
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session?.accessToken) {
+    if (!session?.user?.id) {
       return NextResponse.json(
         { error: "Não autorizado" },
         { status: 401 },
