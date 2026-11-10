@@ -77,7 +77,7 @@ export async function POST(
       );
     }
 
-    const body = await req.json();
+    const body = await req.json().catch(() => ({}));
     const {
       gameName,
       enabled,
@@ -94,6 +94,51 @@ export async function POST(
         { error: 'gameName é obrigatório' },
         { status: 400, ...NO_CACHE }
       );
+    }
+
+    // ===== Validação dos valores =====
+    // Aposta negativa fazia o "débito" virar crédito no bot (dinheiro infinito).
+    const MAX = 2_000_000_000;
+    const isInt = (v: any, min: number) =>
+      v === undefined || v === null || (Number.isInteger(v) && v >= min && v <= MAX);
+
+    if (!['caracoroa', 'roll'].includes(gameName)) {
+      return NextResponse.json({ error: 'Jogo desconhecido' }, { status: 400, ...NO_CACHE });
+    }
+    if (enabled !== undefined && typeof enabled !== 'boolean') {
+      return NextResponse.json({ error: 'enabled inválido' }, { status: 400, ...NO_CACHE });
+    }
+    if (currencyMode !== undefined && !['single', 'multi_fixed', 'multi_user'].includes(currencyMode)) {
+      return NextResponse.json({ error: 'Modo de moeda inválido' }, { status: 400, ...NO_CACHE });
+    }
+    if (!isInt(minBet, 1) || !isInt(maxBet, 1)) {
+      return NextResponse.json(
+        { error: 'As apostas mínima e máxima devem ser números inteiros a partir de 1' },
+        { status: 400, ...NO_CACHE }
+      );
+    }
+    if (!isInt(reward, 0) || !isInt(dailyLimit, 0)) {
+      return NextResponse.json(
+        { error: 'Prêmio e limite diário devem ser números inteiros a partir de 0' },
+        { status: 400, ...NO_CACHE }
+      );
+    }
+    if (typeof minBet === 'number' && typeof maxBet === 'number' && minBet > maxBet) {
+      return NextResponse.json(
+        { error: 'A aposta mínima não pode ser maior que a máxima' },
+        { status: 400, ...NO_CACHE }
+      );
+    }
+    if (!Array.isArray(currencies) || currencies.length > 25) {
+      return NextResponse.json({ error: 'Lista de moedas inválida' }, { status: 400, ...NO_CACHE });
+    }
+    for (const c of currencies) {
+      if (!c || typeof c.currencyId !== 'string' || !isInt(c.minBet, 1) || !isInt(c.maxBet, 1) || !isInt(c.reward, 0)) {
+        return NextResponse.json(
+          { error: 'Valores inválidos em uma das moedas do jogo' },
+          { status: 400, ...NO_CACHE }
+        );
+      }
     }
 
     if (currencyMode && currencyMode !== 'single' && currencies.length === 0) {
@@ -137,6 +182,13 @@ export async function POST(
     });
 
     let game: any;
+
+    if (existing && (minBet ?? existing.minBet) > (maxBet ?? existing.maxBet)) {
+      return NextResponse.json(
+        { error: 'A aposta mínima não pode ser maior que a máxima' },
+        { status: 400, ...NO_CACHE }
+      );
+    }
 
     if (existing) {
       game = await prisma.gameConfig.update({

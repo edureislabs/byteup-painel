@@ -22,11 +22,17 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, account }) {
       if (account) {
         token.accessToken = account.access_token
+        // Quando o token do Discord expira (em segundos). O token dura
+        // cerca de 7 dias; depois disso o painel manda para o /login
+        // (ver src/lib/discordToken.ts) em vez de mostrar o painel vazio.
+        token.expiresAt = account.expires_at
       }
       return token
     },
     async session({ session, token }) {
-
+      // O accessToken do Discord NÃO vai para a sessão: /api/auth/session
+      // é lido pelo navegador. Ele fica só no JWT (cookie criptografado)
+      // e é lido no servidor por src/lib/discordToken.ts.
       if (session.user) {
         session.user.id = token.sub!
       }

@@ -10,6 +10,38 @@ const NO_CACHE = {
   },
 };
 
+// Limites para os campos da moeda. Taxa negativa fazia o /pay criar dinheiro.
+function validateCurrencyFields(body: any, partial: boolean): string | null {
+  const { name, symbol, taxRate, exchangeRate, isPrimary } = body ?? {};
+
+  if (!partial || name !== undefined) {
+    if (typeof name !== 'string' || !name.trim() || name.length > 32) {
+      return 'Nome da moeda deve ter de 1 a 32 caracteres';
+    }
+  }
+  if (symbol !== undefined && symbol !== null && symbol !== '') {
+    if (typeof symbol !== 'string' || symbol.length > 10) {
+      return 'Símbolo deve ter no máximo 10 caracteres';
+    }
+  }
+  if (taxRate !== undefined && taxRate !== null && taxRate !== '') {
+    const n = Number(taxRate);
+    if (!Number.isFinite(n) || n < 0 || n > 100) {
+      return 'A taxa deve ser um número entre 0 e 100';
+    }
+  }
+  if (exchangeRate !== undefined && exchangeRate !== null && exchangeRate !== '') {
+    const n = Number(exchangeRate);
+    if (!Number.isFinite(n) || n <= 0 || n > 1_000_000) {
+      return 'A taxa de câmbio deve ser maior que 0';
+    }
+  }
+  if (isPrimary !== undefined && typeof isPrimary !== 'boolean') {
+    return 'isPrimary deve ser verdadeiro/falso';
+  }
+  return null;
+}
+
 // ===== GET — lista moedas da guild =====
 export async function GET(
   req: NextRequest,
@@ -73,15 +105,14 @@ export async function POST(
       );
     }
 
-    const body = await req.json();
-    const { name, symbol, taxRate, exchangeRate, isPrimary } = body;
-
-    if (!name) {
-      return NextResponse.json(
-        { error: 'Nome da moeda é obrigatório' },
-        { status: 400, ...NO_CACHE }
-      );
+    const body = await req.json().catch(() => null);
+    const validationError = validateCurrencyFields(body, false);
+    if (validationError) {
+      return NextResponse.json({ error: validationError }, { status: 400, ...NO_CACHE });
     }
+
+    const { symbol, taxRate, exchangeRate, isPrimary } = body;
+    const name = String(body.name).trim();
 
     let guild = await prisma.guild.findUnique({ where: { id: guildId } });
     if (!guild) {
@@ -114,8 +145,8 @@ export async function POST(
         guildId,
         name,
         symbol: symbol || '$',
-        taxRate: taxRate || 0,
-        exchangeRate: exchangeRate || 1.0,
+        taxRate: taxRate ? Number(taxRate) : 0,
+        exchangeRate: exchangeRate ? Number(exchangeRate) : 1.0,
         isPrimary: shouldBePrimary,
       },
     });

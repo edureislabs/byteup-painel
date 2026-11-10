@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { botGet } from '@/lib/discordcache';
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
@@ -42,27 +43,13 @@ export async function GET(
       },
     });
 
-    const channelsRes = await fetch(
-      `https://discord.com/api/v10/guilds/${guildId}/channels`,
-      {
-        headers: {
-          Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
-        },
-      },
-    );
+    const [channelsRes, rolesRes] = await Promise.all([
+      botGet(`/guilds/${guildId}/channels`),
+      botGet(`/guilds/${guildId}/roles`),
+    ]);
 
-    const channels = channelsRes.ok ? await channelsRes.json() : [];
-
-    const rolesRes = await fetch(
-      `https://discord.com/api/v10/guilds/${guildId}/roles`,
-      {
-        headers: {
-          Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
-        },
-      },
-    );
-
-    const roles = rolesRes.ok ? await rolesRes.json() : [];
+    const channels = channelsRes.ok ? channelsRes.data : [];
+    const roles = rolesRes.ok ? rolesRes.data : [];
 
     return NextResponse.json({
       config: ticketConfig,

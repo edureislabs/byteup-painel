@@ -14,7 +14,7 @@
       ["/abracar", "Abraçar um usuário."],
       ["/avatar", "Mostrar o avatar de um usuário."],
       ["/beijo", "Dar um beijo em um usuário."],
-      ["/cara coroa", "Jogar cara ou coroa e desafiar alguém."],
+      ["/caracoroa", "Jogar cara ou coroa apostando contra o bot."],
       ["/piada", "Receber uma piada aleatória."],
       ["/ping", "Mostrar a latência do bot."],
       ["/rolardados", "Rolar dados e apostar contra o bot."],

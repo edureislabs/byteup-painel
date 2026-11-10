@@ -4,6 +4,38 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
 import { canAccessPanel } from '@/lib/permissions';
 
+// Limites para os campos da moeda. Taxa negativa fazia o /pay criar dinheiro.
+function validateCurrencyFields(body: any, partial: boolean): string | null {
+  const { name, symbol, taxRate, exchangeRate, isPrimary } = body ?? {};
+
+  if (!partial || name !== undefined) {
+    if (typeof name !== 'string' || !name.trim() || name.length > 32) {
+      return 'Nome da moeda deve ter de 1 a 32 caracteres';
+    }
+  }
+  if (symbol !== undefined && symbol !== null && symbol !== '') {
+    if (typeof symbol !== 'string' || symbol.length > 10) {
+      return 'Símbolo deve ter no máximo 10 caracteres';
+    }
+  }
+  if (taxRate !== undefined && taxRate !== null && taxRate !== '') {
+    const n = Number(taxRate);
+    if (!Number.isFinite(n) || n < 0 || n > 100) {
+      return 'A taxa deve ser um número entre 0 e 100';
+    }
+  }
+  if (exchangeRate !== undefined && exchangeRate !== null && exchangeRate !== '') {
+    const n = Number(exchangeRate);
+    if (!Number.isFinite(n) || n <= 0 || n > 1_000_000) {
+      return 'A taxa de câmbio deve ser maior que 0';
+    }
+  }
+  if (isPrimary !== undefined && typeof isPrimary !== 'boolean') {
+    return 'isPrimary deve ser verdadeiro/falso';
+  }
+  return null;
+}
+
 // ===== PATCH — atualiza moeda =====
 export async function PATCH(
   req: NextRequest,
@@ -22,8 +54,21 @@ export async function PATCH(
       return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
     }
 
-    const body = await req.json();
-    const { name, symbol, taxRate, exchangeRate, isPrimary } = body;
+    const body = await req.json().catch(() => null);
+    const validationError = validateCurrencyFields(body, true);
+    if (validationError) {
+      return NextResponse.json({ error: validationError }, { status: 400 });
+    }
+    const { symbol, isPrimary } = body;
+    const name = typeof body.name === 'string' ? body.name.trim() : undefined;
+    const taxRate =
+      body.taxRate !== undefined && body.taxRate !== null && body.taxRate !== ''
+        ? Number(body.taxRate)
+        : undefined;
+    const exchangeRate =
+      body.exchangeRate !== undefined && body.exchangeRate !== null && body.exchangeRate !== ''
+        ? Number(body.exchangeRate)
+        : undefined;
 
     // Confirma que a moeda pertence à guild
     const currency = await prisma.currency.findFirst({

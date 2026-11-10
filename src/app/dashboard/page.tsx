@@ -9,18 +9,24 @@ export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/");
 
+  // Token do Discord expirado (~7 dias): faz login de novo em vez de
+  // mostrar o painel sem nenhum servidor.
   const accessToken = await getDiscordAccessToken();
+  if (!accessToken) redirect("/login");
   const userId = (session as any).user?.id;
   const userAvatar = (session as any).user?.image;
   const userName = (session as any).user?.name || "Usuário";
 
   let guilds: any[] = [];
+  let tokenRejected = false;
   const accessibleGuilds: any[] = [];
 
   try {
     const res = await fetch("https://discord.com/api/v10/users/@me/guilds", {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
+
+    if (res.status === 401) tokenRejected = true;
 
     if (res.ok) {
       guilds = await res.json();
@@ -29,6 +35,9 @@ export default async function DashboardPage() {
   } catch {
     guilds = [];
   }
+
+  // Token revogado ou inválido no Discord: login de novo
+  if (tokenRejected) redirect("/login");
 
   for (const guild of guilds) {
     if (guild.owner) {

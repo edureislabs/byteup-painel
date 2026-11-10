@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getUsersCached } from '@/lib/discordcache';
 import { guardApi } from '@/lib/apiGuard';
 import { prisma } from '@/lib/prisma';
 
@@ -27,30 +28,9 @@ export async function GET(
       ...new Set(suggestions.map((s) => s.authorId).filter((id) => id !== 'anonymous')),
     ];
 
-    const authorsData: Record<
-      string,
-      { username: string; avatar: string | null }
-    > = {};
-
-    for (const userId of authorIds) {
-      try {
-        const res = await fetch(
-          `https://discord.com/api/v10/users/${userId}`,
-          {
-            headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` },
-          }
-        );
-        if (res.ok) {
-          const data = await res.json();
-          authorsData[userId] = {
-            username: data.username,
-            avatar: data.avatar
-              ? `https://cdn.discordapp.com/avatars/${userId}/${data.avatar}.png?size=128`
-              : null,
-          };
-        }
-      } catch {}
-    }
+    // Busca em paralelo (5 por vez) e com cache de 10 minutos.
+    // Antes eram até 400 chamadas ao Discord uma atrás da outra.
+    const authorsData = await getUsersCached(authorIds);
 
     return NextResponse.json(
       suggestions.map((s) => ({

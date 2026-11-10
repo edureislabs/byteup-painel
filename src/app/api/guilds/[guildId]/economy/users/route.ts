@@ -44,19 +44,17 @@ export async function GET(
     const searchParams = req.nextUrl.searchParams;
     const currencyId = searchParams.get('currencyId') || null;
     const search = searchParams.get('search') || '';
-    const sortBy = (searchParams.get('sortBy') || 'total') as
-      | 'balance'
-      | 'bank'
-      | 'total';
-    const sortOrder = (searchParams.get('sortOrder') || 'desc') as
-      | 'asc'
-      | 'desc';
+    const sortByRaw = searchParams.get('sortBy') || 'total';
+    const sortBy: 'balance' | 'bank' | 'total' = ['balance', 'bank', 'total'].includes(sortByRaw)
+      ? (sortByRaw as 'balance' | 'bank' | 'total')
+      : 'total';
+    const sortOrder: 'asc' | 'desc' = searchParams.get('sortOrder') === 'asc' ? 'asc' : 'desc';
     const limit = Math.min(
-      parseInt(searchParams.get('limit') || '100', 10),
+      Math.max(parseInt(searchParams.get('limit') || '100', 10) || 100, 1),
       500
     );
     const offset = Math.max(
-      parseInt(searchParams.get('offset') || '0', 10),
+      parseInt(searchParams.get('offset') || '0', 10) || 0,
       0
     );
 
@@ -71,24 +69,37 @@ export async function GET(
       where.userId = { contains: search.trim() };
     }
 
-    // Busca os usuários
-    const users = await prisma.economyUser.findMany({
-      where,
-      include: { currency: true },
-      take: limit,
-      skip: offset,
-    });
+    // Ordenação feita ANTES de paginar. Antes o código pegava uma página
+    // qualquer e só ordenava ela, então o "top" mostrava usuários aleatórios.
+    let sorted;
 
-    // Ordena em memória (por total quando for "total")
-    const sorted = [...users].sort((a, b) => {
-      const getVal = (u: any) => {
-        if (sortBy === 'total') return u.balance + u.bank;
-        return u[sortBy];
-      };
-
-      const diff = getVal(a) - getVal(b);
-      return sortOrder === 'desc' ? -diff : diff;
-    });
+    if (sortBy === 'total') {
+      // O Prisma não ordena por soma de colunas: busca só os números,
+      // ordena tudo e depois carrega a página.
+      const all = await prisma.economyUser.findMany({
+        where,
+        select: { id: true, balance: true, bank: true },
+      });
+      all.sort((a, b) => {
+        const diff = a.balance + a.bank - (b.balance + b.bank);
+        return sortOrder === 'desc' ? -diff : diff;
+      });
+      const pageIds = all.slice(offset, offset + limit).map((u) => u.id);
+      const pageUsers = await prisma.economyUser.findMany({
+        where: { id: { in: pageIds } },
+        include: { currency: true },
+      });
+      const byId = new Map(pageUsers.map((u) => [u.id, u]));
+      sorted = pageIds.map((id) => byId.get(id)).filter(Boolean);
+    } else {
+      sorted = await prisma.economyUser.findMany({
+        where,
+        include: { currency: true },
+        orderBy: [{ [sortBy]: sortOrder }, { id: 'asc' }],
+        take: limit,
+        skip: offset,
+      });
+    }
 
     // Total pra saber se tem mais
     const total = await prisma.economyUser.count({ where });

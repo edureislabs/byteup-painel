@@ -37,6 +37,12 @@ export async function getDiscordAccessToken(): Promise<string | null> {
         secret: process.env.NEXTAUTH_SECRET!,
       });
       const accessToken = token?.accessToken;
+
+      // Token do Discord expirado (dura ~7 dias): trata como deslogado,
+      // para o painel mandar a pessoa ao /login em vez de mostrar vazio.
+      const expiresAt = Number(token?.expiresAt || 0);
+      if (expiresAt && Date.now() >= expiresAt * 1000) return null;
+
       if (typeof accessToken === "string" && accessToken) return accessToken;
     } catch {
       // cookie inválido ou segredo trocado: trata como deslogado

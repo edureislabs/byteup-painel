@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { botGet } from '@/lib/discordcache';
 import { guardApi } from "@/lib/apiGuard";
 
 export async function GET(
@@ -11,24 +12,16 @@ export async function GET(
 
   try {
     const [membersRes, rolesRes] = await Promise.all([
-      fetch(`https://discord.com/api/v10/guilds/${guildId}/members?limit=1000`, {
-        headers: {
-          Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
-        },
-      }),
-      fetch(`https://discord.com/api/v10/guilds/${guildId}/roles`, {
-        headers: {
-          Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
-        },
-      }),
+      botGet(`/guilds/${guildId}/members?limit=1000`, 60_000),
+      botGet(`/guilds/${guildId}/roles`),
     ]);
 
-    if (!membersRes.ok || !rolesRes.ok) {
+    if (!membersRes.ok || !rolesRes.ok || !Array.isArray(membersRes.data) || !Array.isArray(rolesRes.data)) {
       return NextResponse.json({ error: "Erro ao buscar dados do servidor" }, { status: 500 });
     }
 
-    const members = await membersRes.json();
-    const roles = await rolesRes.json();
+    const members = membersRes.data;
+    const roles = rolesRes.data;
 
     const users = members.map((member: any) => ({
       id: member.user.id,

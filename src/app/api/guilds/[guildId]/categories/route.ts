@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { botGet } from '@/lib/discordcache';
 import { guardApi } from "@/lib/apiGuard";
 
 export async function GET(
@@ -10,23 +11,16 @@ export async function GET(
     const denied = await guardApi(guildId);
     if (denied) return denied;
 
-    const res = await fetch(
-      `https://discord.com/api/v10/guilds/${guildId}/channels`,
-      {
-        headers: {
-          Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
-        },
-      }
-    );
+    const res = await botGet(`/guilds/${guildId}/channels`);
 
-    if (!res.ok) {
+    if (!res.ok || !Array.isArray(res.data)) {
       return NextResponse.json(
         { error: "Erro ao buscar categorias" },
         { status: 500 }
       );
     }
 
-    const channels = await res.json();
+    const channels = res.data;
 
     const categories = channels
       .filter((channel: any) => channel.type === 4)

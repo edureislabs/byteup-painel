@@ -7,6 +7,8 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect, notFound } from "next/navigation";
 import { canAccessPanel } from "@/lib/permissions";
 import { isSnowflake } from "@/lib/apiGuard";
+import { getDiscordAccessToken } from "@/lib/discordtoken";
+import { botGet } from "@/lib/discordcache";
 import Sidebar from "./Sidebar";
 
 export default async function GuildLayout({
@@ -19,15 +21,16 @@ export default async function GuildLayout({
   const session = await getServerSession(authOptions);
   if (!session) redirect("/login");
 
+  // Token do Discord expirado (~7 dias): faz login de novo
+  if (!(await getDiscordAccessToken())) redirect("/login");
+
   const { guildId } = await params;
 
   // ID de servidor do Discord é só número. Qualquer outra coisa é 404.
   if (!isSnowflake(guildId)) notFound();
 
-  const botInGuild = await fetch(`https://discord.com/api/v10/guilds/${guildId}`, {
-    headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` },
-    cache: 'no-store',
-  }).then(res => res.ok).catch(() => false);
+  // Com cache de 60s: antes chamava o Discord a cada clique no menu
+  const botInGuild = (await botGet(`/guilds/${guildId}`, 60_000)).ok;
 
   if (!botInGuild) {
     return (

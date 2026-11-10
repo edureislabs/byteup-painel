@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { botGet } from '@/lib/discordcache';
 import { guardApi } from '@/lib/apiGuard';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ guildId: string }> }) {
@@ -6,13 +7,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ guil
   const denied = await guardApi(guildId);
   if (denied) return denied;
 
-  const res = await fetch(`https://discord.com/api/v10/guilds/${guildId}?with_counts=true`, {
-    headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` },
-  });
+  const res = await botGet(`/guilds/${guildId}?with_counts=true`, 60_000);
 
-  if (!res.ok) return NextResponse.json({ error: 'Erro ao buscar servidor' }, { status: 500 });
+  if (!res.ok || !res.data) {
+    return NextResponse.json({ error: 'Erro ao buscar servidor' }, { status: 500 });
+  }
 
-  const guild = await res.json();
+  const guild = res.data;
   return NextResponse.json({
     id: guild.id,
     name: guild.name,

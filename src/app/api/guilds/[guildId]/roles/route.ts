@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { botGet } from '@/lib/discordcache';
 import { guardApi } from '@/lib/apiGuard';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ guildId: string }> }) {
@@ -6,13 +7,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ guil
   const denied = await guardApi(guildId);
   if (denied) return denied;
 
-  const res = await fetch(`https://discord.com/api/v10/guilds/${guildId}/roles`, {
-    headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` },
-  });
+  const res = await botGet(`/guilds/${guildId}/roles`);
 
-  if (!res.ok) return NextResponse.json({ error: 'Erro ao buscar cargos' }, { status: 500 });
+  if (!res.ok || !Array.isArray(res.data)) {
+    return NextResponse.json({ error: 'Erro ao buscar cargos' }, { status: 500 });
+  }
 
-  const roles = await res.json();
+  const roles = res.data;
 
   const formattedRoles = roles
     .filter((r: any) => r.name !== "@everyone")

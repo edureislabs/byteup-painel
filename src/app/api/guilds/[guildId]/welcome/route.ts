@@ -1,26 +1,19 @@
 // src/app/api/guilds/[guildId]/welcome/route.ts
 import { NextRequest, NextResponse } from "next/server";
+import { botGet } from '@/lib/discordcache';
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
 import { canAccessPanel } from "@/lib/permissions";
 
 async function getChannels(guildId: string) {
-  const response = await fetch(`https://discord.com/api/guilds/${guildId}/channels`, {
-    headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` },
-    cache: "no-store",
-  });
-  if (!response.ok) return [];
-  return response.json();
+  const res = await botGet(`/guilds/${guildId}/channels`);
+  return res.ok && Array.isArray(res.data) ? res.data : [];
 }
 
 async function getRoles(guildId: string) {
-  const response = await fetch(`https://discord.com/api/guilds/${guildId}/roles`, {
-    headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` },
-    cache: "no-store",
-  });
-  if (!response.ok) return [];
-  return response.json();
+  const res = await botGet(`/guilds/${guildId}/roles`);
+  return res.ok && Array.isArray(res.data) ? res.data : [];
 }
 
 export async function GET(
