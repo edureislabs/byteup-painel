@@ -15,6 +15,10 @@ export const authOptions: NextAuthOptions = {
     DiscordProvider({
       clientId: process.env.DISCORD_CLIENT_ID!,
       clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+      // O Discord passou a mandar o parâmetro "iss" no retorno do login.
+      // Sem declarar o issuer aqui, o next-auth v4 recusa todo login com
+      // "issuer must be configured on the issuer".
+      issuer: "https://discord.com",
       authorization: { params: { scope: "identify guilds" } },
     }),
   ],
