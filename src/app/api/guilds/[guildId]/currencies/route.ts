@@ -39,6 +39,9 @@ function validateCurrencyFields(body: any, partial: boolean): string | null {
   if (isPrimary !== undefined && typeof isPrimary !== 'boolean') {
     return 'isPrimary deve ser verdadeiro/falso';
   }
+  if (body?.transferable !== undefined && typeof body.transferable !== 'boolean') {
+    return 'transferable deve ser verdadeiro/falso';
+  }
   return null;
 }
 
@@ -148,6 +151,8 @@ export async function POST(
         taxRate: taxRate ? Number(taxRate) : 0,
         exchangeRate: exchangeRate ? Number(exchangeRate) : 1.0,
         isPrimary: shouldBePrimary,
+        // Se pode ser enviada para outros usuários com /pay (padrão: sim)
+        transferable: typeof body.transferable === 'boolean' ? body.transferable : true,
       },
     });
 

@@ -120,7 +120,8 @@ model Currency {
   symbol        String         @default("$")
   taxRate       Float          @default(0)
   exchangeRate  Float          @default(1.0)
-  isPrimary     Boolean        @default(false)   // ← NOVO
+  isPrimary     Boolean        @default(false)
+  transferable  Boolean        @default(true)   // pode ser enviada com /pay
   economyUsers  EconomyUser[]
   gameCurrencies GameCurrency[]
 

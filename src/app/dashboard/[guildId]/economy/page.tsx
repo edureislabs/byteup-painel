@@ -9,6 +9,7 @@ type Currency = {
   taxRate: number;
   exchangeRate: number;
   isPrimary: boolean;
+  transferable: boolean;
 };
 
 type GameCurrencyEntry = {
@@ -47,6 +48,7 @@ export default function EconomyPage({ params }: Props) {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [newName, setNewName] = useState('');
   const [newSymbol, setNewSymbol] = useState('$');
+  const [newTransferable, setNewTransferable] = useState(true);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -141,6 +143,7 @@ export default function EconomyPage({ params }: Props) {
         taxRate: 0,
         exchangeRate: 1.0,
         isPrimary: isFirst,
+        transferable: newTransferable,
       }),
     });
 
@@ -150,6 +153,7 @@ export default function EconomyPage({ params }: Props) {
   setMessage('salvo agora');
       setNewName('');
       setNewSymbol('$');
+      setNewTransferable(true);
 
       // Atualização otimista
       setCurrencies((prev) => {
@@ -177,6 +181,30 @@ export default function EconomyPage({ params }: Props) {
     } else {
       const data = await res.json();
       setMessage(data.error || 'Erro ao remover moeda.');
+    }
+  };
+
+  // Liga/desliga se a moeda pode ser enviada com /pay
+  const toggleTransferable = async (c: Currency) => {
+    const res = await fetch(`/api/guilds/${guildId}/currencies/${c.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
+      body: JSON.stringify({ transferable: !c.transferable }),
+    });
+
+    if (res.ok) {
+      setMessage(
+        !c.transferable
+          ? `${c.name} agora pode ser transferida com /pay.`
+          : `${c.name} não pode mais ser transferida com /pay.`
+      );
+      setCurrencies((prev) =>
+        prev.map((x) => (x.id === c.id ? { ...x, transferable: !c.transferable } : x))
+      );
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setMessage(data.error || 'Erro ao atualizar moeda.');
     }
   };
 
@@ -264,6 +292,15 @@ export default function EconomyPage({ params }: Props) {
           <input className="field-input" placeholder="Símbolo" value={newSymbol} onChange={(e) => setNewSymbol(e.target.value)} style={{ width: '80px' }} />
           <button className="save-btn" onClick={addCurrency} style={{ width: 'auto', padding: '10px 20px', marginTop: 0 }}>Criar</button>
         </div>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px', fontSize: '13px', color: '#b5bac1', cursor: 'pointer', width: 'fit-content' }}>
+          <input
+            type="checkbox"
+            checked={newTransferable}
+            onChange={(e) => setNewTransferable(e.target.checked)}
+            style={{ accentColor: '#C100FF', width: '16px', height: '16px' }}
+          />
+          Pode ser transferida entre usuários (/pay)
+        </label>
         {currencies.length === 0 && (
           <p style={{ fontSize: '12px', color: '#C100FF', marginTop: '8px' }}>
             💡 A primeira moeda vira automaticamente a primária.
@@ -292,6 +329,22 @@ export default function EconomyPage({ params }: Props) {
                         Tornar primária
                       </button>
                     )}
+                    <button
+                      onClick={() => toggleTransferable(c)}
+                      title="Clique para mudar se esta moeda pode ser enviada com /pay"
+                      style={{
+                        background: c.transferable ? '#1a3a2a' : '#3a1a1a',
+                        border: `1px solid ${c.transferable ? '#23a55a40' : '#ED424540'}`,
+                        color: c.transferable ? '#23a55a' : '#ED4245',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {c.transferable ? '🔁 TRANSFERÍVEL' : '🔒 NÃO TRANSFERÍVEL'}
+                    </button>
                   </div>
 
                   {currencyGames.length > 0 ? (
