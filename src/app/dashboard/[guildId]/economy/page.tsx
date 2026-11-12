@@ -1,6 +1,9 @@
 ﻿'use client';
 
 import { useState, useEffect, use, useCallback } from 'react';
+import EconomySettings from './economysettings';
+import ShopManager from './shopmanager';
+import AdjustBalance, { type AdjustPrefill } from './adjustbalance';
 
 type Currency = {
   id: string;
@@ -57,6 +60,7 @@ export default function EconomyPage({ params }: Props) {
   const [sortBy, setSortBy] = useState<'balance' | 'bank' | 'total'>('total');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [searchTerm, setSearchTerm] = useState('');
+  const [adjustPrefill, setAdjustPrefill] = useState<AdjustPrefill>(null);
 
   // ===== FETCH =====
   const fetchCurrencies = useCallback(async () => {
@@ -370,6 +374,12 @@ export default function EconomyPage({ params }: Props) {
         })}
       </div>
 
+      {/* Configurações (daily, trabalho, banco, log) */}
+      <EconomySettings guildId={guildId} />
+
+      {/* Loja de cargos */}
+      <ShopManager guildId={guildId} currencies={currencies} />
+
       {/* Ranking */}
       <div>
         <label className="field-label" style={{ marginBottom: '12px' }}>Ranking de Usuários</label>
@@ -408,11 +418,12 @@ export default function EconomyPage({ params }: Props) {
                 <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, color: '#72767d' }}>Carteira</th>
                 <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, color: '#72767d' }}>Banco</th>
                 <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, color: '#72767d' }}>Total</th>
+                <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, color: '#72767d' }}></th>
               </tr>
             </thead>
             <tbody>
               {filteredUsers.length === 0 && (
-                <tr><td colSpan={6} style={{ padding: '24px', textAlign: 'center', color: '#72767d' }}>Nenhum usuário encontrado com esses filtros.</td></tr>
+                <tr><td colSpan={7} style={{ padding: '24px', textAlign: 'center', color: '#72767d' }}>Nenhum usuário encontrado com esses filtros.</td></tr>
               )}
               {filteredUsers.map((user, index) => {
                 const total = user.balance + user.bank;
@@ -424,12 +435,27 @@ export default function EconomyPage({ params }: Props) {
                     <td style={{ padding: '12px 16px', textAlign: 'right' }}>{user.balance.toLocaleString()}</td>
                     <td style={{ padding: '12px 16px', textAlign: 'right' }}>{user.bank.toLocaleString()}</td>
                     <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600 }}>{total.toLocaleString()}</td>
+                    <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                      <button
+                        onClick={() => setAdjustPrefill({ userId: user.userId, currencyId: user.currency.id, nonce: Date.now() })}
+                        style={{ background: 'transparent', border: '1px solid #2b2d31', color: '#b5bac1', padding: '4px 10px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer' }}
+                      >
+                        Ajustar
+                      </button>
+                    </td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
         </div>
+
+        <AdjustBalance
+          guildId={guildId}
+          currencies={currencies}
+          prefill={adjustPrefill}
+          onDone={() => fetchUsers()}
+        />
 
         <div style={{ marginTop: '32px' }}>
           <label className="field-label" style={{ marginBottom: '12px' }}>Histórico de Partidas</label>

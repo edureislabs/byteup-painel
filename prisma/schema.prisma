@@ -124,6 +124,7 @@ model Currency {
   transferable  Boolean        @default(true)   // pode ser enviada com /pay
   economyUsers  EconomyUser[]
   gameCurrencies GameCurrency[]
+  shopItems     ShopItem[]
 
   @@unique([guildId, name])
 }
@@ -134,10 +135,11 @@ model EconomyUser {
   guild      Guild    @relation(fields: [guildId], references: [id])
   userId     String
   currencyId String
-  currency   Currency @relation(fields: [currencyId], references: [id])
+  currency   Currency @relation(fields: [currencyId], references: [id], onDelete: Cascade)
   balance    Int      @default(0)
   bank       Int      @default(0)
   lastDaily  DateTime?
+  lastWork   DateTime?
 
   @@unique([guildId, userId, currencyId])
 }
@@ -467,4 +469,65 @@ model SuggestionVote {
 
   @@unique([suggestionId, userId])
   @@index([suggestionId])
+}
+
+// ===================== ECONOMIA (config, loja, staff) =====================
+
+model EconomyConfig {
+  guildId             String   @id
+  dailyAmount         Int      @default(100)
+  dailyCooldownHours  Int      @default(24)
+  workEnabled         Boolean  @default(true)
+  workMin             Int      @default(50)
+  workMax             Int      @default(150)
+  workCooldownMinutes Int      @default(60)
+  bankEnabled         Boolean  @default(true)
+  staffLogChannelId   String?
+  updatedAt           DateTime @updatedAt
+}
+
+model ShopItem {
+  id           String   @id @default(uuid())
+  guildId      String
+  name         String
+  description  String?
+  price        Int
+  currencyId   String
+  currency     Currency @relation(fields: [currencyId], references: [id], onDelete: Cascade)
+  roleId       String
+  durationDays Int?     // vazio = cargo permanente
+  stock        Int?     // vazio = estoque ilimitado
+  enabled      Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([guildId])
+}
+
+model TemporaryRole {
+  id        String   @id @default(uuid())
+  guildId   String
+  userId    String
+  roleId    String
+  itemId    String?
+  expiresAt DateTime
+  removed   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@unique([guildId, userId, roleId])
+  @@index([removed, expiresAt])
+}
+
+model EconomyLog {
+  id          String   @id @default(uuid())
+  guildId     String
+  userId      String
+  moderatorId String
+  currencyId  String
+  amount      Int      // positivo = adicionou, negativo = removeu
+  reason      String?
+  source      String   @default("bot") // bot | painel
+  createdAt   DateTime @default(now())
+
+  @@index([guildId, createdAt])
 }
