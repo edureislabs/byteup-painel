@@ -7,7 +7,7 @@ import { getUsersCached } from "@/lib/discordCache";
 import { cancelPayment, mercadoPagoConfigured } from "@/lib/mercadopago";
 import { deliverOrder, markOrderPaid } from "@/lib/storeOrders";
 import { daysAgo, formatPrice } from "@/lib/storeShared";
-import ConfirmButton from "./confirmbutton";
+import ConfirmButton from "./ConfirmButton";
 
 export const dynamic = "force-dynamic";
 
