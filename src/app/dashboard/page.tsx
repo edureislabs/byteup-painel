@@ -4,6 +4,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getDiscordAccessToken } from "@/lib/discordtoken";
+import { isAdmin } from "@/lib/admin";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -16,6 +17,12 @@ export default async function DashboardPage() {
   const userId = (session as any).user?.id;
   const userAvatar = (session as any).user?.image;
   const userName = (session as any).user?.name || "Usuário";
+
+  // Botão "Moderação" (só para admins), com o número de denúncias abertas
+  const userIsAdmin = isAdmin(userId);
+  const openReports = userIsAdmin
+    ? await prisma.serverListingReport.count({ where: { resolved: false } })
+    : 0;
 
   let guilds: any[] = [];
   let tokenRejected = false;
@@ -182,6 +189,44 @@ export default async function DashboardPage() {
           </div>
         </div>
 
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        {/* Só aparece para quem está em ADMIN_USER_IDS */}
+        {userIsAdmin && (
+          <a
+            href="/admin/divulgacao"
+            title="Moderação da divulgação de servidores"
+            style={{
+              background: "rgba(193, 0, 255, 0.12)",
+              color: "#e3b5ff",
+              border: "1px solid rgba(193, 0, 255, 0.35)",
+              borderRadius: "10px",
+              padding: "9px 16px",
+              fontSize: "13px",
+              fontWeight: 600,
+              textDecoration: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            🛡️ Moderação
+            {openReports > 0 && (
+              <span
+                style={{
+                  background: "#ED4245",
+                  color: "white",
+                  borderRadius: "999px",
+                  padding: "1px 7px",
+                  fontSize: "11px",
+                  fontWeight: 800,
+                }}
+              >
+                {openReports}
+              </span>
+            )}
+          </a>
+        )}
+
         <a
           href="/api/auth/signout"
           style={{
@@ -215,6 +260,7 @@ export default async function DashboardPage() {
           </svg>
           Trocar conta
         </a>
+        </div>
       </header>
 
       <div style={{ padding: "42px 32px" }}>

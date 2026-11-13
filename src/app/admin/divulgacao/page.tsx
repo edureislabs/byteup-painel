@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
 import { REPORT_REASONS } from "@/lib/listingshared";
+import { isAdmin } from "@/lib/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -14,13 +15,9 @@ export const dynamic = "force-dynamic";
  */
 async function requireAdmin() {
   const session = await getServerSession(authOptions);
-  const admins = (process.env.ADMIN_USER_IDS || "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
   const userId = session?.user?.id;
-  if (!userId || !admins.includes(userId)) notFound();
-  return userId;
+  if (!isAdmin(userId)) notFound();
+  return userId!;
 }
 
 // ===== Ações (cada uma confere o admin de novo: server actions são públicas) =====
@@ -87,7 +84,8 @@ export default async function AdminDivulgacaoPage() {
   return (
     <main className="min-h-screen bg-[#08070a] p-6 text-white md:p-10">
       <div className="mx-auto max-w-5xl">
-        <h1 className="text-3xl font-black">Moderação da divulgação</h1>
+        <Link href="/dashboard" className="text-sm text-[#7d7588] hover:text-white">← Voltar para o painel</Link>
+        <h1 className="mt-3 text-3xl font-black">Moderação da divulgação</h1>
         <p className="mt-2 text-sm text-[#aaa3b5]">
           {ativos} servidores na lista • {byGuild.size} com denúncias abertas • {hidden.length} ocultos
         </p>
