@@ -4,9 +4,10 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getAdminUserId } from "@/lib/admin";
 import { getUsersCached } from "@/lib/discordCache";
-import { mercadoPagoConfigured } from "@/lib/mercadopago";
+import { cancelPayment, mercadoPagoConfigured } from "@/lib/mercadopago";
 import { deliverOrder, markOrderPaid } from "@/lib/storeOrders";
 import { daysAgo, formatPrice } from "@/lib/storeShared";
+import ConfirmButton from "./confirmbutton";
 
 export const dynamic = "force-dynamic";
 
@@ -32,12 +33,49 @@ async function markPaidManually(formData: FormData) {
   revalidatePath("/admin/loja/pedidos");
 }
 
+// Pedido aguardando: cancela (e cancela o Pix no Mercado Pago, para não poder mais ser pago)
+async function cancelOrder(formData: FormData) {
+  "use server";
+  await requireAdmin();
+  const order = await prisma.storeOrder.findUnique({ where: { id: String(formData.get("orderId") || "") } });
+  if (!order || (order.status !== "pending" && order.status !== "failed")) return;
+  if (order.provider === "mercadopago" && order.providerRef) await cancelPayment(order.providerRef);
+  await prisma.storeOrder.updateMany({ where: { id: order.id, status: { in: ["pending", "failed"] } }, data: { status: "cancelled" } });
+  revalidatePath("/admin/loja/pedidos");
+}
+
+// Pedido pago: tira o acesso ao download (a pessoa pode comprar de novo).
+// Não devolve dinheiro: reembolso é feito no Mercado Pago.
+async function revokeOrder(formData: FormData) {
+  "use server";
+  await requireAdmin();
+  await prisma.storeOrder.updateMany({
+    where: { id: String(formData.get("orderId") || ""), status: "paid" },
+    data: { status: "revoked" },
+  });
+  revalidatePath("/admin/loja/pedidos");
+}
+
+// Apaga o pedido de vez (some também de "Minhas compras")
+async function deleteOrder(formData: FormData) {
+  "use server";
+  await requireAdmin();
+  const order = await prisma.storeOrder.findUnique({ where: { id: String(formData.get("orderId") || "") } });
+  if (!order) return;
+  if ((order.status === "pending" || order.status === "failed") && order.provider === "mercadopago" && order.providerRef) {
+    await cancelPayment(order.providerRef);
+  }
+  await prisma.storeOrder.delete({ where: { id: order.id } });
+  revalidatePath("/admin/loja/pedidos");
+}
+
 const STATUS: Record<string, string> = {
   paid: "text-[#7ee2a8]",
   pending: "text-[#f0b878]",
   failed: "text-[#f07878]",
   cancelled: "text-[#7d7588]",
   refunded: "text-[#7d7588]",
+  revoked: "text-[#f07878]",
 };
 
 const LABEL: Record<string, string> = {
@@ -46,6 +84,7 @@ const LABEL: Record<string, string> = {
   failed: "recusado",
   cancelled: "cancelado",
   refunded: "reembolsado",
+  revoked: "revogado",
 };
 
 const fmtDate = (d: Date) =>
@@ -103,7 +142,7 @@ export default async function AdminPedidosPage({ searchParams }: { searchParams:
               </div>
               <div className="font-bold">{o.totalCents ? formatPrice(o.totalCents) : "Grátis"}</div>
               <div className={`w-24 text-xs font-bold ${STATUS[o.status] ?? ""}`}>{LABEL[o.status] ?? o.status}</div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {o.status === "paid" && (
                   <form action={resendDm}>
                     <input type="hidden" name="orderId" value={o.id} />
@@ -113,9 +152,49 @@ export default async function AdminPedidosPage({ searchParams }: { searchParams:
                 {(o.status === "pending" || o.status === "failed") && (
                   <form action={markPaidManually}>
                     <input type="hidden" name="orderId" value={o.id} />
-                    <button className="rounded-xl border border-[#7ee2a8]/40 px-3 py-1.5 text-xs font-bold text-[#7ee2a8]">Marcar pago</button>
+                    <ConfirmButton
+                      message="Marcar este pedido como pago? O cliente recebe o acesso e a DM."
+                      className="rounded-xl border border-[#7ee2a8]/40 px-3 py-1.5 text-xs font-bold text-[#7ee2a8]"
+                    >
+                      Marcar pago
+                    </ConfirmButton>
                   </form>
                 )}
+                {(o.status === "pending" || o.status === "failed") && (
+                  <form action={cancelOrder}>
+                    <input type="hidden" name="orderId" value={o.id} />
+                    <ConfirmButton
+                      message="Cancelar este pedido? O Pix dele deixa de funcionar e o cliente pode fazer um pedido novo."
+                      className="rounded-xl border border-[#f0b878]/40 px-3 py-1.5 text-xs font-bold text-[#f0b878]"
+                    >
+                      Cancelar
+                    </ConfirmButton>
+                  </form>
+                )}
+                {o.status === "paid" && (
+                  <form action={revokeOrder}>
+                    <input type="hidden" name="orderId" value={o.id} />
+                    <ConfirmButton
+                      message="Revogar esta compra? O cliente perde o acesso ao download e pode comprar de novo. O dinheiro NÃO é devolvido automaticamente (faça o reembolso no Mercado Pago, se for o caso)."
+                      className="rounded-xl border border-[#f07878]/40 px-3 py-1.5 text-xs font-bold text-[#f07878]"
+                    >
+                      Revogar
+                    </ConfirmButton>
+                  </form>
+                )}
+                <form action={deleteOrder}>
+                  <input type="hidden" name="orderId" value={o.id} />
+                  <ConfirmButton
+                    message={
+                      o.status === "paid"
+                        ? "Excluir esta compra PAGA? Ela some do histórico e o cliente perde o acesso. Isso não pode ser desfeito."
+                        : "Excluir este pedido? Isso não pode ser desfeito."
+                    }
+                    className="rounded-xl border border-white/10 px-3 py-1.5 text-xs font-bold text-[#7d7588] hover:text-[#f07878]"
+                  >
+                    Excluir
+                  </ConfirmButton>
+                </form>
               </div>
             </div>
           ))}

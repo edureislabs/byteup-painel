@@ -105,6 +105,17 @@ export async function getPayment(paymentId: string): Promise<MpPayment> {
   return mp<MpPayment>(`/v1/payments/${paymentId}`);
 }
 
+/** Cancela um pagamento pendente (ex.: Pix ainda não pago). Não dá erro se já não puder. */
+export async function cancelPayment(paymentId: string): Promise<boolean> {
+  if (!/^\d{1,20}$/.test(paymentId)) return false;
+  try {
+    await mp(`/v1/payments/${paymentId}`, { method: "PUT", body: JSON.stringify({ status: "cancelled" }) });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Confere a assinatura do webhook (x-signature).
  * Retorna true/false, ou null quando não dá para conferir (sem segredo ou sem header).

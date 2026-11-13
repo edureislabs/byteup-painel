@@ -40,10 +40,15 @@ export async function syncMercadoPagoPayment(paymentId: string) {
   return { orderId, status: payment.status };
 }
 
-/** Marca como pago (só uma vez) e entrega. */
+/**
+ * Marca como pago (só uma vez) e entrega.
+ * Inclui "cancelled": se o admin cancelou mas o cliente já tinha pago o Pix,
+ * o dinheiro entrou, então a compra é liberada. Pedidos "revoked" (acesso
+ * retirado pelo admin) nunca voltam sozinhos.
+ */
 export async function markOrderPaid(orderId: string, provider: string, providerRef: string | null) {
   const updated = await prisma.storeOrder.updateMany({
-    where: { id: orderId, status: { in: ["pending", "failed"] } },
+    where: { id: orderId, status: { in: ["pending", "failed", "cancelled"] } },
     data: { status: "paid", provider, providerRef, paidAt: new Date() },
   });
   if (updated.count === 0) return false; // já estava pago: não entrega duas vezes
