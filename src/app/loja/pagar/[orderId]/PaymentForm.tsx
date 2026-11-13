@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { initMercadoPago, Payment } from "@mercadopago/sdk-react";
 
 /**
@@ -46,6 +46,79 @@ type Props = { publicKey: string; orderId: string; amount: number };
 
 const box = "rounded-3xl border border-white/10 bg-white/[0.03] p-6";
 
+// Configuração fixa do formulário de cartão (objeto estável: o Brick se recria se ele mudar)
+const CARD_CUSTOMIZATION = {
+  paymentMethods: { creditCard: "all" as const, maxInstallments: 12 },
+  visual: { style },
+};
+
+/**
+ * Formulário de cartão separado e memorizado: assim o relógio do Pix
+ * (que atualiza a tela a cada segundo) não faz o formulário sumir e voltar.
+ */
+const CardForm = memo(function CardForm({
+  orderId,
+  amount,
+  onApproved,
+  onWaiting,
+}: {
+  orderId: string;
+  amount: number;
+  onApproved: (paymentId: string) => void;
+  onWaiting: () => void;
+}) {
+  const [formKey, setFormKey] = useState(0);
+  const [ready, setReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const initialization = useMemo(() => ({ amount }), [amount]);
+
+  const handleReady = useCallback(() => setReady(true), []);
+  const handleError = useCallback((e: unknown) => console.error("[pagamento]", e), []);
+  const handleSubmit = useCallback(
+    async ({ formData }: { formData: unknown }) => {
+      setError(null);
+      const res = await fetch("/api/store/pay", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, formData }),
+      });
+      const data = await res.json().catch(() => ({}));
+      const retry = (msg: string) => {
+        setError(msg);
+        setReady(false);
+        setFormKey((k) => k + 1);
+      };
+      if (!res.ok) return retry(data.error || "Erro ao processar o pagamento.");
+      if (data.status === "approved") return onApproved(data.paymentId ?? "");
+      if (data.status === "pending" || data.status === "in_process") return onWaiting();
+      retry(data.message || "Pagamento recusado.");
+    },
+    [orderId, onApproved, onWaiting]
+  );
+
+  return (
+    <div>
+      {error && (
+        <div className="mb-4 rounded-2xl border border-[#f07878]/40 bg-[#f07878]/10 px-4 py-3 text-sm text-[#f7b4b4]">{error}</div>
+      )}
+      {!ready && (
+        <div className="grid min-h-[320px] place-items-center rounded-3xl border border-white/10 bg-white/[0.03] text-sm text-[#7d7588]">
+          Carregando formulário do cartão...
+        </div>
+      )}
+      <Payment
+        key={formKey}
+        initialization={initialization}
+        locale="pt"
+        customization={CARD_CUSTOMIZATION}
+        onReady={handleReady}
+        onError={handleError}
+        onSubmit={handleSubmit}
+      />
+    </div>
+  );
+});
+
 export default function PaymentForm({ publicKey, orderId, amount }: Props) {
   ensureMercadoPago(publicKey);
 
@@ -63,9 +136,8 @@ export default function PaymentForm({ publicKey, orderId, amount }: Props) {
   const [now, setNow] = useState(() => Date.now());
 
   // Cartão
-  const [formKey, setFormKey] = useState(0);
-  const [ready, setReady] = useState(false);
   const [cardWaiting, setCardWaiting] = useState(false);
+  const onCardWaiting = useCallback(() => setCardWaiting(true), []);
 
   const goToSuccess = useCallback(
     (pid: string) => {
@@ -113,10 +185,10 @@ export default function PaymentForm({ publicKey, orderId, amount }: Props) {
 
   // Relógio da validade do QR code
   useEffect(() => {
-    if (!pix?.expiresAt) return;
+    if (!pix?.expiresAt || tab !== "pix") return;
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
-  }, [pix?.expiresAt]);
+  }, [pix?.expiresAt, tab]);
 
   // Confere o pedido enquanto espera o pagamento
   const waitingId = pix?.paymentId ?? (cardWaiting ? "card" : null);
@@ -282,45 +354,7 @@ export default function PaymentForm({ publicKey, orderId, amount }: Props) {
               </p>
             </div>
           ) : (
-            <>
-              {!ready && (
-                <div className="grid min-h-[320px] place-items-center rounded-3xl border border-white/10 bg-white/[0.03] text-sm text-[#7d7588]">
-                  Carregando formulário do cartão...
-                </div>
-              )}
-              <Payment
-                key={formKey}
-                initialization={{ amount }}
-                locale="pt"
-                customization={{
-                  paymentMethods: { creditCard: "all", debitCard: "all", maxInstallments: 12 },
-                  visual: { style },
-                }}
-                onReady={() => setReady(true)}
-                onError={(e) => console.error("[pagamento]", e)}
-                onSubmit={async ({ formData }) => {
-                  setError(null);
-                  const res = await fetch("/api/store/pay", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ orderId, formData }),
-                  });
-                  const data = await res.json().catch(() => ({}));
-                  const retry = (msg: string) => {
-                    setError(msg);
-                    setReady(false);
-                    setFormKey((k) => k + 1);
-                  };
-                  if (!res.ok) return retry(data.error || "Erro ao processar o pagamento.");
-                  if (data.status === "approved") return goToSuccess(data.paymentId ?? "");
-                  if (data.status === "pending" || data.status === "in_process") {
-                    setCardWaiting(true);
-                    return;
-                  }
-                  retry(data.message || "Pagamento recusado.");
-                }}
-              />
-            </>
+            <CardForm orderId={orderId} amount={amount} onApproved={goToSuccess} onWaiting={onCardWaiting} />
           )}
         </div>
       )}
