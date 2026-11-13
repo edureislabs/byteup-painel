@@ -10,6 +10,7 @@ const links = [
   { label: "Recursos", href: "/#recursos" },
   { label: "Documentação", href: "/documentacao" },
   { label: "Comandos", href: "/comandos" },
+  { label: "Servidores", href: "/servidores" },
   { label: "Status", href: "/status" },
 ];
 

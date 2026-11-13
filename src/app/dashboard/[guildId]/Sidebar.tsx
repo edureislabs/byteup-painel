@@ -32,6 +32,7 @@ const menuCategories = [
       { label: 'Jogos', href: '/games', icon: 'games' },
       { label: 'Economia', href: '/economy', icon: 'economy' },
       { label: 'Sugestoes', href: '/suggestions', icon: 'suggestion' },
+      { label: 'Divulgacao', href: '/divulgacao', icon: 'megaphone' },
     ],
   },
   {
@@ -50,6 +51,7 @@ const menuCategories = [
 
 const iconPaths: Record<string, string> = {
   home: 'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM9 22V12h6v10',
+  megaphone: 'M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1zM15 8a5 5 0 0 1 0 8M18 5a9 9 0 0 1 0 14',
   shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
   counter: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75M9 7a4 4 0 1 0 0 8 4 4 0 0 0 0-8z',
   slash: 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5',
@@ -542,4 +544,4 @@ export default function Sidebar({ guildId }: Props) {
       </aside>
     </>
   );
-} 
+}

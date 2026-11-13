@@ -531,3 +531,68 @@ model EconomyLog {
 
   @@index([guildId, createdAt])
 }
+
+// ===================== DIVULGAÇÃO DE SERVIDORES =====================
+
+model ServerListing {
+  guildId           String    @id
+  enabled           Boolean   @default(false)
+  // Dados do servidor (atualizados pelo bot e pelo painel)
+  name              String?
+  icon              String?
+  banner            String?
+  memberCount       Int       @default(0)
+  onlineCount       Int       @default(0)
+  // O que o dono escreve no painel
+  shortDescription  String?
+  description       String?
+  tags              String[]  @default([])
+  category          String    @default("comunidade")
+  language          String    @default("pt-BR")
+  nsfw              Boolean   @default(false)
+  // Convite criado pelo bot
+  inviteChannelId   String?
+  inviteCode        String?
+  // Bump
+  bumpChannelId     String?   // canal do aviso "bump liberado" (vazio = onde usaram o /bump)
+  lastBumpChannelId String?
+  bumpedAt          DateTime?
+  bumpedBy          String?
+  bumpCount         Int       @default(0)
+  bumpReminded      Boolean   @default(true)
+  // Moderação (você, pelo /admin/divulgacao)
+  hidden            Boolean   @default(false)
+  hiddenReason      String?
+  syncedAt          DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  votes             ServerVote[]
+  reports           ServerListingReport[]
+
+  @@index([enabled, hidden, bumpedAt])
+}
+
+model ServerVote {
+  id        String        @id @default(uuid())
+  guildId   String
+  listing   ServerListing @relation(fields: [guildId], references: [guildId], onDelete: Cascade)
+  userId    String
+  createdAt DateTime      @default(now())
+
+  @@index([guildId, createdAt])
+  @@index([userId, guildId, createdAt])
+}
+
+model ServerListingReport {
+  id         String        @id @default(uuid())
+  guildId    String
+  listing    ServerListing @relation(fields: [guildId], references: [guildId], onDelete: Cascade)
+  reporterId String
+  reason     String
+  details    String?
+  resolved   Boolean       @default(false)
+  createdAt  DateTime      @default(now())
+
+  @@index([resolved, createdAt])
+}

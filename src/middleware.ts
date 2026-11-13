@@ -72,6 +72,12 @@ export async function middleware(req: NextRequest) {
     if (limitError) return limitError;
   }
 
+  // APIs públicas (lista de servidores, votos...) só passam pelo rate limit;
+  // quem exige login lá dentro é a própria rota.
+  if (pathname.startsWith("/api/public/")) {
+    return NextResponse.next();
+  }
+
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
   if (!token) {
@@ -87,5 +93,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/api/guilds/:path*"],
+  matcher: ["/dashboard/:path*", "/api/guilds/:path*", "/api/public/:path*", "/admin/:path*"],
 };
