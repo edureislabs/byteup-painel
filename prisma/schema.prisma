@@ -668,6 +668,7 @@ model StoreOrder {
   status      String    @default("pending") // pending | paid | failed | cancelled | refunded
   provider    String?   // mercadopago | stripe
   providerRef String?   // ID do pagamento no provedor
+  checkoutUrl String?
   totalCents  Int
   currency    String    @default("BRL")
   paidAt      DateTime?

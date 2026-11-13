@@ -43,13 +43,16 @@ export default async function LojaPage({ searchParams }: { searchParams: SearchP
             Bots, plugins, aplicativos e serviços feitos pela ByteUP. Depois do pagamento, o download chega na sua DM do Discord.
           </p>
 
-          <div className="mt-8 flex flex-wrap gap-2">
+          <div className="mt-8 flex flex-wrap items-center gap-2">
             <Link href="/loja" className={chip(!categoria)}>Tudo</Link>
             {STORE_CATEGORIES.map((c) => (
               <Link key={c.value} href={`/loja?categoria=${c.value}`} className={chip(categoria === c.value)}>
                 {c.emoji} {c.label}
               </Link>
             ))}
+            <Link href="/loja/minhas-compras" className="ml-auto text-sm font-semibold text-[#d9b4ff] hover:text-white">
+              Minhas compras →
+            </Link>
           </div>
         </div>
       </section>

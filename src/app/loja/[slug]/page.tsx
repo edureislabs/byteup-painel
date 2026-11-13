@@ -9,6 +9,9 @@ import LandingFooter from "../../components/LandingFooter";
 import { prisma } from "@/lib/prisma";
 import { isAdmin } from "@/lib/admin";
 import { formatBytes, formatPrice, productImageUrl, storeCategoryLabel } from "@/lib/storeshared";
+import { mercadoPagoConfigured } from "@/lib/mercadopago";
+import { userOwnsProduct } from "@/lib/storeOrders";
+import BuyButton from "./buybutton";
 
 export const dynamic = "force-dynamic";
 
@@ -60,11 +63,13 @@ export default async function ProductPage({ params }: { params: Params }) {
   const product = await getProduct(slug);
   if (!product) notFound();
 
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
+
   // Rascunho: só admins veem
-  if (!product.active) {
-    const session = await getServerSession(authOptions);
-    if (!isAdmin(session?.user?.id)) notFound();
-  }
+  if (!product.active && !isAdmin(userId)) notFound();
+
+  const owned = userId ? await userOwnsProduct(userId, product.id) : false;
 
   const cat = storeCategoryLabel(product.category);
   const image = productImageUrl(product.id, product.imageKey);
@@ -115,14 +120,16 @@ export default async function ProductPage({ params }: { params: Params }) {
                 {product.priceCents === 0 ? "Grátis" : formatPrice(product.priceCents)}
               </div>
 
-              <button
-                type="button"
-                disabled
-                className="mt-6 w-full cursor-not-allowed rounded-2xl bg-[#b64cff]/40 px-5 py-3.5 text-sm font-black text-white/70"
-              >
-                Pagamento em breve
-              </button>
-              <p className="mt-2 text-center text-xs text-[#7d7588]">Pix e cartão chegam nos próximos dias.</p>
+              <div className="mt-6">
+                <BuyButton
+                  productId={product.id}
+                  free={product.priceCents === 0}
+                  isService={isService}
+                  loggedIn={Boolean(userId)}
+                  owned={owned}
+                  paymentsReady={mercadoPagoConfigured()}
+                />
+              </div>
 
               <ul className="mt-6 space-y-2 border-t border-white/10 pt-5 text-sm text-[#aaa3b5]">
                 {isService ? (

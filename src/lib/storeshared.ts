@@ -58,3 +58,6 @@ export function formatBytes(bytes: number): string {
 
 export const productImageUrl = (productId: string, imageKey: string | null) =>
   imageKey ? `/api/store/image/${productId}?v=${encodeURIComponent(imageKey.slice(-12))}` : null;
+
+/** Data de N dias atrás (fora dos componentes, por causa da regra de pureza do React). */
+export const daysAgo = (days: number) => new Date(Date.now() - days * 24 * 60 * 60 * 1000);
