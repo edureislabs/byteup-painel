@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getAdminUserId } from "@/lib/admin";
 import { deleteObject, abortMultipart } from "@/lib/r2";
-import { PRODUCT_KINDS, STORE_CATEGORIES, parsePrice, slugify } from "@/lib/storeshared";
+import { PRODUCT_KINDS, STORE_CATEGORIES, parsePrice, slugify } from "@/lib/storeShared";
 
 /**
  * Ações da loja. Server actions são endpoints públicos, então cada uma

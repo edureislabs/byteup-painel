@@ -7,7 +7,7 @@ import LandingNavbar from "../../../../components/LandingNavbar";
 import LandingFooter from "../../../../components/LandingFooter";
 import { prisma } from "@/lib/prisma";
 import { mercadoPagoConfigured } from "@/lib/mercadopago";
-import { formatPrice, productImageUrl, storeCategoryLabel } from "@/lib/storeshared";
+import { formatPrice, productImageUrl, storeCategoryLabel } from "@/lib/storeShared";
 import PaymentForm from "./PaymentForm";
 
 export const dynamic = "force-dynamic";
