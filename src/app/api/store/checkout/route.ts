@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
-import { mercadoPagoConfigured } from "@/lib/mercadopago";
+import { anyPaymentConfigured } from "@/lib/stripe";
 import { markOrderPaid, userOwnsProduct } from "@/lib/storeOrders";
 
 /**
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ redirect: `/loja/minhas-compras?pedido=${order.id}` });
   }
 
-  if (!mercadoPagoConfigured()) {
+  if (!anyPaymentConfigured()) {
     return NextResponse.json({ error: "Pagamentos ainda não configurados." }, { status: 503 });
   }
 

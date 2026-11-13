@@ -7,6 +7,7 @@ import LandingNavbar from "../../../components/LandingNavbar";
 import LandingFooter from "../../../components/LandingFooter";
 import { prisma } from "@/lib/prisma";
 import { mercadoPagoConfigured } from "@/lib/mercadopago";
+import { anyPaymentConfigured, stripeConfigured } from "@/lib/stripe";
 import { formatPrice, productImageUrl, storeCategoryLabel } from "@/lib/storeShared";
 import PaymentForm from "./PaymentForm";
 
@@ -27,7 +28,7 @@ export default async function PagarPage({ params }: { params: Promise<{ orderId:
   if (!order) notFound();
   if (order.status === "paid") redirect(`/loja/minhas-compras?pedido=${order.id}`);
 
-  const payable = (order.status === "pending" || order.status === "failed") && mercadoPagoConfigured();
+  const payable = (order.status === "pending" || order.status === "failed") && anyPaymentConfigured();
   const item = order.items[0];
   const image = item?.product ? productImageUrl(item.product.id, item.product.imageKey) : null;
   const cat = storeCategoryLabel(item?.product?.category ?? "bot");
@@ -46,7 +47,8 @@ export default async function PagarPage({ params }: { params: Promise<{ orderId:
             <div className="order-2 lg:order-1">
               {payable ? (
                 <PaymentForm
-                  publicKey={process.env.MP_PUBLIC_KEY!}
+                  publicKey={mercadoPagoConfigured() ? process.env.MP_PUBLIC_KEY! : null}
+                  stripeKey={stripeConfigured() ? process.env.STRIPE_PUBLISHABLE_KEY! : null}
                   orderId={order.id}
                   amount={order.totalCents / 100}
                 />
@@ -84,7 +86,7 @@ export default async function PagarPage({ params }: { params: Promise<{ orderId:
                 <span className="text-2xl font-black">{formatPrice(order.totalCents)}</span>
               </div>
               <ul className="mt-4 space-y-1.5 text-xs text-[#7d7588]">
-                <li>🔒 Pagamento processado pelo Mercado Pago</li>
+                <li>🔒 Pagamento seguro via Mercado Pago ou Stripe</li>
                 <li>⚡ Liberação automática após a aprovação</li>
                 <li>💬 Aviso na sua DM do Discord</li>
               </ul>

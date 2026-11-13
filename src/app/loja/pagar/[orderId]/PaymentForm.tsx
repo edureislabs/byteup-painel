@@ -2,6 +2,8 @@
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { initMercadoPago, Payment } from "@mercadopago/sdk-react";
+import { loadStripe, type Stripe as StripeJs } from "@stripe/stripe-js";
+import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js";
 
 /**
  * Pagamento na página da ByteUP.
@@ -42,7 +44,7 @@ function ensureMercadoPago(publicKey: string) {
 }
 
 type Pix = { paymentId: string; qrCode: string; qrBase64: string | null; expiresAt: string | null };
-type Props = { publicKey: string; orderId: string; amount: number };
+type Props = { publicKey: string | null; stripeKey: string | null; orderId: string; amount: number };
 
 const box = "rounded-3xl border border-white/10 bg-white/[0.03] p-6";
 
@@ -119,10 +121,49 @@ const CardForm = memo(function CardForm({
   );
 });
 
-export default function PaymentForm({ publicKey, orderId, amount }: Props) {
-  ensureMercadoPago(publicKey);
+// Stripe carregada uma vez por chave
+const stripePromises = new Map<string, Promise<StripeJs | null>>();
+function getStripe(key: string) {
+  if (!stripePromises.has(key)) stripePromises.set(key, loadStripe(key, { locale: "auto" }));
+  return stripePromises.get(key)!;
+}
 
-  const [tab, setTab] = useState<"pix" | "card">("pix");
+/** Pagamento internacional (Stripe), embutido na página. */
+const StripeForm = memo(function StripeForm({ stripeKey, orderId }: { stripeKey: string; orderId: string }) {
+  const [error, setError] = useState<string | null>(null);
+  const fetchClientSecret = useCallback(async () => {
+    const res = await fetch("/api/store/stripe/session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.clientSecret) {
+      const msg = data.error || "Não foi possível abrir o pagamento internacional.";
+      setError(msg);
+      throw new Error(msg);
+    }
+    return data.clientSecret as string;
+  }, [orderId]);
+  const options = useMemo(() => ({ fetchClientSecret }), [fetchClientSecret]);
+
+  if (error) {
+    return <div className="rounded-2xl border border-[#f07878]/40 bg-[#f07878]/10 px-4 py-3 text-sm text-[#f7b4b4]">{error}</div>;
+  }
+  return (
+    <div className="relative min-h-[420px] overflow-hidden rounded-3xl bg-white p-2">
+      <div className="absolute inset-0 -z-0 grid place-items-center text-sm text-gray-400">Carregando pagamento internacional...</div>
+      <EmbeddedCheckoutProvider stripe={getStripe(stripeKey)} options={options}>
+        <EmbeddedCheckout className="relative z-10 bg-white" />
+      </EmbeddedCheckoutProvider>
+    </div>
+  );
+});
+
+export default function PaymentForm({ publicKey, stripeKey, orderId, amount }: Props) {
+  if (publicKey) ensureMercadoPago(publicKey);
+
+  const [tab, setTab] = useState<"pix" | "card" | "intl">(publicKey ? "pix" : "intl");
   const [error, setError] = useState<string | null>(null);
   const done = useRef(false);
 
@@ -233,12 +274,21 @@ export default function PaymentForm({ publicKey, orderId, amount }: Props) {
   return (
     <div>
       <div className="mb-4 flex gap-2 rounded-3xl border border-white/10 bg-white/[0.03] p-1.5">
-        <button type="button" className={tabBtn(tab === "pix")} onClick={() => setTab("pix")}>
-          ⚡ Pix
-        </button>
-        <button type="button" className={tabBtn(tab === "card")} onClick={() => setTab("card")}>
-          💳 Cartão
-        </button>
+        {publicKey && (
+          <>
+            <button type="button" className={tabBtn(tab === "pix")} onClick={() => setTab("pix")}>
+              ⚡ Pix
+            </button>
+            <button type="button" className={tabBtn(tab === "card")} onClick={() => setTab("card")}>
+              💳 Cartão
+            </button>
+          </>
+        )}
+        {stripeKey && (
+          <button type="button" className={tabBtn(tab === "intl")} onClick={() => setTab("intl")}>
+            🌍 Internacional
+          </button>
+        )}
       </div>
 
       {error && (
@@ -339,6 +389,16 @@ export default function PaymentForm({ publicKey, orderId, amount }: Props) {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* ===== Internacional (Stripe) ===== */}
+      {tab === "intl" && stripeKey && (
+        <div>
+          <p className="mb-3 text-xs text-[#7d7588]">
+            Para cartões de fora do Brasil. O valor é cobrado em reais e o seu banco converte para a sua moeda.
+          </p>
+          <StripeForm stripeKey={stripeKey} orderId={orderId} />
         </div>
       )}
 

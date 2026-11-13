@@ -9,7 +9,7 @@ import LandingFooter from "../../components/LandingFooter";
 import { prisma } from "@/lib/prisma";
 import { isAdmin } from "@/lib/admin";
 import { formatBytes, formatPrice, productImageUrl, storeCategoryLabel } from "@/lib/storeShared";
-import { mercadoPagoConfigured } from "@/lib/mercadopago";
+import { anyPaymentConfigured } from "@/lib/stripe";
 import { userOwnsProduct } from "@/lib/storeOrders";
 import BuyButton from "./BuyButton";
 
@@ -127,7 +127,7 @@ export default async function ProductPage({ params }: { params: Params }) {
                   isService={isService}
                   loggedIn={Boolean(userId)}
                   owned={owned}
-                  paymentsReady={mercadoPagoConfigured()}
+                  paymentsReady={anyPaymentConfigured()}
                 />
               </div>
 

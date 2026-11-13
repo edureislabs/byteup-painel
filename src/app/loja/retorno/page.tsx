@@ -7,6 +7,7 @@ import LandingFooter from "../../components/LandingFooter";
 import { prisma } from "@/lib/prisma";
 import { mercadoPagoConfigured } from "@/lib/mercadopago";
 import { syncMercadoPagoPayment } from "@/lib/storeOrders";
+import { stripeConfigured, syncStripeSession } from "@/lib/stripe";
 import { formatPrice } from "@/lib/storeShared";
 
 export const dynamic = "force-dynamic";
@@ -29,6 +30,16 @@ export default async function RetornoPage({ searchParams }: { searchParams: Sear
       await syncMercadoPagoPayment(paymentId);
     } catch (err) {
       console.error("[loja/retorno]", err);
+    }
+  }
+
+  // Volta da Stripe: confere a sessão direto (não espera o webhook)
+  const stripeSession = one(sp.stripe_session);
+  if (/^cs_[A-Za-z0-9_]+$/.test(stripeSession) && stripeConfigured()) {
+    try {
+      await syncStripeSession(stripeSession);
+    } catch (err) {
+      console.error("[loja/retorno stripe]", err);
     }
   }
 
