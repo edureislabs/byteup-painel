@@ -19,7 +19,8 @@ export const authOptions: NextAuthOptions = {
       // Sem declarar o issuer aqui, o next-auth v4 recusa todo login com
       // "issuer must be configured on the issuer".
       issuer: "https://discord.com",
-      authorization: { params: { scope: "identify guilds" } },
+      // "email": usado só para criar o Pix na loja (o Mercado Pago exige o e-mail do pagador)
+      authorization: { params: { scope: "identify email guilds" } },
     }),
   ],
   callbacks: {
@@ -43,9 +44,15 @@ export const authOptions: NextAuthOptions = {
       return session
     },
     async redirect({ url, baseUrl }) {
-      if (url.startsWith(baseUrl)) return `${baseUrl}/dashboard`
-      if (url.startsWith("/")) return `${baseUrl}${url}`
-      return url
+      // Volta para a página de onde a pessoa veio (ex.: produto da loja);
+      // sem página definida, vai para o dashboard.
+      if (url.startsWith("/")) url = `${baseUrl}${url}`
+      if (url.startsWith(baseUrl)) {
+        const path = url.slice(baseUrl.length)
+        if (!path || path === "/" || path.startsWith("/login")) return `${baseUrl}/dashboard`
+        return url
+      }
+      return `${baseUrl}/dashboard`
     },
   },
   secret: process.env.NEXTAUTH_SECRET,

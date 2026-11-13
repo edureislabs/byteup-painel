@@ -49,7 +49,6 @@ export default async function PagarPage({ params }: { params: Promise<{ orderId:
                   publicKey={process.env.MP_PUBLIC_KEY!}
                   orderId={order.id}
                   amount={order.totalCents / 100}
-                  initialPaymentId={order.status === "pending" ? order.providerRef : null}
                 />
               ) : (
                 <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 text-center text-[#aaa3b5]">

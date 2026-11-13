@@ -95,6 +95,8 @@ export type MpPayment = {
   transaction_amount: number;
   currency_id: string;
   payment_type_id?: string;
+  payment_method_id?: string;
+  date_of_expiration?: string | null;
   point_of_interaction?: { transaction_data?: { qr_code?: string; qr_code_base64?: string; ticket_url?: string } };
 };
 
