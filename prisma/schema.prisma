@@ -613,3 +613,86 @@ model ListingModerationLog {
 
   @@index([createdAt])
 }
+
+// Cache da lista de servidores de cada usuário (vinda do Discord).
+// Compartilhado entre todas as cópias do painel na Vercel, para não
+// estourar o limite de requisições do Discord.
+model DiscordUserGuilds {
+  userId    String   @id
+  guilds    Json
+  fetchedAt DateTime @default(now())
+}
+
+// ===================== LOJA BYTEUP (produtos digitais) =====================
+
+model StoreProduct {
+  id               String   @id @default(uuid())
+  slug             String   @unique
+  name             String
+  shortDescription String   @default("")
+  description      String   @default("")
+  category         String   @default("bot") // bot | plugin | app | servico
+  kind             String   @default("download") // download | servico (atendido por ticket)
+  priceCents       Int      @default(0)
+  imageKey         String?  // imagem de capa no R2
+  active           Boolean  @default(false) // só aparece na loja quando ativo
+  sortOrder        Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  files            StoreProductFile[]
+  orderItems       StoreOrderItem[]
+
+  @@index([active, sortOrder])
+}
+
+// Arquivo de entrega guardado no Cloudflare R2 (pode ter vários GB)
+model StoreProductFile {
+  id          String       @id @default(uuid())
+  productId   String
+  product     StoreProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  key         String       @unique // caminho no R2
+  fileName    String
+  sizeBytes   BigInt       @default(0)
+  contentType String       @default("application/octet-stream")
+  status      String       @default("uploading") // uploading | ready
+  uploadId    String?      // upload multipart em andamento
+  createdAt   DateTime     @default(now())
+
+  @@index([productId, status])
+}
+
+model StoreOrder {
+  id          String    @id @default(uuid())
+  userId      String    // ID do Discord de quem comprou
+  status      String    @default("pending") // pending | paid | failed | cancelled | refunded
+  provider    String?   // mercadopago | stripe
+  providerRef String?   // ID do pagamento no provedor
+  totalCents  Int
+  currency    String    @default("BRL")
+  paidAt      DateTime?
+  deliveredAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  items       StoreOrderItem[]
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+  @@unique([provider, providerRef])
+}
+
+model StoreOrderItem {
+  id           String        @id @default(uuid())
+  orderId      String
+  order        StoreOrder    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId    String?
+  product      StoreProduct? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  nameSnapshot String        // nome do produto no momento da compra
+  priceCents   Int
+  options      Json?         // "monte o seu": comandos escolhidos
+  buildKey     String?       // .zip personalizado gerado no R2
+
+  @@index([orderId])
+  @@index([productId])
+}

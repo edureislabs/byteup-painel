@@ -11,6 +11,7 @@ const links = [
   { label: "Documentação", href: "/documentacao" },
   { label: "Comandos", href: "/comandos" },
   { label: "Servidores", href: "/servidores" },
+  { label: "Loja", href: "/loja" },
   { label: "Status", href: "/status" },
 ];
 

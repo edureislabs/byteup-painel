@@ -6,6 +6,34 @@ import { prisma } from "@/lib/prisma";
 import { getDiscordAccessToken } from "@/lib/discordtoken";
 import { isAdmin } from "@/lib/admin";
 
+type UserGuild = { id: string; name: string; icon: string | null; owner: boolean; permissions: string };
+
+// Dono ou cargo com permissão de Administrador (0x8)
+function isGuildManager(guild: UserGuild): boolean {
+  if (guild.owner) return true;
+  try {
+    return (BigInt(guild.permissions) & BigInt(0x8)) === BigInt(0x8);
+  } catch {
+    return false;
+  }
+}
+
+// Busca no Discord os servidores do usuário logado
+async function fetchUserGuilds(accessToken: string): Promise<UserGuild[] | "unauthorized"> {
+  try {
+    const res = await fetch("https://discord.com/api/v10/users/@me/guilds", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      cache: "no-store",
+      signal: AbortSignal.timeout(8000),
+    });
+    if (res.status === 401) return "unauthorized";
+    if (!res.ok) return [];
+    return (await res.json()) as UserGuild[];
+  } catch {
+    return [];
+  }
+}
+
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/");
@@ -24,56 +52,28 @@ export default async function DashboardPage() {
     ? await prisma.serverListingReport.count({ where: { resolved: false } })
     : 0;
 
-  let guilds: any[] = [];
-  let tokenRejected = false;
-  const accessibleGuilds: any[] = [];
-
-  try {
-    const res = await fetch("https://discord.com/api/v10/users/@me/guilds", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-
-    if (res.status === 401) tokenRejected = true;
-
-    if (res.ok) {
-      guilds = await res.json();
-      if (!Array.isArray(guilds)) guilds = [];
-    }
-  } catch {
-    guilds = [];
-  }
-
+  // Lista de servidores do usuário, direto do Discord
+  const result = await fetchUserGuilds(accessToken);
   // Token revogado ou inválido no Discord: login de novo
-  if (tokenRejected) redirect("/login");
+  if (result === "unauthorized") redirect("/login");
+  const guilds: UserGuild[] = result;
 
-  for (const guild of guilds) {
-    if (guild.owner) {
-      accessibleGuilds.push({ ...guild, accessType: "Dono" });
-      continue;
-    }
+  const managed = guilds.filter(isGuildManager);
+  const others = guilds.filter((g) => !isGuildManager(g));
 
-    const permissions =
-      typeof guild.permissions === "string"
-        ? parseInt(guild.permissions)
-        : guild.permissions;
+  // Uma consulta só para todos os convites do /panelaccess
+  const invited = others.length
+    ? await prisma.panelAccess.findMany({
+        where: { userId, guildId: { in: others.map((g) => g.id) } },
+        select: { guildId: true },
+      })
+    : [];
+  const invitedIds = new Set(invited.map((i) => i.guildId));
 
-    const hasAdmin = (permissions & 0x8) === 0x8;
-
-    if (hasAdmin) {
-      accessibleGuilds.push({ ...guild, accessType: "Administrador" });
-      continue;
-    }
-
-    try {
-      const panelAccess = await prisma.panelAccess.findUnique({
-        where: { guildId_userId: { guildId: guild.id, userId } },
-      });
-
-      if (panelAccess) {
-        accessibleGuilds.push({ ...guild, accessType: "Convidado" });
-      }
-    } catch {}
-  }
+  const accessibleGuilds: any[] = [
+    ...managed.map((g) => ({ ...g, accessType: g.owner ? "Dono" : "Administrador" })),
+    ...others.filter((g) => invitedIds.has(g.id)).map((g) => ({ ...g, accessType: "Convidado" })),
+  ];
 
   return (
     <main
@@ -225,6 +225,27 @@ export default async function DashboardPage() {
               </span>
             )}
           </a>
+        )}
+        {userIsAdmin && (
+          <Link
+            href="/admin/loja"
+            title="Produtos da Loja ByteUP"
+            style={{
+              background: "rgba(193, 0, 255, 0.12)",
+              color: "#e3b5ff",
+              border: "1px solid rgba(193, 0, 255, 0.35)",
+              borderRadius: "10px",
+              padding: "9px 16px",
+              fontSize: "13px",
+              fontWeight: 600,
+              textDecoration: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            🛒 Loja
+          </Link>
         )}
 
         <a
