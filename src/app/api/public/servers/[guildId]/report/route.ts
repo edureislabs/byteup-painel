@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isSnowflake } from "@/lib/apiGuard";
-import { getViewer } from "@/lib/adultgate";
-import { REPORT_REASONS } from "@/lib/listingshared";
-import { notifyNewReport } from "@/lib/reportwebhook";
+import { getViewer } from "@/lib/adultGate";
+import { REPORT_REASONS } from "@/lib/listingShared";
+import { notifyNewReport } from "@/lib/reportWebhook";
 
 /** Denuncia um servidor da lista. Uma denúncia aberta por pessoa por servidor. */
 export async function POST(req: NextRequest, { params }: { params: Promise<{ guildId: string }> }) {

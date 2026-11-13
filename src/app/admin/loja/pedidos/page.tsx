@@ -3,10 +3,10 @@ import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getAdminUserId } from "@/lib/admin";
-import { getUsersCached } from "@/lib/discordcache";
+import { getUsersCached } from "@/lib/discordCache";
 import { mercadoPagoConfigured } from "@/lib/mercadopago";
 import { deliverOrder, markOrderPaid } from "@/lib/storeOrders";
-import { daysAgo, formatPrice } from "@/lib/storeshared";
+import { daysAgo, formatPrice } from "@/lib/storeShared";
 
 export const dynamic = "force-dynamic";
 

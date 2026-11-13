@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import { normalizeTags, PAGE_SIZE, VOTE_WINDOW_DAYS } from "@/lib/listingshared";
+import { normalizeTags, PAGE_SIZE, VOTE_WINDOW_DAYS } from "@/lib/listingShared";
 
-export * from "@/lib/listingshared";
+export * from "@/lib/listingShared";
 
 export type PublicListing = {
   guildId: string;

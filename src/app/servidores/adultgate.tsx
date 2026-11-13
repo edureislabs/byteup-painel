@@ -3,7 +3,7 @@
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ADULT_COOKIE } from "@/lib/listingshared";
+import { ADULT_COOKIE } from "@/lib/listingShared";
 
 /**
  * Barreira para conteúdo +18: pede login com o Discord e a confirmação

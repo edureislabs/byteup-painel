@@ -1,7 +1,7 @@
 'use client';
 
 import { use, useEffect, useState } from 'react';
-import { CATEGORIES, MAX_TAGS, normalizeTags, guildIconUrl } from '@/lib/listingshared';
+import { CATEGORIES, MAX_TAGS, normalizeTags, guildIconUrl } from '@/lib/listingShared';
 
 type Listing = {
   enabled: boolean;

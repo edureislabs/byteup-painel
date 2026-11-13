@@ -4,7 +4,7 @@ import LandingNavbar from "../components/LandingNavbar";
 import LandingFooter from "../components/LandingFooter";
 import ProductCard from "./ProductCard";
 import { prisma } from "@/lib/prisma";
-import { STORE_CATEGORIES } from "@/lib/storeshared";
+import { STORE_CATEGORIES } from "@/lib/storeShared";
 
 export const dynamic = "force-dynamic";
 

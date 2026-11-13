@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isSnowflake } from "@/lib/apiGuard";
-import { getViewer } from "@/lib/adultgate";
-import { VOTE_COOLDOWN_MS } from "@/lib/listingshared";
+import { getViewer } from "@/lib/adultGate";
+import { VOTE_COOLDOWN_MS } from "@/lib/listingShared";
 
 /** Vota em um servidor: 1 voto por pessoa a cada 12 horas por servidor. */
 export async function POST(req: NextRequest, { params }: { params: Promise<{ guildId: string }> }) {

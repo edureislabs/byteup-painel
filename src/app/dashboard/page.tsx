@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { getDiscordAccessToken } from "@/lib/discordtoken";
+import { getDiscordAccessToken } from "@/lib/discordToken";
 import { isAdmin } from "@/lib/admin";
 
 type UserGuild = { id: string; name: string; icon: string | null; owner: boolean; permissions: string };

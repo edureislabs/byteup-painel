@@ -7,7 +7,7 @@ import LandingFooter from "../../components/LandingFooter";
 import { prisma } from "@/lib/prisma";
 import { mercadoPagoConfigured } from "@/lib/mercadopago";
 import { syncMercadoPagoPayment } from "@/lib/storeOrders";
-import { formatPrice } from "@/lib/storeshared";
+import { formatPrice } from "@/lib/storeShared";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Pagamento | Loja ByteUP", robots: { index: false } };

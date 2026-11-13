@@ -6,7 +6,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import LandingNavbar from "../../components/LandingNavbar";
 import LandingFooter from "../../components/LandingFooter";
 import { prisma } from "@/lib/prisma";
-import { daysAgo, formatBytes, formatPrice } from "@/lib/storeshared";
+import { daysAgo, formatBytes, formatPrice } from "@/lib/storeShared";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Minhas compras | Loja ByteUP", robots: { index: false } };

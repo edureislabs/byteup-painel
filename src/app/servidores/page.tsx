@@ -5,7 +5,7 @@ import LandingFooter from "../components/LandingFooter";
 import ServerCard from "./servercard";
 import AdultGate, { LeaveAdultMode } from "./adultgate";
 import { CATEGORIES, getPopularTags, getPublicListings } from "@/lib/listing";
-import { getViewer } from "@/lib/adultgate";
+import { getViewer } from "@/lib/adultGate";
 
 export const dynamic = "force-dynamic";
 

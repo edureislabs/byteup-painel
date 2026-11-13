@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getUsersCached } from '@/lib/discordcache';
+import { getUsersCached } from '@/lib/discordCache';
 import { guardApi } from '@/lib/apiGuard';
 import { prisma } from '@/lib/prisma';
 

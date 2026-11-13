@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { botGet } from '@/lib/discordcache';
+import { botGet } from '@/lib/discordCache';
 import { guardApi } from '@/lib/apiGuard';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ guildId: string }> }) {

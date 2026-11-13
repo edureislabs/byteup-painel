@@ -2,7 +2,7 @@
 
 import { signIn } from "next-auth/react";
 import { useState } from "react";
-import { REPORT_REASONS } from "@/lib/listingshared";
+import { REPORT_REASONS } from "@/lib/listingShared";
 
 /** Botões da página do servidor: Entrar, Votar e Denunciar. */
 export default function ServerActions({

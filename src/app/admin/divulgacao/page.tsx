@@ -4,9 +4,9 @@ import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
-import { REPORT_REASONS } from "@/lib/listingshared";
+import { REPORT_REASONS } from "@/lib/listingShared";
 import { isAdmin } from "@/lib/admin";
-import { getUsersCached } from "@/lib/discordcache";
+import { getUsersCached } from "@/lib/discordCache";
 
 export const dynamic = "force-dynamic";
 

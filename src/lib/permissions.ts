@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
-import { getDiscordAccessToken } from "@/lib/discordtoken";
+import { getDiscordAccessToken } from "@/lib/discordToken";
 
 export { getDiscordAccessToken };
 

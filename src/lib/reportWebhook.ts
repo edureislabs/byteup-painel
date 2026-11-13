@@ -1,4 +1,4 @@
-import { REPORT_REASONS } from "@/lib/listingshared";
+import { REPORT_REASONS } from "@/lib/listingShared";
 
 /**
  * Avisa num canal do Discord quando chega uma denúncia nova.

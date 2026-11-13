@@ -3,11 +3,11 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import LandingNavbar from "../../../../components/LandingNavbar";
-import LandingFooter from "../../../../components/LandingFooter";
+import LandingNavbar from "../../../components/LandingNavbar";
+import LandingFooter from "../../../components/LandingFooter";
 import { prisma } from "@/lib/prisma";
 import { mercadoPagoConfigured } from "@/lib/mercadopago";
-import { formatPrice, productImageUrl, storeCategoryLabel } from "@/lib/storeshared";
+import { formatPrice, productImageUrl, storeCategoryLabel } from "@/lib/storeShared";
 import PaymentForm from "./PaymentForm";
 
 export const dynamic = "force-dynamic";

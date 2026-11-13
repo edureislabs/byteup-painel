@@ -1,7 +1,7 @@
-﻿"use client";
+"use client";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { escapeHtml } from "@/lib/escapehtml";
+import { escapeHtml } from "@/lib/escapeHtml";
 
 interface WelcomeConfig {
   channelId: string | null;

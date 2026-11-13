@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getPayment, siteUrl } from "@/lib/mercadopago";
-import { formatPrice } from "@/lib/storeshared";
+import { formatPrice } from "@/lib/storeShared";
 
 /**
  * Pedidos da loja: confirmação de pagamento e entrega.

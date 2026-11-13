@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { guardApi } from '@/lib/apiGuard';
 import { prisma } from '@/lib/prisma';
-import { validateShopItem } from '@/lib/shopvalidation';
+import { validateShopItem } from '@/lib/shopValidation';
 
 // Lista os itens da loja teste
 export async function GET(req: NextRequest, { params }: { params: Promise<{ guildId: string }> }) {

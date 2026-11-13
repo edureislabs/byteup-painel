@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { guardApi, isSnowflake } from '@/lib/apiGuard';
 import { prisma } from '@/lib/prisma';
-import { botGet } from '@/lib/discordcache';
+import { botGet } from '@/lib/discordCache';
 import { CATEGORIES, normalizeTags } from '@/lib/listing';
 
 const DISCORD_API = 'https://discord.com/api/v10';

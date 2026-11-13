@@ -8,10 +8,10 @@ import LandingNavbar from "../../components/LandingNavbar";
 import LandingFooter from "../../components/LandingFooter";
 import { prisma } from "@/lib/prisma";
 import { isAdmin } from "@/lib/admin";
-import { formatBytes, formatPrice, productImageUrl, storeCategoryLabel } from "@/lib/storeshared";
+import { formatBytes, formatPrice, productImageUrl, storeCategoryLabel } from "@/lib/storeShared";
 import { mercadoPagoConfigured } from "@/lib/mercadopago";
 import { userOwnsProduct } from "@/lib/storeOrders";
-import BuyButton from "./buybutton";
+import BuyButton from "./BuyButton";
 
 export const dynamic = "force-dynamic";
 

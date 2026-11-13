@@ -1,6 +1,6 @@
 // src/app/api/guilds/[guildId]/welcome/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { botGet } from '@/lib/discordcache';
+import { botGet } from '@/lib/discordCache';
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";

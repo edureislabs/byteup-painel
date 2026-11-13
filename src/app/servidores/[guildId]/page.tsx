@@ -7,7 +7,7 @@ import AdultGate from "../adultgate";
 import ServerActions from "../serveractions";
 import { prisma } from "@/lib/prisma";
 import { isSnowflake } from "@/lib/apiGuard";
-import { getViewer } from "@/lib/adultgate";
+import { getViewer } from "@/lib/adultGate";
 import { categoryLabel, countRecentVotes, guildBannerUrl, guildIconUrl } from "@/lib/listing";
 
 export const dynamic = "force-dynamic";

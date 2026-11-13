@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { ADULT_COOKIE } from "@/lib/listingshared";
+import { ADULT_COOKIE } from "@/lib/listingShared";
 
 /**
  * Pode ver servidores +18?

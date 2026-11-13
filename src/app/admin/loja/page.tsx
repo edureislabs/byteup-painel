@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getAdminUserId } from "@/lib/admin";
 import { r2Configured } from "@/lib/r2";
-import { formatPrice, storeCategoryLabel } from "@/lib/storeshared";
+import { formatPrice, storeCategoryLabel } from "@/lib/storeShared";
 import { createProduct } from "./actions";
 
 export const dynamic = "force-dynamic";

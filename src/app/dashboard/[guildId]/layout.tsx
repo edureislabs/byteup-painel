@@ -7,8 +7,8 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect, notFound } from "next/navigation";
 import { canAccessPanel } from "@/lib/permissions";
 import { isSnowflake } from "@/lib/apiGuard";
-import { getDiscordAccessToken } from "@/lib/discordtoken";
-import { botGet } from "@/lib/discordcache";
+import { getDiscordAccessToken } from "@/lib/discordToken";
+import { botGet } from "@/lib/discordCache";
 import Sidebar from "./Sidebar";
 
 export default async function GuildLayout({

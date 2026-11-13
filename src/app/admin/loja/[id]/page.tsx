@@ -3,11 +3,11 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getAdminUserId } from "@/lib/admin";
 import { r2Configured } from "@/lib/r2";
-import { formatBytes, productImageUrl } from "@/lib/storeshared";
+import { formatBytes, productImageUrl } from "@/lib/storeShared";
 import { deleteFile, deleteProduct, removeImage } from "../actions";
-import ProductForm from "./productform";
-import FileUploader from "./fileuploader";
-import ImageUploader from "./imageuploader";
+import ProductForm from "./ProductForm";
+import FileUploader from "./FileUploader";
+import ImageUploader from "./ImageUploader";
 
 export const dynamic = "force-dynamic";
 

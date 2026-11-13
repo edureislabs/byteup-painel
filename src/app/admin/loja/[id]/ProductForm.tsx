@@ -1,7 +1,7 @@
 "use client";
 
 import { startTransition, useActionState } from "react";
-import { PRODUCT_KINDS, STORE_CATEGORIES } from "@/lib/storeshared";
+import { PRODUCT_KINDS, STORE_CATEGORIES } from "@/lib/storeShared";
 import { updateProduct, type SaveState } from "../actions";
 
 type Props = {

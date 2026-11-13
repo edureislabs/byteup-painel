@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isSnowflake } from "@/lib/apiGuard";
-import { getViewer } from "@/lib/adultgate";
+import { getViewer } from "@/lib/adultGate";
 
 /**
  * Entrega o link de convite.

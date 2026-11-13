@@ -1,5 +1,5 @@
 'use client';
-import { escapeHtml } from '@/lib/escapehtml';
+import { escapeHtml } from '@/lib/escapeHtml';
 import { useState, useRef } from 'react';
 
 type Config = {

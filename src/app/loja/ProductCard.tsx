@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatPrice, productImageUrl, storeCategoryLabel } from "@/lib/storeshared";
+import { formatPrice, productImageUrl, storeCategoryLabel } from "@/lib/storeShared";
 
 export type ProductCardData = {
   id: string;

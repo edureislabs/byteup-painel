@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { formatBytes } from "@/lib/storeshared";
+import { formatBytes } from "@/lib/storeShared";
 
 /**
  * Envio em partes (multipart) direto para o R2:
