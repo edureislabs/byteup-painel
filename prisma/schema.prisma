@@ -563,6 +563,8 @@ model ServerListing {
   // Moderação (você, pelo /admin/divulgacao)
   hidden            Boolean   @default(false)
   hiddenReason      String?
+  hiddenBy          String?   // ID do admin que ocultou
+  hiddenAt          DateTime?
   syncedAt          DateTime?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
@@ -592,7 +594,22 @@ model ServerListingReport {
   reason     String
   details    String?
   resolved   Boolean       @default(false)
+  resolution String?       // ocultado | marcado_18 | ignorado
+  resolvedBy String?       // ID do admin que decidiu
+  resolvedAt DateTime?
   createdAt  DateTime      @default(now())
 
   @@index([resolved, createdAt])
+}
+
+// Histórico de decisões da moderação da divulgação
+model ListingModerationLog {
+  id        String   @id @default(uuid())
+  guildId   String
+  adminId   String
+  action    String   // ocultou | mostrou | marcou_18 | ignorou
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
 }

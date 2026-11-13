@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { isSnowflake } from "@/lib/apiGuard";
 import { getViewer } from "@/lib/adultgate";
 import { REPORT_REASONS } from "@/lib/listingshared";
+import { notifyNewReport } from "@/lib/reportwebhook";
 
 /** Denuncia um servidor da lista. Uma denúncia aberta por pessoa por servidor. */
 export async function POST(req: NextRequest, { params }: { params: Promise<{ guildId: string }> }) {
@@ -38,6 +39,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ gui
 
   await prisma.serverListingReport.create({
     data: { guildId, reporterId: viewer.userId, reason, details: details || null },
+  });
+
+  // Aviso no Discord para os admins (se REPORTS_WEBHOOK_URL estiver configurado)
+  const openReports = await prisma.serverListingReport.count({ where: { guildId, resolved: false } });
+  await notifyNewReport({
+    guildId,
+    serverName: listing.name,
+    reason,
+    details: details || null,
+    reporterId: viewer.userId,
+    openReports,
+    nsfw: listing.nsfw,
   });
 
   return NextResponse.json({ ok: true, message: "Denúncia enviada. Obrigado por avisar!" });
