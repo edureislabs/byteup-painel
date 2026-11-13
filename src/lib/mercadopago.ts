@@ -1,17 +1,18 @@
-import { createHmac, timingSafeEqual } from "crypto";
+import { createHmac, randomUUID, timingSafeEqual } from "crypto";
 
 /**
- * Mercado Pago (Checkout Pro): Pix e cartão.
+ * Mercado Pago (Checkout Bricks): Pix e cartão dentro do site.
  *
  * Variáveis na Vercel:
- *   MP_ACCESS_TOKEN    - Access Token de PRODUÇÃO (APP_USR-...). Para testes, o de teste.
+ *   MP_ACCESS_TOKEN    - Access Token de PRODUÇÃO (APP_USR-...). Secreto!
+ *   MP_PUBLIC_KEY      - Public Key de produção (pode aparecer no site, é usada pelo formulário de pagamento)
  *   MP_WEBHOOK_SECRET  - "Assinatura secreta" da seção Webhooks em Suas integrações (opcional, recomendado)
  */
 
 // MP_API_BASE só é usado em testes locais (servidor falso)
 const API = process.env.MP_API_BASE || "https://api.mercadopago.com";
 
-export const mercadoPagoConfigured = () => Boolean(process.env.MP_ACCESS_TOKEN);
+export const mercadoPagoConfigured = () => Boolean(process.env.MP_ACCESS_TOKEN && process.env.MP_PUBLIC_KEY);
 
 export const siteUrl = () => (process.env.NEXTAUTH_URL || "https://byteup-painel.vercel.app").replace(/\/+$/, "");
 
@@ -34,46 +35,56 @@ async function mp<T>(path: string, init: RequestInit = {}): Promise<T> {
   return data as T;
 }
 
-/** Cria o link de pagamento. Retorna a URL do checkout. */
-export async function createPreference(order: {
-  id: string;
-  title: string;
-  productId: string;
-  totalCents: number;
-}): Promise<{ id: string; url: string }> {
-  const base = siteUrl();
-  const pref = await mp<{ id: string; init_point: string; sandbox_init_point?: string }>("/checkout/preferences", {
+export type MpPaymentInput = {
+  token?: string;
+  issuer_id?: string | number;
+  payment_method_id: string;
+  installments?: number;
+  payer: {
+    email: string;
+    first_name?: string;
+    last_name?: string;
+    identification?: { type?: string; number?: string };
+  };
+};
+
+/**
+ * Cria o pagamento com os dados que o Payment Brick devolveu.
+ * Valor, descrição e pedido vêm SEMPRE do servidor, nunca do navegador.
+ */
+export async function createPayment(input: MpPaymentInput, order: { id: string; title: string; totalCents: number }) {
+  const isPix = input.payment_method_id === "pix";
+  return mp<MpPayment>("/v1/payments", {
     method: "POST",
-    headers: { "X-Idempotency-Key": `order-${order.id}` },
+    headers: { "X-Idempotency-Key": randomUUID() },
     body: JSON.stringify({
-      items: [
-        {
-          id: order.productId,
-          title: order.title.slice(0, 250),
-          quantity: 1,
-          unit_price: order.totalCents / 100,
-          currency_id: "BRL",
-          category_id: "services",
-        },
-      ],
+      ...input,
+      transaction_amount: order.totalCents / 100,
+      description: order.title.slice(0, 250),
       external_reference: order.id,
-      notification_url: `${base}/api/store/webhook/mercadopago?source_news=webhooks`,
-      back_urls: {
-        success: `${base}/loja/retorno?pedido=${order.id}`,
-        pending: `${base}/loja/retorno?pedido=${order.id}`,
-        failure: `${base}/loja/retorno?pedido=${order.id}`,
-      },
-      auto_return: "approved",
+      notification_url: `${siteUrl()}/api/store/webhook/mercadopago?source_news=webhooks`,
       statement_descriptor: "BYTEUP",
-      // Sem boleto (demora dias para compensar); Pix e cartão
-      payment_methods: { excluded_payment_types: [{ id: "ticket" }, { id: "atm" }], installments: 12 },
-      // O link vale 24 h
-      expires: true,
-      expiration_date_to: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      // QR code do Pix vale 30 minutos
+      ...(isPix ? { date_of_expiration: new Date(Date.now() + 30 * 60 * 1000).toISOString() } : {}),
     }),
   });
-  const useSandbox = process.env.MP_ACCESS_TOKEN?.startsWith("TEST-");
-  return { id: pref.id, url: (useSandbox && pref.sandbox_init_point) || pref.init_point };
+}
+
+/** Mensagem amigável para pagamentos recusados. */
+export function rejectionMessage(detail?: string): string {
+  const map: Record<string, string> = {
+    cc_rejected_insufficient_amount: "Saldo ou limite insuficiente.",
+    cc_rejected_bad_filled_security_code: "Código de segurança (CVV) incorreto.",
+    cc_rejected_bad_filled_date: "Data de validade incorreta.",
+    cc_rejected_bad_filled_card_number: "Número do cartão incorreto.",
+    cc_rejected_bad_filled_other: "Confira os dados do cartão.",
+    cc_rejected_call_for_authorize: "O banco pediu autorização: ligue para o seu banco e tente de novo.",
+    cc_rejected_card_disabled: "Cartão bloqueado ou desativado. Fale com o seu banco.",
+    cc_rejected_duplicated_payment: "Você já fez um pagamento igual há pouco.",
+    cc_rejected_high_risk: "Pagamento recusado pela análise de segurança. Tente o Pix ou outro cartão.",
+    cc_rejected_max_attempts: "Muitas tentativas com este cartão. Use outro meio.",
+  };
+  return (detail && map[detail]) || "Pagamento recusado. Tente outro cartão ou pague com Pix.";
 }
 
 export type MpPayment = {
@@ -84,6 +95,7 @@ export type MpPayment = {
   transaction_amount: number;
   currency_id: string;
   payment_type_id?: string;
+  point_of_interaction?: { transaction_data?: { qr_code?: string; qr_code_base64?: string; ticket_url?: string } };
 };
 
 export async function getPayment(paymentId: string): Promise<MpPayment> {

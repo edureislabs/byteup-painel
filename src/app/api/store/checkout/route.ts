@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
-import { createPreference, mercadoPagoConfigured } from "@/lib/mercadopago";
+import { mercadoPagoConfigured } from "@/lib/mercadopago";
 import { markOrderPaid, userOwnsProduct } from "@/lib/storeOrders";
 
 /**
  * Inicia uma compra: { productId } -> { redirect }
  * - grátis: libera na hora;
  * - já comprado (download): manda para "Minhas compras";
- * - pago: cria o pedido e devolve o link do Mercado Pago.
+ * - pago: cria o pedido e manda para a página de pagamento do site (/loja/pagar/...).
  */
 
 // Limite simples: 10 tentativas por minuto por usuário
@@ -60,15 +60,14 @@ export async function POST(req: NextRequest) {
   const recent = await prisma.storeOrder.findFirst({
     where: {
       userId,
-      status: "pending",
+      status: { in: ["pending", "failed"] },
       totalCents: product.priceCents,
       createdAt: { gt: new Date(Date.now() - 20 * 60 * 60 * 1000) },
       items: { some: { productId: product.id } },
-      checkoutUrl: { not: null },
     },
     orderBy: { createdAt: "desc" },
   });
-  if (recent?.checkoutUrl) return NextResponse.json({ redirect: recent.checkoutUrl });
+  if (recent) return NextResponse.json({ redirect: `/loja/pagar/${recent.id}` });
 
   const order = await prisma.storeOrder.create({
     data: {
@@ -78,14 +77,6 @@ export async function POST(req: NextRequest) {
       items: { create: { productId: product.id, nameSnapshot: product.name, priceCents: product.priceCents } },
     },
   });
-
-  try {
-    const pref = await createPreference({ id: order.id, title: product.name, productId: product.id, totalCents: product.priceCents });
-    await prisma.storeOrder.update({ where: { id: order.id }, data: { checkoutUrl: pref.url } });
-    return NextResponse.json({ redirect: pref.url });
-  } catch (err) {
-    console.error("[loja/checkout]", err);
-    await prisma.storeOrder.update({ where: { id: order.id }, data: { status: "cancelled" } });
-    return NextResponse.json({ error: "Não foi possível iniciar o pagamento. Tente de novo." }, { status: 502 });
-  }
+  await prisma.storeOrder.update({ where: { id: order.id }, data: { checkoutUrl: `/loja/pagar/${order.id}` } });
+  return NextResponse.json({ redirect: `/loja/pagar/${order.id}` });
 }
