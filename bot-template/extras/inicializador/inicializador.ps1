@@ -175,17 +175,22 @@ function ServidoresDoBot([string]$token) {
 
 # ---------------- ligar / parar ----------------
 function ArqEstado([string]$pasta) { return (Join-Path $pasta '.inicializador.json') }
-function ProcessoDoBot([string]$pasta) {
-  $arq = ArqEstado $pasta
+function ProcessoDe([string]$arq) {
   if (-not (Test-Path -LiteralPath $arq)) { return $null }
   try {
     $e = Get-Content -LiteralPath $arq -Raw -Encoding UTF8 | ConvertFrom-Json
     $p = Get-Process -Id ([int]$e.pid) -ErrorAction SilentlyContinue
     if (-not $p -or @('cmd', 'node') -notcontains $p.ProcessName) { return $null }
     # o Windows reaproveita números de processo: confere a hora em que começou
-    if ([math]::Abs(($p.StartTime - [datetime]$e.inicio).TotalSeconds) -gt 10) { return $null }
+    if ([math]::Abs(($p.StartTime.ToUniversalTime() - ([datetime]$e.inicio).ToUniversalTime()).TotalSeconds) -gt 10) { return $null }
     return $p
   } catch { return $null }
+}
+# O processo do bot: o que o Inicializador ligou ou, se foi ligado de outro jeito (terminal), o que o próprio bot avisou no ".rodando"
+function ProcessoDoBot([string]$pasta) {
+  $p = ProcessoDe (ArqEstado $pasta)
+  if ($p) { return $p }
+  return (ProcessoDe (Join-Path $pasta '.rodando'))
 }
 function InstalarDeps([string]$pasta, $rotulo) {
   $logs = Join-Path $pasta 'logs'
@@ -777,9 +782,10 @@ $btIniciar.Add_Click({
   if ($b.Situacao -like '*antigo') {
     if (-not (Pergunta "Este é uma cópia ANTIGA do bot $($b.Nome). Tem uma versão mais nova na lista.`n`nLigar esta mesmo assim?" 'Warning')) { return }
   }
-  $outro = $script:bots | Where-Object { $_.Nome -eq $b.Nome -and $_.Pasta -ne $b.Pasta -and (ProcessoDoBot $_.Pasta) } | Select-Object -First 1
+  $meuToken = (LerEnv $b.Pasta)['DISCORD_TOKEN']
+  $outro = $script:bots | Where-Object { $_.Pasta -ne $b.Pasta -and ($_.Nome -eq $b.Nome -or ($meuToken -and (LerEnv $_.Pasta)['DISCORD_TOKEN'] -eq $meuToken)) -and (ProcessoDoBot $_.Pasta) } | Select-Object -First 1
   if ($outro) {
-    if (-not (Pergunta "Outra cópia deste bot já está ligada:`n$($outro.Pasta)`n`nDois ao mesmo tempo com o mesmo token não funcionam. Desligar a outra e ligar esta?" 'Warning')) { return }
+    if (-not (Pergunta "Outro bot com o mesmo token (ou outra cópia deste bot) já está ligado:`n$($outro.Nome) · $($outro.Pasta)`n`nDois ao mesmo tempo com o mesmo token respondem tudo em dobro. Desligar o outro e ligar este?" 'Warning')) { return }
     PararBot $outro.Pasta
   }
   try { IniciarComResultado $b $rotulo } catch { $form.Cursor = [System.Windows.Forms.Cursors]::Default; Aviso "Não consegui ligar: $($_.Exception.Message)" 'Error' }

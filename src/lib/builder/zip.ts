@@ -21,10 +21,19 @@ export function crc32(buf: Buffer): number {
   return (c ^ 0xffffffff) >>> 0;
 }
 
-/** Data e hora no formato do MS-DOS (o que o zip usa). */
+/**
+ * Data e hora no formato do MS-DOS (o que o zip usa). O zip não guarda fuso: quem extrai lê como
+ * hora local. O servidor roda em UTC, então grava no horário de Brasília (senão os arquivos
+ * aparecem 3 horas no futuro no PC do cliente).
+ */
 function dosDateTime(d: Date) {
-  const time = (d.getHours() << 11) | (d.getMinutes() << 5) | Math.floor(d.getSeconds() / 2);
-  const date = ((Math.max(1980, d.getFullYear()) - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+  const p = Object.fromEntries(
+    new Intl.DateTimeFormat("en-US", { timeZone: "America/Sao_Paulo", hourCycle: "h23", year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "numeric", second: "numeric" })
+      .formatToParts(d)
+      .map((x) => [x.type, Number(x.value)]),
+  ) as Record<string, number>;
+  const time = (p.hour << 11) | (p.minute << 5) | Math.floor(p.second / 2);
+  const date = ((Math.max(1980, p.year) - 1980) << 9) | (p.month << 5) | p.day;
   return { time, date };
 }
 

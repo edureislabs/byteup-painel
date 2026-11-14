@@ -1,5 +1,5 @@
 import './src/core/env.js';
-import { existsSync, unlinkSync } from 'node:fs';
+import { existsSync, unlinkSync, writeFileSync } from 'node:fs';
 import {
   Client,
   Events,
@@ -198,12 +198,25 @@ client.once(Events.ClientReady, async (c) => {
   }
 });
 
-// salva os dados antes de desligar
-const desligar = () => {
+// salva os dados e avisa o Discord antes de desligar (senão o bot continua aparecendo online por alguns minutos)
+let desligando = false;
+const desligar = async () => {
+  if (desligando) return;
+  desligando = true;
   salvarTudo();
+  await Promise.race([client.destroy().catch(() => {}), new Promise((r) => setTimeout(r, 3000))]);
   process.exit(0);
 };
 for (const sinal of ['SIGINT', 'SIGTERM']) process.on(sinal, desligar);
+
+// ".rodando": o Inicializador sabe que este bot está ligado, mesmo se ele foi ligado pelo terminal
+const arquivoRodando = new URL('./.rodando', import.meta.url);
+try {
+  writeFileSync(arquivoRodando, JSON.stringify({ pid: process.pid, inicio: new Date(Date.now() - process.uptime() * 1000).toISOString() }));
+} catch { /* pasta só de leitura (hospedagem) */ }
+process.on('exit', () => {
+  try { unlinkSync(arquivoRodando); } catch { /* já apagado */ }
+});
 
 // O Inicializador liga o bot sem janela; para desligar com segurança ele cria o arquivo ".parar"
 const arquivoParar = new URL('./.parar', import.meta.url);
