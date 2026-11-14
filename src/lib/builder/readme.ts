@@ -160,6 +160,9 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
   L.push(`**Módulos:** ${mods.map((m) => `${m.emoji} ${m.name}`).join(" · ")}`, "");
   if (extras.length) L.push(`**Ferramentas:** ${extras.map((m) => `${m.emoji} ${m.name}`).join(" · ")}`, "");
   L.push("> Já tinha um bot nosso e está atualizando? Vá direto para **Atualizar o bot sem perder os dados**, mais abaixo.", "");
+  if (extras.length) {
+    L.push("> **Windows:** antes de extrair, clique com o botão direito no **.zip** → **Propriedades** → marque **Desbloquear** → **OK**. Sem isso, o Windows pode bloquear os arquivos `.bat` com o aviso \"O Controle Inteligente de Aplicativos bloqueou um arquivo\" ou \"O Windows protegeu o computador\".", "");
+  }
 
   L.push("## Do que você precisa", "");
   if (temInicializador) L.push("- Um PC com **Windows** (o Inicializador instala o Node.js sozinho, se faltar)");
@@ -314,6 +317,7 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
   }
 
   L.push("## Problemas comuns", "");
+  if (extras.length) L.push("- **O Windows bloqueou o `.bat` (\"Controle Inteligente de Aplicativos\" ou \"O Windows protegeu o computador\")**: apague a pasta extraída, clique com o botão direito no .zip → Propriedades → marque **Desbloquear** → OK e extraia de novo. No aviso azul também dá para clicar em **Mais informações → Executar assim mesmo**.");
   L.push("- **\"Falta o token do bot\"**: o arquivo `.env` não existe ou o `DISCORD_TOKEN` está vazio.");
   L.push("- **\"An invalid token was provided\"**: o token está errado. Gere outro em *Bot → Reset Token*.");
   if (intents.length) L.push(`- **\"Used disallowed intents\"**: ligue ${intents.map((i) => `**${i}**`).join(" e ")} no Developer Portal (passo 1).`);

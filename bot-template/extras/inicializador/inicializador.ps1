@@ -297,6 +297,17 @@ function AlternarInicio($bot) {
   Aviso "Pronto: o bot $($bot.Nome) vai ligar sozinho sempre que o computador ligar (sem abrir janela).`n`nPara desfazer, clique de novo em ""Ligar com o Windows""."
 }
 
+# Tira a marca "baixado da internet" dos scripts (o Windows bloqueia .bat/.ps1 com essa marca).
+# Assim o Transferidor e os outros scripts da pasta do bot funcionam sem aviso.
+function Desbloquear([string]$pasta) {
+  try {
+    Get-ChildItem -LiteralPath $pasta -File -ErrorAction SilentlyContinue |
+      Where-Object { @('.bat', '.cmd', '.ps1', '.js', '.json', '.html') -contains $_.Extension.ToLowerInvariant() } |
+      Unblock-File -ErrorAction SilentlyContinue
+  } catch {}
+}
+Desbloquear $PSScriptRoot
+
 # Modo sem janela (atalho do Windows): só liga o bot, se estiver configurado
 if ($Ligar) {
   if ((EhBot $Ligar) -and (DepsOk $Ligar) -and (LerEnv $Ligar)['DISCORD_TOKEN'] -and -not (ProcessoDoBot $Ligar)) {
@@ -748,6 +759,7 @@ function Carregar([bool]$procurarDeNovo) {
     $form.Cursor = [System.Windows.Forms.Cursors]::Default
     SalvarCache $pastas
   }
+  foreach ($p in $pastas) { Desbloquear $p }
   $script:bots = @($pastas | ForEach-Object { InfoBot $_ } | Sort-Object Nome, Versao)
   MarcarSituacao $script:bots
   Preencher

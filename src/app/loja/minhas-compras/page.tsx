@@ -78,6 +78,10 @@ export default async function MinhasComprasPage() {
           <p className="mt-2 text-sm text-[#aaa3b5]">
             Os links de download são gerados na hora e valem por 1 hora. Pode voltar aqui e baixar de novo quando quiser.
           </p>
+          <p className="mt-3 rounded-2xl border border-[#f2c96d]/25 bg-[#f2c96d]/5 px-4 py-3 text-sm text-[#d8cfb4]">
+            <b className="text-[#f2c96d]">Windows:</b> antes de extrair o .zip, clique nele com o botão direito → <b>Propriedades</b> → marque{" "}
+            <b>Desbloquear</b> → OK. Sem isso, o Windows pode bloquear o <code>Iniciar bot.bat</code>.
+          </p>
 
           {visible.length === 0 && (
             <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-10 text-center text-[#aaa3b5]">
