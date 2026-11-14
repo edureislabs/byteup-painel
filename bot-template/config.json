@@ -1,0 +1,6 @@
+{
+  "nome": "Meu Bot",
+  "cor": "#5865F2",
+  "status": "Use /ajuda",
+  "modulos": ["moderacao", "automod", "boasvindas", "logs", "niveis", "economia", "tickets", "sugestoes", "enquetes", "sorteios", "cargos", "utilidades", "diversao"]
+}

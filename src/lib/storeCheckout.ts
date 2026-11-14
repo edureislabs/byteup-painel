@@ -2,6 +2,14 @@ import { prisma } from "@/lib/prisma";
 import { anyPaymentConfigured } from "@/lib/stripe";
 import { createPayment, getPayment, mercadoPagoConfigured, type MpPayment } from "@/lib/mercadopago";
 import { markOrderPaid, syncMercadoPagoPayment, userOwnsProduct } from "@/lib/storeOrders";
+import {
+  builderItemName,
+  builderTotal,
+  cleanBotName,
+  cleanColor,
+  parseModules,
+  type BuilderOptions,
+} from "@/lib/builder/catalog";
 
 /**
  * Regras de compra da loja, usadas pelo site e pelo bot (loja dentro do Discord).
@@ -82,6 +90,54 @@ export async function startPurchase(userId: string, productId: string): Promise<
   });
   await prisma.storeOrder.update({ where: { id: order.id }, data: { checkoutUrl: `/loja/pagar/${order.id}` } });
   return { kind: "order", orderId: order.id };
+}
+
+// ---------- "Monte o seu bot" ----------
+export type BuilderStartResult =
+  | { kind: "invalid"; error: string }
+  | { kind: "not_configured" }
+  | { kind: "order"; orderId: string; totalCents: number };
+
+/**
+ * Cria (ou reaproveita) o pedido de um bot montado com os módulos escolhidos.
+ * O preço é sempre calculado aqui, pelo catálogo: nunca vem de quem está comprando.
+ */
+export async function startBuilderPurchase(
+  userId: string,
+  input: { modules: unknown; botName: unknown; color?: unknown }
+): Promise<BuilderStartResult> {
+  const modulos = parseModules(input.modules);
+  if (!modulos) return { kind: "invalid", error: "Escolha pelo menos um módulo." };
+  const nome = cleanBotName(input.botName);
+  if (!nome) return { kind: "invalid", error: "Dê um nome ao bot (de 2 a 32 caracteres)." };
+  if (!anyPaymentConfigured()) return { kind: "not_configured" };
+
+  const options: BuilderOptions = { tipo: "monte-o-seu", modulos, nome, cor: cleanColor(input.color) };
+  const totalCents = builderTotal(modulos);
+
+  // mesmo bot pedido de novo (clique duplo, voltou da página de pagamento): reaproveita o pedido pendente
+  const recent = await prisma.storeOrder.findFirst({
+    where: {
+      userId,
+      status: { in: ["pending", "failed"] },
+      totalCents,
+      createdAt: { gt: new Date(Date.now() - 20 * 60 * 60 * 1000) },
+      items: { some: { productId: null, options: { equals: options } } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+  if (recent) return { kind: "order", orderId: recent.id, totalCents };
+
+  const order = await prisma.storeOrder.create({
+    data: {
+      userId,
+      totalCents,
+      provider: "mercadopago",
+      items: { create: { productId: null, nameSnapshot: builderItemName(nome), priceCents: totalCents, options } },
+    },
+  });
+  await prisma.storeOrder.update({ where: { id: order.id }, data: { checkoutUrl: `/loja/pagar/${order.id}` } });
+  return { kind: "order", orderId: order.id, totalCents };
 }
 
 // ---------- Pix ----------

@@ -9,6 +9,7 @@ import { prisma } from "@/lib/prisma";
 import { mercadoPagoConfigured } from "@/lib/mercadopago";
 import { anyPaymentConfigured, stripeConfigured } from "@/lib/stripe";
 import { formatPrice, productImageUrl, storeCategoryLabel } from "@/lib/storeShared";
+import { BUILDER_BASE, builderModule, readBuilderOptions } from "@/lib/builder/catalog";
 import PaymentForm from "./PaymentForm";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +33,7 @@ export default async function PagarPage({ params }: { params: Promise<{ orderId:
   const item = order.items[0];
   const image = item?.product ? productImageUrl(item.product.id, item.product.imageKey) : null;
   const cat = storeCategoryLabel(item?.product?.category ?? "bot");
+  const bot = item && !item.productId ? readBuilderOptions(item.options) : null;
 
   return (
     <main className="min-h-screen text-white">
@@ -40,6 +42,9 @@ export default async function PagarPage({ params }: { params: Promise<{ orderId:
         <div className="site-container max-w-5xl">
           {item?.product && (
             <Link href={`/loja/${item.product.slug}`} className="text-sm text-[#7d7588] hover:text-white">← Voltar ao produto</Link>
+          )}
+          {bot && (
+            <Link href="/loja/monte-o-seu" className="text-sm text-[#7d7588] hover:text-white">← Voltar ao Monte o seu bot</Link>
           )}
           <h1 className="mt-4 text-3xl font-black">Pagamento</h1>
 
@@ -80,6 +85,22 @@ export default async function PagarPage({ params }: { params: Promise<{ orderId:
                     <span>{formatPrice(i.priceCents)}</span>
                   </div>
                 ))}
+                {bot && (
+                  <ul className="space-y-1 border-l border-white/10 pl-3 text-xs text-[#aaa3b5]">
+                    <li className="flex justify-between gap-3">
+                      <span>⚙️ {BUILDER_BASE.name}</span>
+                      <span>{formatPrice(BUILDER_BASE.priceCents)}</span>
+                    </li>
+                    {bot.modulos.map((id) => (
+                      <li key={id} className="flex justify-between gap-3">
+                        <span>
+                          {builderModule(id)?.emoji} {builderModule(id)?.name ?? id}
+                        </span>
+                        <span>{formatPrice(builderModule(id)?.priceCents ?? 0)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
               <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-4">
                 <span className="text-sm text-[#aaa3b5]">Total</span>

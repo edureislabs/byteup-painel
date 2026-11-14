@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { getPayment, siteUrl } from "@/lib/mercadopago";
 import { formatPrice } from "@/lib/storeShared";
+import { readBuilderOptions } from "@/lib/builder/catalog";
+import { buildBotZip } from "@/lib/builder/build";
 
 /**
  * Pedidos da loja: confirmação de pagamento e entrega.
@@ -56,7 +58,7 @@ export async function markOrderPaid(orderId: string, provider: string, providerR
   return true;
 }
 
-/** Avisa o comprador na DM com o link de "Minhas compras". */
+/** Avisa o comprador na DM com o link de "Minhas compras" (e manda o .zip do "Monte o seu bot"). */
 export async function deliverOrder(orderId: string) {
   const order = await prisma.storeOrder.findUnique({
     where: { id: orderId },
@@ -68,6 +70,19 @@ export async function deliverOrder(orderId: string) {
   const hasService = order.items.some((i) => i.product?.kind === "servico");
   const lines = order.items.map((i) => `• **${i.nameSnapshot}**${i.priceCents ? ` — ${formatPrice(i.priceCents)}` : ""}`);
 
+  // bots montados: o .zip vai anexado na DM
+  const files: DmFile[] = [];
+  for (const item of order.items) {
+    const opts = item.productId ? null : readBuilderOptions(item.options);
+    if (!opts) continue;
+    try {
+      const zip = buildBotZip(opts, base);
+      files.push({ name: zip.fileName, data: zip.buffer });
+    } catch (err) {
+      console.error("[loja] falha ao montar o bot", item.id, err);
+    }
+  }
+
   const embed = {
     title: "✅ Compra confirmada!",
     color: 0xa855f7,
@@ -76,6 +91,9 @@ export async function deliverOrder(orderId: string) {
       "",
       ...lines,
       "",
+      ...(files.length
+        ? ["🤖 **Seu bot está anexado nesta mensagem.** Extraia o .zip e siga o **README.md**: em poucos minutos ele está online.", ""]
+        : []),
       hasService
         ? "🛠️ Este é um serviço sob medida: **abra um ticket** no nosso servidor e informe o número do pedido abaixo."
         : `📦 Seus arquivos estão prontos: [**Baixar em Minhas compras**](${base}/loja/minhas-compras)`,
@@ -86,11 +104,15 @@ export async function deliverOrder(orderId: string) {
     timestamp: new Date().toISOString(),
   };
 
-  const ok = await sendDm(order.userId, { embeds: [embed] });
+  let ok = await sendDm(order.userId, { embeds: [embed] }, files);
+  // se o anexo falhar por algum motivo, manda pelo menos o aviso (o .zip fica em Minhas compras)
+  if (!ok && files.length) ok = await sendDm(order.userId, { embeds: [embed] });
   if (ok) await prisma.storeOrder.update({ where: { id: orderId }, data: { deliveredAt: new Date() } });
 }
 
-async function sendDm(userId: string, message: Record<string, unknown>): Promise<boolean> {
+type DmFile = { name: string; data: Buffer };
+
+async function sendDm(userId: string, message: Record<string, unknown>, files: DmFile[] = []): Promise<boolean> {
   const token = process.env.DISCORD_BOT_TOKEN;
   if (!token) return false;
   try {
@@ -102,11 +124,25 @@ async function sendDm(userId: string, message: Record<string, unknown>): Promise
     });
     if (!ch.ok) return false;
     const { id } = (await ch.json()) as { id: string };
+
+    const payload = { ...message, allowed_mentions: { parse: [] } };
+    let body: BodyInit;
+    const headers: Record<string, string> = { Authorization: `Bot ${token}` };
+    if (files.length) {
+      // mensagem com anexo: multipart/form-data (o fetch monta o cabeçalho sozinho)
+      const form = new FormData();
+      form.append("payload_json", JSON.stringify({ ...payload, attachments: files.map((f, i) => ({ id: i, filename: f.name })) }));
+      files.forEach((f, i) => form.append(`files[${i}]`, new Blob([new Uint8Array(f.data)], { type: "application/zip" }), f.name));
+      body = form;
+    } else {
+      headers["Content-Type"] = "application/json";
+      body = JSON.stringify(payload);
+    }
     const res = await fetch(`${DISCORD_API}/channels/${id}/messages`, {
       method: "POST",
-      headers: { Authorization: `Bot ${token}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ ...message, allowed_mentions: { parse: [] } }),
-      signal: AbortSignal.timeout(8000),
+      headers,
+      body,
+      signal: AbortSignal.timeout(files.length ? 20000 : 8000),
     });
     // 50007 = a pessoa fechou a DM; ela ainda acha tudo em "Minhas compras"
     return res.ok;

@@ -59,6 +59,23 @@ export default async function LojaPage({ searchParams }: { searchParams: SearchP
 
       <section className="pb-20">
         <div className="site-container">
+          {(!categoria || categoria === "bot") && (
+            <Link
+              href="/loja/monte-o-seu"
+              className="group mb-6 flex flex-col gap-4 rounded-3xl border border-[#b64cff]/40 bg-gradient-to-r from-[#b64cff]/20 via-[#b64cff]/5 to-transparent p-6 transition-colors hover:border-[#b64cff] sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-[#d9b4ff]">🧩 Novo</p>
+                <h2 className="mt-1 text-2xl font-black">Monte o seu bot</h2>
+                <p className="mt-1 max-w-xl text-sm leading-6 text-[#aaa3b5]">
+                  Escolha os módulos (moderação, tickets, níveis, economia e mais) e pague só pelo que usar. Funciona em qualquer servidor.
+                </p>
+              </div>
+              <span className="shrink-0 rounded-2xl bg-[#b64cff] px-5 py-3 text-sm font-black text-white group-hover:bg-[#c56bff]">
+                Montar agora →
+              </span>
+            </Link>
+          )}
           {products.length === 0 ? (
             <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-10 text-center text-[#aaa3b5]">
               Nenhum produto {categoria ? "nesta categoria " : ""}por enquanto. Volte em breve!

@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { timingSafeEqual } from "node:crypto";
 import { siteUrl } from "@/lib/mercadopago";
-import { checkoutLimited, generatePix, orderStatus, startPurchase } from "@/lib/storeCheckout";
+import { checkoutLimited, generatePix, orderStatus, startBuilderPurchase, startPurchase } from "@/lib/storeCheckout";
+import { BUILDER_BASE, BUILDER_MODULES } from "@/lib/builder/catalog";
 
 /**
  * Loja dentro do Discord: o bot chama esta rota em nome de quem clicou no botão.
  * Só o bot entra: precisa do cabeçalho  Authorization: Bearer <BOT_API_SECRET>
  * (o mesmo valor no .env do bot e nas variáveis da Vercel).
  *
- * Corpo: { action: "start" | "pix" | "status", userId, productId?, orderId?, email? }
+ * Corpo: { action: "start" | "pix" | "status" | "builder_catalog" | "builder_start", userId, productId?, orderId?, email?,
+ *         modules?, botName?, color? }
  */
 
 const SNOWFLAKE = /^\d{15,22}$/;
@@ -49,6 +51,28 @@ export async function POST(req: NextRequest) {
       if (!r.ok) return json({ error: r.error, needEmail: Boolean(r.needEmail) }, r.status);
       if (r.approved) return json({ approved: true });
       return json({ approved: false, pix: r.pix });
+    }
+    case "builder_catalog": {
+      // módulos e preços do "Monte o seu bot" (o bot mostra no menu do Discord)
+      return json({
+        base: { name: BUILDER_BASE.name, priceCents: BUILDER_BASE.priceCents, description: BUILDER_BASE.description },
+        modules: BUILDER_MODULES.map((m) => ({
+          id: m.id,
+          bit: m.bit,
+          name: m.name,
+          emoji: m.emoji,
+          description: m.description,
+          priceCents: m.priceCents,
+          commands: m.commands.length,
+        })),
+      });
+    }
+    case "builder_start": {
+      if (checkoutLimited(userId)) return json({ error: "Muitas tentativas. Espere um minuto." }, 429);
+      const r = await startBuilderPurchase(userId, { modules: body.modules, botName: body.botName, color: body.color });
+      if (r.kind === "invalid") return json({ error: r.error }, 400);
+      if (r.kind === "not_configured") return json(r);
+      return json({ ...r, payUrl: `${siteUrl()}/loja/pagar/${r.orderId}` });
     }
     case "status": {
       const orderId = String(body.orderId || "");

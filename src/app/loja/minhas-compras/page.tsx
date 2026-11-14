@@ -7,6 +7,7 @@ import LandingNavbar from "../../components/LandingNavbar";
 import LandingFooter from "../../components/LandingFooter";
 import { prisma } from "@/lib/prisma";
 import { daysAgo, formatBytes, formatPrice } from "@/lib/storeShared";
+import { builderModule, readBuilderOptions } from "@/lib/builder/catalog";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Minhas compras | Loja ByteUP", robots: { index: false } };
@@ -78,7 +79,9 @@ export default async function MinhasComprasPage() {
                     <span className={`rounded-full px-3 py-1 text-xs font-bold ${st.cls}`}>{st.label}</span>
                   </div>
 
-                  {o.items.map((item) => (
+                  {o.items.map((item) => {
+                    const bot = item.productId ? null : readBuilderOptions(item.options);
+                    return (
                     <div key={item.id} className="mt-3">
                       <div className="font-bold">
                         {item.product ? (
@@ -94,7 +97,23 @@ export default async function MinhasComprasPage() {
                         </p>
                       )}
 
-                      {o.status === "paid" && item.product?.kind !== "servico" && (
+                      {bot && (
+                        <p className="mt-1 text-xs text-[#7d7588]">
+                          {bot.modulos.map((id) => `${builderModule(id)?.emoji ?? ""} ${builderModule(id)?.name ?? id}`).join(" · ")}
+                        </p>
+                      )}
+
+                      {o.status === "paid" && bot && (
+                        <a
+                          href={`/api/store/build/${item.id}`}
+                          className="mt-2 flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm hover:border-[#b64cff]/50"
+                        >
+                          <span className="truncate">🤖 Baixar o bot (.zip)</span>
+                          <span className="shrink-0 text-xs text-[#7d7588]">sempre na versão mais nova • Baixar ↓</span>
+                        </a>
+                      )}
+
+                      {o.status === "paid" && !bot && item.product?.kind !== "servico" && (
                         <div className="mt-2 space-y-2">
                           {(item.product?.files ?? []).map((f) => (
                             <a
@@ -112,7 +131,8 @@ export default async function MinhasComprasPage() {
                         </div>
                       )}
                     </div>
-                  ))}
+                    );
+                  })}
 
                   {o.status === "pending" && o.checkoutUrl && (
                     <a href={o.checkoutUrl} className="mt-4 inline-block text-sm font-bold text-[#d9b4ff] underline">Continuar pagamento →</a>
