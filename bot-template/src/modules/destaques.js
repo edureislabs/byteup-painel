@@ -1,6 +1,28 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, GatewayIntentBits, Partials, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { colecao } from '../core/db.js';
-import { ajustes, salvarAjustes, embed, responder, cortar } from '../core/util.js';
+import { ajustes, salvarAjustes, embed, responder, cortar, imagens } from '../core/util.js';
+import { textos, visuais, botoes, fileira, fileiras } from '../core/textos.js';
+
+// Textos deste módulo (o dono do bot pode trocar todos no "Personalizar bot.html")
+const tx = textos('destaques', {
+  anexos: ['Anexos', 'campo'],
+  ver_mensagem: ['Ver mensagem', 'botao'],
+  destaques_desligados: ['Destaques desligados.', 'resposta'],
+  destaques_ligados_mensagens_vao: ['Destaques ligados: mensagens com **{minimo}** {mostra} vão para {canal}.', 'resposta'],
+  destaques: 'Destaques',
+  reacao_oes: '<#{canal}> · {minimo} reação(ões)',
+  desligado_destaques_configurar: 'Desligado (`/destaques configurar`)',
+});
+
+// Botões (texto, emoji e cor personalizáveis; alguns podem ser escondidos)
+const bt = botoes('destaques', {
+  ver: { nome: 'Ver mensagem original (link)', rotulo: 'ver_mensagem', emoji: '-', estilo: 'Link', ocultavel: true },
+});
+
+// Aparência dos embeds principais (cor, imagem, miniatura e rodapé personalizáveis)
+const vis = visuais('destaques', {
+  destaque: { nome: "Mensagem em destaque", vars: ['avatar', 'servidor_icone'] },
+});
 
 /**
  * Destaques (starboard): mensagem que juntar N reações ⭐ vai para o canal de destaques.
@@ -44,13 +66,14 @@ async function aoReagir(reacao) {
   if (imagem) e.setImage(imagem.url);
   else if (msg.embeds[0]?.image?.url) e.setImage(msg.embeds[0].image.url);
   const outros = msg.attachments.filter((a) => a !== imagem).map((a) => `[${a.name}](${a.url})`);
-  if (outros.length) e.addFields({ name: 'Anexos', value: cortar(outros.join('\n'), 1024) });
+  if (outros.length) e.addFields({ name: tx('anexos'), value: cortar(outros.join('\n'), 1024) });
+  vis(e, 'destaque', imagens({ user: msg.author, guild: msg.guild }));
 
   const enviado = await canal
     .send({
       content: cabecalho,
       embeds: [e],
-      components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setStyle(ButtonStyle.Link).setLabel('Ver mensagem').setURL(msg.url))],
+      components: fileiras(fileira(bt('ver')?.setURL(msg.url))),
       allowedMentions: { parse: [] },
     })
     .catch(() => null);
@@ -79,7 +102,7 @@ const destaques = {
     if (i.options.getSubcommand() === 'desligar') {
       c.canal = null;
       salvarAjustes();
-      return responder(i, 'Destaques desligados.', 'sucesso');
+      return responder(i, tx('destaques_desligados'), 'sucesso');
     }
     const canal = i.options.getChannel('canal');
     c.canal = canal.id;
@@ -92,13 +115,13 @@ const destaques = {
     }
     salvarAjustes();
     const mostra = /^\d+$/.test(c.emoji) ? (i.guild.emojis.cache.get(c.emoji)?.toString() ?? c.emoji) : c.emoji;
-    return responder(i, `Destaques ligados: mensagens com **${c.minimo}** ${mostra} vão para ${canal}.`, 'sucesso');
+    return responder(i, tx('destaques_ligados_mensagens_vao', { minimo: c.minimo, mostra, canal }), 'sucesso');
   },
 };
 
 export default {
   id: 'destaques',
-  nome: 'Destaques',
+  nome: tx('destaques'),
   intents: [GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.MessageContent],
   partials: [Partials.Message, Partials.Reaction, Partials.User, Partials.Channel],
   comandos: [destaques],
@@ -106,7 +129,7 @@ export default {
   config: {
     resumo(guild) {
       const c = cfg(guild.id);
-      return [c.canal ? `<#${c.canal}> · ${c.minimo} reação(ões)` : 'Desligado (`/destaques configurar`)'];
+      return [c.canal ? tx('reacao_oes', { canal: c.canal, minimo: c.minimo }) : tx('desligado_destaques_configurar')];
     },
   },
 };

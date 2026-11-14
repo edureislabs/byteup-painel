@@ -1,6 +1,35 @@
 import { ChannelType, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { colecao } from '../core/db.js';
 import { CONFIG, embed, responder, cortar, lerDuracao, duracaoTexto, ts } from '../core/util.js';
+import { textos, visuais } from '../core/textos.js';
+
+// Textos deste módulo (o dono do bot pode trocar todos no "Personalizar bot.html")
+const tx = textos('anuncios', {
+  america_sao_paulo: 'America/Sao_Paulo',
+  nenhum_anuncio_agendado_use: ['Nenhum anúncio agendado. Use `/anuncio criar`.', 'resposta'],
+  cada: ' · a cada {duracao}',
+  anuncios_agendados: ['📣 Anúncios agendados', 'titulo'],
+  anuncio_encontrado_escolha_lista: ['Anúncio não encontrado. Escolha na lista enquanto digita.', 'resposta'],
+  enviado: 'Enviado em <#{canal}>.',
+  consegui_enviar_confira_minhas: 'Não consegui enviar. Confira as minhas permissões no canal.',
+  anuncio_cancelado: ['Anúncio cancelado.', 'resposta'],
+  maximo_anuncios_agendados: ['No máximo {limite} anúncios agendados.', 'resposta'],
+  essa_data_ja_passou: ['Essa data já passou. Confira o dia e o horário.', 'resposta'],
+  entendi_data_use_algo: ['Não entendi a data. Use algo como **25/12 09:00**, **18:30**, **9h** ou **em 2h**.', 'resposta'],
+  entendi_repetir_use_algo: ['Não entendi o "repetir". Use algo como **12h**, **1d** ou **7d**.', 'resposta'],
+  virar_spam_intervalo_minimo: ['Para não virar spam, o intervalo mínimo é de 10 minutos.', 'resposta'],
+  link_imagem_precisa_comecar: ['O link da imagem precisa começar com https://', 'resposta'],
+  depois_cada: ' e depois a cada **{duracao}**',
+  anuncio_agendado: ['Anúncio agendado para {quando} ({relativo}){duracao} em <#{canal}>.', 'resposta'],
+  anuncios_agendados_2: 'Anúncios agendados',
+  anuncio_agendado_anuncio_lista: '{total} anúncio(s) agendado(s) (`/anuncio lista`)',
+  nenhum_anuncio_criar: 'Nenhum (`/anuncio criar`)',
+});
+
+// Aparência dos embeds principais (cor, imagem, miniatura e rodapé personalizáveis)
+const vis = visuais('anuncios', {
+  anuncio: { nome: "Anúncio agendado", vars: [] },
+});
 
 /**
  * Anúncios agendados: mensagens que saem numa data marcada ou que repetem
@@ -10,7 +39,7 @@ import { CONFIG, embed, responder, cortar, lerDuracao, duracaoTexto, ts } from '
 const anuncios = colecao('anuncios'); // guild -> { lista: [...] }
 const LIMITE = 20;
 const MIN_INTERVALO = 10 * 60_000;
-const FUSO = CONFIG.fuso || 'America/Sao_Paulo';
+const FUSO = CONFIG.fuso || tx('america_sao_paulo');
 const lista = (guildId) => (anuncios.de(guildId).lista ??= []);
 
 /** Diferença (ms) entre o fuso escolhido e o UTC num instante. */
@@ -61,6 +90,7 @@ export function lerQuando(texto) {
 function mensagem(guildId, a) {
   const e = embed(guildId).setDescription(a.texto);
   if (a.titulo) e.setTitle(a.titulo);
+  vis(e, 'anuncio', {}); // a imagem do próprio anúncio vem depois e tem prioridade
   if (a.imagem) e.setImage(a.imagem);
   return { content: a.cargo ? (a.cargo === guildId ? '@everyone' : `<@&${a.cargo}>`) : undefined, embeds: [e], allowedMentions: { parse: a.cargo === guildId ? ['everyone'] : [], roles: a.cargo && a.cargo !== guildId ? [a.cargo] : [] } };
 }
@@ -123,29 +153,29 @@ const anuncio = {
     const sub = i.options.getSubcommand();
     const l = lista(i.guildId);
     if (sub === 'lista') {
-      if (!l.length) return responder(i, 'Nenhum anúncio agendado. Use `/anuncio criar`.', 'aviso');
-      const linhas = l.map((a) => `\`${a.id}\` · <#${a.canal}> · ${ts(a.proximo, 'f')}${a.intervalo ? ` · a cada ${duracaoTexto(a.intervalo)}` : ''}\n> ${cortar(a.titulo || a.texto.replace(/\n/g, ' '), 80)}`);
-      return i.reply({ embeds: [embed(i.guildId).setTitle('📣 Anúncios agendados').setDescription(cortar(linhas.join('\n'), 4000))], flags: 64 });
+      if (!l.length) return responder(i, tx('nenhum_anuncio_agendado_use'), 'aviso');
+      const linhas = l.map((a) => `\`${a.id}\` · <#${a.canal}> · ${ts(a.proximo, 'f')}${a.intervalo ? tx('cada', { duracao: duracaoTexto(a.intervalo) }) : ''}\n> ${cortar(a.titulo || a.texto.replace(/\n/g, ' '), 80)}`);
+      return i.reply({ embeds: [embed(i.guildId).setTitle(tx('anuncios_agendados')).setDescription(cortar(linhas.join('\n'), 4000))], flags: 64 });
     }
     if (sub === 'apagar' || sub === 'testar') {
       const a = l.find((x) => x.id === i.options.getString('anuncio'));
-      if (!a) return responder(i, 'Anúncio não encontrado. Escolha na lista enquanto digita.', 'erro');
-      if (sub === 'testar') return responder(i, (await enviar(i.client, i.guildId, a)) ? `Enviado em <#${a.canal}>.` : 'Não consegui enviar. Confira as minhas permissões no canal.', 'sucesso');
+      if (!a) return responder(i, tx('anuncio_encontrado_escolha_lista'), 'erro');
+      if (sub === 'testar') return responder(i, (await enviar(i.client, i.guildId, a)) ? tx('enviado', { canal: a.canal }) : tx('consegui_enviar_confira_minhas'), 'sucesso');
       anuncios.de(i.guildId).lista = l.filter((x) => x.id !== a.id);
       anuncios.salvar();
-      return responder(i, 'Anúncio cancelado.', 'sucesso');
+      return responder(i, tx('anuncio_cancelado'), 'sucesso');
     }
     // criar
-    if (l.length >= LIMITE) return responder(i, `No máximo ${LIMITE} anúncios agendados.`, 'erro');
+    if (l.length >= LIMITE) return responder(i, tx('maximo_anuncios_agendados', { limite: LIMITE }), 'erro');
     const quando = lerQuando(i.options.getString('quando'));
-    if (quando === -1) return responder(i, 'Essa data já passou. Confira o dia e o horário.', 'erro');
-    if (!quando) return responder(i, 'Não entendi a data. Use algo como **25/12 09:00**, **18:30**, **9h** ou **em 2h**.', 'erro');
+    if (quando === -1) return responder(i, tx('essa_data_ja_passou'), 'erro');
+    if (!quando) return responder(i, tx('entendi_data_use_algo'), 'erro');
     const repetir = i.options.getString('repetir');
     const intervalo = repetir ? lerDuracao(repetir) : null;
-    if (repetir && !intervalo) return responder(i, 'Não entendi o "repetir". Use algo como **12h**, **1d** ou **7d**.', 'erro');
-    if (intervalo && intervalo < MIN_INTERVALO) return responder(i, 'Para não virar spam, o intervalo mínimo é de 10 minutos.', 'erro');
+    if (repetir && !intervalo) return responder(i, tx('entendi_repetir_use_algo'), 'erro');
+    if (intervalo && intervalo < MIN_INTERVALO) return responder(i, tx('virar_spam_intervalo_minimo'), 'erro');
     const imagem = i.options.getString('imagem');
-    if (imagem && !/^https?:\/\/\S+$/i.test(imagem)) return responder(i, 'O link da imagem precisa começar com https://', 'erro');
+    if (imagem && !/^https?:\/\/\S+$/i.test(imagem)) return responder(i, tx('link_imagem_precisa_comecar'), 'erro');
     const a = {
       id: Date.now().toString(36).slice(-6),
       canal: i.options.getChannel('canal').id,
@@ -158,7 +188,7 @@ const anuncio = {
     };
     l.push(a);
     anuncios.salvar();
-    return responder(i, `Anúncio agendado para ${ts(a.proximo, 'f')} (${ts(a.proximo)})${intervalo ? ` e depois a cada **${duracaoTexto(intervalo)}**` : ''} em <#${a.canal}>.`, 'sucesso');
+    return responder(i, tx('anuncio_agendado', { quando: ts(a.proximo, 'f'), relativo: ts(a.proximo), duracao: intervalo ? tx('depois_cada', { duracao: duracaoTexto(intervalo) }) : '', canal: a.canal }), 'sucesso');
   },
   async autocompletar(i) {
     const foco = (i.options.getFocused() || '').toLowerCase();
@@ -173,7 +203,7 @@ const anuncio = {
 
 export default {
   id: 'anuncios',
-  nome: 'Anúncios agendados',
+  nome: tx('anuncios_agendados_2'),
   permissoes: [PermissionFlagsBits.MentionEveryone],
   comandos: [anuncio],
   aoIniciar(client) {
@@ -183,7 +213,7 @@ export default {
   config: {
     resumo(guild) {
       const n = anuncios.ler(guild.id, 'lista')?.length ?? 0;
-      return [n ? `${n} anúncio(s) agendado(s) (\`/anuncio lista\`)` : 'Nenhum (`/anuncio criar`)'];
+      return [n ? tx('anuncio_agendado_anuncio_lista', { total: n }) : tx('nenhum_anuncio_criar')];
     },
   },
 };

@@ -1,6 +1,5 @@
 import './src/core/env.js';
 import {
-  ActivityType,
   Client,
   Events,
   GatewayIntentBits,
@@ -13,7 +12,8 @@ import {
   Routes,
   SlashCommandBuilder,
 } from 'discord.js';
-import { CONFIG } from './src/core/util.js';
+import { CONFIG, erroGenerico, aplicarPresenca } from './src/core/util.js';
+import { registrarNomeModulo } from './src/core/textos.js';
 import { salvarTudo } from './src/core/db.js';
 import nucleo, { registrarModulos } from './src/core/nucleo.js';
 
@@ -35,6 +35,7 @@ for (const id of CONFIG.modulos ?? []) {
   }
 }
 registrarModulos(modulos);
+for (const m of modulos) if (m.id !== 'nucleo') registrarNomeModulo(m.id, m.nome);
 
 const intents = new Set([GatewayIntentBits.Guilds]);
 const partials = new Set();
@@ -119,7 +120,7 @@ for (const [nome, lista] of eventos) {
 
 // ---------------- interações ----------------
 async function avisarErro(i) {
-  const payload = { content: '❌ Algo deu errado. Tente de novo em instantes.', flags: MessageFlags.Ephemeral };
+  const payload = { content: erroGenerico(), flags: MessageFlags.Ephemeral };
   if (i.deferred || i.replied) await i.followUp(payload).catch(() => {});
   else await i.reply(payload).catch(() => {});
 }
@@ -173,7 +174,7 @@ client.once(Events.ClientReady, async (c) => {
     console.error('❌ Não consegui registrar os comandos:', e.message);
   }
 
-  if (CONFIG.status) c.user.setPresence({ activities: [{ type: ActivityType.Custom, name: 'status', state: CONFIG.status }] });
+  aplicarPresenca(c);
 
   for (const m of modulos) {
     try {

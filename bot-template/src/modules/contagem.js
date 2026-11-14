@@ -1,5 +1,24 @@
 import { ChannelType, GatewayIntentBits, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { ajustes, salvarAjustes, embed, responder, fmt, foiRemovida } from '../core/util.js';
+import { textos } from '../core/textos.js';
+
+// Textos deste módulo (o dono do bot pode trocar todos no "Personalizar bot.html")
+const tx = textos('contagem', {
+  proximo_era: 'O próximo era **{esperado}**.',
+  vale_contar_duas_vezes: 'Não vale contar duas vezes seguidas.',
+  errou_voces_chegaram_recomecando: ['💥 {autor} errou! {erro}\nVocês chegaram a **{chegou}**. Recomeçando do **1**. (Recorde: {recorde})', 'descricao'],
+  novo_recorde_voces_passaram: ['🏆 **Novo recorde!** Vocês passaram de {recorde_anterior}.', 'descricao'],
+  jogo_contar_esta_ligado: ['O jogo de contar não está ligado.', 'resposta'],
+  estamos_proximo_recorde: ['🔢 Em <#{canal}>: estamos no **{atual}** (próximo: {proximo}).\n🏆 Recorde: **{recorde}**{quando_recorde}', 'resposta'],
+  so_quem_tem_gerenciar: ['Só quem tem **Gerenciar servidor** pode fazer isso.', 'resposta'],
+  contagem_zerada_proximo_numero: ['Contagem zerada. O próximo número é 1.', 'resposta'],
+  jogo_contar: ['🔢 Jogo de contar', 'titulo'],
+  contem_partir_numero_mensagem: ['Contem a partir do **1**, um número por mensagem.\nA mesma pessoa não pode contar duas vezes seguidas. Errou, volta para o 1!', 'descricao'],
+  jogo_contar_ligado: ['Jogo de contar ligado em {canal}.', 'resposta'],
+  jogo_contar_2: 'Jogo de contar',
+  atual_recorde: '<#{canal}> · atual {atual} · recorde {recorde}',
+  desligado_contagem_canal: 'Desligado (`/contagem canal`)',
+});
 
 /**
  * Jogo de contar: num canal, todo mundo conta 1, 2, 3...
@@ -19,7 +38,7 @@ async function aoMensagem(msg) {
   const n = Number(texto);
   const esperado = c.atual + 1;
 
-  const erro = n !== esperado ? `O próximo era **${fmt(esperado)}**.` : msg.author.id === c.ultimo ? 'Não vale contar duas vezes seguidas.' : null;
+  const erro = n !== esperado ? tx('proximo_era', { esperado: fmt(esperado) }) : msg.author.id === c.ultimo ? tx('vale_contar_duas_vezes') : null;
   if (erro) {
     const chegou = c.atual;
     c.atual = 0;
@@ -29,7 +48,7 @@ async function aoMensagem(msg) {
     await msg.react('❌').catch(() => {});
     await msg
       .reply({
-        embeds: [embed(msg.guildId).setColor(0xef4444).setDescription(`💥 ${msg.author} errou! ${erro}\nVocês chegaram a **${fmt(chegou)}**. Recomeçando do **1**. (Recorde: ${fmt(c.recorde)})`)],
+        embeds: [embed(msg.guildId).setColor(0xef4444).setDescription(tx('errou_voces_chegaram_recomecando', { autor: msg.author, erro, chegou: fmt(chegou), recorde: fmt(c.recorde) }))],
         allowedMentions: { users: [] },
       })
       .catch(() => {});
@@ -45,7 +64,7 @@ async function aoMensagem(msg) {
   }
   salvarAjustes();
   await msg.react(bateuRecorde ? '🏆' : '✅').catch(() => {});
-  if (bateuRecorde) await msg.channel.send({ embeds: [embed(msg.guildId).setDescription(`🏆 **Novo recorde!** Vocês passaram de ${fmt(n - 1)}.`)] }).catch(() => {});
+  if (bateuRecorde) await msg.channel.send({ embeds: [embed(msg.guildId).setDescription(tx('novo_recorde_voces_passaram', { recorde_anterior: fmt(n - 1) }))] }).catch(() => {});
 }
 
 const contagem = {
@@ -64,20 +83,20 @@ const contagem = {
     const c = cfg(i.guildId);
     const sub = i.options.getSubcommand();
     if (sub === 'status') {
-      if (!c.canal) return responder(i, 'O jogo de contar não está ligado.', 'aviso');
+      if (!c.canal) return responder(i, tx('jogo_contar_esta_ligado'), 'aviso');
       return responder(
         i,
-        `🔢 Em <#${c.canal}>: estamos no **${fmt(c.atual)}** (próximo: ${fmt(c.atual + 1)}).\n🏆 Recorde: **${fmt(c.recorde)}**${c.recordeEm ? ` (<t:${Math.floor(c.recordeEm / 1000)}:R>)` : ''}`,
+        tx('estamos_proximo_recorde', { canal: c.canal, atual: fmt(c.atual), proximo: fmt(c.atual + 1), recorde: fmt(c.recorde), quando_recorde: c.recordeEm ? ` (<t:${Math.floor(c.recordeEm / 1000)}:R>)` : '' }),
         'info'
       );
     }
-    if (!i.member.permissions.has(PermissionFlagsBits.ManageGuild)) return responder(i, 'Só quem tem **Gerenciar servidor** pode fazer isso.', 'erro');
+    if (!i.member.permissions.has(PermissionFlagsBits.ManageGuild)) return responder(i, tx('so_quem_tem_gerenciar'), 'erro');
     if (sub === 'zerar') {
       c.atual = 0;
       c.ultimo = null;
       c.recordeDaRodada = c.recorde;
       salvarAjustes();
-      return responder(i, 'Contagem zerada. O próximo número é 1.', 'sucesso');
+      return responder(i, tx('contagem_zerada_proximo_numero'), 'sucesso');
     }
     const canal = i.options.getChannel('canal');
     c.canal = canal.id;
@@ -85,21 +104,21 @@ const contagem = {
     c.ultimo = null;
     c.recordeDaRodada = c.recorde;
     salvarAjustes();
-    await canal.send({ embeds: [embed(i.guildId).setTitle('🔢 Jogo de contar').setDescription('Contem a partir do **1**, um número por mensagem.\nA mesma pessoa não pode contar duas vezes seguidas. Errou, volta para o 1!')] }).catch(() => {});
-    return responder(i, `Jogo de contar ligado em ${canal}.`, 'sucesso');
+    await canal.send({ embeds: [embed(i.guildId).setTitle(tx('jogo_contar')).setDescription(tx('contem_partir_numero_mensagem'))] }).catch(() => {});
+    return responder(i, tx('jogo_contar_ligado', { canal }), 'sucesso');
   },
 };
 
 export default {
   id: 'contagem',
-  nome: 'Jogo de contar',
+  nome: tx('jogo_contar_2'),
   intents: [GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
   comandos: [contagem],
   eventos: { messageCreate: aoMensagem },
   config: {
     resumo(guild) {
       const c = cfg(guild.id);
-      return [c.canal ? `<#${c.canal}> · atual ${fmt(c.atual)} · recorde ${fmt(c.recorde)}` : 'Desligado (`/contagem canal`)'];
+      return [c.canal ? tx('atual_recorde', { canal: c.canal, atual: fmt(c.atual), recorde: fmt(c.recorde) }) : tx('desligado_contagem_canal')];
     },
   },
 };

@@ -1,6 +1,50 @@
 import { ChannelType, GatewayIntentBits, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { colecao } from '../core/db.js';
-import { ajustes, salvarAjustes, embed, responder, preencher, barra, fmt, sorteio, foiRemovida } from '../core/util.js';
+import { ajustes, salvarAjustes, embed, responder, preencher, barra, fmt, sorteio, foiRemovida, imagens } from '../core/util.js';
+import { textos, modeloOu, visuais } from '../core/textos.js';
+
+// Textos deste módulo (o dono do bot pode trocar todos no "Personalizar bot.html")
+const tx = textos('niveis', {
+  msg_nivel_padrao: '🎉 {usuario} subiu para o **nível {nivel}**!',
+  nivel: ['Nível', 'campo'],
+  posicao: ['Posição', 'campo'],
+  xp_total: ['XP total', 'campo'],
+  progresso_nivel: ['Progresso para o nível {nivel}', 'campo'],
+  xp: '{barra}  {atual}/{precisa} XP',
+  ninguem_ganhou_xp_ainda: ['Ninguém ganhou XP ainda. Converse no chat!', 'resposta'],
+  nivel_xp: '{medalhas} <@{usuario}> · nível **{nivel}** · {xp} XP',
+  ranking: ['🏆 Ranking de {servidor}', 'titulo'],
+  sua_posicao: 'Sua posição: #{posicao}',
+  voce_ainda_tem_xp: 'Você ainda não tem XP',
+  bots_tem_xp: ['Bots não têm XP.', 'resposta'],
+  agora_tem_xp_nivel: ['**{tag}** agora tem **{xp} XP** (nível {nivel}).', 'resposta'],
+  ganho_xp_ligado: 'Ganho de XP ligado.',
+  ganho_xp_desligado: 'Ganho de XP desligado.',
+  em: 'em {canal}',
+  mesmo_canal_mensagem: 'no mesmo canal da mensagem',
+  aviso_nivel: 'Aviso de nível {canal}.',
+  esse_cargo_pode_ser: ['Esse cargo não pode ser dado.', 'resposta'],
+  suba_meu_cargo_acima: ' ⚠️ Suba o meu cargo acima dele para funcionar.',
+  chegar_nivel_membro_ganha: 'Ao chegar no nível **{nivel}**, o membro ganha {cargo}.{aviso}',
+  recompensa_nivel_removida: 'Recompensa do nível {nivel} removida.',
+  minimo_pode_ser_maior: ['O mínimo não pode ser maior que o máximo.', 'resposta'],
+  cada_mensagem_vale_xp: 'Cada mensagem vale de **{min} a {max} XP**, uma vez a cada **{intervalo}s**.',
+  volta_dar_xp: '{canal} volta a dar XP.',
+  mais_xp: '{canal} não dá mais XP.',
+  ligado_xp_cada: 'ligado ({xpMin}–{xpMax} XP a cada {intervalo}s)',
+  desligado: 'desligado',
+  ganho_xp: 'Ganho de XP: {xpMin}',
+  mesmo_canal: 'no mesmo canal',
+  aviso: 'Aviso: {canal}',
+  nenhuma: 'nenhuma',
+  recompensas: 'Recompensas: {recompensas}',
+  niveis: 'Níveis',
+});
+
+// Aparência dos embeds principais (cor, imagem, miniatura e rodapé personalizáveis)
+const vis = visuais('niveis', {
+  rank: { nome: "/rank (nível do membro)", vars: ['avatar', 'servidor_icone'], miniatura: "{avatar}" },
+});
 
 /**
  * Níveis: membros ganham XP conversando (com intervalo para não valer flood),
@@ -14,11 +58,12 @@ const PADRAO = {
   xpMax: 25,
   intervalo: 60, // segundos entre mensagens que valem XP
   canal: null, // null = avisa no mesmo canal
-  mensagem: '🎉 {usuario} subiu para o **nível {nivel}**!',
+  mensagem: null,
   recompensas: {}, // nivel -> cargoId
   ignorados: [],
 };
 const cfg = (guildId) => ajustes(guildId, 'niveis', PADRAO);
+const msgNivel = (c) => modeloOu(c.mensagem, '🎉 {usuario} subiu para o **nível {nivel}**!', tx('msg_nivel_padrao'));
 
 /** XP para passar do nível n para o n+1. */
 export const xpDoNivel = (n) => 5 * n * n + 50 * n + 100;
@@ -67,7 +112,7 @@ async function aoMensagem(msg) {
   if (depois <= antes) return;
   await darRecompensas(msg.member, depois);
   const canal = (c.canal && msg.guild.channels.cache.get(c.canal)) || msg.channel;
-  const texto = preencher(c.mensagem, { usuario: `${msg.author}`, nome: msg.member.displayName, nivel: depois, servidor: msg.guild.name });
+  const texto = preencher(msgNivel(c), { usuario: `${msg.author}`, nome: msg.member.displayName, nivel: depois, servidor: msg.guild.name });
   await canal.send({ content: texto, allowedMentions: { users: [msg.author.id] } }).catch(() => {});
 }
 
@@ -84,15 +129,19 @@ const rank = {
     const pos = ranking(i.guildId).findIndex(([id]) => id === user.id) + 1;
     await i.reply({
       embeds: [
-        embed(i.guildId)
-          .setAuthor({ name: user.tag, iconURL: user.displayAvatarURL() })
-          .setThumbnail(user.displayAvatarURL({ size: 256 }))
-          .addFields(
-            { name: 'Nível', value: `**${nivel}**`, inline: true },
-            { name: 'Posição', value: pos ? `#${pos}` : '—', inline: true },
-            { name: 'XP total', value: fmt(xp), inline: true },
-            { name: `Progresso para o nível ${nivel + 1}`, value: `${barra(atual / precisa, 14)}  ${fmt(atual)}/${fmt(precisa)} XP` },
-          ),
+        vis(
+          embed(i.guildId)
+            .setAuthor({ name: user.tag, iconURL: user.displayAvatarURL() })
+            .setThumbnail(user.displayAvatarURL({ size: 256 }))
+            .addFields(
+              { name: tx('nivel'), value: `**${nivel}**`, inline: true },
+              { name: tx('posicao'), value: pos ? `#${pos}` : '—', inline: true },
+              { name: tx('xp_total'), value: fmt(xp), inline: true },
+              { name: tx('progresso_nivel', { nivel: nivel + 1 }), value: tx('xp', { barra: barra(atual / precisa, 14), atual: fmt(atual), precisa: fmt(precisa) }) },
+            ),
+          'rank',
+          imagens({ user, guild: i.guild }),
+        ),
       ],
     });
   },
@@ -102,16 +151,16 @@ const top = {
   data: new SlashCommandBuilder().setName('top').setDescription('Ranking de XP do servidor'),
   async executar(i) {
     const lista = ranking(i.guildId).slice(0, 10);
-    if (!lista.length) return responder(i, 'Ninguém ganhou XP ainda. Converse no chat!', 'info');
+    if (!lista.length) return responder(i, tx('ninguem_ganhou_xp_ainda'), 'info');
     const medalhas = ['🥇', '🥈', '🥉'];
-    const linhas = lista.map(([id, d], n) => `${medalhas[n] ?? `**${n + 1}.**`} <@${id}> · nível **${nivelDe(d.xp).nivel}** · ${fmt(d.xp)} XP`);
+    const linhas = lista.map(([id, d], n) => tx('nivel_xp', { medalhas: medalhas[n] ?? `**${n + 1}.**`, usuario: id, nivel: nivelDe(d.xp).nivel, xp: fmt(d.xp) }));
     const minha = ranking(i.guildId).findIndex(([id]) => id === i.user.id) + 1;
     await i.reply({
       embeds: [
         embed(i.guildId)
-          .setTitle(`🏆 Ranking de ${i.guild.name}`)
+          .setTitle(tx('ranking', { servidor: i.guild.name }))
           .setDescription(linhas.join('\n'))
-          .setFooter({ text: minha ? `Sua posição: #${minha}` : 'Você ainda não tem XP' }),
+          .setFooter({ text: minha ? tx('sua_posicao', { posicao: minha }) : tx('voce_ainda_tem_xp') }),
       ],
       allowedMentions: { parse: [] },
     });
@@ -141,7 +190,7 @@ const xpAdmin = {
   async executar(i) {
     const sub = i.options.getSubcommand();
     const user = i.options.getUser('usuario');
-    if (user.bot) return responder(i, 'Bots não têm XP.', 'erro');
+    if (user.bot) return responder(i, tx('bots_tem_xp'), 'erro');
     const d = xpDb.de(i.guildId, user.id);
     const q = i.options.getInteger('quantidade') ?? 0;
     if (sub === 'dar') d.xp = (d.xp ?? 0) + q;
@@ -151,7 +200,7 @@ const xpAdmin = {
     const { nivel } = nivelDe(d.xp);
     const membro = i.options.getMember('usuario');
     if (membro) await darRecompensas(membro, nivel);
-    return responder(i, `**${user.tag}** agora tem **${fmt(d.xp)} XP** (nível ${nivel}).`, 'sucesso');
+    return responder(i, tx('agora_tem_xp_nivel', { tag: user.tag, xp: fmt(d.xp), nivel }), 'sucesso');
   },
 };
 
@@ -195,39 +244,39 @@ const config = {
     let msg;
     if (sub === 'ativar') {
       c.ativo = i.options.getBoolean('ligado');
-      msg = c.ativo ? 'Ganho de XP ligado.' : 'Ganho de XP desligado.';
+      msg = c.ativo ? tx('ganho_xp_ligado') : tx('ganho_xp_desligado');
     } else if (sub === 'aviso') {
       const canal = i.options.getChannel('canal');
       c.canal = canal?.id ?? null;
       const m = i.options.getString('mensagem');
       if (m) c.mensagem = m;
-      msg = `Aviso de nível ${canal ? `em ${canal}` : 'no mesmo canal da mensagem'}.`;
+      msg = tx('aviso_nivel', { canal: canal ? tx('em', { canal }) : tx('mesmo_canal_mensagem') });
     } else if (sub === 'recompensa') {
       const n = i.options.getInteger('nivel');
       const r = i.options.getRole('cargo');
       if (r) {
-        if (r.managed || r.id === i.guildId) return responder(i, 'Esse cargo não pode ser dado.', 'erro');
+        if (r.managed || r.id === i.guildId) return responder(i, tx('esse_cargo_pode_ser'), 'erro');
         c.recompensas[n] = r.id;
-        msg = `Ao chegar no nível **${n}**, o membro ganha ${r}.${r.editable ? '' : ' ⚠️ Suba o meu cargo acima dele para funcionar.'}`;
+        msg = tx('chegar_nivel_membro_ganha', { nivel: n, cargo: r, aviso: r.editable ? '' : tx('suba_meu_cargo_acima') });
       } else {
         delete c.recompensas[n];
-        msg = `Recompensa do nível ${n} removida.`;
+        msg = tx('recompensa_nivel_removida', { nivel: n });
       }
     } else if (sub === 'xp') {
       const min = i.options.getInteger('minimo');
       const max = i.options.getInteger('maximo');
-      if (min > max) return responder(i, 'O mínimo não pode ser maior que o máximo.', 'erro');
+      if (min > max) return responder(i, tx('minimo_pode_ser_maior'), 'erro');
       c.xpMin = min;
       c.xpMax = max;
       const iv = i.options.getInteger('intervalo');
       if (iv !== null) c.intervalo = iv;
-      msg = `Cada mensagem vale de **${min} a ${max} XP**, uma vez a cada **${c.intervalo}s**.`;
+      msg = tx('cada_mensagem_vale_xp', { min, max, intervalo: c.intervalo });
     } else if (sub === 'ignorar-canal') {
       const ch = i.options.getChannel('canal');
       const idx = c.ignorados.indexOf(ch.id);
       if (idx >= 0) c.ignorados.splice(idx, 1);
       else c.ignorados.push(ch.id);
-      msg = idx >= 0 ? `${ch} volta a dar XP.` : `${ch} não dá mais XP.`;
+      msg = idx >= 0 ? tx('volta_dar_xp', { canal: ch }) : tx('mais_xp', { canal: ch });
     }
     salvarAjustes();
     return responder(i, msg, 'sucesso');
@@ -236,16 +285,16 @@ const config = {
     const c = cfg(guild.id);
     const rec = Object.entries(c.recompensas).sort((a, b) => a[0] - b[0]).map(([n, r]) => `${n}: <@&${r}>`);
     return [
-      `Ganho de XP: ${c.ativo ? `ligado (${c.xpMin}–${c.xpMax} XP a cada ${c.intervalo}s)` : 'desligado'}`,
-      `Aviso: ${c.canal ? `<#${c.canal}>` : 'no mesmo canal'}`,
-      `Recompensas: ${rec.length ? rec.join(' · ') : 'nenhuma'}`,
+      tx('ganho_xp', { xpMin: c.ativo ? tx('ligado_xp_cada', { xpMin: c.xpMin, xpMax: c.xpMax, intervalo: c.intervalo }) : tx('desligado') }),
+      tx('aviso', { canal: c.canal ? `<#${c.canal}>` : tx('mesmo_canal') }),
+      tx('recompensas', { recompensas: rec.length ? rec.join(' · ') : tx('nenhuma') }),
     ];
   },
 };
 
 export default {
   id: 'niveis',
-  nome: 'Níveis',
+  nome: tx('niveis'),
   intents: [GatewayIntentBits.GuildMessages],
   permissoes: [PermissionFlagsBits.ManageRoles],
   comandos: [rank, top, xpAdmin],

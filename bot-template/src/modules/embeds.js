@@ -1,5 +1,32 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, EmbedBuilder, ModalBuilder, PermissionFlagsBits, SlashCommandBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
 import { cor, responder } from '../core/util.js';
+import { textos, modais } from '../core/textos.js';
+
+// Textos deste módulo (o dono do bot pode trocar todos no "Personalizar bot.html")
+const tx = textos('embeds', {
+  criador_embed: ['Criador de embed', 'rotulo'],
+  titulo: 'Título',
+  texto_aceita_negrito_listas: 'Texto (aceita **negrito**, listas, links...)',
+  cor_ex_5865f2: 'Cor (ex.: #5865F2)',
+  link_imagem_grande_opcional: 'Link da imagem grande (opcional)',
+  rodape_opcional: 'Rodapé (opcional)',
+  formulario_expirou_use_comando: ['O formulário expirou. Use o comando de novo.', 'resposta'],
+  ignorei: '\n⚠️ Ignorei: {erros}.',
+  embed_enviado: 'Embed enviado em {canal}.{aviso}',
+  consegui_enviar_confira_minhas: 'Não consegui enviar. Confira as minhas permissões no canal.',
+  achei_mais_mensagem: ['Não achei mais a mensagem.', 'resposta'],
+  embed_atualizado: 'Embed atualizado.{aviso}',
+  consegui_editar: 'Não consegui editar.',
+  botao_precisa_ser_assim: ['O botão {numero} precisa ser assim: **Texto | https://link**', 'resposta'],
+  cole_link_mensagem_botao: ['Cole o **link** da mensagem (botão direito na mensagem → Copiar link da mensagem).', 'resposta'],
+  achei_essa_mensagem_neste: ['Não achei essa mensagem neste servidor.', 'resposta'],
+  so_editar_embeds_enviados: ['Só dá para editar embeds enviados por mim.', 'resposta'],
+  criador_embeds: 'Criador de embeds',
+  cor_invalida_use_rrggbb: 'cor inválida (use #RRGGBB)',
+  link_imagem_precisa_comecar: 'o link da imagem precisa começar com https://',
+});
+
+modais('embeds', { criador: { nome: 'Criador de embed (/embed)', textos: ['criador_embed', 'titulo', 'texto_aceita_negrito_listas', 'cor_ex_5865f2', 'link_imagem_grande_opcional', 'rodape_opcional'] } });
 
 /**
  * Criador de embeds: mensagens bonitas (título, texto, cor, imagem, rodapé e botões de link)
@@ -18,13 +45,13 @@ function formulario(id, atual = {}) {
   };
   return new ModalBuilder()
     .setCustomId(id)
-    .setTitle('Criador de embed')
+    .setTitle(tx('criador_embed'))
     .addComponents(
-      campo('titulo', 'Título', TextInputStyle.Short, 256, atual.title),
-      campo('texto', 'Texto (aceita **negrito**, listas, links...)', TextInputStyle.Paragraph, 4000, atual.description, true),
-      campo('cor', 'Cor (ex.: #5865F2)', TextInputStyle.Short, 7, atual.color != null ? `#${atual.color.toString(16).padStart(6, '0')}` : ''),
-      campo('imagem', 'Link da imagem grande (opcional)', TextInputStyle.Short, 500, atual.image?.url),
-      campo('rodape', 'Rodapé (opcional)', TextInputStyle.Short, 2048, atual.footer?.text)
+      campo('titulo', tx('titulo'), TextInputStyle.Short, 256, atual.title),
+      campo('texto', tx('texto_aceita_negrito_listas'), TextInputStyle.Paragraph, 4000, atual.description, true),
+      campo('cor', tx('cor_ex_5865f2'), TextInputStyle.Short, 7, atual.color != null ? `#${atual.color.toString(16).padStart(6, '0')}` : ''),
+      campo('imagem', tx('link_imagem_grande_opcional'), TextInputStyle.Short, 500, atual.image?.url),
+      campo('rodape', tx('rodape_opcional'), TextInputStyle.Short, 2048, atual.footer?.text)
     );
 }
 
@@ -37,13 +64,13 @@ function montar(i, guildId) {
   if (c) {
     const m = /^#?([0-9a-f]{6})$/i.exec(c);
     if (m) e.setColor(parseInt(m[1], 16));
-    else erros.push('cor inválida (use #RRGGBB)');
+    else erros.push(tx('cor_invalida_use_rrggbb'));
   }
   if (!c || erros.length) e.setColor(cor(guildId));
   const img = f('imagem');
   if (img) {
     if (URL_OK.test(img)) e.setImage(img);
-    else erros.push('o link da imagem precisa começar com https://');
+    else erros.push(tx('link_imagem_precisa_comecar'));
   }
   if (f('rodape')) e.setFooter({ text: f('rodape') });
   return { e, erros };
@@ -57,20 +84,20 @@ const componentes = {
     if (!i.isModalSubmit()) return;
     const r = rascunhos.get(i.user.id);
     rascunhos.delete(i.user.id);
-    if (!r || r.expira < Date.now()) return responder(i, 'O formulário expirou. Use o comando de novo.', 'erro');
+    if (!r || r.expira < Date.now()) return responder(i, tx('formulario_expirou_use_comando'), 'erro');
     const { e, erros } = montar(i, i.guildId);
-    const aviso = erros.length ? `\n⚠️ Ignorei: ${erros.join('; ')}.` : '';
+    const aviso = erros.length ? tx('ignorei', { erros: erros.join('; ') }) : '';
     if (acao === 'criar') {
       const canal = i.guild.channels.cache.get(r.canal);
       const ok = canal ? await canal.send({ embeds: [e], components: linhaBotoes(r.botoes) }).then(() => true, () => false) : false;
-      return responder(i, ok ? `Embed enviado em ${canal}.${aviso}` : 'Não consegui enviar. Confira as minhas permissões no canal.', ok ? 'sucesso' : 'erro');
+      return responder(i, ok ? tx('embed_enviado', { canal, aviso }) : tx('consegui_enviar_confira_minhas'), ok ? 'sucesso' : 'erro');
     }
     if (acao === 'editar') {
       const canal = i.guild.channels.cache.get(r.canal);
       const msg = await canal?.messages.fetch(r.mensagem).catch(() => null);
-      if (!msg) return responder(i, 'Não achei mais a mensagem.', 'erro');
+      if (!msg) return responder(i, tx('achei_mais_mensagem'), 'erro');
       const ok = await msg.edit({ embeds: [e] }).then(() => true, () => false);
-      return responder(i, ok ? `Embed atualizado.${aviso}` : 'Não consegui editar.', ok ? 'sucesso' : 'erro');
+      return responder(i, ok ? tx('embed_atualizado', { aviso }) : tx('consegui_editar'), ok ? 'sucesso' : 'erro');
     }
   },
 };
@@ -104,7 +131,7 @@ const embedCmd = {
         const v = i.options.getString(`botao${n}`);
         if (!v) continue;
         const [texto, link] = v.split('|').map((x) => x.trim());
-        if (!texto || !URL_OK.test(link ?? '')) return responder(i, `O botão ${n} precisa ser assim: **Texto | https://link**`, 'erro');
+        if (!texto || !URL_OK.test(link ?? '')) return responder(i, tx('botao_precisa_ser_assim', { numero: n }), 'erro');
         botoes.push({ texto: texto.slice(0, 80), link });
       }
       rascunhos.set(i.user.id, { canal: canal.id, botoes, expira: Date.now() + 15 * 60_000 });
@@ -112,11 +139,11 @@ const embedCmd = {
     }
     // editar
     const m = /(\d{17,20})\/(\d{17,20})\/?$/.exec(i.options.getString('mensagem').trim());
-    if (!m) return responder(i, 'Cole o **link** da mensagem (botão direito na mensagem → Copiar link da mensagem).', 'erro');
+    if (!m) return responder(i, tx('cole_link_mensagem_botao'), 'erro');
     const canal = i.guild.channels.cache.get(m[1]);
     const msg = await canal?.messages.fetch(m[2]).catch(() => null);
-    if (!msg) return responder(i, 'Não achei essa mensagem neste servidor.', 'erro');
-    if (msg.author.id !== i.client.user.id || !msg.embeds.length) return responder(i, 'Só dá para editar embeds enviados por mim.', 'erro');
+    if (!msg) return responder(i, tx('achei_essa_mensagem_neste'), 'erro');
+    if (msg.author.id !== i.client.user.id || !msg.embeds.length) return responder(i, tx('so_editar_embeds_enviados'), 'erro');
     rascunhos.set(i.user.id, { canal: canal.id, mensagem: msg.id, botoes: [], expira: Date.now() + 15 * 60_000 });
     return i.showModal(formulario('eb:editar', msg.embeds[0].toJSON?.() ?? msg.embeds[0].data ?? msg.embeds[0]));
   },
@@ -124,7 +151,7 @@ const embedCmd = {
 
 export default {
   id: 'embeds',
-  nome: 'Criador de embeds',
+  nome: tx('criador_embeds'),
   comandos: [embedCmd],
   componentes,
 };

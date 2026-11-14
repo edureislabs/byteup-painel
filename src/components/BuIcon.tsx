@@ -335,6 +335,18 @@ const ICONES: Record<string, Desenho> = {
       </>
     ),
   },
+  personalizar: {
+    anim: "",
+    svg: (
+      <>
+        {P("M12 3a9 9 0 1 0 0 18c1.2 0 1.8-.8 1.8-1.7 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z")}
+        {PONTO(7.4, 11.2, 1.25, "bu-dot")}
+        {PONTO(9.4, 7.3, 1.25, "bu-dot bu-d2")}
+        {PONTO(14.2, 7.1, 1.25, "bu-dot bu-d3")}
+        {PONTO(16.9, 10.4, 1.25, "bu-dot")}
+      </>
+    ),
+  },
   transferidor: {
     anim: "",
     svg: (

@@ -339,6 +339,15 @@ export const BUILDER_MODULES: BuilderModule[] = [
     commands: ["/caracoroa", "/dado", "/8ball", "/escolher", "/ship"],
   },
   {
+    id: "personalizar",
+    bit: 32,
+    name: "Personalização",
+    emoji: "🎨",
+    description: "Personalize 100% do bot: todos os textos, botões (texto, emoji, cor, mostrar ou esconder), modais, cores, emojis, aparência dos embeds e status. E crie seus próprios painéis com botões ou menu (dar cargo, responder, abrir formulário, abrir ticket, link) e formulários. Edita num painel no seu PC e aplica com /personalizar, mesmo numa hospedagem.",
+    priceCents: 1490,
+    commands: ["/personalizar", "/painel"],
+  },
+  {
     id: "transferidor",
     bit: 13,
     name: "Transferidor de dados",

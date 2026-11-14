@@ -1,6 +1,32 @@
 import { ChannelType, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { colecao } from '../core/db.js';
 import { ajustes, salvarAjustes, embed, responder, lerDuracao, duracaoTexto, ts, cortar } from '../core/util.js';
+import { textos } from '../core/textos.js';
+
+// Textos deste módulo (o dono do bot pode trocar todos no "Personalizar bot.html")
+const tx = textos('cargostemp', {
+  tirei: 'Tirei',
+  consegui_tirar: 'Não consegui tirar',
+  fim_prazo: '⏳ {resultado} <@&{cargo}> de <@{usuario}> (fim do prazo).',
+  canal_registro_salvo: ['Canal de registro salvo.', 'resposta'],
+  nenhum_cargo_temporario_ativo: ['Nenhum cargo temporário ativo.', 'resposta'],
+  sai: '<@{usuario}> · <@&{cargo}> · sai {quando}',
+  cargos_temporarios: ['⏳ Cargos temporários', 'titulo'],
+  essa_pessoa_esta_servidor: ['Essa pessoa não está no servidor.', 'resposta'],
+  tirei_2: 'Tirei {cargo} de {usuario}.',
+  consegui_tirar_cargo_confira: 'Não consegui tirar o cargo (confira a minha posição na lista de cargos).',
+  duracao_invalida_use_algo: ['Duração inválida. Use algo como **7d**, **30d** ou **12h** (máximo 365d).', 'resposta'],
+  esse_cargo_pode_ser: ['Esse cargo não pode ser dado.', 'resposta'],
+  meu_cargo_precisa_ficar: ['Meu cargo precisa ficar acima de {cargo}.', 'resposta'],
+  voce_so_pode_dar: ['Você só pode dar cargos abaixo do seu.', 'resposta'],
+  consegui_dar_cargo: ['Não consegui dar o cargo.', 'resposta'],
+  deu_ate: '⏳ {autor} deu <@&{cargo_id}> para {usuario} até {quando}{motivo}',
+  prazo_renovado: ' (prazo renovado)',
+  recebeu_ate: ['{usuario} recebeu {cargo} até {quando} ({relativo}).{renovado}', 'resposta'],
+  cargos_temporarios_2: 'Cargos temporários',
+  registro: ' · registro em <#{registro}>',
+  cargo_temporario_ativo: '{total} cargo(s) temporário(s) ativo(s){registro}',
+});
 
 /**
  * Cargos temporários: /cargotemp dar @pessoa @VIP 30d. O cargo sai sozinho no fim do prazo
@@ -31,7 +57,7 @@ async function verificar(client) {
       const membro = await guild.members.fetch(x.user).catch(() => null);
       if (membro?.roles.cache.has(x.cargo)) {
         const ok = await membro.roles.remove(x.cargo, 'Fim do cargo temporário').then(() => true, () => false);
-        await registrar(guild, `⏳ ${ok ? 'Tirei' : 'Não consegui tirar'} <@&${x.cargo}> de <@${x.user}> (fim do prazo).`);
+        await registrar(guild, tx('fim_prazo', { resultado: ok ? tx('tirei') : tx('consegui_tirar'), cargo: x.cargo, usuario: x.user }));
       }
     }
   }
@@ -76,47 +102,47 @@ const cargotemp = {
     if (sub === 'registro') {
       cfg(i.guildId).registro = i.options.getChannel('canal').id;
       salvarAjustes();
-      return responder(i, 'Canal de registro salvo.', 'sucesso');
+      return responder(i, tx('canal_registro_salvo'), 'sucesso');
     }
     if (sub === 'lista') {
       const u = i.options.getUser('usuario');
       const ativos = l.filter((x) => !u || x.user === u.id).sort((a, b) => a.ate - b.ate);
-      if (!ativos.length) return responder(i, 'Nenhum cargo temporário ativo.', 'aviso');
-      const linhas = ativos.slice(0, 40).map((x) => `<@${x.user}> · <@&${x.cargo}> · sai ${ts(x.ate)}`);
-      return i.reply({ embeds: [embed(i.guildId).setTitle('⏳ Cargos temporários').setDescription(cortar(linhas.join('\n'), 4000))], flags: 64, allowedMentions: { parse: [] } });
+      if (!ativos.length) return responder(i, tx('nenhum_cargo_temporario_ativo'), 'aviso');
+      const linhas = ativos.slice(0, 40).map((x) => tx('sai', { usuario: x.user, cargo: x.cargo, quando: ts(x.ate) }));
+      return i.reply({ embeds: [embed(i.guildId).setTitle(tx('cargos_temporarios')).setDescription(cortar(linhas.join('\n'), 4000))], flags: 64, allowedMentions: { parse: [] } });
     }
     const u = i.options.getUser('usuario');
     const cargo = i.options.getRole('cargo');
     const membro = await i.guild.members.fetch(u.id).catch(() => null);
-    if (!membro) return responder(i, 'Essa pessoa não está no servidor.', 'erro');
+    if (!membro) return responder(i, tx('essa_pessoa_esta_servidor'), 'erro');
     if (sub === 'tirar') {
       temps.de(i.guildId).lista = l.filter((x) => !(x.user === u.id && x.cargo === cargo.id));
       temps.salvar();
       const ok = await membro.roles.remove(cargo, `Cargo temporário tirado por ${i.user.tag}`).then(() => true, () => false);
-      return responder(i, ok ? `Tirei ${cargo} de ${u}.` : 'Não consegui tirar o cargo (confira a minha posição na lista de cargos).', ok ? 'sucesso' : 'erro');
+      return responder(i, ok ? tx('tirei_2', { cargo, usuario: u }) : tx('consegui_tirar_cargo_confira'), ok ? 'sucesso' : 'erro');
     }
     // dar
     const ms = lerDuracao(i.options.getString('duracao'));
-    if (!ms || ms > MAX) return responder(i, 'Duração inválida. Use algo como **7d**, **30d** ou **12h** (máximo 365d).', 'erro');
-    if (cargo.managed || cargo.id === i.guildId) return responder(i, 'Esse cargo não pode ser dado.', 'erro');
-    if (!cargo.editable) return responder(i, `Meu cargo precisa ficar acima de ${cargo}.`, 'erro');
-    if (i.user.id !== i.guild.ownerId && cargo.position >= i.member.roles.highest.position) return responder(i, 'Você só pode dar cargos abaixo do seu.', 'erro');
+    if (!ms || ms > MAX) return responder(i, tx('duracao_invalida_use_algo'), 'erro');
+    if (cargo.managed || cargo.id === i.guildId) return responder(i, tx('esse_cargo_pode_ser'), 'erro');
+    if (!cargo.editable) return responder(i, tx('meu_cargo_precisa_ficar', { cargo }), 'erro');
+    if (i.user.id !== i.guild.ownerId && cargo.position >= i.member.roles.highest.position) return responder(i, tx('voce_so_pode_dar'), 'erro');
     const ok = await membro.roles.add(cargo, `Cargo temporário (${duracaoTexto(ms)}) por ${i.user.tag}`).then(() => true, () => false);
-    if (!ok) return responder(i, 'Não consegui dar o cargo.', 'erro');
+    if (!ok) return responder(i, tx('consegui_dar_cargo'), 'erro');
     const existente = l.find((x) => x.user === u.id && x.cargo === cargo.id);
     const ate = Date.now() + ms;
     const motivo = i.options.getString('motivo') ?? null;
     if (existente) Object.assign(existente, { ate, por: i.user.id, motivo });
     else l.push({ user: u.id, cargo: cargo.id, ate, por: i.user.id, motivo });
     temps.salvar();
-    await registrar(i.guild, `⏳ ${i.user} deu <@&${cargo.id}> para ${u} até ${ts(ate, 'f')}${motivo ? ` · ${cortar(motivo, 200)}` : ''}`);
-    return responder(i, `${u} recebeu ${cargo} até ${ts(ate, 'f')} (${ts(ate)}).${existente ? ' (prazo renovado)' : ''}`, 'sucesso');
+    await registrar(i.guild, tx('deu_ate', { autor: i.user, cargo_id: cargo.id, usuario: u, quando: ts(ate, 'f'), motivo: motivo ? ` · ${cortar(motivo, 200)}` : '' }));
+    return responder(i, tx('recebeu_ate', { usuario: u, cargo, quando: ts(ate, 'f'), relativo: ts(ate), renovado: existente ? tx('prazo_renovado') : '' }), 'sucesso');
   },
 };
 
 export default {
   id: 'cargostemp',
-  nome: 'Cargos temporários',
+  nome: tx('cargos_temporarios_2'),
   permissoes: [PermissionFlagsBits.ManageRoles],
   comandos: [cargotemp],
   aoIniciar(client) {
@@ -126,7 +152,7 @@ export default {
   config: {
     resumo(guild) {
       const n = temps.ler(guild.id, 'lista')?.length ?? 0;
-      return [`${n} cargo(s) temporário(s) ativo(s)${cfg(guild.id).registro ? ` · registro em <#${cfg(guild.id).registro}>` : ''}`];
+      return [tx('cargo_temporario_ativo', { total: n, registro: cfg(guild.id).registro ? tx('registro', { registro: cfg(guild.id).registro }) : '' })];
     },
   },
 };

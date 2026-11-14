@@ -1,6 +1,37 @@
 import { ChannelType, GatewayIntentBits, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { colecao } from '../core/db.js';
 import { ajustes, salvarAjustes, responder, preencher } from '../core/util.js';
+import { textos, modeloOu } from '../core/textos.js';
+
+// Textos deste módulo (o dono do bot pode trocar todos no "Personalizar bot.html")
+const tx = textos('callstemp', {
+  nome_sala_padrao: 'Sala de {nome}',
+  aguarde_criar_outra_sala: 'Aguarde para criar outra sala',
+  sala_temporaria: 'Sala temporária',
+  entre_sua_sala_temporaria: ['Entre na sua sala temporária para usar este comando.', 'resposta'],
+  voce_ja_dono_desta: ['Você já é o dono desta sala.', 'resposta'],
+  dono_ainda_esta_sala: ['O dono (<@{dono}>) ainda está na sala.', 'resposta'],
+  agora_sala_sua_use: ['Agora a sala é sua. Use /sala para controlar.', 'resposta'],
+  so_dono_sala_pode: ['Só o dono da sala (<@{dono}>) pode fazer isso.', 'resposta'],
+  consegui_confira_minhas_permissoes: 'Não consegui. Confira as minhas permissões (Gerenciar canais e Gerenciar cargos).',
+  sala_renomeada: '✅ Sala renomeada para **{nome}**.',
+  consegui_renomear_agora_discord: '❌ Não consegui renomear agora (o Discord limita a 2 vezes a cada 10 minutos).',
+  limite_pessoa: 'Limite: **{limite}** pessoa(s).',
+  sala_sem_limite: 'Sala sem limite.',
+  sala_trancada: '🔒 Sala trancada.',
+  sala_liberada: '🔓 Sala liberada.',
+  escolha_outra_pessoa: ['Escolha outra pessoa.', 'resposta'],
+  pode_entrar_sala: '{usuario} pode entrar na sala.',
+  expulso_sala_temporaria: 'Expulso da sala temporária',
+  foi_tirado_sala_pode: '{usuario} foi tirado(a) da sala e não pode voltar.',
+  calls_temporarias_desligadas: ['Calls temporárias desligadas.', 'resposta'],
+  criar_sala: ['➕ Criar sala', 'campo'],
+  consegui_criar_call_preciso: ['Não consegui criar a call. Preciso da permissão **Gerenciar canais**.', 'resposta'],
+  pronto_quem_entrar_ganha: ['Pronto! Quem entrar em {canal} ganha uma sala própria (nome: "{nome}"). O dono controla com `/sala`.', 'resposta'],
+  calls_temporarias: 'Calls temporárias',
+  criar_sala_nome_sala: 'Criar sala: <#{criador}> · nome "{nome}" · {total} sala(s) aberta(s)',
+  desligado_salas_configurar: 'Desligado (`/salas configurar`)',
+});
 
 /**
  * Calls temporárias: quem entra na call "➕ Criar sala" ganha uma call só dele,
@@ -8,8 +39,9 @@ import { ajustes, salvarAjustes, responder, preencher } from '../core/util.js';
  */
 
 const salas = colecao('salas_temporarias'); // guild -> canalId -> { dono, criada }
-const PADRAO = { criador: null, categoria: null, nome: 'Sala de {nome}', limite: 0 };
+const PADRAO = { criador: null, categoria: null, nome: null, limite: 0 };
 const cfg = (guildId) => ajustes(guildId, 'callstemp', PADRAO);
+const nomeSala = (c) => modeloOu(c.nome, 'Sala de {nome}', tx('nome_sala_padrao'));
 const espera = new Map(); // anti-spam: userId -> quando criou a última
 
 const salaDe = (guildId, canalId) => salas.ler(guildId, canalId);
@@ -18,12 +50,12 @@ async function criarSala(state) {
   const c = cfg(state.guild.id);
   const membro = state.member;
   if (Date.now() - (espera.get(membro.id) ?? 0) < 10_000) {
-    await membro.voice.disconnect('Aguarde para criar outra sala').catch(() => {});
+    await membro.voice.disconnect(tx('aguarde_criar_outra_sala')).catch(() => {});
     return;
   }
   espera.set(membro.id, Date.now());
   const parent = (c.categoria && state.guild.channels.cache.get(c.categoria)?.id) || state.channel.parentId || undefined;
-  const nome = preencher(c.nome, { nome: membro.displayName, usuario: membro.user.username }).slice(0, 100);
+  const nome = preencher(nomeSala(c), { nome: membro.displayName, usuario: membro.user.username }).slice(0, 100);
   let canal;
   try {
     // sem permissões próprias: a sala herda as da categoria (se a categoria é privada, a sala também é)
@@ -42,7 +74,7 @@ async function criarSala(state) {
   await canal.permissionOverwrites.edit(membro.id, { ViewChannel: true, Connect: true, Speak: true }).catch(() => {});
   salas.de(state.guild.id)[canal.id] = { dono: membro.id, criada: Date.now() };
   salas.salvar();
-  const ok = await membro.voice.setChannel(canal, 'Sala temporária').then(() => true, () => false);
+  const ok = await membro.voice.setChannel(canal, tx('sala_temporaria')).then(() => true, () => false);
   if (!ok) await apagarSeVazia(state.guild, canal.id); // a pessoa saiu antes de ser movida
 }
 
@@ -76,45 +108,45 @@ const sala = {
   async executar(i) {
     const canal = i.member.voice?.channel;
     const s = canal && salaDe(i.guildId, canal.id);
-    if (!s) return responder(i, 'Entre na sua sala temporária para usar este comando.', 'erro');
+    if (!s) return responder(i, tx('entre_sua_sala_temporaria'), 'erro');
     const sub = i.options.getSubcommand();
 
     if (sub === 'reivindicar') {
-      if (s.dono === i.user.id) return responder(i, 'Você já é o dono desta sala.', 'aviso');
-      if (canal.members.has(s.dono)) return responder(i, `O dono (<@${s.dono}>) ainda está na sala.`, 'erro');
+      if (s.dono === i.user.id) return responder(i, tx('voce_ja_dono_desta'), 'aviso');
+      if (canal.members.has(s.dono)) return responder(i, tx('dono_ainda_esta_sala', { dono: s.dono }), 'erro');
       s.dono = i.user.id;
       salas.salvar();
       await canal.permissionOverwrites.edit(i.user.id, { ViewChannel: true, Connect: true, Speak: true }).catch(() => {});
-      return responder(i, 'Agora a sala é sua. Use /sala para controlar.', 'sucesso');
+      return responder(i, tx('agora_sala_sua_use'), 'sucesso');
     }
-    if (s.dono !== i.user.id) return responder(i, `Só o dono da sala (<@${s.dono}>) pode fazer isso.`, 'erro');
+    if (s.dono !== i.user.id) return responder(i, tx('so_dono_sala_pode', { dono: s.dono }), 'erro');
 
     const tentar = async (fn, ok) => {
       const deu = await fn().then(() => true, () => false);
-      return responder(i, deu ? ok : 'Não consegui. Confira as minhas permissões (Gerenciar canais e Gerenciar cargos).', deu ? 'sucesso' : 'erro');
+      return responder(i, deu ? ok : tx('consegui_confira_minhas_permissoes'), deu ? 'sucesso' : 'erro');
     };
     if (sub === 'nome') {
       const nome = i.options.getString('nome');
       // o Discord só deixa renomear 2 vezes a cada 10 minutos: responde antes de esperar
       await i.deferReply({ flags: 64 });
       const ok = await canal.setName(nome).then(() => true, () => false);
-      return i.editReply(ok ? `✅ Sala renomeada para **${nome}**.` : '❌ Não consegui renomear agora (o Discord limita a 2 vezes a cada 10 minutos).');
+      return i.editReply(ok ? tx('sala_renomeada', { nome }) : tx('consegui_renomear_agora_discord'));
     }
     if (sub === 'limite') {
       const n = i.options.getInteger('pessoas');
-      return tentar(() => canal.setUserLimit(n), n ? `Limite: **${n}** pessoa(s).` : 'Sala sem limite.');
+      return tentar(() => canal.setUserLimit(n), n ? tx('limite_pessoa', { limite: n }) : tx('sala_sem_limite'));
     }
-    if (sub === 'trancar') return tentar(() => canal.permissionOverwrites.edit(i.guild.roles.everyone, { Connect: false }), '🔒 Sala trancada.');
-    if (sub === 'destrancar') return tentar(() => canal.permissionOverwrites.edit(i.guild.roles.everyone, { Connect: null }), '🔓 Sala liberada.');
+    if (sub === 'trancar') return tentar(() => canal.permissionOverwrites.edit(i.guild.roles.everyone, { Connect: false }), tx('sala_trancada'));
+    if (sub === 'destrancar') return tentar(() => canal.permissionOverwrites.edit(i.guild.roles.everyone, { Connect: null }), tx('sala_liberada'));
     const u = i.options.getUser('usuario');
-    if (u.id === i.user.id) return responder(i, 'Escolha outra pessoa.', 'erro');
-    if (sub === 'permitir') return tentar(() => canal.permissionOverwrites.edit(u.id, { ViewChannel: true, Connect: true }), `${u} pode entrar na sala.`);
+    if (u.id === i.user.id) return responder(i, tx('escolha_outra_pessoa'), 'erro');
+    if (sub === 'permitir') return tentar(() => canal.permissionOverwrites.edit(u.id, { ViewChannel: true, Connect: true }), tx('pode_entrar_sala', { usuario: u }));
     // expulsar
     return tentar(async () => {
       await canal.permissionOverwrites.edit(u.id, { Connect: false });
       const m = canal.members.get(u.id);
-      if (m) await m.voice.disconnect('Expulso da sala temporária');
-    }, `${u} foi tirado(a) da sala e não pode voltar.`);
+      if (m) await m.voice.disconnect(tx('expulso_sala_temporaria'));
+    }, tx('foi_tirado_sala_pode', { usuario: u }));
   },
 };
 
@@ -139,15 +171,15 @@ const salasCmd = {
     if (i.options.getSubcommand() === 'desligar') {
       c.criador = null;
       salvarAjustes();
-      return responder(i, 'Calls temporárias desligadas.', 'sucesso');
+      return responder(i, tx('calls_temporarias_desligadas'), 'sucesso');
     }
     let canal = i.options.getChannel('canal');
     const categoria = i.options.getChannel('categoria');
     if (!canal) {
       canal = await i.guild.channels
-        .create({ name: '➕ Criar sala', type: ChannelType.GuildVoice, parent: categoria?.id, reason: 'Calls temporárias' })
+        .create({ name: tx('criar_sala'), type: ChannelType.GuildVoice, parent: categoria?.id, reason: 'Calls temporárias' })
         .catch(() => null);
-      if (!canal) return responder(i, 'Não consegui criar a call. Preciso da permissão **Gerenciar canais**.', 'erro');
+      if (!canal) return responder(i, tx('consegui_criar_call_preciso'), 'erro');
     }
     c.criador = canal.id;
     if (categoria) c.categoria = categoria.id;
@@ -156,13 +188,13 @@ const salasCmd = {
     const limite = i.options.getInteger('limite');
     if (limite !== null) c.limite = limite;
     salvarAjustes();
-    return responder(i, `Pronto! Quem entrar em ${canal} ganha uma sala própria (nome: "${c.nome}"). O dono controla com \`/sala\`.`, 'sucesso');
+    return responder(i, tx('pronto_quem_entrar_ganha', { canal, nome: nomeSala(c) }), 'sucesso');
   },
 };
 
 export default {
   id: 'callstemp',
-  nome: 'Calls temporárias',
+  nome: tx('calls_temporarias'),
   intents: [GatewayIntentBits.GuildVoiceStates],
   permissoes: [PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageRoles, PermissionFlagsBits.MoveMembers, PermissionFlagsBits.Connect],
   comandos: [salasCmd, sala],
@@ -179,7 +211,7 @@ export default {
     resumo(guild) {
       const c = cfg(guild.id);
       const n = Object.keys(salas.ler(guild.id) ?? {}).length;
-      return [c.criador ? `Criar sala: <#${c.criador}> · nome "${c.nome}" · ${n} sala(s) aberta(s)` : 'Desligado (`/salas configurar`)'];
+      return [c.criador ? tx('criar_sala_nome_sala', { criador: c.criador, nome: nomeSala(c), total: n }) : tx('desligado_salas_configurar')];
     },
   },
 };

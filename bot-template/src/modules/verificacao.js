@@ -1,5 +1,54 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
-import { ajustes, salvarAjustes, embed, responder, sorteio, CORES } from '../core/util.js';
+import { ajustes, salvarAjustes, embed, responder, sorteio, CORES, imagens } from '../core/util.js';
+import { textos, visuais, botoes } from '../core/textos.js';
+
+// Textos deste módulo (o dono do bot pode trocar todos no "Personalizar bot.html")
+const tx = textos('verificacao', {
+  verificacao: ['🔐 Verificação', 'titulo'],
+  provar_voce_robo_clique: ['Para provar que você não é um robô, clique em **{resposta}**.\n\nVocê tem 2 minutos.', 'descricao'],
+  verificacao_ainda_foi_configurada: ['A verificação ainda não foi configurada. Avise a equipe.', 'resposta'],
+  voce_ja_esta_verificado: ['Você já está verificado(a)!', 'resposta'],
+  tentou_verificar_conta_dia: '⛔ {usuario} ({tag}) tentou se verificar com uma conta de {dias} dia(s).',
+  sua_conta_discord_precisa: ['Sua conta do Discord precisa ter pelo menos **{idadeMinima} dia(s)** para entrar aqui. Tente de novo mais tarde.', 'resposta'],
+  tempo_acabou_clique_verificar: ['⏱️ O tempo acabou. Clique em **Verificar** de novo.', 'conteudo'],
+  errou_verificacao_vezes: '⚠️ {usuario} ({tag}) errou a verificação 3 vezes.',
+  voce_errou_vezes_espere: ['❌ Você errou 3 vezes. Espere um pouco e clique em **Verificar** de novo.', 'conteudo'],
+  foi_esse_tente_novo: ['❌ Não foi esse. Tente de novo:', 'conteudo'],
+  consigo_dar_cargo_meu: ['❌ Não consigo dar o cargo (o meu cargo está abaixo dele). Avise a equipe.', 'conteudo'],
+  consegui_te_dar_cargo: ['❌ Não consegui te dar o cargo. Avise a equipe.', 'conteudo'],
+  verificou: '✅ {usuario} ({tag}) se verificou.',
+  verificado_voce_recebeu_bem: ['✅ Verificado(a)! Você recebeu {cargo}. Bem-vindo(a)!', 'conteudo'],
+  escolha_cargo_comum_pode: ['Escolha um cargo comum (não pode ser @everyone nem cargo de bot).', 'resposta'],
+  seguranca_cargo_verificacao_pode: ['Por segurança, o cargo de verificação não pode ser de administrador.', 'resposta'],
+  meu_cargo_precisa_ficar: ['Meu cargo precisa ficar acima de {cargo} em Configurações do servidor → Cargos.', 'resposta'],
+  perde: ', perde <@&{remover}>',
+  conta_pelo_menos_dia: ', conta com pelo menos {idadeMinima} dia(s)',
+  verificacao_configurada_ganha_agora: ['Verificação configurada: ganha {cargo}{remover}{idadeMinima}.\nAgora use `/verificacao painel`.', 'resposta'],
+  primeiro_use_verificacao_configurar: ['Primeiro use `/verificacao configurar` para escolher o cargo.', 'resposta'],
+  clique_botao_abaixo_verificar: 'Clique no botão abaixo para se verificar e liberar o servidor.',
+  verificar: ['Verificar', 'botao'],
+  consegui_enviar_confira_minhas: ['Não consegui enviar em {canal}. Confira as minhas permissões.', 'resposta'],
+  painel_enviado: ['Painel enviado em {canal}.', 'resposta'],
+  verificacao_2: 'Verificação',
+  configurada_verificacao_configurar: 'Não configurada (`/verificacao configurar`)',
+  remove: ' · remove <@&{remover}>',
+  cargo: 'Cargo: <@&{cargo}>{remover}',
+  dia: '{idadeMinima} dia(s)',
+  sem_limite: 'sem limite',
+  idade_minima_conta: 'Idade mínima da conta: {idadeMinima}',
+  definido: 'não definido',
+  registro: 'Registro: {registro}',
+});
+
+// Botões (texto, emoji e cor personalizáveis; alguns podem ser escondidos)
+const bt = botoes('verificacao', {
+  iniciar: { nome: 'Verificar (painel)', rotulo: 'verificar', emoji: '✅', estilo: 'Success' },
+});
+
+// Aparência dos embeds principais (cor, imagem, miniatura e rodapé personalizáveis)
+const vis = visuais('verificacao', {
+  painel: { nome: "Painel de verificação", vars: ['servidor_icone'] },
+});
 
 /**
  * Verificação: painel com o botão "Verificar". A pessoa resolve um desafio simples
@@ -27,7 +76,7 @@ function novoDesafio(i) {
   const antigo = desafios.get(chave(i));
   desafios.set(chave(i), { opcoes, resposta, expira: Date.now() + 2 * 60_000, erros: antigo?.erros ?? 0 });
   return {
-    embeds: [embed(i.guildId).setTitle('🔐 Verificação').setDescription(`Para provar que você não é um robô, clique em **${resposta}**.\n\nVocê tem 2 minutos.`)],
+    embeds: [embed(i.guildId).setTitle(tx('verificacao')).setDescription(tx('provar_voce_robo_clique', { resposta }))],
     components: [
       new ActionRowBuilder().addComponents(
         opcoes.map((e, n) => new ButtonBuilder().setCustomId(`vf:r:${n}`).setEmoji(e).setStyle(ButtonStyle.Secondary))
@@ -41,14 +90,14 @@ const componentes = {
   async vf(i, [acao, indice]) {
     const c = cfg(i.guildId);
     const cargo = c.cargo && i.guild.roles.cache.get(c.cargo);
-    if (!cargo) return responder(i, 'A verificação ainda não foi configurada. Avise a equipe.', 'erro');
+    if (!cargo) return responder(i, tx('verificacao_ainda_foi_configurada'), 'erro');
 
     if (acao === 'iniciar') {
-      if (i.member.roles.cache.has(cargo.id)) return responder(i, 'Você já está verificado(a)!', 'sucesso');
+      if (i.member.roles.cache.has(cargo.id)) return responder(i, tx('voce_ja_esta_verificado'), 'sucesso');
       const dias = (Date.now() - i.user.createdTimestamp) / 86400e3;
       if (c.idadeMinima && dias < c.idadeMinima) {
-        await registrar(i.guild, `⛔ ${i.user} (${i.user.tag}) tentou se verificar com uma conta de ${Math.floor(dias)} dia(s).`, CORES.aviso);
-        return responder(i, `Sua conta do Discord precisa ter pelo menos **${c.idadeMinima} dia(s)** para entrar aqui. Tente de novo mais tarde.`, 'erro');
+        await registrar(i.guild, tx('tentou_verificar_conta_dia', { usuario: i.user, tag: i.user.tag, dias: Math.floor(dias) }), CORES.aviso);
+        return responder(i, tx('sua_conta_discord_precisa', { idadeMinima: c.idadeMinima }), 'erro');
       }
       return i.reply(novoDesafio(i));
     }
@@ -57,26 +106,26 @@ const componentes = {
       const d = desafios.get(chave(i));
       if (!d || d.expira < Date.now()) {
         desafios.delete(chave(i));
-        return i.update({ content: '⏱️ O tempo acabou. Clique em **Verificar** de novo.', embeds: [], components: [] });
+        return i.update({ content: tx('tempo_acabou_clique_verificar'), embeds: [], components: [] });
       }
       if (d.opcoes[Number(indice)] !== d.resposta) {
         d.erros += 1;
         if (d.erros >= 3) {
           desafios.delete(chave(i));
-          await registrar(i.guild, `⚠️ ${i.user} (${i.user.tag}) errou a verificação 3 vezes.`, CORES.aviso);
-          return i.update({ content: '❌ Você errou 3 vezes. Espere um pouco e clique em **Verificar** de novo.', embeds: [], components: [] });
+          await registrar(i.guild, tx('errou_verificacao_vezes', { usuario: i.user, tag: i.user.tag }), CORES.aviso);
+          return i.update({ content: tx('voce_errou_vezes_espere'), embeds: [], components: [] });
         }
         const proximo = novoDesafio(i);
-        return i.update({ content: '❌ Não foi esse. Tente de novo:', embeds: proximo.embeds, components: proximo.components });
+        return i.update({ content: tx('foi_esse_tente_novo'), embeds: proximo.embeds, components: proximo.components });
       }
       desafios.delete(chave(i));
-      if (!cargo.editable) return i.update({ content: '❌ Não consigo dar o cargo (o meu cargo está abaixo dele). Avise a equipe.', embeds: [], components: [] });
+      if (!cargo.editable) return i.update({ content: tx('consigo_dar_cargo_meu'), embeds: [], components: [] });
       const ok = await i.member.roles.add(cargo, 'Verificação').then(() => true, () => false);
-      if (!ok) return i.update({ content: '❌ Não consegui te dar o cargo. Avise a equipe.', embeds: [], components: [] });
+      if (!ok) return i.update({ content: tx('consegui_te_dar_cargo'), embeds: [], components: [] });
       const remover = c.remover && i.guild.roles.cache.get(c.remover);
       if (remover?.editable && i.member.roles.cache.has(remover.id)) await i.member.roles.remove(remover, 'Verificação').catch(() => {});
-      await registrar(i.guild, `✅ ${i.user} (${i.user.tag}) se verificou.`);
-      return i.update({ content: `✅ Verificado(a)! Você recebeu ${cargo}. Bem-vindo(a)!`, embeds: [], components: [] });
+      await registrar(i.guild, tx('verificou', { usuario: i.user, tag: i.user.tag }));
+      return i.update({ content: tx('verificado_voce_recebeu_bem', { cargo }), embeds: [], components: [] });
     }
   },
 };
@@ -106,9 +155,9 @@ const verificacao = {
     const c = cfg(i.guildId);
     if (i.options.getSubcommand() === 'configurar') {
       const cargo = i.options.getRole('cargo');
-      if (cargo.managed || cargo.id === i.guildId) return responder(i, 'Escolha um cargo comum (não pode ser @everyone nem cargo de bot).', 'erro');
-      if (cargo.permissions.has(PermissionFlagsBits.Administrator)) return responder(i, 'Por segurança, o cargo de verificação não pode ser de administrador.', 'erro');
-      if (!cargo.editable) return responder(i, `Meu cargo precisa ficar acima de ${cargo} em Configurações do servidor → Cargos.`, 'erro');
+      if (cargo.managed || cargo.id === i.guildId) return responder(i, tx('escolha_cargo_comum_pode'), 'erro');
+      if (cargo.permissions.has(PermissionFlagsBits.Administrator)) return responder(i, tx('seguranca_cargo_verificacao_pode'), 'erro');
+      if (!cargo.editable) return responder(i, tx('meu_cargo_precisa_ficar', { cargo }), 'erro');
       c.cargo = cargo.id;
       const remover = i.options.getRole('remover');
       if (remover !== null) c.remover = remover?.id ?? null;
@@ -119,22 +168,22 @@ const verificacao = {
       salvarAjustes();
       return responder(
         i,
-        `Verificação configurada: ganha ${cargo}${c.remover ? `, perde <@&${c.remover}>` : ''}${c.idadeMinima ? `, conta com pelo menos ${c.idadeMinima} dia(s)` : ''}.\nAgora use \`/verificacao painel\`.`,
+        tx('verificacao_configurada_ganha_agora', { cargo, remover: c.remover ? tx('perde', { remover: c.remover }) : '', idadeMinima: c.idadeMinima ? tx('conta_pelo_menos_dia', { idadeMinima: c.idadeMinima }) : '' }),
         'sucesso'
       );
     }
 
-    if (!c.cargo) return responder(i, 'Primeiro use `/verificacao configurar` para escolher o cargo.', 'erro');
+    if (!c.cargo) return responder(i, tx('primeiro_use_verificacao_configurar'), 'erro');
     const canal = i.options.getChannel('canal') ?? i.channel;
-    const texto = i.options.getString('mensagem') || 'Clique no botão abaixo para se verificar e liberar o servidor.';
+    const texto = i.options.getString('mensagem') || tx('clique_botao_abaixo_verificar');
     const msg = await canal
       .send({
-        embeds: [embed(i.guildId).setTitle('🔐 Verificação').setDescription(texto)],
-        components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId('vf:iniciar').setLabel('Verificar').setEmoji('✅').setStyle(ButtonStyle.Success))],
+        embeds: [vis(embed(i.guildId).setTitle(tx('verificacao')).setDescription(texto), 'painel', imagens({ guild: i.guild }))],
+        components: [new ActionRowBuilder().addComponents(bt('iniciar').setCustomId('vf:iniciar'))],
       })
       .catch(() => null);
-    if (!msg) return responder(i, `Não consegui enviar em ${canal}. Confira as minhas permissões.`, 'erro');
-    return responder(i, `Painel enviado em ${canal}.`, 'sucesso');
+    if (!msg) return responder(i, tx('consegui_enviar_confira_minhas', { canal }), 'erro');
+    return responder(i, tx('painel_enviado', { canal }), 'sucesso');
   },
 };
 
@@ -146,18 +195,18 @@ setInterval(() => {
 
 export default {
   id: 'verificacao',
-  nome: 'Verificação',
+  nome: tx('verificacao_2'),
   comandos: [verificacao],
   componentes,
   permissoes: [PermissionFlagsBits.ManageRoles],
   config: {
     resumo(guild) {
       const c = cfg(guild.id);
-      if (!c.cargo) return ['Não configurada (`/verificacao configurar`)'];
+      if (!c.cargo) return [tx('configurada_verificacao_configurar')];
       return [
-        `Cargo: <@&${c.cargo}>${c.remover ? ` · remove <@&${c.remover}>` : ''}`,
-        `Idade mínima da conta: ${c.idadeMinima ? `${c.idadeMinima} dia(s)` : 'sem limite'}`,
-        `Registro: ${c.registro ? `<#${c.registro}>` : 'não definido'}`,
+        tx('cargo', { cargo: c.cargo, remover: c.remover ? tx('remove', { remover: c.remover }) : '' }),
+        tx('idade_minima_conta', { idadeMinima: c.idadeMinima ? tx('dia', { idadeMinima: c.idadeMinima }) : tx('sem_limite') }),
+        tx('registro', { registro: c.registro ? `<#${c.registro}>` : tx('definido') }),
       ];
     },
   },

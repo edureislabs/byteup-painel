@@ -42,6 +42,8 @@ const PRIMEIROS_PASSOS: Record<string, string[]> = {
     "`/config tickets equipe cargo:@Suporte` — quem atende (padrão: o cargo do /config staff)",
     "`/config tickets registro canal:#tickets-log` — recebe o histórico em .txt",
     "`/ticket painel` — envia o painel com o botão **Abrir ticket**",
+    "Com assuntos: `/ticket assunto adicionar nome:Compras emoji:🛒 categoria:Vendas equipe:@Vendas` (até 25; cada um pode ter categoria, equipe e mensagem própria)",
+    "Depois `/ticket painel modo:Menu de assuntos` — a pessoa escolhe o assunto num menu. `/ticket assunto lista` mostra todos",
   ],
   sugestoes: ["`/config sugestoes canal canal:#sugestoes` — onde as sugestões são publicadas"],
   verificacao: [
@@ -116,6 +118,15 @@ const PRIMEIROS_PASSOS: Record<string, string[]> = {
   embeds: [
     "`/embed criar canal:#regras botao1:Site | https://seusite.com` — abre o formulário (título, texto, cor, imagem, rodapé)",
     "`/embed editar mensagem:<link da mensagem>` — muda um embed que o bot enviou",
+  ],
+  personalizar: [
+    "No Discord, use `/personalizar baixar`: o bot manda o arquivo **personalizacao.json** (só para você, que criou o bot)",
+    "Abra o **Personalizar bot.html** (está na pasta do bot) com dois cliques, clique em **Abrir arquivo** e escolha o arquivo",
+    "Mude textos, botões (texto, emoji, cor, mostrar/esconder), modais, cores, emojis, a aparência dos embeds e o status. A prévia mostra como fica no Discord",
+    "Na parte **Criar**, monte seus **Painéis** (botões ou menu que dão cargo, respondem, abrem formulário, abrem ticket ou levam a um link) e **Formulários**",
+    "Clique em **Salvar** e, no Discord, use `/personalizar aplicar arquivo:` com o arquivo salvo. Vale na hora, sem reiniciar",
+    "Publique um painel criado com `/painel enviar`. Se mudar o painel e aplicar de novo, os já enviados se atualizam sozinhos",
+    "Funciona igual com o bot numa hospedagem: o arquivo vai e volta pelo Discord. `/personalizar resetar` volta tudo ao padrão",
   ],
   minecraft: [
     "`/minecraft status ip:jogar.seuservidor.com` — mostra na hora (servidores Java)",
@@ -274,6 +285,16 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
   L.push("- `fuso` (opcional): fuso horário dos aniversários, ex.: `\"fuso\": \"America/Manaus\"` (padrão: horário de Brasília)");
   L.push("");
   L.push("Depois de mudar, reinicie o bot (Ctrl+C no terminal e `npm start` de novo).", "");
+  if (mods.some((m) => m.id === "personalizar")) {
+    L.push("### Textos, cores, emojis e status (módulo Personalização)", "");
+    L.push("Todos os textos, botões (texto, emoji, cor, mostrar/esconder), modais, cores e o status do bot podem ser trocados sem mexer no código. Também dá para criar painéis com botões ou menu e formulários próprios:", "");
+    L.push("1. No Discord: `/personalizar baixar` (só quem criou o bot no Developer Portal pode usar).");
+    L.push("2. Abra o **Personalizar bot.html** (na pasta do bot) no navegador e abra o arquivo baixado.");
+    L.push("3. Edite e clique em **Salvar**.");
+    L.push("4. No Discord: `/personalizar aplicar` com o arquivo salvo. Vale na hora.");
+    L.push("5. Painéis criados: publique com `/painel enviar` (veja todos com `/painel lista`).", "");
+    L.push("A personalização fica em `data/personalizacao.json` (o Transferidor de dados leva junto). Se um servidor definir uma mensagem própria no `/config` (ex.: boas-vindas), ela tem prioridade nele.", "");
+  }
 
   L.push("## Problemas comuns", "");
   L.push("- **\"Falta o token do bot\"**: o arquivo `.env` não existe ou o `DISCORD_TOKEN` está vazio.");

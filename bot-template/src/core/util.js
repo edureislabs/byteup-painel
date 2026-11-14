@@ -1,7 +1,19 @@
 import fs from 'node:fs';
 import { EventEmitter } from 'node:events';
-import { EmbedBuilder, MessageFlags, PermissionFlagsBits } from 'discord.js';
+import { ActivityType, EmbedBuilder, MessageFlags, PermissionFlagsBits } from 'discord.js';
 import { colecao } from './db.js';
+import { textos, preencher, emojiTipo, corPersonalizada, presenca } from './textos.js';
+
+export { preencher };
+
+const tx = textos('geral', {
+  voce_mesmo: 'Você não pode usar isso em você mesmo.',
+  dono_servidor: 'Não dá para punir o dono do servidor.',
+  eu_mesmo: 'Não posso fazer isso comigo mesmo.',
+  cargo_maior_seu: 'Esse membro tem um cargo igual ou maior que o seu.',
+  cargo_maior_meu: 'Esse membro tem um cargo igual ou maior que o meu. Suba o meu cargo na lista de cargos.',
+  erro_generico: 'Algo deu errado. Tente de novo em instantes.',
+});
 
 /** config.json: nome do bot, cor padrão e módulos instalados. */
 export const CONFIG = JSON.parse(fs.readFileSync(new URL('../../config.json', import.meta.url), 'utf8'));
@@ -25,18 +37,24 @@ export const salvarAjustes = () => ajustesDb.salvar();
 // ---------------- aparência ----------------
 export function cor(guildId) {
   const c = guildId ? ajustesDb.ler(guildId, 'geral', 'cor') : null;
-  return parseInt(String(c || CONFIG.cor || '#5865F2').replace('#', ''), 16);
+  if (c) return parseInt(String(c).replace('#', ''), 16);
+  return corPersonalizada('padrao') ?? parseInt(String(CONFIG.cor || '#5865F2').replace('#', ''), 16);
 }
 
 export const embed = (guildId) => new EmbedBuilder().setColor(cor(guildId));
 
-export const CORES = { sucesso: 0x22c55e, erro: 0xef4444, aviso: 0xf59e0b };
+/** Cores de sucesso, erro e aviso (o dono pode trocar no Personalizar bot). */
+export const CORES = {
+  get sucesso() { return corPersonalizada('sucesso') ?? 0x22c55e; },
+  get erro() { return corPersonalizada('erro') ?? 0xef4444; },
+  get aviso() { return corPersonalizada('aviso') ?? 0xf59e0b; },
+};
 
 /** Resposta curta só para quem usou o comando. */
 export async function responder(i, texto, tipo = 'info') {
-  const icone = { sucesso: '✅', erro: '❌', aviso: '⚠️', info: 'ℹ️' }[tipo] ?? '';
+  const icone = emojiTipo(tipo);
   const e = new EmbedBuilder()
-    .setColor(CORES[tipo] ?? cor(i.guildId))
+    .setColor(tipo in CORES ? CORES[tipo] : cor(i.guildId))
     .setDescription(`${icone} ${texto}`.trim());
   const payload = { embeds: [e], flags: MessageFlags.Ephemeral };
   if (i.deferred || i.replied) return i.followUp(payload).catch(() => null);
@@ -51,9 +69,6 @@ export const cortar = (t, n) => {
   return s.length > n ? `${s.slice(0, n - 1)}…` : s;
 };
 
-/** Troca {chave} pelos valores. Chaves desconhecidas ficam como estão. */
-export const preencher = (modelo, vars) =>
-  String(modelo ?? '').replace(/\{(\w+)\}/g, (m, k) => (k in vars ? String(vars[k]) : m));
 
 export function barra(fracao, tamanho = 12) {
   const f = Math.max(0, Math.min(1, fracao || 0));
@@ -105,14 +120,14 @@ export function ehStaff(member) {
  */
 export function checarHierarquia(autor, alvo, bot) {
   if (!alvo) return null;
-  if (alvo.id === autor.id) return 'Você não pode usar isso em você mesmo.';
-  if (alvo.id === alvo.guild.ownerId) return 'Não dá para punir o dono do servidor.';
-  if (alvo.id === bot.id) return 'Não posso fazer isso comigo mesmo.';
+  if (alvo.id === autor.id) return tx('voce_mesmo');
+  if (alvo.id === alvo.guild.ownerId) return tx('dono_servidor');
+  if (alvo.id === bot.id) return tx('eu_mesmo');
   if (autor.id !== autor.guild.ownerId && alvo.roles.highest.position >= autor.roles.highest.position) {
-    return 'Esse membro tem um cargo igual ou maior que o seu.';
+    return tx('cargo_maior_seu');
   }
   if (alvo.roles.highest.position >= bot.roles.highest.position) {
-    return 'Esse membro tem um cargo igual ou maior que o meu. Suba o meu cargo na lista de cargos.';
+    return tx('cargo_maior_meu');
   }
   return null;
 }
@@ -175,3 +190,21 @@ export async function responderCampos(i, base, campos, { efemero = false } = {})
  */
 export const sinais = new EventEmitter();
 sinais.setMaxListeners(50);
+
+/** Mensagem padrão quando algo dá errado numa interação. */
+export const erroGenerico = () => `${emojiTipo('erro')} ${tx('erro_generico')}`;
+
+/** Status do bot (o que aparece embaixo do nome). O Personalizar bot pode trocar. */
+export function aplicarPresenca(c) {
+  const p = presenca(CONFIG.status);
+  if (!p.texto) return c.user.setPresence({ activities: [], status: p.status });
+  const tipos = { jogando: ActivityType.Playing, ouvindo: ActivityType.Listening, assistindo: ActivityType.Watching, competindo: ActivityType.Competing };
+  const atividade = p.tipo === 'personalizado' ? { type: ActivityType.Custom, name: 'status', state: p.texto } : { type: tipos[p.tipo], name: p.texto };
+  c.user.setPresence({ activities: [atividade], status: p.status });
+}
+
+/** Links de imagem que o dono pode usar na aparência dos embeds: {avatar} e {servidor_icone}. */
+export const imagens = ({ user, guild } = {}) => ({
+  avatar: user?.displayAvatarURL?.({ size: 256 }) ?? '',
+  servidor_icone: guild?.iconURL?.({ size: 256 }) ?? '',
+});

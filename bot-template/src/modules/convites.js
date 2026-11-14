@@ -1,6 +1,35 @@
 import { ChannelType, GatewayIntentBits, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { colecao } from '../core/db.js';
 import { ajustes, salvarAjustes, embed, responder, fmt, preencher } from '../core/util.js';
+import { textos, modeloOu } from '../core/textos.js';
+
+// Textos deste módulo (o dono do bot pode trocar todos no "Personalizar bot.html")
+const tx = textos('convites', {
+  msg_entrada_padrao: '📥 {usuario} entrou · convidado(a) por {convidou} ({convites} convite(s))',
+  link_personalizado_servidor: 'link personalizado do servidor',
+  convite_desconhecido: 'convite desconhecido',
+  conta_nova: ' ⚠️ conta nova',
+  so_quem_tem_gerenciar: ['Só quem tem **Gerenciar servidor** pode configurar.', 'resposta'],
+  avisos: ': avisos em <#{canal}>',
+  consigo_ler_convites_me: '\n⚠️ Não consigo ler os convites: me dê a permissão **Gerenciar servidor**.',
+  rastreio_convites_configurado: ['Rastreio de convites configurado{canal}.{aviso}', 'resposta'],
+  ninguem_convidou_ninguem_ainda: ['Ninguém convidou ninguém ainda (desde que o bot entrou).', 'resposta'],
+  entraram_sairam_falsos: '**{posicao}.** <@{usuario}> · **{validos}** ({total} entraram, {saiu} saíram, {falsos} falsos)',
+  ranking_convites: ['📨 Ranking de convites', 'titulo'],
+  sei_como_entrou_foi: ['Não sei como {usuario} entrou (foi antes do bot começar a rastrear).', 'resposta'],
+  link_personalizado_servidor_2: 'o link personalizado do servidor',
+  convite_consegui_identificar: 'um convite que não consegui identificar',
+  convite: ' (convite `{codigo}`)',
+  ja_saiu: ' · já saiu',
+  entrou: ['{usuario} entrou por {por}{codigo} · <t:{em}:R>{saiu}.', 'resposta'],
+  convite_valido: ['**{validos}** convite(s) válido(s)', 'descricao'],
+  entraram: ['Entraram', 'campo'],
+  sairam: ['Saíram', 'campo'],
+  contas_falsas: ['Contas falsas', 'campo'],
+  rastreio_convites: 'Rastreio de convites',
+  nenhum_canal: 'nenhum canal',
+  avisos_entrada_rastreada: 'Avisos: {canal} · {total} entrada(s) rastreada(s)',
+});
 
 /**
  * Rastreio de convites: descobre por qual convite cada pessoa entrou e quem convidou.
@@ -9,8 +38,9 @@ import { ajustes, salvarAjustes, embed, responder, fmt, preencher } from '../cor
  */
 
 const dados = colecao('convites'); // guild -> { membros: {userId: {por, codigo, em, saiu}}, contas: {inviterId: {total, saiu, falsos}} }
-const PADRAO = { canal: null, mensagem: '📥 {usuario} entrou · convidado(a) por {convidou} ({convites} convite(s))', diasFalso: 7 };
+const PADRAO = { canal: null, mensagem: null, diasFalso: 7 };
 const cfg = (guildId) => ajustes(guildId, 'convites', PADRAO);
+const msgEntrada = (c) => modeloOu(c.mensagem, '📥 {usuario} entrou · convidado(a) por {convidou} ({convites} convite(s))', tx('msg_entrada_padrao'));
 const usos = new Map(); // guildId -> Map(codigo -> { usos, dono })
 const mapa = (lista) => new Map(lista.map((inv) => [inv.code, { usos: inv.uses ?? 0, dono: inv.inviterId ?? inv.inviter?.id ?? null }]));
 
@@ -73,9 +103,9 @@ async function aoEntrar(member) {
   const canalId = cfg(guild.id).canal;
   const canal = canalId && guild.channels.cache.get(canalId);
   if (canal?.isTextBased()) {
-    const convidou = por ? `<@${por}>` : codigo === 'personalizado' ? 'link personalizado do servidor' : 'convite desconhecido';
-    const texto = preencher(cfg(guild.id).mensagem, { usuario: `${member}`, nome: member.displayName, convidou, convites: fmt(validos(dados.ler(guild.id, 'contas', por))), codigo: codigo ?? '?' });
-    await canal.send({ content: texto + (falso ? ' ⚠️ conta nova' : ''), allowedMentions: { parse: [] } }).catch(() => {});
+    const convidou = por ? `<@${por}>` : codigo === 'personalizado' ? tx('link_personalizado_servidor') : tx('convite_desconhecido');
+    const texto = preencher(msgEntrada(cfg(guild.id)), { usuario: `${member}`, nome: member.displayName, convidou, convites: fmt(validos(dados.ler(guild.id, 'contas', por))), codigo: codigo ?? '?' });
+    await canal.send({ content: texto + (falso ? tx('conta_nova') : ''), allowedMentions: { parse: [] } }).catch(() => {});
   }
 }
 
@@ -115,7 +145,7 @@ const convites = {
   async executar(i) {
     const sub = i.options.getSubcommand();
     if (sub === 'configurar') {
-      if (!i.member.permissions.has(PermissionFlagsBits.ManageGuild)) return responder(i, 'Só quem tem **Gerenciar servidor** pode configurar.', 'erro');
+      if (!i.member.permissions.has(PermissionFlagsBits.ManageGuild)) return responder(i, tx('so_quem_tem_gerenciar'), 'erro');
       const c = cfg(i.guildId);
       const canal = i.options.getChannel('canal');
       const msg = i.options.getString('mensagem');
@@ -127,7 +157,7 @@ const convites = {
       const ok = await carregarConvites(i.guild);
       return responder(
         i,
-        `Rastreio de convites configurado${c.canal ? `: avisos em <#${c.canal}>` : ''}.${ok ? '' : '\n⚠️ Não consigo ler os convites: me dê a permissão **Gerenciar servidor**.'}`,
+        tx('rastreio_convites_configurado', { canal: c.canal ? tx('avisos', { canal: c.canal }) : '', aviso: ok ? '' : tx('consigo_ler_convites_me') }),
         ok ? 'sucesso' : 'aviso'
       );
     }
@@ -137,16 +167,16 @@ const convites = {
         .filter((x) => x.c.total > 0)
         .sort((a, b) => b.v - a.v || b.c.total - a.c.total)
         .slice(0, 15);
-      if (!contas.length) return responder(i, 'Ninguém convidou ninguém ainda (desde que o bot entrou).', 'aviso');
-      const linhas = contas.map((x, k) => `**${k + 1}.** <@${x.id}> · **${fmt(x.v)}** (${x.c.total} entraram, ${x.c.saiu} saíram, ${x.c.falsos} falsos)`);
-      return i.reply({ embeds: [embed(i.guildId).setTitle('📨 Ranking de convites').setDescription(linhas.join('\n'))], allowedMentions: { parse: [] } });
+      if (!contas.length) return responder(i, tx('ninguem_convidou_ninguem_ainda'), 'aviso');
+      const linhas = contas.map((x, k) => tx('entraram_sairam_falsos', { posicao: k + 1, usuario: x.id, validos: fmt(x.v), total: x.c.total, saiu: x.c.saiu, falsos: x.c.falsos }));
+      return i.reply({ embeds: [embed(i.guildId).setTitle(tx('ranking_convites')).setDescription(linhas.join('\n'))], allowedMentions: { parse: [] } });
     }
     if (sub === 'quem') {
       const u = i.options.getUser('usuario');
       const m = dados.ler(i.guildId, 'membros', u.id);
-      if (!m) return responder(i, `Não sei como ${u} entrou (foi antes do bot começar a rastrear).`, 'aviso');
-      const por = m.por ? `<@${m.por}>` : m.codigo === 'personalizado' ? 'o link personalizado do servidor' : 'um convite que não consegui identificar';
-      return responder(i, `${u} entrou por ${por}${m.codigo && m.codigo !== 'personalizado' ? ` (convite \`${m.codigo}\`)` : ''} · <t:${Math.floor(m.em / 1000)}:R>${m.saiu ? ' · já saiu' : ''}.`, 'info');
+      if (!m) return responder(i, tx('sei_como_entrou_foi', { usuario: u }), 'aviso');
+      const por = m.por ? `<@${m.por}>` : m.codigo === 'personalizado' ? tx('link_personalizado_servidor_2') : tx('convite_consegui_identificar');
+      return responder(i, tx('entrou', { usuario: u, por, codigo: m.codigo && m.codigo !== 'personalizado' ? tx('convite', { codigo: m.codigo }) : '', em: Math.floor(m.em / 1000), saiu: m.saiu ? tx('ja_saiu') : '' }), 'info');
     }
     const u = i.options.getUser('usuario') ?? i.user;
     const c = dados.ler(i.guildId, 'contas', u.id);
@@ -154,11 +184,11 @@ const convites = {
       embeds: [
         embed(i.guildId)
           .setAuthor({ name: u.username, iconURL: u.displayAvatarURL() })
-          .setDescription(`**${fmt(validos(c))}** convite(s) válido(s)`)
+          .setDescription(tx('convite_valido', { validos: fmt(validos(c)) }))
           .addFields(
-            { name: 'Entraram', value: fmt(c?.total ?? 0), inline: true },
-            { name: 'Saíram', value: fmt(c?.saiu ?? 0), inline: true },
-            { name: 'Contas falsas', value: fmt(c?.falsos ?? 0), inline: true }
+            { name: tx('entraram'), value: fmt(c?.total ?? 0), inline: true },
+            { name: tx('sairam'), value: fmt(c?.saiu ?? 0), inline: true },
+            { name: tx('contas_falsas'), value: fmt(c?.falsos ?? 0), inline: true }
           ),
       ],
     });
@@ -167,7 +197,7 @@ const convites = {
 
 export default {
   id: 'convites',
-  nome: 'Rastreio de convites',
+  nome: tx('rastreio_convites'),
   intents: [GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildInvites],
   permissoes: [PermissionFlagsBits.ManageGuild],
   comandos: [convites],
@@ -186,7 +216,7 @@ export default {
     resumo(guild) {
       const c = cfg(guild.id);
       const n = Object.keys(dados.ler(guild.id, 'membros') ?? {}).length;
-      return [`Avisos: ${c.canal ? `<#${c.canal}>` : 'nenhum canal'} · ${n} entrada(s) rastreada(s)`];
+      return [tx('avisos_entrada_rastreada', { canal: c.canal ? `<#${c.canal}>` : tx('nenhum_canal'), total: n })];
     },
   },
 };

@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Personalizar bot</title>
+<style>
+:root{
+  --bg:#08070a;--surface:#111014;--surface2:#17151c;--surface3:#1e1b25;--border:rgba(255,255,255,.09);--border2:rgba(255,255,255,.16);
+  --text:#f4f1f6;--muted:#aaa3b5;--soft:#7d7588;--brand:#b64cff;--brand-soft:#d9b4ff;--brand-dark:#7330a3;
+  --green:#73d99f;--yellow:#f2c96d;--red:#f07878;--discord:#313338;--discord2:#2b2d31;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:radial-gradient(1200px 600px at 10% -10%,rgba(182,76,255,.14),transparent 60%),var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--brand-soft)}
+.app{display:grid;grid-template-columns:290px 1fr;height:100vh}
+aside{border-right:1px solid var(--border);background:rgba(17,16,20,.85);display:flex;flex-direction:column;min-height:0}
+.marca{padding:18px 18px 12px;border-bottom:1px solid var(--border)}
+.marca b{font-size:15px;letter-spacing:.2px}
+.marca small{display:block;color:var(--soft);font-size:12px;margin-top:2px}
+.busca{padding:12px 14px;border-bottom:1px solid var(--border)}
+.busca input[type=search]{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:9px 12px;outline:none}
+.busca input[type=search]:focus{border-color:var(--brand)}
+.busca label{display:flex;gap:8px;align-items:center;margin-top:9px;color:var(--muted);font-size:12.5px;cursor:pointer}
+.busca input[type=checkbox]{accent-color:var(--brand);width:15px;height:15px;margin:0}
+nav{overflow:auto;padding:8px;flex:1}
+nav button{display:flex;width:100%;align-items:center;justify-content:space-between;gap:8px;background:none;border:0;border-radius:10px;padding:8px 10px;text-align:left;color:var(--muted);cursor:pointer}
+nav button:hover{background:var(--surface2);color:var(--text)}
+nav button.on{background:rgba(182,76,255,.14);color:var(--text);box-shadow:inset 0 0 0 1px rgba(182,76,255,.35)}
+nav .sec{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--soft);padding:12px 10px 4px}
+.qtd{font-size:11.5px;color:var(--soft)}
+.qtd .alt{color:var(--brand-soft);font-weight:700}
+main{overflow:auto;min-height:0}
+header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;padding:14px 26px;background:rgba(8,7,10,.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+header h1{font-size:18px;margin:0;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header .status{font-size:12.5px;color:var(--soft)}
+header .status.sujo{color:var(--yellow)}
+.btn{border:1px solid var(--border2);background:var(--surface2);border-radius:999px;padding:8px 16px;cursor:pointer;font-weight:600;white-space:nowrap}
+.btn:hover{border-color:var(--brand-soft)}
+.btn.pri{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.pri:hover{filter:brightness(1.1)}
+.btn.peq{padding:4px 11px;font-size:12px;font-weight:600}
+.btn:disabled{opacity:.45;cursor:default}
+.conteudo{padding:22px 26px 80px;max-width:1080px}
+.vazio{display:grid;place-items:center;min-height:calc(100vh - 70px);padding:30px}
+.solta{border:2px dashed rgba(182,76,255,.45);border-radius:24px;padding:44px 40px;text-align:center;max-width:620px;background:rgba(182,76,255,.05)}
+.solta.sobre{background:rgba(182,76,255,.14);border-color:var(--brand)}
+.solta h2{margin:6px 0 8px;font-size:22px}
+.solta p{color:var(--muted);margin:6px 0}
+.solta ol{text-align:left;color:var(--muted);margin:18px auto 22px;max-width:470px;padding-left:20px}
+.solta ol li{margin:6px 0}
+.solta code,.dica code{background:var(--surface3);padding:1px 6px;border-radius:6px;color:var(--brand-soft)}
+.icone-grande{width:64px;height:64px;border-radius:20px;display:grid;place-items:center;margin:0 auto;background:linear-gradient(160deg,#1f1030,#0a0710);border:1px solid rgba(182,76,255,.45);box-shadow:0 0 30px -8px rgba(182,76,255,.8)}
+.titulo-sec{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:4px 0 14px}
+.titulo-sec h2{margin:0;font-size:20px}
+.titulo-sec p{margin:2px 0 0;color:var(--muted);font-size:13px}
+.cartao{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:12px}
+.cartao.alterado{border-color:rgba(182,76,255,.5);box-shadow:inset 3px 0 0 var(--brand)}
+.cab{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.tag{font-size:11px;font-weight:700;letter-spacing:.03em;padding:2px 8px;border-radius:999px;background:var(--surface3);color:var(--muted)}
+.tag.tipo{background:rgba(182,76,255,.14);color:var(--brand-soft)}
+.chave{font:12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--soft)}
+.cab .esp{flex:1}
+textarea{width:100%;min-height:42px;resize:vertical;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:9px 11px;outline:none;line-height:1.45}
+textarea:focus,input.campo:focus,select:focus{border-color:var(--brand)}
+input.campo,select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px 11px;outline:none}
+.vars{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center}
+.vars span.rot{font-size:11.5px;color:var(--soft);margin-right:2px}
+.var{border:1px solid rgba(182,76,255,.35);background:rgba(182,76,255,.08);color:var(--brand-soft);border-radius:8px;padding:1px 8px;font:12px ui-monospace,Menlo,Consolas,monospace;cursor:pointer}
+.var:hover{background:rgba(182,76,255,.2)}
+.rodape-cartao{display:flex;gap:10px;align-items:center;margin-top:8px;font-size:12px;color:var(--soft)}
+.rodape-cartao .esp{flex:1}
+.conta.ruim{color:var(--red);font-weight:700}
+.alerta{font-size:12.5px;color:var(--yellow);margin-top:6px}
+.alerta.erro{color:var(--red)}
+.previa{margin-top:10px;background:var(--discord);border-radius:10px;padding:10px 12px;font-size:14px;color:#dbdee1;line-height:1.4;word-wrap:break-word}
+.previa .rot{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#949ba4;margin-bottom:4px}
+.md strong{color:#f2f3f5}
+.md code{background:#1e1f22;border-radius:4px;padding:1px 4px;font-size:85%}
+.md pre{background:#1e1f22;border-radius:6px;padding:8px;margin:4px 0;white-space:pre-wrap}
+.md blockquote{margin:2px 0;padding-left:10px;border-left:4px solid #4e5058}
+.md h1,.md h2,.md h3{margin:4px 0;color:#f2f3f5}.md h1{font-size:20px}.md h2{font-size:17px}.md h3{font-size:15px}
+.md .mencao{background:rgba(88,101,242,.3);color:#c9cdfb;border-radius:3px;padding:0 2px}
+.md .var-p{background:rgba(182,76,255,.25);color:#ecd7ff;border-radius:4px;padding:0 3px}
+.md .emoji{width:1.3em;height:1.3em;vertical-align:-.3em;object-fit:contain}
+.md a{color:#00a8fc;text-decoration:none}
+.grade{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grade3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.grade4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.campo-rot{display:block;font-size:12px;color:var(--muted);margin:0 0 5px;font-weight:600}
+.linha-cor{display:flex;gap:8px}
+.linha-cor input[type=color]{width:42px;height:38px;padding:2px;border:1px solid var(--border);border-radius:10px;background:var(--surface2);cursor:pointer}
+.embed{display:flex;background:var(--discord2);border-radius:4px;overflow:hidden;max-width:520px;margin-top:10px}
+.embed .barra{width:4px;flex:none}
+.embed .corpo{padding:10px 14px 12px;flex:1;display:grid;grid-template-columns:1fr auto;gap:8px}
+.embed .tit{font-weight:700;color:#f2f3f5;grid-column:1}
+.embed .desc{font-size:13.5px;color:#dbdee1;grid-column:1}
+.embed .mini{width:64px;height:64px;border-radius:4px;background:#1e1f22 center/cover;grid-column:2;grid-row:1/3}
+.embed .img{grid-column:1/3;height:120px;border-radius:4px;background:#1e1f22 center/cover;display:grid;place-items:center;color:#949ba4;font-size:12px}
+.embed .rod{grid-column:1/3;font-size:12px;color:#949ba4}
+.ph{display:grid;place-items:center;color:#949ba4;font-size:10.5px;text-align:center;padding:4px}
+.dica{background:rgba(182,76,255,.07);border:1px solid rgba(182,76,255,.25);border-radius:14px;padding:12px 14px;color:var(--muted);font-size:13px;margin-bottom:16px}
+.dica b{color:var(--text)}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--surface3);border:1px solid var(--border2);padding:10px 18px;border-radius:999px;box-shadow:0 10px 40px rgba(0,0,0,.5);font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.on{opacity:1}
+.mais{width:100%;margin-top:6px}
+.sub-grupo{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--soft);margin:22px 0 10px}
+.presenca{display:flex;align-items:center;gap:12px;background:var(--discord2);border-radius:10px;padding:12px 14px;margin-top:12px;max-width:420px}
+.ava{width:42px;height:42px;border-radius:50%;background:linear-gradient(160deg,#b64cff,#4b1f73);position:relative;flex:none}
+.ava i{position:absolute;right:-2px;bottom:-2px;width:14px;height:14px;border-radius:50%;border:3px solid var(--discord2)}
+
+/* botões e menus com cara de Discord */
+.dbtn{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:2px 16px;border-radius:8px;font-size:14px;font-weight:500;color:#fff;border:0;cursor:default;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.dbtn.Primary{background:#5865f2}.dbtn.Secondary{background:#4e5058}.dbtn.Success{background:#248046}.dbtn.Danger{background:#da373c}.dbtn.Link{background:#4e5058}
+.dbtn .emoji{width:20px;height:20px}
+.dbtn.oculto{opacity:.35;text-decoration:line-through}
+.dlinha{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.dselect{display:flex;justify-content:space-between;align-items:center;background:#1e1f22;border:1px solid #1e1f22;border-radius:6px;padding:9px 12px;color:#949ba4;max-width:420px;margin-top:8px}
+.dopcoes{background:#2b2d31;border-radius:6px;max-width:420px;margin-top:4px;padding:4px}
+.dopcoes div{padding:6px 8px;border-radius:4px;color:#dbdee1;font-size:14px}.dopcoes small{display:block;color:#949ba4;font-size:12px}
+.swatches{display:flex;gap:6px;flex-wrap:wrap}
+.sw{border:2px solid transparent;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;color:#fff;cursor:pointer}
+.sw.Primary{background:#5865f2}.sw.Secondary{background:#4e5058}.sw.Success{background:#248046}.sw.Danger{background:#da373c}
+.sw.on{border-color:#fff;box-shadow:0 0 0 2px var(--brand)}
+.sw.padrao{background:var(--surface3);color:var(--muted)}
+.chave-liga{display:inline-flex;align-items:center;gap:8px;cursor:pointer;color:var(--muted);font-size:13px}
+.chave-liga input{accent-color:var(--brand);width:16px;height:16px}
+.dmodal{background:#313338;border-radius:8px;max-width:440px;padding:16px;margin-top:10px}
+.dmodal h4{margin:0 0 12px;color:#f2f3f5;font-size:18px}
+.dmodal label{display:block;font-size:12px;font-weight:700;color:#b5bac1;text-transform:uppercase;margin:10px 0 6px}
+.dmodal label i{color:#f23f43;font-style:normal}
+.dmodal .inp{background:#1e1f22;border-radius:4px;padding:9px 10px;color:#6d6f78;font-size:14px;min-height:38px}
+.dmodal .inp.longa{min-height:76px}
+.dmodal .acoes{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.lista-criados{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.lista-criados button{border:1px solid var(--border2);background:var(--surface2);border-radius:999px;padding:6px 14px;cursor:pointer;font-weight:600}
+.lista-criados button.on{border-color:var(--brand);background:rgba(182,76,255,.18)}
+.item{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-top:10px}
+.item .cab b{font-size:13px}
+.mini-btns{display:flex;gap:6px}
+.mini-btns button{border:1px solid var(--border2);background:var(--surface3);border-radius:8px;padding:2px 9px;cursor:pointer;color:var(--muted)}
+.mini-btns button:hover{color:var(--text);border-color:var(--brand-soft)}
+.mini-btns button.perigo:hover{border-color:var(--red);color:var(--red)}
+.linha2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.linha3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px}
+.mt{margin-top:10px}
+@media (max-width:860px){.linha2,.linha3{grid-template-columns:1fr}}
+@media (max-width:860px){.app{grid-template-columns:1fr}aside{display:none}.grade,.grade3,.grade4{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="marca">
+      <b id="nomeBot">Personalizar bot</b>
+      <small id="infoArquivo">Nenhum arquivo aberto</small>
+    </div>
+    <div class="busca">
+      <input id="busca" type="search" placeholder="Procurar em todos os textos…" disabled>
+      <label><input id="soAlterados" type="checkbox" disabled> Só os que eu mudei</label>
+    </div>
+    <nav id="menu"></nav>
+  </aside>
+  <main id="principal">
+    <header>
+      <h1 id="tituloPagina">Personalizar bot</h1>
+      <span class="status" id="estado"></span>
+      <button class="btn" id="btnAbrir">Abrir arquivo</button>
+      <button class="btn pri" id="btnSalvar" disabled>Salvar</button>
+      <input type="file" id="arquivo" accept=".json,application/json" hidden>
+    </header>
+    <div id="area"></div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+// ------------------------------------------------------------------
+// Personalizar bot: edita o arquivo baixado com /personalizar baixar.
+// Tudo roda aqui no seu computador; nada é enviado para a internet.
+// ------------------------------------------------------------------
+const TIPOS = {
+  texto: 'Texto', resposta: 'Resposta (só quem usou vê)', descricao: 'Texto do embed', conteudo: 'Mensagem',
+  titulo: 'Título', campo: 'Nome de campo', valor: 'Valor de campo', rodape: 'Rodapé', autor: 'Autor do embed',
+  botao: 'Botão', rotulo: 'Pergunta de formulário', placeholder: 'Dica dentro do campo', opcao: 'Opção de menu',
+  motivo: 'Motivo', canal: 'Nome de canal'
+};
+const LIMITES_PADRAO = { texto: 2000, resposta: 3900, descricao: 4000, conteudo: 2000, titulo: 256, campo: 256, valor: 1024, rodape: 2048, autor: 256, botao: 80, rotulo: 45, placeholder: 150, opcao: 100, motivo: 500, canal: 100 };
+const EXEMPLOS = {
+  usuario: '<@1>', autor: '<@2>', alvo: '<@3>', membro: '<@1>', dono: '<@1>', atendente: '<@2>', por: '<@2>', mencao: '<@1>',
+  tag: 'ana', nome: 'Ana', servidor: 'Meu Servidor', membros: '1.234', canal: '<#1>', cargo: '<@&1>', motivo: 'Spam no chat',
+  duracao: '10min', quando: '<t:1893456000:R>', relativo: '<t:1893456000:R>', data: '25 de dezembro', numero: '7', total: '3',
+  nivel: '5', xp: '1.250', dinheiro: '🪙 **500** moedas', moeda: '🪙', premio: 'Nitro', vencedores: '1', limite: '5', pontos: '10',
+  estrelas: '⭐⭐⭐⭐⭐', media: '4,8', titulo: 'Candidatura', perguntas_total: '3', codigo: 'abc123', convidou: '<@2>', convites: '4',
+  link: 'https://discord.com', endereco: 'jogar.servidor.com', latencia: '42', segundos: '30', status: 'aprovada', gatilho: 'ip',
+  tipo: 'mensagens apagadas', acao: 'expulsar', erro: 'Não consegui.', aviso: '', extra: '', lista: '• item', posicao: '1',
+  avatar: 'https://cdn.discordapp.com/embed/avatars/0.png', servidor_icone: 'https://cdn.discordapp.com/embed/avatars/1.png'
+};
+const EMOJI_NOMES = { sucesso: 'Sucesso', erro: 'Erro', aviso: 'Aviso', info: 'Informação' };
+const COR_NOMES = { padrao: 'Cor padrão das mensagens', sucesso: 'Sucesso', erro: 'Erro', aviso: 'Aviso' };
+const PRESENCA_TIPOS = { personalizado: 'Status personalizado', jogando: 'Jogando', ouvindo: 'Ouvindo', assistindo: 'Assistindo', competindo: 'Competindo em' };
+const PRESENCA_STATUS = { online: ['Online', '#23a55a'], idle: ['Ausente', '#f0b232'], dnd: ['Não perturbe', '#f23f43'] };
+
+let dados = null;          // arquivo aberto (catálogo + valores)
+let valores = null;        // o que está sendo editado
+let atual = 'geral-config'; // seção aberta
+let sujo = false;
+let limiteLista = 120;
+
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const varsDe = (s) => [...new Set([...String(s).matchAll(/\{(\w+)\}/g)].map((m) => m[1]))];
+const vazio = () => ({ textos: {}, visuais: {}, emojis: {}, cores: {}, presenca: {}, botoes: {}, criados: { paineis: [], formularios: [] } });
+
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('on');
+  clearTimeout(toast.t);
+  toast.t = setTimeout(() => t.classList.remove('on'), 2600);
+}
+
+// ---------------- prévia com cara de Discord ----------------
+function markdown(texto, vars) {
+  let s = esc(texto);
+  // variáveis: troca pelo exemplo (ou mostra a etiqueta)
+  s = s.replace(/\{(\w+)\}/g, (m, k) => {
+    if (vars && !vars.includes(k)) return `<span class="var-p" title="Esta variável não existe neste texto">{${k}}</span>`;
+    const ex = EXEMPLOS[k];
+    return ex !== undefined ? esc(ex) : `<span class="var-p">${k}</span>`;
+  });
+  const blocos = [];
+  s = s.replace(/```(?:\w+\n)?([\s\S]*?)```/g, (m, c) => { blocos.push(`<pre>${c}</pre>`); return `\u0000${blocos.length - 1}\u0000`; });
+  s = s.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+  s = s.replace(/&lt;a?:(\w+):(\d+)&gt;/g, (m, n, id) => `<img class="emoji" alt=":${n}:" title=":${n}:" src="https://cdn.discordapp.com/emojis/${id}.webp?size=48" onerror="this.replaceWith(':${n}:')">`);
+  s = s.replace(/&lt;@!?\d+&gt;/g, '<span class="mencao">@Ana</span>');
+  s = s.replace(/&lt;@&amp;\d+&gt;/g, '<span class="mencao">@Cargo</span>');
+  s = s.replace(/&lt;#\d+&gt;/g, '<span class="mencao">#canal</span>');
+  s = s.replace(/&lt;t:\d+(?::\w)?&gt;/g, '<span class="mencao">em 2 horas</span>');
+  s = s.replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  s = s.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+  s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  s = s.replace(/__(.+?)__/g, '<u>$1</u>');
+  s = s.replace(/(^|[^\w*])\*(?!\s)(.+?)\*(?!\w)/g, '$1<em>$2</em>');
+  s = s.replace(/(^|\W)_(?!\s)(.+?)_(?!\w)/g, '$1<em>$2</em>');
+  s = s.replace(/~~(.+?)~~/g, '<s>$1</s>');
+  s = s.split('\n').map((l) => {
+    if (/^### /.test(l)) return `<h3>${l.slice(4)}</h3>`;
+    if (/^## /.test(l)) return `<h2>${l.slice(3)}</h2>`;
+    if (/^# /.test(l)) return `<h1>${l.slice(2)}</h1>`;
+    if (/^&gt; /.test(l)) return `<blockquote>${l.slice(5)}</blockquote>`;
+    if (/^[-*] /.test(l)) return `• ${l.slice(2)}<br>`;
+    return `${l}<br>`;
+  }).join('').replace(/<br>$/, '');
+  return s.replace(/\u0000(\d+)\u0000/g, (m, n) => blocos[n]);
+}
+
+// ---------------- abrir / salvar ----------------
+function abrirJson(texto, nomeArquivo) {
+  let json;
+  try { json = JSON.parse(texto.replace(/^\uFEFF/, '')); } catch { return toast('Esse arquivo não é um JSON válido.'); }
+  if (json.formato !== 'byteup-personalizacao' || !json.catalogo?.textos) {
+    return toast('Esse arquivo não serve. Use o que o bot manda no /personalizar baixar.');
+  }
+  dados = json;
+  valores = Object.assign(vazio(), structuredClone(json.valores || {}));
+  for (const k of Object.keys(vazio())) valores[k] = valores[k] || vazio()[k];
+  valores.criados.paineis = valores.criados.paineis || [];
+  valores.criados.formularios = valores.criados.formularios || [];
+  dados.catalogo.botoes = dados.catalogo.botoes || {};
+  dados.catalogo.modais = dados.catalogo.modais || {};
+  dados.servidores = dados.servidores || [];
+  // rascunho guardado neste navegador
+  const r = lerRascunho();
+  if (r && r.base === assinatura() && JSON.stringify(r.valores) !== JSON.stringify(valores) && confirm('Encontrei alterações que você não salvou da última vez. Quer recuperar?')) {
+    valores = Object.assign(vazio(), r.valores);
+    marcarSujo(true);
+  } else marcarSujo(false);
+  $('#nomeBot').textContent = json.bot || 'Seu bot';
+  $('#infoArquivo').textContent = `${Object.keys(json.catalogo.textos).length} textos · ${nomeArquivo || 'arquivo'}`;
+  $('#busca').disabled = false;
+  $('#soAlterados').disabled = false;
+  $('#btnSalvar').disabled = false;
+  atual = 'geral-config';
+  montarMenu();
+  mostrar();
+  toast('Arquivo aberto ✓');
+}
+
+function limpar(v) {
+  // guarda só o que é diferente do padrão
+  const out = vazio();
+  for (const [k, s] of Object.entries(v.textos)) if (s && s !== dados.catalogo.textos[k]?.padrao) out.textos[k] = s;
+  for (const [k, x] of Object.entries(v.visuais)) {
+    const y = {};
+    for (const c of ['cor', 'imagem', 'miniatura', 'rodape']) if (x?.[c]) y[c] = x[c];
+    if (Object.keys(y).length) out.visuais[k] = y;
+  }
+  for (const [k, e] of Object.entries(v.emojis)) if (e && e !== dados.catalogo.emojis?.[k]) out.emojis[k] = e;
+  for (const [k, c] of Object.entries(v.cores)) if (c && c !== dados.catalogo.cores?.[k]) out.cores[k] = c;
+  for (const [k, b] of Object.entries(v.botoes || {})) {
+    const y = {};
+    if (b?.emoji) y.emoji = b.emoji;
+    if (b?.estilo) y.estilo = b.estilo;
+    if (b?.oculto) y.oculto = true;
+    if (Object.keys(y).length) out.botoes[k] = y;
+  }
+  out.criados = structuredClone(v.criados || { paineis: [], formularios: [] });
+  if (v.presenca.texto) out.presenca.texto = v.presenca.texto;
+  if (v.presenca.tipo && v.presenca.tipo !== 'personalizado') out.presenca.tipo = v.presenca.tipo;
+  if (v.presenca.status && v.presenca.status !== 'online') out.presenca.status = v.presenca.status;
+  return out;
+}
+
+function salvar() {
+  if (!dados) return;
+  const final = { ...dados, gerado: new Date().toISOString(), valores: limpar(valores) };
+  const blob = new Blob([JSON.stringify(final, null, 1)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'personalizacao.json';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  dados.valores = final.valores;
+  marcarSujo(false);
+  apagarRascunho();
+  toast('Salvo! Agora use /personalizar aplicar no Discord com este arquivo.');
+}
+
+const assinatura = () => `${dados?.bot}|${Object.keys(dados?.catalogo?.textos || {}).length}`;
+function lerRascunho() { try { return JSON.parse(localStorage.getItem('byteup-personalizar') || 'null'); } catch { return null; } }
+function guardarRascunho() { try { localStorage.setItem('byteup-personalizar', JSON.stringify({ base: assinatura(), valores })); } catch { /* sem armazenamento */ } }
+function apagarRascunho() { try { localStorage.removeItem('byteup-personalizar'); } catch { /* sem armazenamento */ } }
+
+function marcarSujo(v) {
+  sujo = v;
+  const e = $('#estado');
+  e.textContent = v ? '● alterações não salvas' : dados ? 'tudo salvo' : '';
+  e.className = 'status' + (v ? ' sujo' : '');
+  if (v) { clearTimeout(marcarSujo.t); marcarSujo.t = setTimeout(guardarRascunho, 400); }
+}
+
+// ---------------- menu ----------------
+function contagens(modulo) {
+  const chaves = Object.entries(dados.catalogo.textos).filter(([, v]) => v.modulo === modulo).map(([k]) => k);
+  const vis = Object.entries(dados.catalogo.visuais || {}).filter(([, v]) => v.modulo === modulo).map(([k]) => k);
+  const bts = Object.entries(dados.catalogo.botoes || {}).filter(([, v]) => v.modulo === modulo).map(([k]) => k);
+  const alt = chaves.filter((k) => valores.textos[k] && valores.textos[k] !== dados.catalogo.textos[k].padrao).length
+    + vis.filter((k) => Object.values(valores.visuais[k] || {}).some(Boolean)).length
+    + bts.filter((k) => Object.values(valores.botoes[k] || {}).some(Boolean)).length;
+  return { total: chaves.length, alt };
+}
+
+function montarMenu() {
+  const modulos = (dados.modulos || []).filter((m) => contagens(m.id).total);
+  const altGeral = Object.keys(limpar(valores).emojis).length + Object.keys(limpar(valores).cores).length + (valores.presenca.texto ? 1 : 0);
+  let h = `<div class="sec">Geral</div>
+    <button data-sec="geral-config" class="${atual === 'geral-config' ? 'on' : ''}"><span>🎨 Cores, emojis e status</span><span class="qtd">${altGeral ? `<span class="alt">${altGeral}</span>` : ''}</span></button>
+    <div class="sec">Criar</div>
+    <button data-sec="criar-paineis" class="${atual === 'criar-paineis' ? 'on' : ''}"><span>🧩 Painéis</span><span class="qtd">${valores.criados.paineis.length ? `<span class="alt">${valores.criados.paineis.length}</span>` : ''}</span></button>
+    <button data-sec="criar-formularios" class="${atual === 'criar-formularios' ? 'on' : ''}"><span>📝 Formulários</span><span class="qtd">${valores.criados.formularios.length ? `<span class="alt">${valores.criados.formularios.length}</span>` : ''}</span></button>
+    <div class="sec">Textos por módulo</div>`;
+  for (const m of modulos) {
+    const c = contagens(m.id);
+    h += `<button data-sec="${esc(m.id)}" class="${atual === m.id ? 'on' : ''}"><span>${esc(m.nome)}</span><span class="qtd">${c.alt ? `<span class="alt">${c.alt}</span> / ` : ''}${c.total}</span></button>`;
+  }
+  $('#menu').innerHTML = h;
+}
+$('#menu').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-sec]');
+  if (!b) return;
+  atual = b.dataset.sec;
+  $('#busca').value = '';
+  limiteLista = 120;
+  montarMenu();
+  mostrar();
+  $('#principal').scrollTop = 0;
+});
+
+// ---------------- telas ----------------
+function telaVazia() {
+  $('#tituloPagina').textContent = 'Personalizar bot';
+  $('#area').innerHTML = `<div class="vazio"><div class="solta" id="solta">
+    <div class="icone-grande"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#d9b4ff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></div>
+    <h2>Personalize todos os textos do seu bot</h2>
+    <p>Mensagens, títulos, botões, cores, emojis e o status. Tudo fica no seu computador.</p>
+    <ol>
+      <li>No Discord, use <code>/personalizar baixar</code> e salve o arquivo <code>personalizacao.json</code>.</li>
+      <li>Arraste o arquivo para cá (ou clique em <b>Abrir arquivo</b>).</li>
+      <li>Edite o que quiser e clique em <b>Salvar</b>.</li>
+      <li>No Discord, use <code>/personalizar aplicar</code> e envie o arquivo salvo. Vale na hora.</li>
+    </ol>
+    <button class="btn pri" onclick="document.getElementById('arquivo').click()">Abrir arquivo</button>
+  </div></div>`;
+}
+
+function mostrar() {
+  if (!dados) return telaVazia();
+  const busca = $('#busca').value.trim().toLowerCase();
+  if (busca) return telaBusca(busca);
+  if (atual === 'geral-config') return telaGeral();
+  if (atual === 'criar-paineis') return telaPaineis();
+  if (atual === 'criar-formularios') return telaFormularios();
+  return telaModulo(atual);
+}
+
+function cartaoTexto(chave) {
+  const c = dados.catalogo.textos[chave];
+  const valor = valores.textos[chave] ?? c.padrao;
+  const alterado = valor !== c.padrao;
+  const limite = (dados.limites || LIMITES_PADRAO)[c.tipo] ?? 2000;
+  const linhas = Math.min(8, Math.max(1, Math.ceil(valor.length / 90), valor.split('\n').length));
+  const dicaPadrao = /^(msg_|nome_sala_padrao)/.test(chave.split('.')[1]) ? '<div class="alerta" style="color:var(--muted)">Usado quando o servidor não definiu uma mensagem própria no /config.</div>' : '';
+  return `<div class="cartao ${alterado ? 'alterado' : ''}" data-chave="${esc(chave)}">
+    <div class="cab"><span class="tag tipo">${esc(TIPOS[c.tipo] || 'Texto')}</span><span class="chave">${esc(chave)}</span><span class="esp"></span>
+      ${alterado ? '<button class="btn peq" data-acao="restaurar">Voltar ao padrão</button>' : ''}</div>
+    <textarea rows="${linhas}" data-campo="texto" spellcheck="true">${esc(valor)}</textarea>
+    ${c.vars.length ? `<div class="vars"><span class="rot">Variáveis:</span>${c.vars.map((v) => `<button class="var" data-var="${esc(v)}" title="Inserir {${esc(v)}}">{${esc(v)}}</button>`).join('')}</div>` : ''}
+    ${dicaPadrao}
+    <div class="avisos"></div>
+    <div class="previa md"><span class="rot">Prévia</span><div class="render"></div></div>
+    <div class="rodape-cartao">${alterado ? `<span title="${esc(c.padrao)}">Padrão: ${esc(c.padrao.length > 90 ? c.padrao.slice(0, 89) + '…' : c.padrao)}</span>` : '<span>Texto padrão</span>'}<span class="esp"></span><span class="conta" data-limite="${limite}"></span></div>
+  </div>`;
+}
+
+function atualizarCartao(el) {
+  const chave = el.dataset.chave;
+  const c = dados.catalogo.textos[chave];
+  const ta = el.querySelector('textarea');
+  const v = ta.value;
+  el.querySelector('.render').innerHTML = markdown(v, c.vars) || '<span style="color:#949ba4">(vazio: vai usar o texto padrão)</span>';
+  const conta = el.querySelector('.conta');
+  const lim = Number(conta.dataset.limite);
+  conta.textContent = `${v.length} / ${lim}`;
+  conta.classList.toggle('ruim', v.length > lim);
+  const avisos = [];
+  const desconhecidas = varsDe(v).filter((x) => !c.vars.includes(x));
+  if (desconhecidas.length) avisos.push(`<div class="alerta">⚠️ ${desconhecidas.map((x) => `{${esc(x)}}`).join(', ')} não existe neste texto e vai aparecer escrito assim.</div>`);
+  if (v.length > lim) avisos.push(`<div class="alerta erro">Passou do limite do Discord (${lim}). O bot vai cortar o final.</div>`);
+  if (!v.trim()) avisos.push('<div class="alerta">Vazio: o bot usa o texto padrão.</div>');
+  el.querySelector('.avisos').innerHTML = avisos.join('');
+}
+
+function ligarCartoes(raiz) {
+  raiz.querySelectorAll('.cartao[data-chave]').forEach(atualizarCartao);
+}
+
+$('#area').addEventListener('input', (e) => {
+  const el = e.target.closest('.cartao[data-chave]');
+  if (el && e.target.matches('textarea')) {
+    const chave = el.dataset.chave;
+    const padrao = dados.catalogo.textos[chave].padrao;
+    const v = e.target.value;
+    if (v === padrao || !v.trim()) delete valores.textos[chave];
+    else valores.textos[chave] = v;
+    el.classList.toggle('alterado', v !== padrao && !!v.trim());
+    atualizarCartao(el);
+    marcarSujo(true);
+    atualizarContagemMenu();
+    return;
+  }
+  const vis = e.target.closest('.cartao[data-visual]');
+  if (vis) { lerVisual(vis); marcarSujo(true); atualizarContagemMenu(); return; }
+  const bc = e.target.closest('.cartao[data-botao]');
+  if (bc) { lerBotao(bc, e.target); marcarSujo(true); atualizarContagemMenu(); return; }
+  if (e.target.closest('[data-pn]')) { editarPainel(e); return; }
+  if (e.target.closest('[data-fm]')) { editarFormulario(e); return; }
+  const g = e.target.closest('[data-geral]');
+  if (g) { lerGeral(); marcarSujo(true); atualizarContagemMenu(); }
+});
+$('#area').addEventListener('change', (e) => {
+  if (e.target.closest('[data-geral]')) { lerGeral(); marcarSujo(true); atualizarContagemMenu(); return; }
+  if (e.target.matches('select, input[type=checkbox]')) {
+    const bc = e.target.closest('.cartao[data-botao]');
+    if (bc) { lerBotao(bc, e.target); marcarSujo(true); atualizarContagemMenu(); return; }
+    if (e.target.closest('[data-pn]')) { editarPainel(e, true); return; }
+    if (e.target.closest('[data-fm]')) { editarFormulario(e, true); return; }
+  }
+});
+
+let ultimoFoco = null;
+$('#area').addEventListener('focusin', (e) => { if (e.target.matches('textarea,input.campo')) ultimoFoco = e.target; });
+$('#area').addEventListener('click', (e) => {
+  const v = e.target.closest('.var');
+  if (v) {
+    const card = v.closest('.cartao');
+    const alvo = ultimoFoco && card.contains(ultimoFoco) ? ultimoFoco : card.querySelector('textarea, [data-v="miniatura"]');
+    if (!alvo) return;
+    const ins = `{${v.dataset.var}}`;
+    const ini = alvo.selectionStart ?? alvo.value.length, fim = alvo.selectionEnd ?? alvo.value.length;
+    alvo.value = alvo.value.slice(0, ini) + ins + alvo.value.slice(fim);
+    alvo.focus();
+    alvo.selectionStart = alvo.selectionEnd = ini + ins.length;
+    alvo.dispatchEvent(new Event('input', { bubbles: true }));
+    return;
+  }
+  const r = e.target.closest('[data-acao="restaurar"]');
+  if (r) {
+    const el = r.closest('.cartao[data-chave]');
+    delete valores.textos[el.dataset.chave];
+    el.outerHTML = cartaoTexto(el.dataset.chave);
+    ligarCartoes($('#area'));
+    marcarSujo(true);
+    atualizarContagemMenu();
+    return;
+  }
+  const rv = e.target.closest('[data-acao="restaurar-visual"]');
+  if (rv) {
+    const el = rv.closest('.cartao[data-visual]');
+    delete valores.visuais[el.dataset.visual];
+    el.outerHTML = cartaoVisual(el.dataset.visual);
+    $('#area').querySelectorAll('.cartao[data-visual]').forEach(previaVisual);
+    marcarSujo(true);
+    atualizarContagemMenu();
+    return;
+  }
+  if (e.target.closest('[data-acao="mais"]')) { limiteLista += 150; mostrar(); return; }
+  if (cliqueBotao(e) || cliquePainel(e) || cliqueFormulario(e)) return;
+});
+
+function atualizarContagemMenu() {
+  clearTimeout(atualizarContagemMenu.t);
+  atualizarContagemMenu.t = setTimeout(montarMenu, 250);
+}
+
+function telaModulo(id) {
+  const mod = (dados.modulos || []).find((m) => m.id === id) || { nome: id };
+  $('#tituloPagina').textContent = mod.nome;
+  const so = $('#soAlterados').checked;
+  const bts = Object.entries(dados.catalogo.botoes || {}).filter(([, v]) => v.modulo === id).map(([k]) => k);
+  const mds = Object.entries(dados.catalogo.modais || {}).filter(([, v]) => v.modulo === id);
+  // textos que já aparecem nos cartões de botão e de modal não se repetem na lista
+  const usados = new Set([...bts.map((k) => dados.catalogo.botoes[k].rotulo).filter(Boolean), ...mds.flatMap(([, m]) => m.textos)]);
+  let chaves = Object.entries(dados.catalogo.textos).filter(([k, v]) => v.modulo === id && !usados.has(k)).map(([k]) => k);
+  if (so) chaves = chaves.filter((k) => valores.textos[k] !== undefined);
+  const vis = Object.entries(dados.catalogo.visuais || {}).filter(([, v]) => v.modulo === id).map(([k]) => k);
+  const partes = [`${chaves.length} texto(s)`];
+  if (bts.length) partes.push(`${bts.length} botão(ões)`);
+  if (mds.length) partes.push(`${mds.length} modal(is)`);
+  if (vis.length) partes.push(`${vis.length} embed(s) com aparência personalizável`);
+  let h = `<div class="conteudo"><div class="titulo-sec"><div><h2>${esc(mod.nome)}</h2><p>${partes.join(' · ')}</p></div></div>`;
+  if (!so) {
+    if (vis.length) h += `<div class="sub-grupo">Aparência dos embeds</div>${vis.map(cartaoVisual).join('')}`;
+    if (bts.length) h += `<div class="sub-grupo">Botões</div>${bts.map(cartaoBotao).join('')}`;
+    for (const [, m] of mds) h += `<div class="sub-grupo">Modal: ${esc(m.nome)}</div>${m.textos.filter((k) => dados.catalogo.textos[k]).map(cartaoTexto).join('')}`;
+    if (vis.length || bts.length || mds.length) h += '<div class="sub-grupo">Textos</div>';
+  }
+  if (!chaves.length) h += `<div class="dica">${so ? 'Nenhum texto alterado neste módulo.' : 'Este módulo não tem textos.'}</div>`;
+  h += chaves.slice(0, limiteLista).map(cartaoTexto).join('');
+  if (chaves.length > limiteLista) h += `<button class="btn mais" data-acao="mais">Mostrar mais (${chaves.length - limiteLista})</button>`;
+  $('#area').innerHTML = h + '</div>';
+  ligarCartoes($('#area'));
+  $('#area').querySelectorAll('.cartao[data-visual]').forEach(previaVisual);
+  $('#area').querySelectorAll('.cartao[data-botao]').forEach(previaBotao);
+}
+
+function telaBusca(busca) {
+  $('#tituloPagina').textContent = 'Procurar';
+  const so = $('#soAlterados').checked;
+  const nomes = Object.fromEntries((dados.modulos || []).map((m) => [m.id, m.nome]));
+  const achados = Object.entries(dados.catalogo.textos)
+    .filter(([k, v]) => (!so || valores.textos[k] !== undefined) && (k.toLowerCase().includes(busca) || v.padrao.toLowerCase().includes(busca) || (valores.textos[k] || '').toLowerCase().includes(busca)))
+    .map(([k]) => k);
+  let h = `<div class="conteudo"><div class="titulo-sec"><div><h2>“${esc(busca)}”</h2><p>${achados.length} texto(s) encontrado(s)</p></div></div>`;
+  let ultimo = '';
+  for (const k of achados.slice(0, limiteLista)) {
+    const m = dados.catalogo.textos[k].modulo;
+    if (m !== ultimo) { h += `<div class="sub-grupo">${esc(nomes[m] || m)}</div>`; ultimo = m; }
+    h += cartaoTexto(k);
+  }
+  if (achados.length > limiteLista) h += `<button class="btn mais" data-acao="mais">Mostrar mais (${achados.length - limiteLista})</button>`;
+  $('#area').innerHTML = h + '</div>';
+  ligarCartoes($('#area'));
+}
+
+let buscaT;
+$('#busca').addEventListener('input', () => { clearTimeout(buscaT); buscaT = setTimeout(() => { limiteLista = 120; mostrar(); }, 200); });
+$('#soAlterados').addEventListener('change', () => { limiteLista = 120; mostrar(); });
+
+// ---------------- aparência dos embeds ----------------
+function cartaoVisual(chave) {
+  const c = dados.catalogo.visuais[chave];
+  const v = valores.visuais[chave] || {};
+  const alterado = Object.values(v).some(Boolean);
+  const corPadrao = valores.cores.padrao || dados.catalogo.cores?.padrao || '#5865f2';
+  const dicaVars = c.vars.length ? `Pode usar ${c.vars.map((x) => `<code>{${x}}</code>`).join(' ou ')} ou um link https://. Use <code>-</code> para tirar.` : 'Um link https:// (ou <code>-</code> para tirar).';
+  return `<div class="cartao ${alterado ? 'alterado' : ''}" data-visual="${esc(chave)}">
+    <div class="cab"><span class="tag tipo">Embed</span><b>${esc(c.nome)}</b><span class="esp"></span>${alterado ? '<button class="btn peq" data-acao="restaurar-visual">Voltar ao padrão</button>' : ''}</div>
+    <div class="grade">
+      <div><span class="campo-rot">Cor da barra</span><div class="linha-cor"><input type="color" data-v="corpicker" value="${esc(v.cor || corPadrao)}"><input class="campo" data-v="cor" placeholder="padrão (${esc(corPadrao)})" value="${esc(v.cor || '')}" maxlength="7"></div></div>
+      <div><span class="campo-rot">Rodapé</span><input class="campo" data-v="rodape" placeholder="${esc(c.padrao?.rodape ? 'padrão: ' + c.padrao.rodape : 'sem rodapé extra')}" value="${esc(v.rodape || '')}" maxlength="2048"></div>
+      <div><span class="campo-rot">Miniatura (imagem pequena à direita)</span><input class="campo" data-v="miniatura" placeholder="${esc(c.padrao?.miniatura ? 'padrão: ' + c.padrao.miniatura : 'sem miniatura')}" value="${esc(v.miniatura || '')}"></div>
+      <div><span class="campo-rot">Imagem grande (banner)</span><input class="campo" data-v="imagem" placeholder="${esc(c.padrao?.imagem ? 'padrão: ' + c.padrao.imagem : 'sem imagem')}" value="${esc(v.imagem || '')}"></div>
+    </div>
+    ${c.vars.length ? `<div class="vars"><span class="rot">Para as imagens:</span>${c.vars.map((x) => `<button class="var" data-var="${esc(x)}">{${esc(x)}}</button>`).join('')}</div>` : ''}
+    <div class="alerta" style="color:var(--muted)">${dicaVars}</div>
+    <div class="avisos"></div>
+    <div class="embed"><div class="barra"></div><div class="corpo"><div class="tit">${esc(c.nome)}</div><div class="mini ph"></div><div class="desc">Exemplo do texto desta mensagem.</div><div class="img ph"></div><div class="rod"></div></div></div>
+  </div>`;
+}
+
+function urlExemplo(u) {
+  if (!u || u === '-') return '';
+  const s = u.replace(/\{(\w+)\}/g, (m, k) => EXEMPLOS[k] || '');
+  return /^https?:\/\//i.test(s) ? s : '';
+}
+
+function previaVisual(el) {
+  const chave = el.dataset.visual;
+  const c = dados.catalogo.visuais[chave];
+  const v = valores.visuais[chave] || {};
+  const cor = v.cor || valores.cores.padrao || dados.catalogo.cores?.padrao || '#5865f2';
+  el.querySelector('.barra').style.background = cor;
+  const mini = el.querySelector('.mini');
+  const miniUrl = v.miniatura ? urlExemplo(v.miniatura) : c.padrao?.miniatura?.startsWith('{') ? urlExemplo(c.padrao.miniatura) : '';
+  const mostraMini = v.miniatura ? v.miniatura !== '-' : !!c.padrao?.miniatura;
+  mini.style.display = mostraMini ? '' : 'none';
+  mini.style.backgroundImage = miniUrl ? `url("${miniUrl}")` : '';
+  mini.textContent = mostraMini && !miniUrl ? (c.padrao?.miniatura || 'miniatura') : '';
+  const img = el.querySelector('.img');
+  const imgUrl = urlExemplo(v.imagem);
+  img.style.display = v.imagem && v.imagem !== '-' ? '' : 'none';
+  img.style.backgroundImage = imgUrl ? `url("${imgUrl}")` : '';
+  img.textContent = imgUrl ? '' : 'imagem';
+  el.querySelector('.rod').textContent = v.rodape && v.rodape !== '-' ? v.rodape.replace(/\{(\w+)\}/g, (m, k) => (c.vars.includes(k) ? EXEMPLOS[k] ?? m : m)) : '';
+  const avisos = [];
+  if (v.cor && !/^#[0-9a-f]{6}$/i.test(v.cor)) avisos.push('A cor precisa ser assim: #B64CFF');
+  for (const campo of ['miniatura', 'imagem']) {
+    const u = v[campo];
+    if (u && u !== '-' && !/^https?:\/\/\S+$/i.test(u) && !/^\{\w+\}$/.test(u)) avisos.push(`${campo === 'imagem' ? 'Imagem' : 'Miniatura'}: use um link que começa com https:// ou uma variável.`);
+  }
+  el.querySelector('.avisos').innerHTML = avisos.map((a) => `<div class="alerta erro">${esc(a)}</div>`).join('');
+}
+
+function lerVisual(el) {
+  const chave = el.dataset.visual;
+  const v = {};
+  const picker = el.querySelector('[data-v="corpicker"]');
+  const corTxt = el.querySelector('[data-v="cor"]');
+  if (document.activeElement === picker) corTxt.value = picker.value;
+  else if (/^#[0-9a-f]{6}$/i.test(corTxt.value)) picker.value = corTxt.value;
+  for (const c of ['cor', 'rodape', 'miniatura', 'imagem']) {
+    const x = el.querySelector(`[data-v="${c}"]`).value.trim();
+    if (x) v[c] = x;
+  }
+  if (Object.keys(v).length) valores.visuais[chave] = v;
+  else delete valores.visuais[chave];
+  el.classList.toggle('alterado', Object.keys(v).length > 0);
+  previaVisual(el);
+}
+
+// ---------------- geral: cores, emojis e status ----------------
+function telaGeral() {
+  $('#tituloPagina').textContent = 'Cores, emojis e status';
+  const cat = dados.catalogo;
+  const p = valores.presenca;
+  let h = `<div class="conteudo">
+    <div class="titulo-sec"><div><h2>Cores, emojis e status</h2><p>Valem para o bot inteiro. Os textos de cada módulo ficam no menu ao lado.</p></div></div>
+    <div class="dica">Quando terminar, clique em <b>Salvar</b> e envie o arquivo no Discord com <code>/personalizar aplicar</code>. A cor escolhida em <code>/config cor</code> num servidor continua valendo nele.</div>
+    <div class="sub-grupo">Cores</div><div class="cartao" data-geral><div class="grade4">`;
+  for (const k of Object.keys(cat.cores || {})) {
+    const v = valores.cores[k] || '';
+    const pad = cat.cores[k] || '#5865f2';
+    h += `<div><span class="campo-rot">${esc(COR_NOMES[k] || k)}</span><div class="linha-cor"><input type="color" data-cor-picker="${k}" value="${esc(v || pad)}"><input class="campo" data-cor="${k}" placeholder="${esc(pad || 'do config.json')}" value="${esc(v)}" maxlength="7"></div></div>`;
+  }
+  h += `</div><div class="alerta" style="color:var(--muted)">A cor padrão é a das mensagens comuns. Sucesso, erro e aviso são as das respostas rápidas (✅ ❌ ⚠️).</div></div>
+    <div class="sub-grupo">Emojis das respostas rápidas</div><div class="cartao" data-geral><div class="grade4">`;
+  for (const k of Object.keys(cat.emojis || {})) {
+    h += `<div><span class="campo-rot">${esc(EMOJI_NOMES[k] || k)}</span><input class="campo" data-emoji="${k}" placeholder="${esc(cat.emojis[k])}" value="${esc(valores.emojis[k] || '')}" maxlength="100"></div>`;
+  }
+  h += `</div><div class="alerta" style="color:var(--muted)">Aceita emoji normal (✅) ou um emoji do seu servidor/aplicação: no Discord, digite <code>\\:nome:</code> e copie o resultado, que fica assim: <code>&lt;a:nome:123456789&gt;</code>.</div>
+    <div class="previa md"><span class="rot">Prévia</span><div id="previaEmojis"></div></div></div>
+    <div class="sub-grupo">Status do bot</div><div class="cartao" data-geral><div class="grade3">
+      <div><span class="campo-rot">Tipo</span><select data-pres="tipo">${Object.entries(PRESENCA_TIPOS).map(([k, n]) => `<option value="${k}" ${((p.tipo || 'personalizado') === k) ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
+      <div><span class="campo-rot">Texto</span><input class="campo" data-pres="texto" maxlength="128" placeholder="padrão do config.json" value="${esc(p.texto || '')}"></div>
+      <div><span class="campo-rot">Bolinha</span><select data-pres="status">${Object.entries(PRESENCA_STATUS).map(([k, [n]]) => `<option value="${k}" ${((p.status || 'online') === k) ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
+    </div><div class="presenca"><div class="ava"><i id="bolinha"></i></div><div><b>${esc(dados.bot || 'Seu bot')}</b><div id="previaStatus" style="font-size:13px;color:#b5bac1"></div></div></div></div>
+  </div>`;
+  $('#area').innerHTML = h;
+  previaGeral();
+}
+
+function lerGeral() {
+  const area = $('#area');
+  area.querySelectorAll('[data-cor]').forEach((inp) => {
+    const k = inp.dataset.cor;
+    const picker = area.querySelector(`[data-cor-picker="${k}"]`);
+    if (document.activeElement === picker) inp.value = picker.value;
+    else if (/^#[0-9a-f]{6}$/i.test(inp.value)) picker.value = inp.value;
+    const v = inp.value.trim();
+    if (v) valores.cores[k] = v; else delete valores.cores[k];
+  });
+  area.querySelectorAll('[data-emoji]').forEach((inp) => {
+    const v = inp.value.trim();
+    if (v) valores.emojis[inp.dataset.emoji] = v; else delete valores.emojis[inp.dataset.emoji];
+  });
+  for (const campo of ['tipo', 'texto', 'status']) {
+    const el = area.querySelector(`[data-pres="${campo}"]`);
+    if (!el) continue;
+    const v = el.value.trim();
+    if (v) valores.presenca[campo] = v; else delete valores.presenca[campo];
+  }
+  previaGeral();
+}
+
+function previaGeral() {
+  const cat = dados.catalogo;
+  const pe = $('#previaEmojis');
+  if (pe) {
+    pe.innerHTML = Object.keys(cat.emojis || {}).map((k) => {
+      const cor = valores.cores[k] || cat.cores?.[k] || '#5865f2';
+      return `<div class="embed" style="margin-top:6px"><div class="barra" style="background:${esc(/^#[0-9a-f]{6}$/i.test(cor) ? cor : '#5865f2')}"></div><div class="corpo" style="display:block">${markdown(`${valores.emojis[k] || cat.emojis[k]} Exemplo de resposta de ${(EMOJI_NOMES[k] || k).toLowerCase()}.`)}</div></div>`;
+    }).join('');
+  }
+  const ps = $('#previaStatus');
+  if (ps) {
+    const p = valores.presenca;
+    const tipo = p.tipo || 'personalizado';
+    const texto = p.texto || '(status do config.json)';
+    ps.innerHTML = tipo === 'personalizado' ? esc(texto) : `${esc(PRESENCA_TIPOS[tipo])} <b>${esc(texto)}</b>`;
+    $('#bolinha').style.background = PRESENCA_STATUS[p.status || 'online'][1];
+  }
+}
+
+// ---------------- botões ----------------
+const ESTILOS = { Primary: 'Azul', Secondary: 'Cinza', Success: 'Verde', Danger: 'Vermelho' };
+const emojiHtml = (e) => {
+  if (!e || e === '-') return '';
+  const m = /^<a?:(\w+):(\d+)>$/.exec(e);
+  return m ? `<img class="emoji" alt=":${esc(m[1])}:" src="https://cdn.discordapp.com/emojis/${m[2]}.webp?size=48">` : `<span>${esc(e)}</span>`;
+};
+const emojiOk = (e) => !e || e === '-' || /^<a?:\w{2,32}:\d{15,22}>$/.test(e) || (/^[\p{Extended_Pictographic}\p{Regional_Indicator}\p{Emoji_Modifier}‍️⃣#*0-9]+$/u.test(e) && /[\p{Extended_Pictographic}\p{Regional_Indicator}⃣]/u.test(e));
+const dbtn = (rotulo, emoji, estilo, extra = '') => `<span class="dbtn ${esc(estilo)} ${extra}">${emojiHtml(emoji)}${rotulo ? `<span>${esc(rotulo)}</span>` : ''}${estilo === 'Link' ? ' ↗' : ''}</span>`;
+
+function cartaoBotao(k) {
+  const d = dados.catalogo.botoes[k];
+  const v = valores.botoes[k] || {};
+  const rot = d.rotulo && dados.catalogo.textos[d.rotulo];
+  const alterado = Object.values(v).some(Boolean) || (d.rotulo && valores.textos[d.rotulo] !== undefined);
+  const sw = d.estilo === 'Link' ? '<span class="alerta" style="color:var(--muted)">Botão de link: o Discord deixa sempre cinza.</span>'
+    : `<div class="swatches"><button class="sw padrao ${!v.estilo ? 'on' : ''}" data-estilo="">Padrão</button>${Object.entries(ESTILOS).map(([e, n]) => `<button class="sw ${e} ${v.estilo === e ? 'on' : ''}" data-estilo="${e}">${n}</button>`).join('')}</div>`;
+  return `<div class="cartao ${alterado ? 'alterado' : ''}" data-botao="${esc(k)}">
+    <div class="cab"><span class="tag tipo">Botão</span><b>${esc(d.nome)}</b><span class="esp"></span>${alterado ? '<button class="btn peq" data-acao="restaurar-botao">Voltar ao padrão</button>' : ''}</div>
+    <div class="grade">
+      <div><span class="campo-rot">Texto</span>${rot ? `<input class="campo" data-rotulo="${esc(d.rotulo)}" maxlength="80" value="${esc(valores.textos[d.rotulo] ?? rot.padrao)}">` : `<div class="alerta" style="color:var(--muted);margin:0">${esc(d.rotuloInfo || 'Automático')}</div>`}</div>
+      <div><span class="campo-rot">Emoji</span><input class="campo" data-b="emoji" ${d.emojiFixo ? 'disabled' : ''} placeholder="${esc(d.emojiFixo ? 'automático' : d.emoji && d.emoji !== '-' ? 'padrão: ' + d.emoji : 'sem emoji')}" value="${esc(v.emoji || '')}"></div>
+    </div>
+    ${rot && d.rotuloInfo ? `<div class="alerta" style="color:var(--muted)">${esc(d.rotuloInfo)}</div>` : ''}
+    <div class="mt"><span class="campo-rot">Cor</span>${sw}</div>
+    ${d.ocultavel ? `<div class="mt"><label class="chave-liga"><input type="checkbox" data-b="mostrar" ${v.oculto ? '' : 'checked'}> Mostrar este botão</label></div>` : ''}
+    <div class="avisos"></div>
+    <div class="previa"><span class="rot">Prévia</span><div class="dlinha"></div></div>
+    <div class="alerta" style="color:var(--muted)">Emoji: um emoji normal (🎫) ou do servidor (<code>&lt;:nome:id&gt;</code>). Use <code>-</code> para tirar o emoji.</div>
+  </div>`;
+}
+
+function previaBotao(el) {
+  const k = el.dataset.botao;
+  const d = dados.catalogo.botoes[k];
+  const v = valores.botoes[k] || {};
+  const rotulo = d.rotulo ? (valores.textos[d.rotulo] ?? dados.catalogo.textos[d.rotulo]?.padrao ?? '') : '(automático)';
+  const emoji = d.emojiFixo ? d.emoji : v.emoji || d.emoji;
+  const estilo = d.estilo === 'Link' ? 'Link' : v.estilo || d.estilo;
+  el.querySelector('.dlinha').innerHTML = dbtn(rotulo, emoji, estilo, v.oculto ? 'oculto' : '') + (v.oculto ? '<span class="alerta" style="margin:6px 0 0">Escondido: não aparece no Discord.</span>' : '');
+  const avisos = [];
+  if (v.emoji && !emojiOk(v.emoji)) avisos.push('Esse emoji não funciona num botão. Use um emoji normal ou <:nome:id>.');
+  if (d.rotulo && !rotulo.trim() && (!emoji || emoji === '-')) avisos.push('O botão precisa de texto ou emoji.');
+  el.querySelector('.avisos').innerHTML = avisos.map((a) => `<div class="alerta erro">${esc(a)}</div>`).join('');
+}
+
+function lerBotao(el, alvo) {
+  const k = el.dataset.botao;
+  const v = (valores.botoes[k] = valores.botoes[k] || {});
+  if (alvo.dataset.rotulo) {
+    const chave = alvo.dataset.rotulo;
+    const pad = dados.catalogo.textos[chave].padrao;
+    if (alvo.value === pad || !alvo.value.trim()) delete valores.textos[chave];
+    else valores.textos[chave] = alvo.value;
+  }
+  if (alvo.dataset.b === 'emoji') { if (alvo.value.trim()) v.emoji = alvo.value.trim(); else delete v.emoji; }
+  if (alvo.dataset.b === 'mostrar') { if (alvo.checked) delete v.oculto; else v.oculto = true; }
+  if (!Object.keys(v).length) delete valores.botoes[k];
+  el.classList.add('alterado');
+  previaBotao(el);
+}
+
+function cliqueBotao(e) {
+  const el = e.target.closest('.cartao[data-botao]');
+  if (!el) return false;
+  const k = el.dataset.botao;
+  const sw = e.target.closest('.sw');
+  if (sw) {
+    const v = (valores.botoes[k] = valores.botoes[k] || {});
+    if (sw.dataset.estilo) v.estilo = sw.dataset.estilo; else delete v.estilo;
+    if (!Object.keys(v).length) delete valores.botoes[k];
+    el.querySelectorAll('.sw').forEach((x) => x.classList.toggle('on', x === sw));
+    previaBotao(el);
+    marcarSujo(true);
+    atualizarContagemMenu();
+    return true;
+  }
+  if (e.target.closest('[data-acao="restaurar-botao"]')) {
+    const d = dados.catalogo.botoes[k];
+    delete valores.botoes[k];
+    if (d.rotulo) delete valores.textos[d.rotulo];
+    el.outerHTML = cartaoBotao(k);
+    $('#area').querySelectorAll('.cartao[data-botao]').forEach(previaBotao);
+    marcarSujo(true);
+    atualizarContagemMenu();
+    return true;
+  }
+  return false;
+}
+
+// ---------------- servidores (cargos e canais) ----------------
+const servidor = (id) => (dados.servidores || []).find((s) => s.id === id);
+function opcoes(lista, atual, vazioTexto, prefixo = '') {
+  let h = `<option value="">${esc(vazioTexto)}</option>`;
+  h += lista.map((x) => `<option value="${esc(x.id)}" ${x.id === atual ? 'selected' : ''}>${esc(prefixo + x.nome)}</option>`).join('');
+  if (atual && !lista.some((x) => x.id === atual)) h += `<option value="${esc(atual)}" selected>(não encontrado: ${esc(atual)})</option>`;
+  return h;
+}
+const cargosDe = (sid) => servidor(sid)?.cargos || [];
+const canaisDe = (sid, tipo) => (servidor(sid)?.canais || []).filter((c) => c.tipo === tipo);
+const opcoesServidor = (atual, vazio = 'Qualquer servidor') => opcoes(dados.servidores || [], atual, vazio);
+const semServidores = () => (dados.servidores || []).length ? '' : '<div class="alerta">O arquivo não trouxe a lista de cargos e canais. Use <code>/personalizar baixar</code> de novo (com o bot já no servidor).</div>';
+const novoId = (base, existentes) => {
+  const b = (base || 'item').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 24) || 'item';
+  let id = b;
+  for (let n = 2; existentes.includes(id); n++) id = `${b}-${n}`;
+  return id;
+};
+
+// ---------------- painéis criados ----------------
+let painelSel = null;
+const ACOES = { cargo: 'Dar/tirar cargo', mensagem: 'Responder uma mensagem', formulario: 'Abrir formulário', ticket: 'Abrir ticket', link: 'Abrir link' };
+const temTickets = () => (dados.modulos || []).some((m) => m.id === 'tickets');
+
+function novoItem(pn) {
+  const id = novoId('opcao', pn.itens.map((x) => x.id));
+  return { id, rotulo: pn.tipo === 'menu' ? 'Nova opção' : 'Novo botão', emoji: '', descricao: '', estilo: 'Primary', acao: { tipo: 'mensagem', mensagem: 'Olá, {usuario}!' } };
+}
+
+function telaPaineis() {
+  $('#tituloPagina').textContent = 'Painéis';
+  const pns = valores.criados.paineis;
+  if (!pns.some((p) => p.id === painelSel)) painelSel = pns[0]?.id ?? null;
+  let h = `<div class="conteudo"><div class="titulo-sec"><div><h2>Painéis</h2><p>Mensagens com botões ou menu que você monta: dar cargo, responder, abrir formulário${temTickets() ? ', abrir ticket' : ''} ou abrir link.</p></div><button class="btn pri" data-acao="novo-painel" ${pns.length >= 25 ? 'disabled' : ''}>+ Novo painel</button></div>
+    <div class="dica">Depois de <b>Salvar</b> e aplicar com <code>/personalizar aplicar</code>, publique no canal com <code>/painel enviar</code>. Se você mudar um painel já publicado, ele se atualiza sozinho ao aplicar de novo.</div>`;
+  if (!pns.length) h += '<div class="dica">Nenhum painel ainda. Clique em <b>+ Novo painel</b>.</div>';
+  else h += `<div class="lista-criados">${pns.map((p) => `<button data-acao="sel-painel" data-id="${esc(p.id)}" class="${p.id === painelSel ? 'on' : ''}">${esc(p.nome)}</button>`).join('')}</div>`;
+  const pn = pns.find((p) => p.id === painelSel);
+  if (pn) h += editorPainel(pn);
+  $('#area').innerHTML = h + '</div>';
+  if (pn) previaPainel(pn);
+}
+
+function editorPainel(pn) {
+  const menu = pn.tipo === 'menu';
+  const sid = pn.servidor;
+  const itens = pn.itens.map((it, n) => {
+    const a = it.acao;
+    let campos = '';
+    if (a.tipo === 'cargo') campos = `<div class="linha2"><div><span class="campo-rot">Cargo</span><select data-ia="cargo" data-idx="${n}">${opcoes(cargosDe(sid), a.cargo, sid ? 'Escolha o cargo' : 'Escolha o servidor do painel primeiro', '@')}</select></div>
+      <div><span class="campo-rot">Ao clicar</span><select data-ia="modo" data-idx="${n}">${[['alternar', 'Dá se não tem, tira se tem'], ['dar', 'Só dá'], ['tirar', 'Só tira']].map(([v, t]) => `<option value="${v}" ${a.modo === v ? 'selected' : ''}>${t}</option>`).join('')}</select></div></div>
+      <div class="mt"><span class="campo-rot">Resposta (opcional)</span><input class="campo" data-ia="mensagem" data-idx="${n}" maxlength="2000" placeholder="Padrão: Você ganhou o cargo… · variáveis {usuario} {nome} {cargo}" value="${esc(a.mensagem || '')}"></div>`;
+    if (a.tipo === 'mensagem') campos = `<div class="mt"><span class="campo-rot">Mensagem (só quem clicou vê)</span><textarea data-ia="mensagem" data-idx="${n}" rows="3" maxlength="2000">${esc(a.mensagem || '')}</textarea><div class="alerta" style="color:var(--muted)">Variáveis: {usuario} {nome} {servidor}</div></div>`;
+    if (a.tipo === 'formulario') campos = `<div class="mt"><span class="campo-rot">Formulário</span><select data-ia="formulario" data-idx="${n}">${opcoes(valores.criados.formularios.map((f) => ({ id: f.id, nome: f.titulo })), a.formulario, valores.criados.formularios.length ? 'Escolha o formulário' : 'Crie um formulário na aba Formulários')}</select></div>`;
+    if (a.tipo === 'ticket') campos = `<div class="linha3"><div><span class="campo-rot">Assunto</span><input class="campo" data-ia="assunto" data-idx="${n}" maxlength="80" placeholder="Padrão: o nome do botão" value="${esc(a.assunto || '')}"></div>
+      <div><span class="campo-rot">Categoria</span><select data-ia="categoria" data-idx="${n}">${opcoes(canaisDe(sid, 'categoria'), a.categoria, 'A do /config tickets', '📁 ')}</select></div>
+      <div><span class="campo-rot">Equipe avisada</span><select data-ia="equipe" data-idx="${n}">${opcoes(cargosDe(sid), a.equipe, 'A do /config tickets', '@')}</select></div></div>
+      <div class="mt"><span class="campo-rot">Mensagem de abertura (opcional)</span><textarea data-ia="mensagem" data-idx="${n}" rows="2" maxlength="2000" placeholder="Padrão: a mensagem do /config tickets · variáveis {usuario} {nome} {servidor} {assunto}">${esc(a.mensagem || '')}</textarea></div>`;
+    if (a.tipo === 'link') campos = `<div class="mt"><span class="campo-rot">Link</span><input class="campo" data-ia="url" data-idx="${n}" maxlength="500" placeholder="https://" value="${esc(a.url || '')}"></div>`;
+    const acoes = Object.entries(ACOES).filter(([k]) => (k !== 'link' || !menu) && (k !== 'ticket' || temTickets() || a.tipo === 'ticket'));
+    return `<div class="item" data-item="${n}">
+      <div class="cab"><b>${menu ? 'Opção' : 'Botão'} ${n + 1}</b><span class="esp"></span><div class="mini-btns"><button data-acao="item-sobe" data-idx="${n}" title="Subir">↑</button><button data-acao="item-desce" data-idx="${n}" title="Descer">↓</button><button class="perigo" data-acao="item-apaga" data-idx="${n}" title="Apagar">✕</button></div></div>
+      <div class="linha3">
+        <div><span class="campo-rot">Nome</span><input class="campo" data-it="rotulo" data-idx="${n}" maxlength="${menu ? 100 : 80}" value="${esc(it.rotulo)}"></div>
+        <div><span class="campo-rot">Emoji</span><input class="campo" data-it="emoji" data-idx="${n}" placeholder="opcional" value="${esc(it.emoji)}"></div>
+        ${menu ? `<div><span class="campo-rot">Descrição</span><input class="campo" data-it="descricao" data-idx="${n}" maxlength="100" placeholder="opcional" value="${esc(it.descricao)}"></div>`
+          : `<div><span class="campo-rot">O que faz</span><select data-ia="tipo" data-idx="${n}">${acoes.map(([k, t]) => `<option value="${k}" ${a.tipo === k ? 'selected' : ''}>${t}</option>`).join('')}</select></div>`}
+      </div>
+      ${menu ? `<div class="mt"><span class="campo-rot">O que faz</span><select data-ia="tipo" data-idx="${n}">${acoes.map(([k, t]) => `<option value="${k}" ${a.tipo === k ? 'selected' : ''}>${t}</option>`).join('')}</select></div>`
+        : a.tipo === 'link' ? '' : `<div class="mt"><span class="campo-rot">Cor</span><div class="swatches">${Object.entries(ESTILOS).map(([e, t]) => `<button class="sw ${e} ${it.estilo === e ? 'on' : ''}" data-it-estilo="${e}" data-idx="${n}">${t}</button>`).join('')}</div></div>`}
+      ${campos}
+      <div class="avisos-item"></div>
+    </div>`;
+  }).join('');
+  return `<div class="cartao" data-pn="${esc(pn.id)}">
+    <div class="linha3" style="margin-top:0">
+      <div><span class="campo-rot">Nome do painel (só para você)</span><input class="campo" data-p="nome" maxlength="80" value="${esc(pn.nome)}"></div>
+      <div><span class="campo-rot">Servidor</span><select data-p="servidor">${opcoesServidor(pn.servidor)}</select></div>
+      <div><span class="campo-rot">Tipo</span><select data-p="tipo"><option value="botoes" ${!menu ? 'selected' : ''}>Botões (até 25)</option><option value="menu" ${menu ? 'selected' : ''}>Menu de seleção (até 25)</option></select></div>
+    </div>
+    ${semServidores()}
+    ${menu ? `<div class="mt"><span class="campo-rot">Texto do menu fechado</span><input class="campo" data-p="placeholder" maxlength="150" placeholder="Escolha uma opção" value="${esc(pn.placeholder)}"></div>` : ''}
+    <div class="sub-grupo">Mensagem</div>
+    <div class="linha2" style="margin-top:0">
+      <div><span class="campo-rot">Título do embed</span><input class="campo" data-e="titulo" maxlength="256" value="${esc(pn.embed.titulo)}"></div>
+      <div><span class="campo-rot">Cor</span><div class="linha-cor"><input type="color" data-e="corpicker" value="${esc(pn.embed.cor || valores.cores.padrao || '#5865f2')}"><input class="campo" data-e="cor" maxlength="7" placeholder="padrão do bot" value="${esc(pn.embed.cor)}"></div></div>
+    </div>
+    <div class="mt"><span class="campo-rot">Texto do embed</span><textarea data-e="descricao" rows="4" maxlength="4000">${esc(pn.embed.descricao)}</textarea></div>
+    <div class="linha3">
+      <div><span class="campo-rot">Imagem grande</span><input class="campo" data-e="imagem" placeholder="https://" value="${esc(pn.embed.imagem)}"></div>
+      <div><span class="campo-rot">Miniatura</span><input class="campo" data-e="miniatura" placeholder="https:// ou {servidor_icone}" value="${esc(pn.embed.miniatura)}"></div>
+      <div><span class="campo-rot">Rodapé</span><input class="campo" data-e="rodape" maxlength="2048" value="${esc(pn.embed.rodape)}"></div>
+    </div>
+    <div class="mt"><span class="campo-rot">Texto fora do embed (opcional)</span><input class="campo" data-p="conteudo" maxlength="2000" value="${esc(pn.conteudo)}"></div>
+    <div class="alerta" style="color:var(--muted)">Variáveis: {servidor} {membros}. Nas imagens: {servidor_icone}.</div>
+    <div class="sub-grupo">${menu ? 'Opções do menu' : 'Botões'} (${pn.itens.length}/25)</div>
+    ${itens}
+    <button class="btn mais" data-acao="item-novo" ${pn.itens.length >= 25 ? 'disabled' : ''}>+ Adicionar ${menu ? 'opção' : 'botão'}</button>
+    <div class="avisos-painel mt"></div>
+    <div class="sub-grupo">Prévia</div>
+    <div class="previa-painel"></div>
+    <div class="mt" style="display:flex;gap:8px;justify-content:flex-end"><button class="btn peq" data-acao="dup-painel">Duplicar</button><button class="btn peq" data-acao="del-painel" style="border-color:var(--red);color:var(--red)">Apagar painel</button></div>
+  </div>`;
+}
+
+function avisosPainel(pn) {
+  const av = [];
+  if (!pn.embed.titulo.trim() && !pn.embed.descricao.trim() && !pn.conteudo.trim()) av.push('Coloque um título, um texto ou um texto fora do embed.');
+  if (pn.embed.cor && !/^#[0-9a-f]{6}$/i.test(pn.embed.cor)) av.push('A cor precisa ser assim: #B64CFF.');
+  for (const c of ['imagem', 'miniatura']) if (pn.embed[c] && !/^https?:\/\/\S+$/i.test(pn.embed[c]) && !/^\{\w+\}$/.test(pn.embed[c])) av.push(`${c === 'imagem' ? 'Imagem' : 'Miniatura'}: use um link https://.`);
+  if (!pn.itens.length) av.push(`Adicione pelo menos ${pn.tipo === 'menu' ? 'uma opção' : 'um botão'}.`);
+  if (pn.itens.some((it) => it.acao.tipo === 'cargo') && !pn.servidor) av.push('Escolha o servidor: o painel tem botão de cargo.');
+  return av;
+}
+function avisosItem(pn, it) {
+  const av = [];
+  const a = it.acao;
+  if (pn.tipo === 'menu' && !it.rotulo.trim()) av.push('A opção precisa de um nome.');
+  if (pn.tipo !== 'menu' && !it.rotulo.trim() && !it.emoji) av.push('O botão precisa de nome ou emoji.');
+  if (it.emoji && !emojiOk(it.emoji)) av.push('Emoji inválido: use um emoji normal ou <:nome:id>.');
+  if (a.tipo === 'cargo' && !a.cargo) av.push('Escolha o cargo.');
+  if (a.tipo === 'mensagem' && !a.mensagem?.trim()) av.push('Escreva a mensagem.');
+  if (a.tipo === 'formulario' && !valores.criados.formularios.some((f) => f.id === a.formulario)) av.push('Escolha o formulário.');
+  if (a.tipo === 'link' && !/^https?:\/\/\S+$/i.test(a.url || '')) av.push('O link precisa começar com https://');
+  if (a.tipo === 'ticket' && !temTickets()) av.push('Este bot não tem o módulo Tickets.');
+  return av;
+}
+
+function previaPainel(pn) {
+  const el = $('#area').querySelector('[data-pn]');
+  if (!el) return;
+  const sv = servidor(pn.servidor);
+  const sub = (t) => String(t || '').replace(/\{servidor\}/g, sv?.nome || 'Meu Servidor').replace(/\{membros\}/g, '1.234');
+  const cor = /^#[0-9a-f]{6}$/i.test(pn.embed.cor) ? pn.embed.cor : valores.cores.padrao || '#5865f2';
+  const url = (u) => { const x = String(u || '').replace('{servidor_icone}', 'https://cdn.discordapp.com/embed/avatars/1.png'); return /^https?:\/\//.test(x) ? x : ''; };
+  let h = '<div class="previa md">';
+  if (pn.conteudo) h += `<div>${markdown(sub(pn.conteudo))}</div>`;
+  if (pn.embed.titulo || pn.embed.descricao) {
+    h += `<div class="embed"><div class="barra" style="background:${esc(cor)}"></div><div class="corpo">
+      ${pn.embed.titulo ? `<div class="tit">${markdown(sub(pn.embed.titulo))}</div>` : ''}
+      ${pn.embed.miniatura ? `<div class="mini" style="background-image:url('${esc(url(pn.embed.miniatura))}')"></div>` : ''}
+      ${pn.embed.descricao ? `<div class="desc">${markdown(sub(pn.embed.descricao))}</div>` : ''}
+      ${pn.embed.imagem ? `<div class="img" style="background-image:url('${esc(url(pn.embed.imagem))}')">${url(pn.embed.imagem) ? '' : 'imagem'}</div>` : ''}
+      ${pn.embed.rodape ? `<div class="rod">${esc(sub(pn.embed.rodape))}</div>` : ''}
+    </div></div>`;
+  }
+  if (pn.tipo === 'menu') {
+    h += `<div class="dselect"><span>${esc(pn.placeholder || 'Escolha uma opção')}</span><span>▾</span></div><div class="dopcoes">${pn.itens.map((it) => `<div>${emojiHtml(it.emoji)} ${esc(it.rotulo)}${it.descricao ? `<small>${esc(it.descricao)}</small>` : ''}</div>`).join('')}</div>`;
+  } else {
+    for (let n = 0; n < pn.itens.length; n += 5) h += `<div class="dlinha">${pn.itens.slice(n, n + 5).map((it) => dbtn(it.rotulo, it.emoji, it.acao.tipo === 'link' ? 'Link' : it.estilo)).join('')}</div>`;
+  }
+  el.querySelector('.previa-painel').innerHTML = h + '</div>';
+  el.querySelector('.avisos-painel').innerHTML = avisosPainel(pn).map((a) => `<div class="alerta erro">${esc(a)}</div>`).join('');
+  el.querySelectorAll('.item[data-item]').forEach((x) => {
+    x.querySelector('.avisos-item').innerHTML = avisosItem(pn, pn.itens[+x.dataset.item]).map((a) => `<div class="alerta erro">${esc(a)}</div>`).join('');
+  });
+}
+
+function editarPainel(e, estrutura = false) {
+  const pn = valores.criados.paineis.find((p) => p.id === painelSel);
+  if (!pn) return;
+  const t = e.target;
+  const d = t.dataset;
+  let redesenhar = false;
+  if (d.p) {
+    pn[d.p] = t.value;
+    if (d.p === 'tipo') {
+      redesenhar = true;
+      if (pn.tipo === 'menu') pn.itens.forEach((it) => { if (it.acao.tipo === 'link') it.acao = { tipo: 'mensagem', mensagem: '' }; });
+    }
+    if (d.p === 'servidor') redesenhar = true;
+    if (d.p === 'nome') $('#area').querySelector(`.lista-criados [data-id="${CSS.escape(pn.id)}"]`).textContent = pn.nome;
+  } else if (d.e) {
+    if (d.e === 'corpicker') { pn.embed.cor = t.value; t.parentElement.querySelector('[data-e="cor"]').value = t.value; }
+    else {
+      pn.embed[d.e] = t.value;
+      if (d.e === 'cor' && /^#[0-9a-f]{6}$/i.test(t.value)) t.parentElement.querySelector('[data-e="corpicker"]').value = t.value;
+    }
+  } else if (d.it) {
+    pn.itens[+d.idx][d.it] = t.value.trim() === '' ? '' : d.it === 'emoji' ? t.value.trim() : t.value;
+  } else if (d.ia) {
+    const it = pn.itens[+d.idx];
+    if (d.ia === 'tipo') {
+      it.acao = { tipo: t.value, mensagem: '' };
+      if (t.value === 'cargo') it.acao.modo = 'alternar';
+      redesenhar = true;
+    } else it.acao[d.ia] = t.value;
+  }
+  marcarSujo(true);
+  if (redesenhar || (estrutura && (d.p === 'tipo' || d.ia === 'tipo' || d.p === 'servidor'))) {
+    const y = $('#principal').scrollTop;
+    telaPaineis();
+    $('#principal').scrollTop = y;
+  } else previaPainel(pn);
+}
+
+function cliquePainel(e) {
+  const b = e.target.closest('[data-acao], [data-it-estilo]');
+  if (!b || !(b.closest('[data-pn]') || /painel/.test(b.dataset.acao || ''))) return false;
+  const pns = valores.criados.paineis;
+  const pn = pns.find((p) => p.id === painelSel);
+  const ac = b.dataset.acao;
+  const redesenha = () => { const y = $('#principal').scrollTop; telaPaineis(); $('#principal').scrollTop = y; marcarSujo(true); atualizarContagemMenu(); };
+  if (ac === 'novo-painel') {
+    const id = novoId('painel', pns.map((p) => p.id));
+    const sv = dados.servidores?.[0]?.id || '';
+    pns.push({ id, nome: `Painel ${pns.length + 1}`, servidor: sv, tipo: 'botoes', placeholder: '', conteudo: '', embed: { titulo: 'Título do painel', descricao: 'Clique num botão abaixo.', cor: '', imagem: '', miniatura: '', rodape: '' }, itens: [] });
+    painelSel = id;
+    pns.at(-1).itens.push(novoItem(pns.at(-1)));
+    redesenha();
+    return true;
+  }
+  if (ac === 'sel-painel') { painelSel = b.dataset.id; telaPaineis(); return true; }
+  if (!pn) return false;
+  if (b.dataset.itEstilo) {
+    pn.itens[+b.dataset.idx].estilo = b.dataset.itEstilo;
+    b.parentElement.querySelectorAll('.sw').forEach((x) => x.classList.toggle('on', x === b));
+    marcarSujo(true);
+    previaPainel(pn);
+    return true;
+  }
+  const n = +b.dataset.idx;
+  if (ac === 'item-novo') { if (pn.itens.length < 25) pn.itens.push(novoItem(pn)); redesenha(); return true; }
+  if (ac === 'item-apaga') { pn.itens.splice(n, 1); redesenha(); return true; }
+  if (ac === 'item-sobe' && n > 0) { [pn.itens[n - 1], pn.itens[n]] = [pn.itens[n], pn.itens[n - 1]]; redesenha(); return true; }
+  if (ac === 'item-desce' && n < pn.itens.length - 1) { [pn.itens[n + 1], pn.itens[n]] = [pn.itens[n], pn.itens[n + 1]]; redesenha(); return true; }
+  if (ac === 'dup-painel' && pns.length < 25) {
+    const c = structuredClone(pn);
+    c.id = novoId(pn.id, pns.map((p) => p.id));
+    c.nome = `${pn.nome} (cópia)`;
+    pns.push(c);
+    painelSel = c.id;
+    redesenha();
+    return true;
+  }
+  if (ac === 'del-painel') {
+    if (!confirm(`Apagar o painel "${pn.nome}"? Mensagens já enviadas dele param de funcionar.`)) return true;
+    pns.splice(pns.indexOf(pn), 1);
+    painelSel = null;
+    redesenha();
+    return true;
+  }
+  return ['item-sobe', 'item-desce'].includes(ac);
+}
+
+// ---------------- formulários criados ----------------
+let formSel = null;
+function telaFormularios() {
+  $('#tituloPagina').textContent = 'Formulários';
+  const fs = valores.criados.formularios;
+  if (!fs.some((f) => f.id === formSel)) formSel = fs[0]?.id ?? null;
+  let h = `<div class="conteudo"><div class="titulo-sec"><div><h2>Formulários</h2><p>Janelas com até 5 perguntas. As respostas vão para o canal que você escolher.</p></div><button class="btn pri" data-acao="novo-form" ${fs.length >= 25 ? 'disabled' : ''}>+ Novo formulário</button></div>
+    <div class="dica">Para abrir um formulário, crie um <b>Painel</b> com um botão (ou opção de menu) com a ação <b>Abrir formulário</b>.</div>`;
+  if (!fs.length) h += '<div class="dica">Nenhum formulário ainda. Clique em <b>+ Novo formulário</b>.</div>';
+  else h += `<div class="lista-criados">${fs.map((f) => `<button data-acao="sel-form" data-id="${esc(f.id)}" class="${f.id === formSel ? 'on' : ''}">${esc(f.titulo)}</button>`).join('')}</div>`;
+  const f = fs.find((x) => x.id === formSel);
+  if (f) h += editorFormulario(f);
+  $('#area').innerHTML = h + '</div>';
+  if (f) previaFormulario(f);
+}
+
+function editorFormulario(f) {
+  const sid = f.servidor;
+  const perguntas = f.perguntas.map((q, n) => `<div class="item" data-q="${n}">
+    <div class="cab"><b>Pergunta ${n + 1}</b><span class="esp"></span><div class="mini-btns"><button data-acao="q-sobe" data-idx="${n}">↑</button><button data-acao="q-desce" data-idx="${n}">↓</button><button class="perigo" data-acao="q-apaga" data-idx="${n}">✕</button></div></div>
+    <div class="linha2" style="margin-top:0">
+      <div><span class="campo-rot">Pergunta (até 45 letras)</span><input class="campo" data-qf="rotulo" data-idx="${n}" maxlength="45" value="${esc(q.rotulo)}"></div>
+      <div><span class="campo-rot">Dica dentro do campo</span><input class="campo" data-qf="placeholder" data-idx="${n}" maxlength="100" placeholder="opcional" value="${esc(q.placeholder)}"></div>
+    </div>
+    <div class="linha3">
+      <div><span class="campo-rot">Tamanho da resposta</span><select data-qf="longa" data-idx="${n}"><option value="">Curta (1 linha)</option><option value="1" ${q.longa ? 'selected' : ''}>Longa (parágrafo)</option></select></div>
+      <div><span class="campo-rot">Mínimo de letras</span><input class="campo" type="number" min="0" max="4000" data-qf="min" data-idx="${n}" value="${q.min || 0}"></div>
+      <div><span class="campo-rot">Máximo de letras</span><input class="campo" type="number" min="1" max="4000" data-qf="max" data-idx="${n}" value="${q.max}"></div>
+    </div>
+    <div class="mt"><label class="chave-liga"><input type="checkbox" data-qf="obrigatoria" data-idx="${n}" ${q.obrigatoria ? 'checked' : ''}> Obrigatória</label></div>
+  </div>`).join('');
+  return `<div class="cartao" data-fm="${esc(f.id)}">
+    <div class="linha2" style="margin-top:0">
+      <div><span class="campo-rot">Título (até 45 letras)</span><input class="campo" data-f="titulo" maxlength="45" value="${esc(f.titulo)}"></div>
+      <div><span class="campo-rot">Servidor</span><select data-f="servidor">${opcoesServidor(f.servidor, 'Escolha o servidor')}</select></div>
+    </div>
+    ${semServidores()}
+    <div class="linha2">
+      <div><span class="campo-rot">Canal que recebe as respostas</span><select data-f="canal">${opcoes(canaisDe(sid, 'texto'), f.canal, sid ? 'Escolha o canal' : 'Escolha o servidor primeiro', '# ')}</select></div>
+      <div><span class="campo-rot">Cargo para quem enviar (opcional)</span><select data-f="cargo">${opcoes(cargosDe(sid), f.cargo, 'Nenhum', '@')}</select></div>
+    </div>
+    <div class="mt"><span class="campo-rot">Mensagem depois de enviar (opcional)</span><input class="campo" data-f="mensagem" maxlength="2000" placeholder="Padrão: Formulário enviado! Obrigado. · variáveis {usuario} {nome} {servidor}" value="${esc(f.mensagem)}"></div>
+    <div class="sub-grupo">Perguntas (${f.perguntas.length}/5)</div>
+    ${perguntas}
+    <button class="btn mais" data-acao="q-nova" ${f.perguntas.length >= 5 ? 'disabled' : ''}>+ Adicionar pergunta</button>
+    <div class="avisos-form mt"></div>
+    <div class="sub-grupo">Prévia</div>
+    <div class="previa-form"></div>
+    <div class="mt" style="display:flex;justify-content:flex-end"><button class="btn peq" data-acao="del-form" style="border-color:var(--red);color:var(--red)">Apagar formulário</button></div>
+  </div>`;
+}
+
+function previaFormulario(f) {
+  const el = $('#area').querySelector('[data-fm]');
+  if (!el) return;
+  el.querySelector('.previa-form').innerHTML = `<div class="dmodal"><h4>${esc(f.titulo || 'Formulário')}</h4>${f.perguntas.map((q) => `<label>${esc(q.rotulo || 'Pergunta')} ${q.obrigatoria ? '<i>*</i>' : ''}</label><div class="inp ${q.longa ? 'longa' : ''}">${esc(q.placeholder)}</div>`).join('')}<div class="acoes"><span class="dbtn Secondary">Cancelar</span><span class="dbtn Primary">Enviar</span></div></div>`;
+  const av = [];
+  if (!f.titulo.trim()) av.push('Coloque um título.');
+  if (!f.perguntas.length) av.push('Adicione pelo menos uma pergunta.');
+  if (f.perguntas.some((q) => !q.rotulo.trim())) av.push('Toda pergunta precisa de texto.');
+  if (f.perguntas.some((q) => q.min > q.max)) av.push('O mínimo de letras não pode passar do máximo.');
+  if (!f.canal) av.push('Escolha o canal que recebe as respostas.');
+  el.querySelector('.avisos-form').innerHTML = av.map((a) => `<div class="alerta erro">${esc(a)}</div>`).join('');
+}
+
+function editarFormulario(e, estrutura = false) {
+  const f = valores.criados.formularios.find((x) => x.id === formSel);
+  if (!f) return;
+  const t = e.target;
+  const d = t.dataset;
+  if (d.f) {
+    f[d.f] = t.value;
+    if (d.f === 'titulo') $('#area').querySelector(`.lista-criados [data-id="${CSS.escape(f.id)}"]`).textContent = f.titulo || '(sem título)';
+  } else if (d.qf) {
+    const q = f.perguntas[+d.idx];
+    if (d.qf === 'obrigatoria') q.obrigatoria = t.checked;
+    else if (d.qf === 'longa') { q.longa = !!t.value; q.max = Math.min(q.max, 4000); if (q.longa && q.max === 200) q.max = 1000; if (!q.longa && q.max === 1000) q.max = 200; }
+    else if (d.qf === 'min' || d.qf === 'max') q[d.qf] = Math.max(d.qf === 'max' ? 1 : 0, Math.min(4000, parseInt(t.value, 10) || 0));
+    else q[d.qf] = t.value;
+  }
+  marcarSujo(true);
+  if (estrutura && (d.f === 'servidor' || d.qf === 'longa')) {
+    if (d.f === 'servidor') { f.canal = ''; f.cargo = ''; }
+    const y = $('#principal').scrollTop; telaFormularios(); $('#principal').scrollTop = y;
+  } else previaFormulario(f);
+}
+
+function cliqueFormulario(e) {
+  const b = e.target.closest('[data-acao]');
+  if (!b || !/form|^q-/.test(b.dataset.acao)) return false;
+  const fs = valores.criados.formularios;
+  const f = fs.find((x) => x.id === formSel);
+  const ac = b.dataset.acao;
+  const redesenha = () => { const y = $('#principal').scrollTop; telaFormularios(); $('#principal').scrollTop = y; marcarSujo(true); atualizarContagemMenu(); };
+  if (ac === 'novo-form') {
+    const id = novoId('formulario', fs.map((x) => x.id));
+    fs.push({ id, titulo: `Formulário ${fs.length + 1}`, servidor: dados.servidores?.[0]?.id || '', canal: '', cargo: '', mensagem: '', perguntas: [{ rotulo: 'Qual o seu nome?', placeholder: '', longa: false, obrigatoria: true, min: 0, max: 200 }] });
+    formSel = id;
+    redesenha();
+    return true;
+  }
+  if (ac === 'sel-form') { formSel = b.dataset.id; telaFormularios(); return true; }
+  if (!f) return false;
+  const n = +b.dataset.idx;
+  if (ac === 'q-nova' && f.perguntas.length < 5) { f.perguntas.push({ rotulo: 'Nova pergunta', placeholder: '', longa: false, obrigatoria: true, min: 0, max: 200 }); redesenha(); return true; }
+  if (ac === 'q-apaga') { f.perguntas.splice(n, 1); redesenha(); return true; }
+  if (ac === 'q-sobe' && n > 0) { [f.perguntas[n - 1], f.perguntas[n]] = [f.perguntas[n], f.perguntas[n - 1]]; redesenha(); return true; }
+  if (ac === 'q-desce' && n < f.perguntas.length - 1) { [f.perguntas[n + 1], f.perguntas[n]] = [f.perguntas[n], f.perguntas[n + 1]]; redesenha(); return true; }
+  if (ac === 'del-form') {
+    const usado = valores.criados.paineis.filter((p) => p.itens.some((it) => it.acao.tipo === 'formulario' && it.acao.formulario === f.id));
+    if (!confirm(usado.length ? `Este formulário é usado em: ${usado.map((p) => p.nome).join(', ')}. Apagar mesmo assim?` : `Apagar o formulário "${f.titulo}"?`)) return true;
+    fs.splice(fs.indexOf(f), 1);
+    formSel = null;
+    redesenha();
+    return true;
+  }
+  return true;
+}
+
+// ---------------- arquivos ----------------
+$('#btnAbrir').addEventListener('click', () => $('#arquivo').click());
+$('#btnSalvar').addEventListener('click', salvar);
+$('#arquivo').addEventListener('change', (e) => {
+  const f = e.target.files[0];
+  if (!f) return;
+  if (sujo && !confirm('Você tem alterações não salvas. Abrir outro arquivo mesmo assim?')) return;
+  f.text().then((t) => abrirJson(t, f.name));
+  e.target.value = '';
+});
+document.addEventListener('dragover', (e) => { e.preventDefault(); $('#solta')?.classList.add('sobre'); });
+document.addEventListener('dragleave', (e) => { if (!e.relatedTarget) $('#solta')?.classList.remove('sobre'); });
+document.addEventListener('drop', (e) => {
+  e.preventDefault();
+  $('#solta')?.classList.remove('sobre');
+  const f = e.dataTransfer.files[0];
+  if (!f) return;
+  if (sujo && !confirm('Você tem alterações não salvas. Abrir outro arquivo mesmo assim?')) return;
+  f.text().then((t) => abrirJson(t, f.name));
+});
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); salvar(); }
+});
+window.addEventListener('beforeunload', (e) => { if (sujo) { e.preventDefault(); e.returnValue = ''; } });
+
+telaVazia();
+</script>
+</body>
+</html>

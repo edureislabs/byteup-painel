@@ -1,5 +1,29 @@
 import { ChannelType, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { ajustes, salvarAjustes, embed, responder, fmt } from '../core/util.js';
+import { textos } from '../core/textos.js';
+
+// Textos deste módulo (o dono do bot pode trocar todos no "Personalizar bot.html")
+const tx = textos('contadores', {
+  membros: 'Membros',
+  membros_2: '👥 Membros: {n}',
+  online_agora: 'Online agora',
+  online: '🟢 Online: {n}',
+  boosts: 'Boosts',
+  boosts_2: '🚀 Boosts: {n}',
+  canais: 'Canais',
+  canais_2: '💬 Canais: {n}',
+  cargos: 'Cargos',
+  cargos_2: '🎭 Cargos: {n}',
+  nenhum_contador_use_contadores: ['Nenhum contador. Use `/contadores criar`.', 'resposta'],
+  contadores: ['📈 Contadores', 'titulo'],
+  esse_canal_contador: ['Esse canal não é um contador.', 'resposta'],
+  contador_removido: ['Contador removido.', 'resposta'],
+  maximo_contadores: ['No máximo {limite} contadores.', 'resposta'],
+  consegui_criar_canal_preciso: '❌ Não consegui criar o canal. Preciso das permissões **Gerenciar canais** e **Conectar**.',
+  contador_criado_ele_atualiza: '✅ Contador criado: {canal}. Ele se atualiza a cada 10 minutos.',
+  contadores_2: 'Contadores',
+  nenhum_contadores_criar: 'Nenhum (`/contadores criar`)',
+});
 
 /**
  * Contadores: calls trancadas cujo nome mostra um número do servidor
@@ -8,11 +32,11 @@ import { ajustes, salvarAjustes, embed, responder, fmt } from '../core/util.js';
  */
 
 const TIPOS = {
-  membros: { nome: 'Membros', modelo: '👥 Membros: {n}' },
-  online: { nome: 'Online agora', modelo: '🟢 Online: {n}' },
-  boosts: { nome: 'Boosts', modelo: '🚀 Boosts: {n}' },
-  canais: { nome: 'Canais', modelo: '💬 Canais: {n}' },
-  cargos: { nome: 'Cargos', modelo: '🎭 Cargos: {n}' },
+  membros: { nome: tx('membros'), modelo: tx('membros_2') },
+  online: { nome: tx('online_agora'), modelo: tx('online') },
+  boosts: { nome: tx('boosts'), modelo: tx('boosts_2') },
+  canais: { nome: tx('canais'), modelo: tx('canais_2') },
+  cargos: { nome: tx('cargos'), modelo: tx('cargos_2') },
 };
 const LIMITE = 5;
 const cfg = (guildId) => ajustes(guildId, 'contadores', { lista: [] });
@@ -78,19 +102,19 @@ const contadores = {
     const c = cfg(i.guildId);
     const sub = i.options.getSubcommand();
     if (sub === 'lista') {
-      if (!c.lista.length) return responder(i, 'Nenhum contador. Use `/contadores criar`.', 'aviso');
-      return i.reply({ embeds: [embed(i.guildId).setTitle('📈 Contadores').setDescription(c.lista.map((x) => `<#${x.canal}> · ${TIPOS[x.tipo].nome}`).join('\n'))], flags: 64 });
+      if (!c.lista.length) return responder(i, tx('nenhum_contador_use_contadores'), 'aviso');
+      return i.reply({ embeds: [embed(i.guildId).setTitle(tx('contadores')).setDescription(c.lista.map((x) => `<#${x.canal}> · ${TIPOS[x.tipo].nome}`).join('\n'))], flags: 64 });
     }
     if (sub === 'remover') {
       const canal = i.options.getChannel('canal');
-      if (!c.lista.some((x) => x.canal === canal.id)) return responder(i, 'Esse canal não é um contador.', 'erro');
+      if (!c.lista.some((x) => x.canal === canal.id)) return responder(i, tx('esse_canal_contador'), 'erro');
       c.lista = c.lista.filter((x) => x.canal !== canal.id);
       salvarAjustes();
       await canal.delete('Contador removido').catch(() => {});
-      return responder(i, 'Contador removido.', 'sucesso');
+      return responder(i, tx('contador_removido'), 'sucesso');
     }
     // criar
-    if (c.lista.length >= LIMITE) return responder(i, `No máximo ${LIMITE} contadores.`, 'erro');
+    if (c.lista.length >= LIMITE) return responder(i, tx('maximo_contadores', { limite: LIMITE }), 'erro');
     const tipo = i.options.getString('tipo');
     let modelo = i.options.getString('nome') || TIPOS[tipo].modelo;
     if (!modelo.includes('{n}')) modelo += ': {n}';
@@ -112,16 +136,16 @@ const contadores = {
         console.error('[contadores]', e.message);
         return null;
       });
-    if (!canal) return i.editReply('❌ Não consegui criar o canal. Preciso das permissões **Gerenciar canais** e **Conectar**.');
+    if (!canal) return i.editReply(tx('consegui_criar_canal_preciso'));
     c.lista.push({ canal: canal.id, tipo, modelo });
     salvarAjustes();
-    return i.editReply(`✅ Contador criado: ${canal}. Ele se atualiza a cada 10 minutos.`);
+    return i.editReply(tx('contador_criado_ele_atualiza', { canal }));
   },
 };
 
 export default {
   id: 'contadores',
-  nome: 'Contadores',
+  nome: tx('contadores_2'),
   comandos: [contadores],
   permissoes: [PermissionFlagsBits.ManageChannels, PermissionFlagsBits.Connect],
   aoIniciar(client) {
@@ -134,7 +158,7 @@ export default {
   config: {
     resumo(guild) {
       const c = cfg(guild.id);
-      return [c.lista.length ? c.lista.map((x) => `<#${x.canal}> (${TIPOS[x.tipo].nome})`).join(' · ') : 'Nenhum (`/contadores criar`)'];
+      return [c.lista.length ? c.lista.map((x) => `<#${x.canal}> (${TIPOS[x.tipo].nome})`).join(' · ') : tx('nenhum_contadores_criar')];
     },
   },
 };

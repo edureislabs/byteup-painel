@@ -1,6 +1,29 @@
 import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { colecao } from '../core/db.js';
 import { ajustes, salvarAjustes, embed, responder, fmt, duracaoTexto, cortar } from '../core/util.js';
+import { textos } from '../core/textos.js';
+
+// Textos deste módulo (o dono do bot pode trocar todos no "Personalizar bot.html")
+const tx = textos('reputacao', {
+  dar_reputacao_voce_mesmo: ['Não dá para dar reputação para você mesmo.', 'resposta'],
+  bots_tem_reputacao: ['Bots não têm reputação.', 'resposta'],
+  voce_ja_deu_reputacao: ['Você já deu reputação hoje. Volte em **{duracao}**.', 'resposta'],
+  ganhou: '\n🎁 Ganhou {novos}',
+  deu_reputacao_agora: ['👍 {usuario} deu **+1 de reputação** para {alvo}! Agora: **{pontos}**{motivo}{novos}', 'descricao'],
+  so_quem_tem_gerenciar: ['Só quem tem **Gerenciar servidor** pode fazer isso.', 'resposta'],
+  agora_tem_reputacao: ['{usuario} agora tem **{pontos}** de reputação.', 'resposta'],
+  recompensa_pontos_removida: ['Recompensa de {pontos} pontos removida.', 'resposta'],
+  escolha_cargo_comum_sem: ['Escolha um cargo comum (sem administrador).', 'resposta'],
+  meu_cargo_precisa_ficar: ['Meu cargo precisa ficar acima de {cargo}.', 'resposta'],
+  reputacao_pessoa_ganha: ['Com **{pontos}** de reputação a pessoa ganha {cargo}.', 'resposta'],
+  ninguem_tem_reputacao_ainda: ['Ninguém tem reputação ainda. Use `/rep`.', 'resposta'],
+  ranking_reputacao: ['👍 Ranking de reputação', 'titulo'],
+  proxima_recompensa: ' Próxima recompensa: <@&{proxima}> com {pontos_proxima}.',
+  tem_reputacao: ['{usuario} tem **{pontos}** de reputação.{proxima}', 'resposta'],
+  reputacao: 'Reputação',
+  recompensas: 'Recompensas: {recompensas}',
+  sem_recompensas_reputacao_recompensa: 'Sem recompensas (`/reputacao recompensa`)',
+});
 
 /**
  * Reputação: cada membro pode dar +1 de reputação para alguém uma vez por dia.
@@ -41,11 +64,11 @@ const repCmd = {
     .addStringOption((o) => o.setName('motivo').setDescription('Por quê? (opcional)').setMaxLength(150)),
   async executar(i) {
     const alvo = i.options.getUser('usuario');
-    if (alvo.id === i.user.id) return responder(i, 'Não dá para dar reputação para você mesmo.', 'erro');
-    if (alvo.bot) return responder(i, 'Bots não têm reputação.', 'erro');
+    if (alvo.id === i.user.id) return responder(i, tx('dar_reputacao_voce_mesmo'), 'erro');
+    if (alvo.bot) return responder(i, tx('bots_tem_reputacao'), 'erro');
     const eu = de(i.guildId, i.user.id);
     const falta = (eu.deuEm ?? 0) + ESPERA - Date.now();
-    if (falta > 0) return responder(i, `Você já deu reputação hoje. Volte em **${duracaoTexto(falta)}**.`, 'aviso');
+    if (falta > 0) return responder(i, tx('voce_ja_deu_reputacao', { duracao: duracaoTexto(falta) }), 'aviso');
     const ele = de(i.guildId, alvo.id);
     ele.pontos += 1;
     eu.deuEm = Date.now();
@@ -55,7 +78,7 @@ const repCmd = {
     return i.reply({
       embeds: [
         embed(i.guildId).setDescription(
-          `👍 ${i.user} deu **+1 de reputação** para ${alvo}! Agora: **${fmt(ele.pontos)}**${motivo ? `\n> ${cortar(motivo, 150)}` : ''}${novos.length ? `\n🎁 Ganhou ${novos.join(', ')}` : ''}`
+          tx('deu_reputacao_agora', { usuario: i.user, alvo, pontos: fmt(ele.pontos), motivo: motivo ? `\n> ${cortar(motivo, 150)}` : '', novos: novos.length ? tx('ganhou', { novos: novos.join(', ') }) : '' })
         ),
       ],
       allowedMentions: { users: [alvo.id] },
@@ -91,14 +114,14 @@ const reputacao = {
   async executar(i) {
     const sub = i.options.getSubcommand();
     if (sub === 'recompensa' || sub === 'definir') {
-      if (!i.member.permissions.has(PermissionFlagsBits.ManageGuild)) return responder(i, 'Só quem tem **Gerenciar servidor** pode fazer isso.', 'erro');
+      if (!i.member.permissions.has(PermissionFlagsBits.ManageGuild)) return responder(i, tx('so_quem_tem_gerenciar'), 'erro');
       if (sub === 'definir') {
         const u = i.options.getUser('usuario');
-        if (u.bot) return responder(i, 'Bots não têm reputação.', 'erro');
+        if (u.bot) return responder(i, tx('bots_tem_reputacao'), 'erro');
         de(i.guildId, u.id).pontos = i.options.getInteger('pontos');
         rep.salvar();
         await darRecompensas(i.guild, u.id, i.options.getInteger('pontos'));
-        return responder(i, `${u} agora tem **${fmt(i.options.getInteger('pontos'))}** de reputação.`, 'sucesso');
+        return responder(i, tx('agora_tem_reputacao', { usuario: u, pontos: fmt(i.options.getInteger('pontos')) }), 'sucesso');
       }
       const c = cfg(i.guildId);
       const pontos = String(i.options.getInteger('pontos'));
@@ -106,22 +129,22 @@ const reputacao = {
       if (!cargo) {
         delete c.recompensas[pontos];
         salvarAjustes();
-        return responder(i, `Recompensa de ${pontos} pontos removida.`, 'sucesso');
+        return responder(i, tx('recompensa_pontos_removida', { pontos }), 'sucesso');
       }
-      if (cargo.managed || cargo.permissions.has(PermissionFlagsBits.Administrator)) return responder(i, 'Escolha um cargo comum (sem administrador).', 'erro');
-      if (!cargo.editable) return responder(i, `Meu cargo precisa ficar acima de ${cargo}.`, 'erro');
+      if (cargo.managed || cargo.permissions.has(PermissionFlagsBits.Administrator)) return responder(i, tx('escolha_cargo_comum_sem'), 'erro');
+      if (!cargo.editable) return responder(i, tx('meu_cargo_precisa_ficar', { cargo }), 'erro');
       c.recompensas[pontos] = cargo.id;
       salvarAjustes();
-      return responder(i, `Com **${pontos}** de reputação a pessoa ganha ${cargo}.`, 'sucesso');
+      return responder(i, tx('reputacao_pessoa_ganha', { pontos, cargo }), 'sucesso');
     }
     if (sub === 'ranking') {
       const top = Object.entries(rep.ler(i.guildId) ?? {})
         .filter(([, d]) => d.pontos > 0)
         .sort((a, b) => b[1].pontos - a[1].pontos)
         .slice(0, 15);
-      if (!top.length) return responder(i, 'Ninguém tem reputação ainda. Use `/rep`.', 'aviso');
+      if (!top.length) return responder(i, tx('ninguem_tem_reputacao_ainda'), 'aviso');
       return i.reply({
-        embeds: [embed(i.guildId).setTitle('👍 Ranking de reputação').setDescription(top.map(([id, d], k) => `**${k + 1}.** <@${id}> · ${fmt(d.pontos)}`).join('\n'))],
+        embeds: [embed(i.guildId).setTitle(tx('ranking_reputacao')).setDescription(top.map(([id, d], k) => `**${k + 1}.** <@${id}> · ${fmt(d.pontos)}`).join('\n'))],
         allowedMentions: { parse: [] },
       });
     }
@@ -129,19 +152,19 @@ const reputacao = {
     const d = rep.ler(i.guildId, u.id);
     const r = Object.entries(cfg(i.guildId).recompensas).sort((a, b) => Number(a[0]) - Number(b[0]));
     const proxima = r.find(([p]) => Number(p) > (d?.pontos ?? 0));
-    return responder(i, `${u} tem **${fmt(d?.pontos ?? 0)}** de reputação.${proxima ? ` Próxima recompensa: <@&${proxima[1]}> com ${proxima[0]}.` : ''}`, 'info');
+    return responder(i, tx('tem_reputacao', { usuario: u, pontos: fmt(d?.pontos ?? 0), proxima: proxima ? tx('proxima_recompensa', { proxima: proxima[1], pontos_proxima: proxima[0] }) : '' }), 'info');
   },
 };
 
 export default {
   id: 'reputacao',
-  nome: 'Reputação',
+  nome: tx('reputacao'),
   comandos: [repCmd, reputacao],
   permissoes: [PermissionFlagsBits.ManageRoles],
   config: {
     resumo(guild) {
       const r = Object.entries(cfg(guild.id).recompensas);
-      return [r.length ? `Recompensas: ${r.map(([p, c]) => `${p} → <@&${c}>`).join(' · ')}` : 'Sem recompensas (`/reputacao recompensa`)'];
+      return [r.length ? tx('recompensas', { recompensas: r.map(([p, c]) => `${p} → <@&${c}>`).join(' · ') }) : tx('sem_recompensas_reputacao_recompensa')];
     },
   },
 };

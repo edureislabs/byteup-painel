@@ -1,6 +1,41 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { colecao } from '../core/db.js';
-import { embed, responder, cortar } from '../core/util.js';
+import { embed, responder, cortar, imagens } from '../core/util.js';
+import { textos, visuais, botoes as registrarBotoes } from '../core/textos.js';
+
+// Textos deste módulo (o dono do bot pode trocar todos no "Personalizar bot.html")
+const tx = textos('cargos', {
+  clique_nos_botoes_pegar: 'Clique nos botões para pegar ou tirar cargos.',
+  consegui_enviar_mensagens_confira: ['Não consegui enviar mensagens em {canal}. Confira as minhas permissões.', 'resposta'],
+  painel_criado_agora_use: ['Painel criado em {canal}. Agora use **/cargos adicionar painel:{mensagem_id}** para colocar os cargos.', 'resposta'],
+  painel_encontrado_use_id: ['Painel não encontrado. Use o ID ou o link da mensagem do painel.', 'resposta'],
+  esse_cargo_pode_ser: ['Esse cargo não pode ser dado por botão.', 'resposta'],
+  consigo_dar_suba_meu: ['Não consigo dar {cargo}: suba o meu cargo acima dele na lista de cargos.', 'resposta'],
+  seguranca_cargos_permissoes_administ: ['Por segurança, cargos com permissões de administração não podem ir para painéis.', 'resposta'],
+  esse_cargo_ja_esta: ['Esse cargo já está no painel.', 'resposta'],
+  painel_aceita_maximo_25: ['Um painel aceita no máximo 25 cargos.', 'resposta'],
+  consegui_atualizar_painel_confira: ['Não consegui atualizar o painel. Confira se o emoji é válido.', 'resposta'],
+  adicionado_painel: ['{cargo} adicionado ao painel.', 'resposta'],
+  esse_cargo_esta_painel: ['Esse cargo não está no painel.', 'resposta'],
+  removido_painel: ['{cargo} removido do painel.', 'resposta'],
+  este_botao_esta_mais: ['Este botão não está mais ativo.', 'resposta'],
+  esse_cargo_existe_mais: ['Esse cargo não existe mais. Avise a equipe.', 'resposta'],
+  consigo_dar_esse_cargo: ['Não consigo dar esse cargo agora (o meu cargo está abaixo dele). Avise a equipe.', 'resposta'],
+  consegui_mudar_seu_cargo: ['Não consegui mudar o seu cargo agora. Avise a equipe.', 'resposta'],
+  cargo_removido: 'Cargo {cargo} removido.',
+  voce_recebeu: 'Você recebeu {cargo}!',
+  cargos_botao: 'Cargos por botão',
+});
+
+// Botões (texto, emoji e cor personalizáveis; alguns podem ser escondidos)
+const bt = registrarBotoes('cargos', {
+  cargo: { nome: "Botões do painel de cargos", estilo: 'Secondary', rotuloInfo: "O texto e o emoji de cada botão vêm do /cargos. Aqui você muda a cor de todos." },
+});
+
+// Aparência dos embeds principais (cor, imagem, miniatura e rodapé personalizáveis)
+const vis = visuais('cargos', {
+  painel: { nome: "Painel de cargos", vars: ['servidor_icone'] },
+});
 
 /**
  * Cargos por botão: painéis onde cada membro pega ou tira cargos sozinho
@@ -13,7 +48,7 @@ function componentes(p) {
   const rows = [];
   p.cargos.forEach((c, n) => {
     if (n % 5 === 0) rows.push(new ActionRowBuilder());
-    const b = new ButtonBuilder().setCustomId(`cr:${c.id}`).setLabel(cortar(c.rotulo, 80)).setStyle(ButtonStyle.Secondary);
+    const b = bt('cargo', { rotulo: cortar(c.rotulo, 80), emoji: c.emoji || undefined }).setCustomId(`cr:${c.id}`);
     if (c.emoji) b.setEmoji(c.emoji);
     rows.at(-1).addComponents(b);
   });
@@ -66,44 +101,45 @@ const cargos = {
       const canal = i.options.getChannel('canal') ?? i.channel;
       const e = embed(i.guildId)
         .setTitle(i.options.getString('titulo'))
-        .setDescription(i.options.getString('descricao') || 'Clique nos botões para pegar ou tirar cargos.');
+        .setDescription(i.options.getString('descricao') || tx('clique_nos_botoes_pegar'));
+      vis(e, 'painel', imagens({ guild: i.guild }));
       const msg = await canal.send({ embeds: [e] }).catch(() => null);
-      if (!msg) return responder(i, `Não consegui enviar mensagens em ${canal}. Confira as minhas permissões.`, 'erro');
+      if (!msg) return responder(i, tx('consegui_enviar_mensagens_confira', { canal }), 'erro');
       paineis.de(i.guildId)[msg.id] = { canal: canal.id, cargos: [] };
       paineis.salvar();
-      return responder(i, `Painel criado em ${canal}. Agora use **/cargos adicionar painel:${msg.id}** para colocar os cargos.`, 'sucesso');
+      return responder(i, tx('painel_criado_agora_use', { canal, mensagem_id: msg.id }), 'sucesso');
     }
 
     const [p, msg] = await buscarPainel(i, i.options.getString('painel'));
-    if (!p || !msg) return responder(i, 'Painel não encontrado. Use o ID ou o link da mensagem do painel.', 'erro');
+    if (!p || !msg) return responder(i, tx('painel_encontrado_use_id'), 'erro');
     const r = i.options.getRole('cargo');
 
     if (sub === 'adicionar') {
-      if (r.managed || r.id === i.guildId) return responder(i, 'Esse cargo não pode ser dado por botão.', 'erro');
-      if (!r.editable) return responder(i, `Não consigo dar ${r}: suba o meu cargo acima dele na lista de cargos.`, 'erro');
+      if (r.managed || r.id === i.guildId) return responder(i, tx('esse_cargo_pode_ser'), 'erro');
+      if (!r.editable) return responder(i, tx('consigo_dar_suba_meu', { cargo: r }), 'erro');
       if (r.permissions.has(PermissionFlagsBits.Administrator) || r.permissions.has(PermissionFlagsBits.ManageGuild)) {
-        return responder(i, 'Por segurança, cargos com permissões de administração não podem ir para painéis.', 'erro');
+        return responder(i, tx('seguranca_cargos_permissoes_administ'), 'erro');
       }
-      if (p.cargos.some((c) => c.id === r.id)) return responder(i, 'Esse cargo já está no painel.', 'aviso');
-      if (p.cargos.length >= 25) return responder(i, 'Um painel aceita no máximo 25 cargos.', 'erro');
+      if (p.cargos.some((c) => c.id === r.id)) return responder(i, tx('esse_cargo_ja_esta'), 'aviso');
+      if (p.cargos.length >= 25) return responder(i, tx('painel_aceita_maximo_25'), 'erro');
       const emoji = i.options.getString('emoji')?.trim() || null;
       p.cargos.push({ id: r.id, rotulo: i.options.getString('rotulo') || r.name, emoji });
       try {
         await msg.edit({ components: componentes(p) });
       } catch {
         p.cargos.pop();
-        return responder(i, 'Não consegui atualizar o painel. Confira se o emoji é válido.', 'erro');
+        return responder(i, tx('consegui_atualizar_painel_confira'), 'erro');
       }
       paineis.salvar();
-      return responder(i, `${r} adicionado ao painel.`, 'sucesso');
+      return responder(i, tx('adicionado_painel', { cargo: r }), 'sucesso');
     }
     if (sub === 'remover') {
       const antes = p.cargos.length;
       p.cargos = p.cargos.filter((c) => c.id !== r.id);
-      if (p.cargos.length === antes) return responder(i, 'Esse cargo não está no painel.', 'aviso');
+      if (p.cargos.length === antes) return responder(i, tx('esse_cargo_esta_painel'), 'aviso');
       await msg.edit({ components: componentes(p) }).catch(() => {});
       paineis.salvar();
-      return responder(i, `${r} removido do painel.`, 'sucesso');
+      return responder(i, tx('removido_painel', { cargo: r }), 'sucesso');
     }
   },
 };
@@ -112,20 +148,20 @@ const botoes = {
   async cr(i, [cargoId]) {
     // o cargo precisa estar mesmo neste painel
     const p = paineis.ler(i.guildId, i.message?.id);
-    if (!p?.cargos.some((c) => c.id === cargoId)) return responder(i, 'Este botão não está mais ativo.', 'erro');
+    if (!p?.cargos.some((c) => c.id === cargoId)) return responder(i, tx('este_botao_esta_mais'), 'erro');
     const r = i.guild.roles.cache.get(cargoId);
-    if (!r) return responder(i, 'Esse cargo não existe mais. Avise a equipe.', 'erro');
-    if (!r.editable) return responder(i, 'Não consigo dar esse cargo agora (o meu cargo está abaixo dele). Avise a equipe.', 'erro');
+    if (!r) return responder(i, tx('esse_cargo_existe_mais'), 'erro');
+    if (!r.editable) return responder(i, tx('consigo_dar_esse_cargo'), 'erro');
     const tem = i.member.roles.cache.has(r.id);
     const ok = await (tem ? i.member.roles.remove(r, 'Painel de cargos') : i.member.roles.add(r, 'Painel de cargos')).then(() => true, () => false);
-    if (!ok) return responder(i, 'Não consegui mudar o seu cargo agora. Avise a equipe.', 'erro');
-    return responder(i, tem ? `Cargo ${r} removido.` : `Você recebeu ${r}!`, 'sucesso');
+    if (!ok) return responder(i, tx('consegui_mudar_seu_cargo'), 'erro');
+    return responder(i, tem ? tx('cargo_removido', { cargo: r }) : tx('voce_recebeu', { cargo: r }), 'sucesso');
   },
 };
 
 export default {
   id: 'cargos',
-  nome: 'Cargos por botão',
+  nome: tx('cargos_botao'),
   comandos: [cargos],
   componentes: botoes,
   permissoes: [PermissionFlagsBits.ManageRoles],

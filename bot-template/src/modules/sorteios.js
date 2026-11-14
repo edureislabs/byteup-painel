@@ -1,6 +1,52 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { colecao } from '../core/db.js';
 import { embed, responder, lerDuracao, ts, cortar, CORES } from '../core/util.js';
+import { textos, visuais, botoes } from '../core/textos.js';
+
+// Textos deste módulo (o dono do bot pode trocar todos no "Personalizar bot.html")
+const tx = textos('sorteios', {
+  encerrado: 'Encerrado {quando}',
+  termina: 'Termina {quando} ({data})',
+  vencedores: 'Vencedores: **{vencedores}**',
+  so_participa_quem_tem: 'Só participa quem tem <@&{cargo}>',
+  criado: 'Criado por <@{autor}>',
+  participante: ['{participantes_total} participante(s)', 'rodape'],
+  ganhador_es: ['Ganhador(es)', 'campo'],
+  ninguem_participou: 'Ninguém participou.',
+  encerrado_2: 'Encerrado',
+  participar: 'Participar ({participantes_total})',
+  ganharam: 's ganharam',
+  ganhou: ' ganhou',
+  parabens_voce: '🎉 Parabéns {ganhadores}! Você{verbo} **{premio}**!',
+  sorteio_terminou_sem_participantes: '😕 O sorteio de **{premio}** terminou sem participantes.',
+  duracao_invalida_ex_1h: ['Duração inválida (ex.: 1h, 2d; entre 10s e 60d).', 'resposta'],
+  consegui_enviar_mensagens_confira: ['Não consegui enviar mensagens em {canal}. Confira as minhas permissões.', 'resposta'],
+  sorteio_criado_termina: ['Sorteio criado em {canal}! Termina {quando}.', 'resposta'],
+  sorteio_encontrado: ['Sorteio não encontrado.', 'resposta'],
+  esse_sorteio_ja_terminou: ['Esse sorteio já terminou. Use /sorteio refazer para sortear de novo.', 'resposta'],
+  sorteio_encerrado: '✅ Sorteio encerrado.',
+  esse_sorteio_ainda_terminou: ['Esse sorteio ainda não terminou.', 'resposta'],
+  ninguem_participou_desse_sorteio: ['Ninguém participou desse sorteio.', 'resposta'],
+  novo_sorteio: ['🎉 Novo sorteio de **{premio}**: {ganhadores}!', 'conteudo'],
+  nenhum_sorteio_andamento: ['Nenhum sorteio em andamento.', 'resposta'],
+  termina_participante_id: '**{premio}** · <#{canal}> · termina {quando} · {participantes_total} participante(s) · ID `{id}`',
+  sorteios_andamento: ['🎉 Sorteios em andamento', 'titulo'],
+  este_sorteio_ja_terminou: ['Este sorteio já terminou.', 'resposta'],
+  participar_voce_precisa_cargo: ['Para participar você precisa do cargo <@&{cargo}>.', 'resposta'],
+  voce_saiu_sorteio: 'Você saiu do sorteio.',
+  voce_esta_participando_clique: '🎉 Você está participando! Clique de novo para sair.',
+  sorteios: 'Sorteios',
+});
+
+// Botões (texto, emoji e cor personalizáveis; alguns podem ser escondidos)
+const bt = botoes('sorteios', {
+  entrar: { nome: 'Participar do sorteio', rotulo: 'participar', emoji: '🎉', estilo: 'Primary', rotuloInfo: 'Quando o sorteio acaba, o texto vira o de "Encerrado".' },
+});
+
+// Aparência dos embeds principais (cor, imagem, miniatura e rodapé personalizáveis)
+const vis = visuais('sorteios', {
+  sorteio: { nome: "Mensagem do sorteio", vars: [] },
+});
 
 /**
  * Sorteios: botão para participar, cargo obrigatório opcional, sorteio automático
@@ -15,24 +61,22 @@ function painel(guildId, s, encerrado = false) {
     .setDescription(
       [
         s.descricao ? `${s.descricao}\n` : '',
-        encerrado ? `Encerrado ${ts(s.fim)}` : `Termina ${ts(s.fim)} (${ts(s.fim, 'f')})`,
-        `Vencedores: **${s.vencedores}**`,
-        s.cargo ? `Só participa quem tem <@&${s.cargo}>` : '',
-        `Criado por <@${s.autor}>`,
+        encerrado ? tx('encerrado', { quando: ts(s.fim) }) : tx('termina', { quando: ts(s.fim), data: ts(s.fim, 'f') }),
+        tx('vencedores', { vencedores: s.vencedores }),
+        s.cargo ? tx('so_participa_quem_tem', { cargo: s.cargo }) : '',
+        tx('criado', { autor: s.autor }),
       ]
         .filter(Boolean)
         .join('\n')
     )
-    .setFooter({ text: `${s.participantes.length} participante(s)` });
+    .setFooter({ text: tx('participante', { participantes_total: s.participantes.length }) });
   if (encerrado) {
-    e.setColor(CORES.sucesso).addFields({ name: 'Ganhador(es)', value: s.ganhadores?.length ? s.ganhadores.map((id) => `<@${id}>`).join(', ') : 'Ninguém participou.' });
+    e.setColor(CORES.sucesso).addFields({ name: tx('ganhador_es'), value: s.ganhadores?.length ? s.ganhadores.map((id) => `<@${id}>`).join(', ') : tx('ninguem_participou') });
   }
+  vis(e, 'sorteio', {});
   const row = new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
+    bt('entrar', { rotulo: encerrado ? tx('encerrado_2') : tx('participar', { participantes_total: s.participantes.length }) })
       .setCustomId('sr:entrar')
-      .setLabel(encerrado ? 'Encerrado' : `Participar (${s.participantes.length})`)
-      .setEmoji('🎉')
-      .setStyle(ButtonStyle.Primary)
       .setDisabled(encerrado)
   );
   return { embeds: [e], components: [row] };
@@ -57,8 +101,8 @@ async function finalizar(client, guildId, msgId) {
   if (msg) await msg.edit(painel(guildId, s, true)).catch(() => {});
   if (canal?.isTextBased()) {
     const texto = s.ganhadores.length
-      ? `🎉 Parabéns ${s.ganhadores.map((id) => `<@${id}>`).join(', ')}! Você${s.ganhadores.length > 1 ? 's ganharam' : ' ganhou'} **${s.premio}**!`
-      : `😕 O sorteio de **${s.premio}** terminou sem participantes.`;
+      ? tx('parabens_voce', { ganhadores: s.ganhadores.map((id) => `<@${id}>`).join(', '), verbo: s.ganhadores.length > 1 ? tx('ganharam') : tx('ganhou'), premio: s.premio })
+      : tx('sorteio_terminou_sem_participantes', { premio: s.premio });
     await canal.send({ content: texto, reply: msg ? { messageReference: msg.id, failIfNotExists: false } : undefined, allowedMentions: { users: s.ganhadores } }).catch(() => {});
   }
 }
@@ -96,7 +140,7 @@ const sorteio = {
     const sub = i.options.getSubcommand();
     if (sub === 'criar') {
       const ms = lerDuracao(i.options.getString('duracao'));
-      if (!ms || ms < 10_000 || ms > 60 * 86_400_000) return responder(i, 'Duração inválida (ex.: 1h, 2d; entre 10s e 60d).', 'erro');
+      if (!ms || ms < 10_000 || ms > 60 * 86_400_000) return responder(i, tx('duracao_invalida_ex_1h'), 'erro');
       const canal = i.options.getChannel('canal') ?? i.channel;
       const s = {
         premio: i.options.getString('premio'),
@@ -110,35 +154,35 @@ const sorteio = {
         encerrado: false,
       };
       const msg = await canal.send(painel(i.guildId, s)).catch(() => null);
-      if (!msg) return responder(i, `Não consegui enviar mensagens em ${canal}. Confira as minhas permissões.`, 'erro');
+      if (!msg) return responder(i, tx('consegui_enviar_mensagens_confira', { canal }), 'erro');
       sorteios.de(i.guildId)[msg.id] = s;
       sorteios.salvar();
-      return responder(i, `Sorteio criado em ${canal}! Termina ${ts(s.fim)}.`, 'sucesso');
+      return responder(i, tx('sorteio_criado_termina', { canal, quando: ts(s.fim) }), 'sucesso');
     }
     if (sub === 'encerrar') {
       const id = idDaMensagem(i.options.getString('mensagem'));
       const s = sorteios.ler(i.guildId, id);
-      if (!s) return responder(i, 'Sorteio não encontrado.', 'erro');
-      if (s.encerrado) return responder(i, 'Esse sorteio já terminou. Use /sorteio refazer para sortear de novo.', 'aviso');
+      if (!s) return responder(i, tx('sorteio_encontrado'), 'erro');
+      if (s.encerrado) return responder(i, tx('esse_sorteio_ja_terminou'), 'aviso');
       await i.deferReply({ flags: 64 });
       await finalizar(i.client, i.guildId, id);
-      return i.editReply('✅ Sorteio encerrado.');
+      return i.editReply(tx('sorteio_encerrado'));
     }
     if (sub === 'refazer') {
       const id = idDaMensagem(i.options.getString('mensagem'));
       const s = sorteios.ler(i.guildId, id);
-      if (!s) return responder(i, 'Sorteio não encontrado.', 'erro');
-      if (!s.encerrado) return responder(i, 'Esse sorteio ainda não terminou.', 'aviso');
+      if (!s) return responder(i, tx('sorteio_encontrado'), 'erro');
+      if (!s.encerrado) return responder(i, tx('esse_sorteio_ainda_terminou'), 'aviso');
       const n = i.options.getInteger('vencedores') ?? s.vencedores;
       const novos = sortear(s.participantes, n);
-      if (!novos.length) return responder(i, 'Ninguém participou desse sorteio.', 'aviso');
-      return i.reply({ content: `🎉 Novo sorteio de **${cortar(s.premio, 100)}**: ${novos.map((u) => `<@${u}>`).join(', ')}!`, allowedMentions: { users: novos } });
+      if (!novos.length) return responder(i, tx('ninguem_participou_desse_sorteio'), 'aviso');
+      return i.reply({ content: tx('novo_sorteio', { premio: cortar(s.premio, 100), ganhadores: novos.map((u) => `<@${u}>`).join(', ') }), allowedMentions: { users: novos } });
     }
     if (sub === 'lista') {
       const ativos = Object.entries(sorteios.ler(i.guildId) ?? {}).filter(([, s]) => !s.encerrado);
-      if (!ativos.length) return responder(i, 'Nenhum sorteio em andamento.', 'info');
-      const linhas = ativos.map(([id, s]) => `**${cortar(s.premio, 60)}** · <#${s.canal}> · termina ${ts(s.fim)} · ${s.participantes.length} participante(s) · ID \`${id}\``);
-      return i.reply({ embeds: [embed(i.guildId).setTitle('🎉 Sorteios em andamento').setDescription(linhas.join('\n'))], flags: 64 });
+      if (!ativos.length) return responder(i, tx('nenhum_sorteio_andamento'), 'info');
+      const linhas = ativos.map(([id, s]) => tx('termina_participante_id', { premio: cortar(s.premio, 60), canal: s.canal, quando: ts(s.fim), participantes_total: s.participantes.length, id }));
+      return i.reply({ embeds: [embed(i.guildId).setTitle(tx('sorteios_andamento')).setDescription(linhas.join('\n'))], flags: 64 });
     }
   },
 };
@@ -147,20 +191,20 @@ const componentes = {
   async sr(i, [acao]) {
     if (acao !== 'entrar') return;
     const s = sorteios.ler(i.guildId, i.message.id);
-    if (!s || s.encerrado) return responder(i, 'Este sorteio já terminou.', 'aviso');
-    if (s.cargo && !i.member.roles.cache.has(s.cargo)) return responder(i, `Para participar você precisa do cargo <@&${s.cargo}>.`, 'erro');
+    if (!s || s.encerrado) return responder(i, tx('este_sorteio_ja_terminou'), 'aviso');
+    if (s.cargo && !i.member.roles.cache.has(s.cargo)) return responder(i, tx('participar_voce_precisa_cargo', { cargo: s.cargo }), 'erro');
     const idx = s.participantes.indexOf(i.user.id);
     if (idx >= 0) s.participantes.splice(idx, 1);
     else s.participantes.push(i.user.id);
     sorteios.salvar();
     await i.update(painel(i.guildId, s));
-    await i.followUp({ content: idx >= 0 ? 'Você saiu do sorteio.' : '🎉 Você está participando! Clique de novo para sair.', flags: 64 });
+    await i.followUp({ content: idx >= 0 ? tx('voce_saiu_sorteio') : tx('voce_esta_participando_clique'), flags: 64 });
   },
 };
 
 export default {
   id: 'sorteios',
-  nome: 'Sorteios',
+  nome: tx('sorteios'),
   comandos: [sorteio],
   componentes,
   aoIniciar(client) {

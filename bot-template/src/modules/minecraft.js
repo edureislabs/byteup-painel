@@ -2,6 +2,31 @@ import net from 'node:net';
 import dns from 'node:dns/promises';
 import { AttachmentBuilder, ChannelType, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { ajustes, salvarAjustes, embed, responder, cortar, fmt, CORES } from '../core/util.js';
+import { textos, visuais } from '../core/textos.js';
+
+// Textos deste módulo (o dono do bot pode trocar todos no "Personalizar bot.html")
+const tx = textos('minecraft', {
+  endereco_invalido: ['❌ Endereço inválido: `{endereco}`', 'descricao'],
+  jogadores: ['Jogadores', 'campo'],
+  versao: ['Versão', 'campo'],
+  ping: ['Ping', 'campo'],
+  ms: '{latencia} ms',
+  atualizado: ['Atualizado', 'rodape'],
+  online_agora: ['Online agora', 'campo'],
+  servidor_offline_ou_respondeu: ['Servidor **offline** ou não respondeu.', 'descricao'],
+  so_quem_tem_gerenciar: ['Só quem tem **Gerenciar servidor** pode criar painéis.', 'resposta'],
+  maximo_paineis_apague_mensagem: ['No máximo {limite} painéis. Apague a mensagem de um para liberar.', 'resposta'],
+  consegui_enviar_nesse_canal: '❌ Não consegui enviar nesse canal.',
+  painel_criado_ele_atualiza: '✅ Painel criado em {canal}. Ele se atualiza a cada 2 minutos (para tirar, apague a mensagem).',
+  status_minecraft: 'Status Minecraft',
+  em: '`{endereco}` em <#{canal}>',
+  nenhum_painel_minecraft_painel: 'Nenhum painel (`/minecraft painel`)',
+});
+
+// Aparência dos embeds principais (cor, imagem, miniatura e rodapé personalizáveis)
+const vis = visuais('minecraft', {
+  status: { nome: "Painel de status (online)", vars: [], miniatura: "ícone do servidor de Minecraft" },
+});
 
 /**
  * Status de servidor de Minecraft (Java): online/offline, jogadores, versão e mensagem do servidor.
@@ -107,7 +132,7 @@ function textoMotd(d) {
 
 async function statusEmbed(guildId, endereco) {
   const alvo = await resolverEndereco(endereco);
-  if (!alvo) return { e: embed(guildId).setColor(CORES.erro).setDescription(`❌ Endereço inválido: \`${endereco}\``) };
+  if (!alvo) return { e: embed(guildId).setColor(CORES.erro).setDescription(tx('endereco_invalido', { endereco })) };
   try {
     const s = await consultar(alvo.host, alvo.porta);
     const nomes = (s.players?.sample ?? []).map((p) => p.name).filter((n) => n && !n.includes('§'));
@@ -116,23 +141,24 @@ async function statusEmbed(guildId, endereco) {
       .setTitle(`🟢 ${endereco}`)
       .setDescription(cortar(textoMotd(s.description), 500) || null)
       .addFields(
-        { name: 'Jogadores', value: `**${fmt(s.players?.online ?? 0)}** / ${fmt(s.players?.max ?? 0)}`, inline: true },
-        { name: 'Versão', value: cortar(String(s.version?.name ?? '?').replace(/§[0-9a-fk-or]/gi, ''), 100), inline: true },
-        { name: 'Ping', value: `${s.latencia} ms`, inline: true }
+        { name: tx('jogadores'), value: `**${fmt(s.players?.online ?? 0)}** / ${fmt(s.players?.max ?? 0)}`, inline: true },
+        { name: tx('versao'), value: cortar(String(s.version?.name ?? '?').replace(/§[0-9a-fk-or]/gi, ''), 100), inline: true },
+        { name: tx('ping'), value: tx('ms', { latencia: s.latencia }), inline: true }
       )
-      .setFooter({ text: 'Atualizado' })
+      .setFooter({ text: tx('atualizado') })
       .setTimestamp();
-    if (nomes.length) e.addFields({ name: 'Online agora', value: cortar(nomes.slice(0, 20).join(', '), 1024) });
+    if (nomes.length) e.addFields({ name: tx('online_agora'), value: cortar(nomes.slice(0, 20).join(', '), 1024) });
     let arquivo = null;
     const icone = /^data:image\/png;base64,(.+)$/.exec(s.favicon ?? '');
     if (icone) {
       arquivo = new AttachmentBuilder(Buffer.from(icone[1], 'base64'), { name: 'icone.png' });
       e.setThumbnail('attachment://icone.png');
     }
+    vis(e, 'status', {});
     return { e, arquivo, online: true };
   } catch {
     return {
-      e: embed(guildId).setColor(CORES.erro).setTitle(`🔴 ${endereco}`).setDescription('Servidor **offline** ou não respondeu.').setFooter({ text: 'Atualizado' }).setTimestamp(),
+      e: embed(guildId).setColor(CORES.erro).setTitle(`🔴 ${endereco}`).setDescription(tx('servidor_offline_ou_respondeu')).setFooter({ text: tx('atualizado') }).setTimestamp(),
       online: false,
     };
   }
@@ -182,23 +208,23 @@ const minecraft = {
       const { e, arquivo } = await statusEmbed(i.guildId, endereco);
       return i.editReply({ embeds: [e], files: arquivo ? [arquivo] : [] });
     }
-    if (!i.member.permissions.has(PermissionFlagsBits.ManageGuild)) return responder(i, 'Só quem tem **Gerenciar servidor** pode criar painéis.', 'erro');
+    if (!i.member.permissions.has(PermissionFlagsBits.ManageGuild)) return responder(i, tx('so_quem_tem_gerenciar'), 'erro');
     const c = cfg(i.guildId);
-    if (c.paineis.length >= LIMITE_PAINEIS) return responder(i, `No máximo ${LIMITE_PAINEIS} painéis. Apague a mensagem de um para liberar.`, 'erro');
+    if (c.paineis.length >= LIMITE_PAINEIS) return responder(i, tx('maximo_paineis_apague_mensagem', { limite: LIMITE_PAINEIS }), 'erro');
     const canal = i.options.getChannel('canal') ?? i.channel;
     await i.deferReply({ flags: 64 });
     const { e } = await statusEmbed(i.guildId, endereco);
     const msg = await canal.send({ embeds: [e] }).catch(() => null);
-    if (!msg) return i.editReply('❌ Não consegui enviar nesse canal.');
+    if (!msg) return i.editReply(tx('consegui_enviar_nesse_canal'));
     c.paineis.push({ endereco, canal: canal.id, msg: msg.id });
     salvarAjustes();
-    return i.editReply(`✅ Painel criado em ${canal}. Ele se atualiza a cada 2 minutos (para tirar, apague a mensagem).`);
+    return i.editReply(tx('painel_criado_ele_atualiza', { canal }));
   },
 };
 
 export default {
   id: 'minecraft',
-  nome: 'Status Minecraft',
+  nome: tx('status_minecraft'),
   comandos: [minecraft],
   aoIniciar(client) {
     atualizarPaineis(client).catch(() => {});
@@ -207,7 +233,7 @@ export default {
   config: {
     resumo(guild) {
       const p = cfg(guild.id).paineis;
-      return [p.length ? p.map((x) => `\`${x.endereco}\` em <#${x.canal}>`).join(' · ') : 'Nenhum painel (`/minecraft painel`)'];
+      return [p.length ? p.map((x) => tx('em', { endereco: x.endereco, canal: x.canal })).join(' · ') : tx('nenhum_painel_minecraft_painel')];
     },
   },
 };
