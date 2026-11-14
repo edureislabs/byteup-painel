@@ -12,6 +12,7 @@ import { formatPrice, productImageUrl, storeCategoryLabel } from "@/lib/storeSha
 import { BUILDER_BASE, BUILDER_COMBOS, builderModule, readBuilderOptions, readUpgradeOptions } from "@/lib/builder/catalog";
 import { isStoreTester } from "@/lib/storeTesters";
 import PaymentForm from "./PaymentForm";
+import { BuIcon } from "@/components/BuIcon";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Pagamento | Loja ByteUP", robots: { index: false } };
@@ -87,7 +88,7 @@ export default async function PagarPage({ params }: { params: Promise<{ orderId:
                 <img src={image} alt="" className="aspect-video w-full rounded-2xl border border-white/10 object-cover" />
               ) : (
                 <div className="grid aspect-video w-full place-items-center rounded-2xl bg-gradient-to-br from-[#b64cff]/25 to-[#08070a] text-5xl">
-                  {cat.emoji}
+                  <BuIcon name={cat.value} size={96} />
                 </div>
               )}
               <div className="mt-4 space-y-2 text-sm">
@@ -105,8 +106,8 @@ export default async function PagarPage({ params }: { params: Promise<{ orderId:
                     </li>
                     {bot.modulos.map((id) => (
                       <li key={id} className="flex justify-between gap-3">
-                        <span>
-                          {builderModule(id)?.emoji} {builderModule(id)?.name ?? id}
+                        <span className="inline-flex items-center gap-1.5">
+                          <BuIcon name={id} size={14} plain /> {builderModule(id)?.name ?? id}
                         </span>
                         <span>{formatPrice(bot.precos?.[id] ?? builderModule(id)?.priceCents ?? 0)}</span>
                       </li>
@@ -125,8 +126,8 @@ export default async function PagarPage({ params }: { params: Promise<{ orderId:
                   <ul className="space-y-1 border-l border-white/10 pl-3 text-xs text-[#aaa3b5]">
                     {upgrade.modulos.map((id) => (
                       <li key={id} className="flex justify-between gap-3">
-                        <span>
-                          ➕ {builderModule(id)?.emoji} {builderModule(id)?.name ?? id}
+                        <span className="inline-flex items-center gap-1.5">
+                          ➕ <BuIcon name={id} size={14} plain /> {builderModule(id)?.name ?? id}
                         </span>
                         <span>{formatPrice(upgrade.precos?.[id] ?? builderModule(id)?.priceCents ?? 0)}</span>
                       </li>

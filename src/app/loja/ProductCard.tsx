@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { formatPrice, productImageUrl, storeCategoryLabel } from "@/lib/storeShared";
+import { BuIcon } from "@/components/BuIcon";
 
 export type ProductCardData = {
   id: string;
@@ -26,12 +27,12 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
         <img src={image} alt="" loading="lazy" className="aspect-video w-full object-cover" />
       ) : (
         <div className="grid aspect-video w-full place-items-center bg-gradient-to-br from-[#b64cff]/25 to-[#08070a] text-5xl">
-          {cat.emoji}
+          <BuIcon name={cat.value} size={84} />
         </div>
       )}
       <div className="flex flex-1 flex-col p-5">
-        <p className="text-xs font-semibold text-[#7d7588]">
-          {cat.emoji} {cat.label}
+        <p className="flex items-center gap-1.5 text-xs font-semibold text-[#7d7588]">
+          <BuIcon name={cat.value} size={13} plain /> {cat.label}
         </p>
         <h3 className="mt-1 font-black text-white group-hover:text-[#d9b4ff]">{product.name}</h3>
         <p className="mt-2 line-clamp-3 flex-1 text-sm leading-6 text-[#aaa3b5]">{product.shortDescription || "Sem descrição."}</p>

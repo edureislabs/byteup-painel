@@ -5,6 +5,7 @@ import LandingFooter from "../components/LandingFooter";
 import ProductCard from "./ProductCard";
 import { prisma } from "@/lib/prisma";
 import { STORE_CATEGORIES } from "@/lib/storeShared";
+import { BuIcon } from "@/components/BuIcon";
 
 export const dynamic = "force-dynamic";
 
@@ -47,7 +48,7 @@ export default async function LojaPage({ searchParams }: { searchParams: SearchP
             <Link href="/loja" className={chip(!categoria)}>Tudo</Link>
             {STORE_CATEGORIES.map((c) => (
               <Link key={c.value} href={`/loja?categoria=${c.value}`} className={chip(categoria === c.value)}>
-                {c.emoji} {c.label}
+                <BuIcon name={c.value} size={15} plain className="mr-1" /> {c.label}
               </Link>
             ))}
             <Link href="/loja/minhas-compras" className="ml-auto text-sm font-semibold text-[#d9b4ff] hover:text-white">
@@ -65,7 +66,7 @@ export default async function LojaPage({ searchParams }: { searchParams: SearchP
               className="group mb-6 flex flex-col gap-4 rounded-3xl border border-[#b64cff]/40 bg-gradient-to-r from-[#b64cff]/20 via-[#b64cff]/5 to-transparent p-6 transition-colors hover:border-[#b64cff] sm:flex-row sm:items-center sm:justify-between"
             >
               <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-[#d9b4ff]">🧩 Novo</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-[#d9b4ff]"><BuIcon name="destaques" size={14} plain className="mr-1" /> Novo</p>
                 <h2 className="mt-1 text-2xl font-black">Monte o seu bot</h2>
                 <p className="mt-1 max-w-xl text-sm leading-6 text-[#aaa3b5]">
                   Escolha os módulos (moderação, tickets, níveis, economia e mais) e pague só pelo que usar. Funciona em qualquer servidor.

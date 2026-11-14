@@ -5,6 +5,7 @@ import { getAdminUserId } from "@/lib/admin";
 import { r2Configured } from "@/lib/r2";
 import { formatPrice, storeCategoryLabel } from "@/lib/storeShared";
 import { createProduct } from "./actions";
+import { BuIcon } from "@/components/BuIcon";
 
 export const dynamic = "force-dynamic";
 
@@ -61,7 +62,7 @@ export default async function AdminLojaPage() {
                 href={`/admin/loja/${p.id}`}
                 className="flex items-center gap-4 border-b border-white/5 px-5 py-4 last:border-b-0 hover:bg-white/[0.03]"
               >
-                <span className="text-2xl">{cat.emoji}</span>
+                <BuIcon name={cat.value} size={36} />
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-bold">{p.name}</div>
                   <div className="text-xs text-[#7d7588]">

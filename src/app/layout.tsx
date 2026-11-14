@@ -1,6 +1,7 @@
 ﻿import type { Metadata } from "next";
 import Providers from "./providers";
 import "./globals.css";
+import { BuIconDefs } from "@/components/BuIcon";
 
 export const metadata: Metadata = {
   title: "ByteUP BOT",
@@ -16,6 +17,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body>
+        <BuIconDefs />
         <Providers>{children}</Providers>
       </body>
     </html>

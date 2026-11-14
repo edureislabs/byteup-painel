@@ -10,6 +10,7 @@ import { GENERATED_FILES, generatedFiles, moduleOfFile } from "@/lib/builder/bui
 import { TEMPLATE_FILES, TEMPLATE_VERSION } from "@/lib/builder/templateFiles";
 import { NOT_TEST_ORDER } from "@/lib/storeTesters";
 import { resetBuilderPrices, saveBuilderPrices } from "./actions";
+import { BuIcon } from "@/components/BuIcon";
 
 export const dynamic = "force-dynamic";
 
@@ -109,8 +110,8 @@ export default async function AdminMontadorPage({ searchParams }: { searchParams
           {catalogo.modules.map((m) => (
             <div key={m.id} className="grid grid-cols-[1fr_130px_90px] items-center gap-3 border-b border-white/5 px-5 py-3 last:border-b-0">
               <div className="min-w-0">
-                <div className="font-bold">
-                  {m.emoji} {m.name}
+                <div className="flex items-center gap-2 font-bold">
+                  <BuIcon name={m.id} size={28} /> {m.name}
                   {(vezes.get(m.id) ?? 0) > 0 && <span className="ml-2 text-xs font-normal text-[#7ee2a8]">{vezes.get(m.id)} venda(s)</span>}
                 </div>
                 <div className="truncate text-xs text-[#7d7588]">
@@ -139,8 +140,8 @@ export default async function AdminMontadorPage({ searchParams }: { searchParams
           {catalogo.combos.map((c) => (
             <div key={c.id} className="grid grid-cols-[1fr_130px_90px] items-center gap-3 border-b border-white/5 px-5 py-3">
               <div className="min-w-0">
-                <div className="font-bold">
-                  {c.emoji} Combo {c.name}
+                <div className="flex items-center gap-2 font-bold">
+                  <BuIcon name={c.id} size={28} /> Combo {c.name}
                   {c.active && !c.available && <span className="ml-2 text-xs font-normal text-[#f0b878]">um módulo dele está fora de venda</span>}
                 </div>
                 <div className="truncate text-xs text-[#7d7588]">
@@ -213,8 +214,8 @@ export default async function AdminMontadorPage({ searchParams }: { searchParams
             return (
               <div key={m.id} className="overflow-hidden rounded-3xl border border-white/10">
                 <div className="flex flex-wrap items-center justify-between gap-2 bg-white/[0.03] px-5 py-3">
-                  <span className="font-bold">
-                    {m.emoji} {m.name}{" "}
+                  <span className="flex items-center gap-2 font-bold">
+                    <BuIcon name={m.id} size={28} /> {m.name}{" "}
                     {!m.active && <span className="ml-1 rounded-full bg-white/10 px-2 py-0.5 text-[10px] text-[#aaa3b5]">fora de venda</span>}
                   </span>
                   <span className="text-xs text-[#7d7588]">

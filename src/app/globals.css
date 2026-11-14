@@ -301,3 +301,106 @@ body::before {
     padding: 48px 0;
   }
 }
+
+/* ---------- Ícones animados ByteUP (src/components/BuIcon.tsx) ---------- */
+.bu-tile {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  background:
+    radial-gradient(circle at 30% 18%, rgba(199, 125, 255, 0.28), transparent 55%),
+    linear-gradient(160deg, #1f1030 0%, #110a1a 55%, #09060d 100%);
+  border: 1px solid rgba(182, 76, 255, 0.32);
+  box-shadow:
+    inset 0 1px 0 rgba(243, 227, 255, 0.08),
+    inset 0 0 14px rgba(182, 76, 255, 0.12),
+    0 0 18px -8px rgba(182, 76, 255, 0.7);
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.bu-tile svg { filter: drop-shadow(0 0 3px rgba(182, 76, 255, 0.55)); }
+.bu-tile-on,
+button:hover .bu-tile,
+.group:hover .bu-tile {
+  border-color: rgba(199, 125, 255, 0.75);
+  box-shadow:
+    inset 0 1px 0 rgba(243, 227, 255, 0.12),
+    inset 0 0 16px rgba(182, 76, 255, 0.25),
+    0 0 22px -4px rgba(182, 76, 255, 0.85);
+}
+.bu-ico .bu-swing,
+.bu-ico .bu-pulse,
+.bu-ico .bu-shake,
+.bu-ico .bu-wave,
+.bu-ico .bu-float,
+.bu-ico .bu-coin,
+.bu-ico .bu-roll,
+.bu-ico .bu-flip,
+.bu-ico .bu-blink,
+.bu-ico .bu-dot,
+.bu-ico .bu-flicker,
+.bu-ico .bu-twinkle,
+.bu-ico .bu-needle,
+.bu-ico .bu-wave-a,
+.bu-ico .bu-slide-l,
+.bu-ico .bu-slide-r,
+.bu-ico .bu-grow,
+.bu-ico .bu-slide-down,
+.bu-ico .bu-rocket {
+  animation-delay: var(--bu-d, 0s);
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+.bu-ico .bu-twinkle, .bu-ico .bu-grow { transform-box: fill-box; transform-origin: center; }
+.bu-ico .bu-grow { transform-origin: center bottom; }
+.bu-ico .bu-pulse:not([style]) { transform-origin: 12px 12px; }
+.bu-ico .bu-coin { transform-origin: 12px 12px; }
+.bu-ico .bu-swing { animation-name: bu-swing; animation-duration: 2.6s; }
+.bu-ico .bu-pulse { animation-name: bu-pulse; animation-duration: 2.8s; }
+.bu-ico .bu-shake { animation-name: bu-shake; animation-duration: 3.2s; }
+.bu-ico .bu-wave { animation-name: bu-wave; animation-duration: 3s; }
+.bu-ico .bu-float { animation-name: bu-float; animation-duration: 3.4s; }
+.bu-ico .bu-coin { animation-name: bu-coin; animation-duration: 3.6s; }
+.bu-ico .bu-roll { animation-name: bu-roll; animation-duration: 3.4s; }
+.bu-ico .bu-flip { animation-name: bu-flip; animation-duration: 4s; }
+.bu-ico .bu-blink { animation-name: bu-blink; animation-duration: 4.2s; }
+.bu-ico .bu-dot { animation-name: bu-dot; animation-duration: 1.8s; }
+.bu-ico .bu-flicker { animation-name: bu-flicker; animation-duration: 1.6s; }
+.bu-ico .bu-twinkle { animation-name: bu-twinkle; animation-duration: 2.2s; }
+.bu-ico .bu-needle { animation-name: bu-needle; animation-duration: 3s; }
+.bu-ico .bu-wave-a { animation-name: bu-dot; animation-duration: 1.6s; }
+.bu-ico .bu-slide-r { animation-name: bu-slide-r; animation-duration: 2.4s; }
+.bu-ico .bu-slide-l { animation-name: bu-slide-l; animation-duration: 2.4s; }
+.bu-ico .bu-slide-down { animation-name: bu-slide-down; animation-duration: 2s; }
+.bu-ico .bu-grow { animation-name: bu-grow; animation-duration: 2.4s; }
+.bu-ico .bu-rocket { animation-name: bu-rocket; animation-duration: 2.2s; }
+.bu-ico .bu-d2 { animation-delay: calc(var(--bu-d, 0s) + 0.25s); }
+.bu-ico .bu-d3 { animation-delay: calc(var(--bu-d, 0s) + 0.5s); }
+
+@keyframes bu-swing { 0%, 100% { rotate: -9deg; } 50% { rotate: 9deg; } }
+@keyframes bu-pulse { 0%, 100% { scale: 1; } 50% { scale: 1.09; } }
+@keyframes bu-shake {
+  0%, 58%, 100% { rotate: 0deg; }
+  64% { rotate: -9deg; } 70% { rotate: 8deg; } 76% { rotate: -6deg; } 82% { rotate: 4deg; } 88% { rotate: 0deg; }
+}
+@keyframes bu-wave {
+  0%, 60%, 100% { rotate: 0deg; }
+  12% { rotate: 16deg; } 24% { rotate: -6deg; } 36% { rotate: 14deg; } 48% { rotate: -2deg; }
+}
+@keyframes bu-float { 0%, 100% { translate: 0 0.6px; } 50% { translate: 0 -1.2px; } }
+@keyframes bu-coin { 0%, 55%, 100% { scale: 1 1; } 70% { scale: 0.12 1; } 85% { scale: 1 1; } }
+@keyframes bu-roll { 0%, 60% { rotate: 0deg; } 82%, 100% { rotate: 90deg; } }
+@keyframes bu-flip { 0%, 65% { rotate: 0deg; } 85%, 100% { rotate: 180deg; } }
+@keyframes bu-blink { 0%, 90%, 100% { scale: 1 1; } 94% { scale: 1 0.1; } }
+@keyframes bu-dot { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+@keyframes bu-flicker { 0%, 100% { opacity: 1; } 40% { opacity: 0.55; } 60% { opacity: 0.9; } }
+@keyframes bu-twinkle { 0%, 100% { scale: 0.7; opacity: 0.55; } 50% { scale: 1.15; opacity: 1; } }
+@keyframes bu-needle { 0%, 100% { rotate: -38deg; } 50% { rotate: 22deg; } }
+@keyframes bu-slide-r { 0%, 100% { translate: -1px 0; } 50% { translate: 1.2px 0; } }
+@keyframes bu-slide-l { 0%, 100% { translate: 1px 0; } 50% { translate: -1.2px 0; } }
+@keyframes bu-slide-down { 0%, 100% { translate: 0 -1px; } 50% { translate: 0 1.2px; } }
+@keyframes bu-grow { 0%, 100% { scale: 1 1; } 50% { scale: 1 0.78; } }
+@keyframes bu-rocket { 0%, 100% { translate: 0 0; } 50% { translate: 0.9px -0.9px; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .bu-ico * { animation: none !important; }
+}

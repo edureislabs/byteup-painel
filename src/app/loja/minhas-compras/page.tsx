@@ -8,6 +8,7 @@ import LandingFooter from "../../components/LandingFooter";
 import { prisma } from "@/lib/prisma";
 import { daysAgo, formatBytes, formatPrice } from "@/lib/storeShared";
 import { builderModule, parseModules, readBuilderOptions, readUpgradeOptions } from "@/lib/builder/catalog";
+import { BuIcon } from "@/components/BuIcon";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Minhas compras | Loja ByteUP", robots: { index: false } };
@@ -59,7 +60,13 @@ export default async function MinhasComprasPage() {
       if (up) extrasDoBot.set(up.botItemId, [...(extrasDoBot.get(up.botItemId) ?? []), ...up.modulos]);
     }
   }
-  const nomeModulos = (ids: string[]) => ids.map((id) => `${builderModule(id)?.emoji ?? ""} ${builderModule(id)?.name ?? id}`).join(" · ");
+  const nomeModulos = (ids: string[]) =>
+    ids.map((id, n) => (
+      <span key={id} className="inline-flex items-center gap-1">
+        {n > 0 && <span className="mx-1">·</span>}
+        <BuIcon name={id} size={13} plain /> {builderModule(id)?.name ?? id}
+      </span>
+    ));
 
   return (
     <main className="min-h-screen text-white">

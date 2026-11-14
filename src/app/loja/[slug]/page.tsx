@@ -12,6 +12,7 @@ import { formatBytes, formatPrice, productImageUrl, storeCategoryLabel } from "@
 import { anyPaymentConfigured } from "@/lib/stripe";
 import { userOwnsProduct } from "@/lib/storeOrders";
 import BuyButton from "./BuyButton";
+import { BuIcon } from "@/components/BuIcon";
 
 export const dynamic = "force-dynamic";
 
@@ -98,7 +99,7 @@ export default async function ProductPage({ params }: { params: Params }) {
                 <img src={image} alt="" className="aspect-video w-full rounded-3xl border border-white/10 object-cover" />
               ) : (
                 <div className="grid aspect-video w-full place-items-center rounded-3xl border border-white/10 bg-gradient-to-br from-[#b64cff]/25 to-[#08070a] text-7xl">
-                  {cat.emoji}
+                  <BuIcon name={cat.value} size={120} />
                 </div>
               )}
 
@@ -113,8 +114,8 @@ export default async function ProductPage({ params }: { params: Params }) {
             </div>
 
             <aside className="h-fit rounded-3xl border border-white/10 bg-white/[0.03] p-6 lg:sticky lg:top-24">
-              <p className="text-xs font-semibold text-[#7d7588]">
-                {cat.emoji} {cat.label}
+              <p className="flex items-center gap-1.5 text-xs font-semibold text-[#7d7588]">
+                <BuIcon name={cat.value} size={13} plain /> {cat.label}
               </p>
               <div className="mt-2 text-4xl font-black">
                 {product.priceCents === 0 ? "Grátis" : formatPrice(product.priceCents)}

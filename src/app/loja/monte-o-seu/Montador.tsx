@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { signIn } from "next-auth/react";
 import { bestCombo, builderModule, type BuilderModule, type ComboAtivo } from "@/lib/builder/catalog";
 import { formatPrice } from "@/lib/storeShared";
+import { BuIcon } from "@/components/BuIcon";
 
 type Props = {
   loggedIn: boolean;
@@ -170,8 +171,8 @@ export default function Montador({
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-black">
-                      {c.emoji} Combo {c.name}
+                    <span className="flex items-center gap-2 font-black">
+                      <BuIcon name={c.id} size={28} active={ativo} /> Combo {c.name}
                     </span>
                     <span className="shrink-0 rounded-full bg-[#7ee2a8]/15 px-2 py-0.5 text-xs font-bold text-[#7ee2a8]">-{c.discountPct}%</span>
                   </div>
@@ -208,9 +209,7 @@ export default function Montador({
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
-                  <span className="text-2xl" aria-hidden>
-                    {m.emoji}
-                  </span>
+                  <BuIcon name={m.id} size={44} active={on} />
                   <span
                     className={`grid h-6 w-6 shrink-0 place-items-center rounded-lg border text-xs font-black ${
                       tem
@@ -298,17 +297,17 @@ export default function Montador({
         <div className="mt-6 space-y-2 border-t border-white/10 pt-5 text-sm">
           {upgrade ? (
             <div className="text-xs text-[#7ee2a8]">
-              ✓ Já tem: ⚙️ {base.name}
-              {upgrade.owned
-                .map(
-                  (id) =>
-                    ` · ${builderModule(id)?.emoji ?? ""} ${builderModule(id)?.name ?? id}`,
-                )
-                .join("")}
+              <span className="mr-1">✓ Já tem:</span>
+              <span className="inline-flex items-center gap-1"><BuIcon name="base" size={14} plain /> {base.name}</span>
+              {upgrade.owned.map((id) => (
+                <span key={id} className="ml-2 inline-flex items-center gap-1">
+                  · <BuIcon name={id} size={14} plain /> {builderModule(id)?.name ?? id}
+                </span>
+              ))}
             </div>
           ) : (
             <div className="flex justify-between gap-3">
-              <span>⚙️ {base.name}</span>
+              <span className="flex items-center gap-2"><BuIcon name="base" size={22} /> {base.name}</span>
               <span className="text-[#aaa3b5]">
                 {formatPrice(base.priceCents)}
               </span>
@@ -316,8 +315,8 @@ export default function Montador({
           )}
           {ordered.map((m) => (
             <div key={m.id} className="flex justify-between gap-3">
-              <span>
-                {m.emoji} {m.name}
+              <span className="flex items-center gap-2">
+                <BuIcon name={m.id} size={22} /> {m.name}
               </span>
               <span className="text-[#aaa3b5]">
                 {formatPrice(m.priceCents)}
@@ -326,8 +325,8 @@ export default function Montador({
           ))}
           {combo && (
             <div className="flex justify-between gap-3 text-[#7ee2a8]">
-              <span>
-                {combo.combo.emoji} Combo {combo.combo.name} (-{combo.combo.discountPct}%)
+              <span className="flex items-center gap-2">
+                <BuIcon name={combo.combo.id} size={22} /> Combo {combo.combo.name} (-{combo.combo.discountPct}%)
               </span>
               <span>-{formatPrice(combo.discountCents)}</span>
             </div>
@@ -379,10 +378,10 @@ export default function Montador({
         </div>
 
         <ul className="mt-6 space-y-2 border-t border-white/10 pt-5 text-sm text-[#aaa3b5]">
-          <li>🌐 Funciona em qualquer servidor</li>
-          <li>⚙️ Configurado por comandos, sem mexer no código</li>
-          <li>📘 Passo a passo para ligar (README)</li>
-          <li>🔁 Baixe de novo quando quiser em &quot;Minhas compras&quot;</li>
+          <li className="flex items-center gap-2"><BuIcon name="globo" size={16} plain /> Funciona em qualquer servidor</li>
+          <li className="flex items-center gap-2"><BuIcon name="base" size={16} plain /> Configurado por comandos, sem mexer no código</li>
+          <li className="flex items-center gap-2"><BuIcon name="livro" size={16} plain /> Passo a passo para ligar (README)</li>
+          <li className="flex items-center gap-2"><BuIcon name="baixar" size={16} plain /> Baixe de novo quando quiser em &quot;Minhas compras&quot;</li>
         </ul>
       </aside>
     </div>
