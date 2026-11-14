@@ -362,7 +362,7 @@ export const BUILDER_MODULES: BuilderModule[] = [
     bit: 17,
     name: "Inicializador",
     emoji: "🚀",
-    description: "Liga o bot com dois cliques, sem digitar comandos. Acha os bots no seu PC, mostra o mais novo e o mais antigo e ajuda a apagar cópias velhas. Para Windows.",
+    description: "Configura e liga o bot por janelas, sem terminal: instala o Node.js se faltar, confere o token e as permissões com o Discord, instala tudo e liga. Também para, mostra o registro, liga junto com o Windows e organiza cópias antigas. Para Windows.",
     priceCents: 990,
     commands: [],
     extra: true,

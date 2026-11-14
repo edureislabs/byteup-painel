@@ -152,6 +152,7 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
   const privileged = new Set<PrivilegedIntent>();
   for (const m of mods) for (const p of m.privileged ?? []) privileged.add(p);
   const intents = [...privileged].map((p) => PRIVILEGED_LABEL[p]);
+  const temInicializador = extras.some((m) => m.id === "inicializador");
 
   const L: string[] = [];
   L.push(`# ${opts.nome}`, "");
@@ -161,7 +162,8 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
   L.push("> Já tinha um bot nosso e está atualizando? Vá direto para **Atualizar o bot sem perder os dados**, mais abaixo.", "");
 
   L.push("## Do que você precisa", "");
-  L.push("- **Node.js 18.17 ou mais novo** (recomendado: a versão LTS em https://nodejs.org)");
+  if (temInicializador) L.push("- Um PC com **Windows** (o Inicializador instala o Node.js sozinho, se faltar)");
+  else L.push("- **Node.js 18.17 ou mais novo** (recomendado: a versão LTS em https://nodejs.org)");
   L.push("- Uma conta no Discord e permissão de **Gerenciar servidor** no servidor onde o bot vai ficar");
   L.push("");
 
@@ -175,6 +177,20 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
   }
   L.push("");
 
+  if (temInicializador) {
+    L.push("### 2. Ligue com o Inicializador (sem terminal)", "");
+    L.push("1. Extraia este .zip numa pasta (por exemplo, em Documentos).");
+    L.push("2. Dê **dois cliques em `Iniciar bot.bat`** e clique em **Ligar**. Na primeira vez abre a configuração, com 4 passos que ficam verdes quando estão certos:");
+    L.push("    - **Node.js:** se faltar, um botão baixa e instala sozinho.");
+    L.push("    - **Token:** cole o token do passo 1. Ele confere com o Discord na hora.");
+    L.push("    - **Permissões especiais (intents):** ele mostra quais faltam ligar e abre a página certa do Developer Portal.");
+    L.push("    - **ID do servidor** (opcional): com ele, os comandos aparecem na hora.");
+    L.push("3. Clique em **Instalar e ligar o bot**. Ele instala o que precisa e liga o bot, sem abrir terminal.");
+    L.push("4. Se o bot ainda não estiver no seu servidor, ele oferece o **link de convite** com as permissões certas. Escolha o servidor e autorize.", "");
+    L.push("Pode fechar o Inicializador: o bot continua ligado. Para desligar, abra de novo e clique em **Parar**. **Ligar com o Windows** faz o bot ligar sozinho quando o PC liga, e **Ver registro** mostra o que o bot está fazendo.", "");
+    L.push("> Vai usar uma hospedagem? Pule para **Deixar o bot ligado 24 horas**.", "");
+    L.push("<details><summary>Prefere fazer pelo terminal?</summary>", "");
+  }
   L.push("### 2. Coloque o token no bot", "");
   L.push("1. Extraia este .zip numa pasta.");
   L.push("2. Faça uma cópia do arquivo **.env.example** com o nome **.env** (no Windows, se a extensão estiver oculta, confira que o nome ficou só `.env`).");
@@ -186,6 +202,7 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
   L.push("```", "npm install", "npm start", "```", "");
   L.push("Quando aparecer **✅ online**, o terminal mostra um **link para adicionar o bot a um servidor**, já com as permissões certas. Abra o link, escolha o servidor e autorize.", "");
   L.push("> Os comandos podem levar alguns minutos para aparecer na primeira vez. Se demorar, aperte **Ctrl+R** no Discord.", "");
+  if (temInicializador) L.push("</details>", "");
 
   L.push("### 4. Configure no servidor", "");
   L.push("Tudo é configurado com **/config** (só quem tem *Gerenciar servidor* vê esse comando):", "");
@@ -214,10 +231,10 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
     L.push(`### ${m.emoji} ${m.name}`, "", m.description, "");
     if (m.id === "inicializador") {
       L.push("O arquivo **`Iniciar bot.bat`** fica fora da pasta do bot (pode deixar na Área de Trabalho). Dois cliques e ele:", "");
-      L.push("1. Procura no seu PC as pastas de bot (na primeira vez demora um pouco; depois ele lembra).");
-      L.push("2. Mostra a lista com o nome, a pasta, a data da versão e a última atividade de cada um, marcando o **mais novo** e o **mais antigo**.");
-      L.push("3. **Iniciar:** confere o Node.js, pede o token se faltar o `.env`, instala o que precisar e abre o bot numa janela.");
-      L.push("4. **Apagar:** manda uma cópia velha para a Lixeira (avisa antes se ela tiver dados mais novos que a outra).", "");
+      L.push("1. Procura no seu PC as pastas de bot (na primeira vez demora um pouco; depois ele lembra) e mostra se cada uma está **Ligado**, **Desligado** ou falta **Configurar**.");
+      L.push("2. **Ligar:** na primeira vez, configura tudo por janelas (Node.js, token, permissões, servidor), instala o que precisa e liga o bot sem terminal.");
+      L.push("3. **Parar** (salva os dados antes), **Configurar** (trocar token ou servidor), **Ver registro**, **Ligar com o Windows**.");
+      L.push("4. Marca a cópia **mais nova** e a **mais antiga** do mesmo bot e manda as velhas para a Lixeira (avisa antes se ela tiver dados mais novos).", "");
       L.push("> Use o Inicializador enquanto o bot roda no seu PC. Quando for para uma hospedagem, siga **Deixar o bot ligado 24 horas**.", "");
     } else {
       L.push("Veja como usar em **Atualizar o bot sem perder os dados**.", "");
@@ -231,7 +248,7 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
     L.push("1. Desligue o bot antigo e extraia este .zip numa pasta **nova**.");
     L.push("2. Na pasta nova, dê **dois cliques em `Transferir dados.bat`**.");
     L.push("3. Escolha a pasta do bot antigo e confirme. Ele copia a `data` e o `.env`, guarda uma cópia de segurança e já roda o `npm install`.");
-    L.push("4. Ligue o bot novo com `npm start`.");
+    L.push(temInicializador ? "4. Ligue o bot novo pelo **Iniciar bot.bat** (o antigo aparece como cópia antiga na lista)." : "4. Ligue o bot novo com `npm start`.");
   } else {
     L.push("1. Desligue o bot antigo e extraia este .zip numa pasta **nova**.");
     L.push("2. Copie a pasta **`data`** e o arquivo **`.env`** do bot antigo para a pasta nova.");
@@ -284,7 +301,7 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
   L.push("- `modulos`: módulos ligados (para desligar um, tire o nome dele da lista)");
   L.push("- `fuso` (opcional): fuso horário dos aniversários, ex.: `\"fuso\": \"America/Manaus\"` (padrão: horário de Brasília)");
   L.push("");
-  L.push("Depois de mudar, reinicie o bot (Ctrl+C no terminal e `npm start` de novo).", "");
+  L.push(temInicializador ? "Depois de mudar, reinicie o bot: no Inicializador, **Parar** e depois **Ligar**." : "Depois de mudar, reinicie o bot (Ctrl+C no terminal e `npm start` de novo).", "");
   if (mods.some((m) => m.id === "personalizar")) {
     L.push("### Textos, cores, emojis e status (módulo Personalização)", "");
     L.push("Todos os textos, botões (texto, emoji, cor, mostrar/esconder), modais, cores e o status do bot podem ser trocados sem mexer no código. Também dá para criar painéis com botões ou menu e formulários próprios:", "");

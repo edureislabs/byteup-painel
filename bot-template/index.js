@@ -1,4 +1,5 @@
 import './src/core/env.js';
+import { existsSync, unlinkSync } from 'node:fs';
 import {
   Client,
   Events,
@@ -186,12 +187,20 @@ client.once(Events.ClientReady, async (c) => {
 });
 
 // salva os dados antes de desligar
-for (const sinal of ['SIGINT', 'SIGTERM']) {
-  process.on(sinal, () => {
-    salvarTudo();
-    process.exit(0);
-  });
-}
+const desligar = () => {
+  salvarTudo();
+  process.exit(0);
+};
+for (const sinal of ['SIGINT', 'SIGTERM']) process.on(sinal, desligar);
+
+// O Inicializador liga o bot sem janela; para desligar com segurança ele cria o arquivo ".parar"
+const arquivoParar = new URL('./.parar', import.meta.url);
+setInterval(() => {
+  if (!existsSync(arquivoParar)) return;
+  try { unlinkSync(arquivoParar); } catch { /* já apagado */ }
+  console.log('⏹️ Desligando a pedido do Inicializador...');
+  desligar();
+}, 2000).unref();
 process.on('unhandledRejection', (e) => console.error('[erro]', e));
 
 client.login(token).catch((e) => {
