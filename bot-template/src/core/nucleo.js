@@ -16,7 +16,7 @@ const ajuda = {
     const campos = [];
     for (const m of MODULOS) {
       const linhas = (m.comandos ?? []).map((c) => `\`/${c.data.name}\` · ${c.data.description}`);
-      if (m.config) linhas.push(`\`/config ${m.config.grupo}\` · configurar este módulo`);
+      if (m.config?.grupo) linhas.push(`\`/config ${m.config.grupo}\` · configurar este módulo`);
       if (!linhas.length) continue;
       // um campo aceita até 1024 caracteres: quebra em partes se precisar
       let atual = '';

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NOT_TEST_ORDER } from "@/lib/storeTesters";
 import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
@@ -7,7 +8,7 @@ import { getUsersCached } from "@/lib/discordCache";
 import { cancelPayment, mercadoPagoConfigured } from "@/lib/mercadopago";
 import { deliverOrder, markOrderPaid } from "@/lib/storeOrders";
 import { daysAgo, formatPrice } from "@/lib/storeShared";
-  import ConfirmButton from "./ConfirmButton";
+import ConfirmButton from "./ConfirmButton";
 
 export const dynamic = "force-dynamic";
 
@@ -103,8 +104,8 @@ export default async function AdminPedidosPage({ searchParams }: { searchParams:
       take: 100,
       include: { items: true },
     }),
-    prisma.storeOrder.aggregate({ where: { status: "paid", paidAt: { gte: since30 } }, _sum: { totalCents: true } }),
-    prisma.storeOrder.count({ where: { status: "paid", paidAt: { gte: since30 } } }),
+    prisma.storeOrder.aggregate({ where: { status: "paid", paidAt: { gte: since30 }, ...NOT_TEST_ORDER }, _sum: { totalCents: true } }),
+    prisma.storeOrder.count({ where: { status: "paid", paidAt: { gte: since30 }, ...NOT_TEST_ORDER } }),
   ]);
   const users = await getUsersCached([...new Set(orders.map((o) => o.userId))]);
 
@@ -140,7 +141,10 @@ export default async function AdminPedidosPage({ searchParams }: { searchParams:
                   {o.status === "paid" && !o.deliveredAt && <span className="text-[#f0b878]"> • DM não entregue</span>}
                 </div>
               </div>
-              <div className="font-bold">{o.totalCents ? formatPrice(o.totalCents) : "Grátis"}</div>
+              <div className="font-bold">
+                  {o.provider === "teste" && <span className="mr-2 rounded-full bg-[#f0b878]/15 px-2 py-0.5 text-[10px] text-[#f0b878]">TESTE</span>}
+                  {o.totalCents ? formatPrice(o.totalCents) : "Grátis"}
+                </div>
               <div className={`w-24 text-xs font-bold ${STATUS[o.status] ?? ""}`}>{LABEL[o.status] ?? o.status}</div>
               <div className="flex flex-wrap gap-2">
                 {o.status === "paid" && (

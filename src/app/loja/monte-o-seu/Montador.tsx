@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { signIn } from "next-auth/react";
-import { builderModule, type BuilderModule } from "@/lib/builder/catalog";
+import { bestCombo, builderModule, type BuilderModule, type ComboAtivo } from "@/lib/builder/catalog";
 import { formatPrice } from "@/lib/storeShared";
 
 type Props = {
@@ -11,6 +11,8 @@ type Props = {
   /** preços valendo agora (vêm do servidor) e só os módulos à venda */
   base: { name: string; priceCents: number };
   modules: BuilderModule[];
+  /** combos com desconto (não valem em "Adicionar módulos") */
+  combos: ComboAtivo[];
   /** "Adicionar módulos" a um bot que a pessoa já comprou */
   upgrade?: { botItemId: string; nome: string; cor: string; owned: string[] };
 };
@@ -23,6 +25,7 @@ export default function Montador({
   paymentsReady,
   base,
   modules: BUILDER_MODULES,
+  combos,
   upgrade,
 }: Props) {
   const [form, setForm] = useState<Form>({
@@ -69,9 +72,9 @@ export default function Montador({
     [selected, BUILDER_MODULES],
   );
   const disponiveis = BUILDER_MODULES.filter((m) => !owned.has(m.id));
-  const total =
-    (upgrade ? 0 : base.priceCents) +
-    ordered.reduce((t, m) => t + m.priceCents, 0);
+  const precos = useMemo(() => Object.fromEntries(BUILDER_MODULES.map((m) => [m.id, m.priceCents])), [BUILDER_MODULES]);
+  const combo = upgrade ? null : bestCombo(combos, precos, ordered.map((m) => m.id));
+  const total = (upgrade ? 0 : base.priceCents) + ordered.reduce((t, m) => t + m.priceCents, 0) - (combo?.discountCents ?? 0);
   const allSelected =
     disponiveis.length > 0 && disponiveis.every((m) => selected.includes(m.id));
   const nameOk =
@@ -143,6 +146,39 @@ export default function Montador({
             {allSelected ? "Limpar" : "Selecionar todos"}
           </button>
         </div>
+
+        {!upgrade && combos.length > 0 && (
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">
+            {combos.map((c) => {
+              const soma = c.modules.reduce((t, id) => t + (precos[id] ?? 0), 0);
+              const ativo = combo?.combo.id === c.id;
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => setSelected((s) => [...new Set([...s, ...c.modules])])}
+                  className={`rounded-2xl border px-4 py-3 text-left text-sm transition-colors ${
+                    ativo ? "border-[#7ee2a8] bg-[#7ee2a8]/10" : "border-[#b64cff]/30 bg-[#b64cff]/[0.06] hover:border-[#b64cff]"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-black">
+                      {c.emoji} Combo {c.name}
+                    </span>
+                    <span className="shrink-0 rounded-full bg-[#7ee2a8]/15 px-2 py-0.5 text-xs font-bold text-[#7ee2a8]">-{c.discountPct}%</span>
+                  </div>
+                  <p className="mt-1 text-xs text-[#aaa3b5]">
+                    {c.modules.map((id) => BUILDER_MODULES.find((m) => m.id === id)?.name ?? id).join(" + ")}
+                  </p>
+                  <p className="mt-1 text-xs text-[#7d7588]">
+                    <s>{formatPrice(soma)}</s> {formatPrice(soma - Math.round((soma * c.discountPct) / 100))}{" "}
+                    {ativo ? "· aplicado ✓" : "· clique para escolher"}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {BUILDER_MODULES.map((m) => {
@@ -279,6 +315,14 @@ export default function Montador({
               </span>
             </div>
           ))}
+          {combo && (
+            <div className="flex justify-between gap-3 text-[#7ee2a8]">
+              <span>
+                {combo.combo.emoji} Combo {combo.combo.name} (-{combo.combo.discountPct}%)
+              </span>
+              <span>-{formatPrice(combo.discountCents)}</span>
+            </div>
+          )}
           {!ordered.length && (
             <p className="text-xs text-[#7d7588]">
               Nenhum módulo escolhido ainda.

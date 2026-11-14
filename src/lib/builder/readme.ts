@@ -44,6 +44,22 @@ const PRIMEIROS_PASSOS: Record<string, string[]> = {
     "`/ticket painel` — envia o painel com o botão **Abrir ticket**",
   ],
   sugestoes: ["`/config sugestoes canal canal:#sugestoes` — onde as sugestões são publicadas"],
+  verificacao: [
+    "`/verificacao configurar cargo:@Membro` — cargo que a pessoa ganha ao se verificar",
+    "Opcional na mesma linha: `remover:@NaoVerificado`, `idade-minima:7` (conta com pelo menos 7 dias) e `registro:#verificacoes`",
+    "`/verificacao painel canal:#verificacao` — envia o painel com o botão **Verificar**",
+    "Dica: deixe os canais do servidor visíveis só para quem tem o cargo de membro; o canal de verificação fica aberto para todos.",
+  ],
+  autorespostas: [
+    "`/autoresposta adicionar gatilho:ip do servidor resposta:O IP é jogar.exemplo.com` — cria uma resposta",
+    "`modo:` contém a palavra (padrão), é exatamente ou começa com",
+    "`/tag nome:...` mostra qualquer resposta salva; `/autoresposta lista` mostra todas",
+  ],
+  aniversarios: [
+    "`/aniversario configurar canal:#geral cargo:@Aniversariante` — onde dar parabéns e o cargo do dia",
+    "Cada membro usa `/aniversario definir dia:14 mes:novembro`",
+    "`/aniversario proximos` mostra os próximos. O horário segue o fuso do Brasil.",
+  ],
   enquetes: ["`/enquete pergunta:... opcoes:Sim | Não | Talvez duracao:1d` — cria uma enquete"],
   sorteios: ["`/sorteio criar premio:... duracao:2d vencedores:1` — cria um sorteio"],
   cargos: [
@@ -117,7 +133,19 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
       L.push("Não precisa configurar nada: é só usar os comandos.", "");
     }
   }
-  for (const m of extras) L.push(`### ${m.emoji} ${m.name}`, "", m.description, "", "Veja como usar em **Atualizar o bot sem perder os dados**.", "");
+  for (const m of extras) {
+    L.push(`### ${m.emoji} ${m.name}`, "", m.description, "");
+    if (m.id === "inicializador") {
+      L.push("O arquivo **`Iniciar bot.bat`** fica fora da pasta do bot (pode deixar na Área de Trabalho). Dois cliques e ele:", "");
+      L.push("1. Procura no seu PC as pastas de bot (na primeira vez demora um pouco; depois ele lembra).");
+      L.push("2. Mostra a lista com o nome, a pasta, a data da versão e a última atividade de cada um, marcando o **mais novo** e o **mais antigo**.");
+      L.push("3. **Iniciar:** confere o Node.js, pede o token se faltar o `.env`, instala o que precisar e abre o bot numa janela.");
+      L.push("4. **Apagar:** manda uma cópia velha para a Lixeira (avisa antes se ela tiver dados mais novos que a outra).", "");
+      L.push("> Use o Inicializador enquanto o bot roda no seu PC. Quando for para uma hospedagem, siga **Deixar o bot ligado 24 horas**.", "");
+    } else {
+      L.push("Veja como usar em **Atualizar o bot sem perder os dados**.", "");
+    }
+  }
   L.push(`### ⚙️ ${BUILDER_BASE.name}`, "", `**Comandos:** ${BUILDER_BASE.commands.map((c) => `\`${c}\``).join(" ")}`, "");
 
   L.push("## Atualizar o bot sem perder os dados", "");
@@ -137,11 +165,38 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
   L.push("");
 
   L.push("## Deixar o bot ligado 24 horas", "");
-  L.push("O bot só fica online enquanto o `npm start` estiver rodando. Para não depender do seu computador, use uma hospedagem que rode **Node.js** (uma VPS ou um serviço de hospedagem de bots):", "");
-  L.push("- Envie a pasta do bot **sem** a pasta `node_modules`.");
-  L.push("- O comando para iniciar é `npm start` (o arquivo principal é `index.js`).");
-  L.push("- Se a hospedagem tiver um lugar para **variáveis de ambiente**, coloque `DISCORD_TOKEN` lá em vez de enviar o `.env`.");
-  L.push("- As informações do bot (XP, dinheiro, advertências, configurações) ficam na pasta **`data`**. Faça backup dela e não apague ao atualizar o bot.");
+  L.push("O bot só fica online enquanto estiver rodando. No seu PC, ele desliga quando você desliga o computador. Para ficar online sempre, use uma **hospedagem**. Este bot já vem pronto para as mais usadas no Brasil.", "");
+  L.push("**Antes de qualquer hospedagem:**", "");
+  L.push("1. Ligue o bot no seu PC uma vez e confira que funciona (assim o `.env` já está certo).");
+  L.push("2. Monte o arquivo para enviar: abra a pasta do bot, selecione **tudo o que está dentro dela, menos a pasta `node_modules`**, clique com o botão direito → **Enviar para → Pasta compactada**. O `discloud.config` e o `squarecloud.app` precisam ficar na **raiz** do .zip, não dentro de outra pasta.");
+  L.push("3. O `.env` (com o token) vai junto. **Nunca mande esse .zip para ninguém.**");
+  L.push("");
+  L.push("### Discloud", "");
+  L.push("1. Crie a conta em https://discloud.com e entre no servidor deles no Discord (o envio é feito pelo bot da Discloud ou pelo painel do site).");
+  L.push("2. O arquivo **`discloud.config`** já vem pronto:", "");
+  L.push("```", "TYPE=bot", "MAIN=index.js", "RAM=100", "VERSION=latest", "```", "");
+  L.push("3. Envie o .zip pelo painel (Upload) ou, no Discord, com o comando `.upconfig` no canal de comandos deles.");
+  L.push("4. Se o bot cair por falta de memória, aumente o `RAM` (ex.: `RAM=200`).");
+  L.push("");
+  L.push("### Square Cloud", "");
+  L.push("1. Crie a conta em https://squarecloud.app.");
+  L.push("2. O arquivo **`squarecloud.app`** já vem pronto (bots precisam de pelo menos 256 MB):", "");
+  L.push("```", "MAIN=index.js", "MEMORY=256", "VERSION=recommended", `DISPLAY_NAME=${opts.nome.slice(0, 32)}`, "```", "");
+  L.push("3. No painel, clique em **Upload** e envie o .zip. Para o bot voltar sozinho se cair, adicione a linha `AUTORESTART=true` (se o seu plano permitir).");
+  L.push("");
+  L.push("### Hospedagem com painel (Pterodactyl e parecidas)", "");
+  L.push("1. Crie um servidor do tipo **Node.js** (versão 18 ou mais nova).");
+  L.push("2. Envie os arquivos pelo gerenciador de arquivos do painel (sem a `node_modules`).");
+  L.push("3. Arquivo principal: `index.js` · comando de início: `npm start` (ou `node index.js`).");
+  L.push("4. Se o painel tiver **variáveis de ambiente**, coloque `DISCORD_TOKEN` lá; senão, envie o `.env`.");
+  L.push("");
+  L.push("### VPS (Linux / Ubuntu)", "");
+  L.push("```", "# instalar o Node.js 22", "curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -", "sudo apt install -y nodejs", "", "# na pasta do bot (envie os arquivos com o WinSCP ou o FileZilla)", "npm install", "sudo npm install -g pm2", "pm2 start index.js --name meu-bot", "pm2 save", "pm2 startup   # rode o comando que ele mostrar: o bot volta sozinho quando a VPS reinicia", "```", "");
+  L.push("Comandos úteis: `pm2 logs meu-bot` (ver o que o bot está fazendo) · `pm2 restart meu-bot` (reiniciar).", "");
+  L.push("### Cuidado com os dados na hospedagem", "");
+  L.push("- As informações do bot (XP, dinheiro, configurações) ficam na pasta **`data`**, que o bot cria e atualiza sozinho.");
+  L.push("- **Antes de enviar uma versão nova**, baixe a pasta `data` da hospedagem (pelo gerenciador de arquivos ou pela opção de backup do painel) e coloque no .zip novo. Senão o bot volta zerado.");
+  L.push("- Faça backup da pasta `data` de vez em quando.");
   L.push("");
 
   L.push("## Personalizar", "");
@@ -150,6 +205,7 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
   L.push("- `cor`: cor padrão das mensagens (cada servidor pode trocar com `/config cor`)");
   L.push("- `status`: frase que aparece no perfil do bot");
   L.push("- `modulos`: módulos ligados (para desligar um, tire o nome dele da lista)");
+  L.push("- `fuso` (opcional): fuso horário dos aniversários, ex.: `\"fuso\": \"America/Manaus\"` (padrão: horário de Brasília)");
   L.push("");
   L.push("Depois de mudar, reinicie o bot (Ctrl+C no terminal e `npm start` de novo).", "");
 

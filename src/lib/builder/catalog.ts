@@ -28,6 +28,8 @@ export type BuilderModule = {
    * (os arquivos ficam em bot-template/extras/<id>/ e vão para a raiz do bot).
    */
   extra?: boolean;
+  /** extra que vai FORA da pasta do bot, na raiz do .zip (ex.: o Inicializador) */
+  fora?: boolean;
 };
 
 export const BUILDER_BASE = {
@@ -60,6 +62,15 @@ export const BUILDER_MODULES: BuilderModule[] = [
     configGroup: "automod",
     configSubs: ["ativar", "links", "permitir-site", "convites", "palavra", "flood", "maiusculas", "mencoes", "punicao", "imune", "ignorar-canal", "registro"],
     privileged: ["content"],
+  },
+  {
+    id: "verificacao",
+    bit: 14,
+    name: "Verificação",
+    emoji: "🔐",
+    description: "Painel com botão \"Verificar\": a pessoa resolve um desafio rápido e ganha o cargo de membro. Segura contas falsas e raids, com idade mínima da conta.",
+    priceCents: 790,
+    commands: ["/verificacao"],
   },
   {
     id: "boasvindas",
@@ -158,6 +169,25 @@ export const BUILDER_MODULES: BuilderModule[] = [
     commands: ["/cargos"],
   },
   {
+    id: "autorespostas",
+    bit: 15,
+    name: "Respostas automáticas",
+    emoji: "💬",
+    description: "O bot responde sozinho quando alguém escreve uma palavra (ex.: \"ip do servidor\"). Cada resposta vira um atalho: /tag regras.",
+    priceCents: 690,
+    commands: ["/autoresposta", "/tag"],
+    privileged: ["content"],
+  },
+  {
+    id: "aniversarios",
+    bit: 16,
+    name: "Aniversários",
+    emoji: "🎂",
+    description: "Cada membro cadastra o dia. No aniversário, o bot dá parabéns no canal e um cargo especial por 24 horas. Lista dos próximos aniversários.",
+    priceCents: 590,
+    commands: ["/aniversario"],
+  },
+  {
     id: "utilidades",
     bit: 11,
     name: "Utilidades",
@@ -185,7 +215,54 @@ export const BUILDER_MODULES: BuilderModule[] = [
     commands: [],
     extra: true,
   },
+  {
+    id: "inicializador",
+    bit: 17,
+    name: "Inicializador",
+    emoji: "🚀",
+    description: "Liga o bot com dois cliques, sem digitar comandos. Acha os bots no seu PC, mostra o mais novo e o mais antigo e ajuda a apagar cópias velhas. Para Windows.",
+    priceCents: 990,
+    commands: [],
+    extra: true,
+    fora: true,
+  },
 ];
+
+// ---------------- combos ----------------
+export type BuilderCombo = {
+  id: string;
+  name: string;
+  emoji: string;
+  /** módulos do combo; "todos" = todos os módulos do bot que estão à venda (sem as ferramentas) */
+  modules: string[] | "todos";
+  /** desconto padrão, em % sobre os módulos do combo (editável no admin) */
+  discountPct: number;
+};
+
+export const BUILDER_COMBOS: BuilderCombo[] = [
+  { id: "comunidade", name: "Comunidade", emoji: "🎉", modules: ["boasvindas", "niveis", "cargos", "enquetes", "sorteios", "aniversarios"], discountPct: 15 },
+  { id: "seguranca", name: "Segurança", emoji: "🛡️", modules: ["moderacao", "automod", "verificacao", "logs"], discountPct: 15 },
+  { id: "atendimento", name: "Atendimento", emoji: "🎫", modules: ["tickets", "sugestoes", "autorespostas", "logs"], discountPct: 15 },
+  { id: "completo", name: "Completo", emoji: "👑", modules: "todos", discountPct: 25 },
+];
+
+/** Combo pronto para usar: com os módulos já resolvidos e o desconto valendo agora. */
+export type ComboAtivo = { id: string; name: string; emoji: string; modules: string[]; discountPct: number };
+
+/**
+ * Melhor combo para os módulos escolhidos (o que dá o maior desconto).
+ * Usado no site, no servidor e no Discord, para a conta sempre bater.
+ */
+export function bestCombo(combos: ComboAtivo[], prices: Record<string, number>, ids: string[]) {
+  let melhor: { combo: ComboAtivo; discountCents: number } | null = null;
+  for (const c of combos) {
+    if (!c.modules.length || !c.modules.every((id) => ids.includes(id))) continue;
+    const soma = c.modules.reduce((t, id) => t + (prices[id] ?? 0), 0);
+    const discountCents = Math.round((soma * c.discountPct) / 100);
+    if (discountCents > 0 && (!melhor || discountCents > melhor.discountCents)) melhor = { combo: c, discountCents };
+  }
+  return melhor;
+}
 
 export const PRIVILEGED_LABEL: Record<PrivilegedIntent, string> = {
   members: "Server Members Intent",

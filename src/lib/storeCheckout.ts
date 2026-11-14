@@ -4,6 +4,7 @@ import { createPayment, getPayment, mercadoPagoConfigured, type MpPayment } from
 import { markOrderPaid, syncMercadoPagoPayment, userOwnsProduct } from "@/lib/storeOrders";
 import { breakdownTotal, getBuilderCatalog, priceBreakdown } from "@/lib/builder/prices";
 import { ownedBot } from "@/lib/builder/owned";
+import { isStoreTester } from "@/lib/storeTesters";
 import {
   builderItemName,
   cleanBotName,
@@ -165,8 +166,7 @@ export async function startUpgradePurchase(userId: string, input: { botItemId: u
   if (novos.some((id) => !catalogo.modules.find((m) => m.id === id)?.active)) {
     return { kind: "invalid", error: "Um dos módulos escolhidos não está mais à venda. Escolha de novo." };
   }
-  const precos = priceBreakdown(catalogo, novos);
-  delete precos.base; // a base a pessoa já pagou
+  const precos = priceBreakdown(catalogo, novos, { base: false, combo: false }); // a base já foi paga; combo só em bot novo
   const totalCents = breakdownTotal(precos);
   if (totalCents < 100) return { kind: "invalid", error: "O total precisa ser de pelo menos R$ 1,00." };
   const options: UpgradeOptions = { tipo: "adicionar", botItemId: bot.itemId, modulos: novos, precos };
@@ -221,6 +221,13 @@ function pixData(p: MpPayment): PixData {
 
 /** Gera (ou reaproveita) o Pix de um pedido do usuário. */
 export async function generatePix(userId: string, orderId: string, emailInput?: string | null): Promise<PixResult> {
+  // testador da loja (/admin/loja/testadores): o pedido é aprovado na hora, sem cobrança
+  if (await isStoreTester(userId)) {
+    const order = await prisma.storeOrder.findFirst({ where: { id: orderId, userId }, select: { id: true, status: true } });
+    if (!order) return { ok: false, status: 404, error: "Pedido não encontrado." };
+    if (order.status !== "paid") await markOrderPaid(order.id, "teste", `teste-${order.id}`);
+    return { ok: true, approved: true };
+  }
   if (!mercadoPagoConfigured()) return { ok: false, status: 503, error: "Pagamentos não configurados." };
 
   const order = await prisma.storeOrder.findFirst({ where: { id: orderId, userId }, include: { items: true } });

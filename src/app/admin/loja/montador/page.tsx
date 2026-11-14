@@ -8,6 +8,7 @@ import { BUILDER_MODULES, PRIVILEGED_LABEL, readBuilderOptions, readUpgradeOptio
 import { getBuilderCatalog } from "@/lib/builder/prices";
 import { GENERATED_FILES, generatedFiles, moduleOfFile } from "@/lib/builder/build";
 import { TEMPLATE_FILES, TEMPLATE_VERSION } from "@/lib/builder/templateFiles";
+import { NOT_TEST_ORDER } from "@/lib/storeTesters";
 import { resetBuilderPrices, saveBuilderPrices } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -42,7 +43,7 @@ export default async function AdminMontadorPage({ searchParams }: { searchParams
   const [catalogo, itensPagos] = await Promise.all([
     getBuilderCatalog(),
     prisma.storeOrderItem.findMany({
-      where: { productId: null, order: { status: "paid" } },
+      where: { productId: null, order: { status: "paid", ...NOT_TEST_ORDER } },
       select: { priceCents: true, options: true },
     }),
   ]);
@@ -81,6 +82,7 @@ export default async function AdminMontadorPage({ searchParams }: { searchParams
         <h2 className="mt-10 text-xl font-black">Preços</h2>
         <p className="mt-1 text-sm text-[#7d7588]">
           Valores em reais (ex.: 14,90). Desmarque &quot;À venda&quot; para tirar um módulo do site e do Discord. Pedidos já feitos mantêm o preço da compra.
+          Nos combos, o desconto vale sobre os módulos do combo (a base não tem desconto) e entra sozinho quando a pessoa escolhe todos eles; se der mais de um, vale o maior.
         </p>
 
         <form action={saveBuilderPrices} className="mt-4 overflow-hidden rounded-3xl border border-white/10">
@@ -129,12 +131,41 @@ export default async function AdminMontadorPage({ searchParams }: { searchParams
             </div>
           ))}
 
+          <div className="grid grid-cols-[1fr_130px_90px] items-center gap-3 border-y border-white/10 bg-white/[0.03] px-5 py-2 text-xs font-bold uppercase tracking-wider text-[#7d7588]">
+            <span>Combo</span>
+            <span>Desconto (%)</span>
+            <span className="text-center">Ativo</span>
+          </div>
+          {catalogo.combos.map((c) => (
+            <div key={c.id} className="grid grid-cols-[1fr_130px_90px] items-center gap-3 border-b border-white/5 px-5 py-3">
+              <div className="min-w-0">
+                <div className="font-bold">
+                  {c.emoji} Combo {c.name}
+                  {c.active && !c.available && <span className="ml-2 text-xs font-normal text-[#f0b878]">um módulo dele está fora de venda</span>}
+                </div>
+                <div className="truncate text-xs text-[#7d7588]">
+                  {c.modules.map((id) => catalogo.modules.find((m) => m.id === id)?.name ?? id).join(" + ")} · padrão {c.defaultDiscountPct}%
+                </div>
+              </div>
+              <input
+                name={`combo_${c.id}`}
+                defaultValue={c.discountPct}
+                inputMode="numeric"
+                className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm focus:border-[#b64cff] focus:outline-none"
+              />
+              <label className="flex justify-center">
+                <input type="checkbox" name={`comboativo_${c.id}`} defaultChecked={c.active} className="h-5 w-5 accent-[#b64cff]" />
+              </label>
+            </div>
+          ))}
+
           <div className="flex flex-wrap items-center justify-between gap-3 bg-white/[0.03] px-5 py-4">
             <span className="text-sm text-[#aaa3b5]">
               Tudo junto sai por{" "}
               <strong className="text-white">
                 {formatPrice(catalogo.base.priceCents + catalogo.modules.filter((m) => m.active).reduce((t, m) => t + m.priceCents, 0))}
-              </strong>
+              </strong>{" "}
+              (sem combo)
             </span>
             <button className="rounded-2xl bg-[#b64cff] px-6 py-3 text-sm font-bold hover:bg-[#c56bff]">Salvar preços</button>
           </div>

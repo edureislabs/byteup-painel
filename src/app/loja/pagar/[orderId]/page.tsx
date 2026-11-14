@@ -9,7 +9,8 @@ import { prisma } from "@/lib/prisma";
 import { mercadoPagoConfigured } from "@/lib/mercadopago";
 import { anyPaymentConfigured, stripeConfigured } from "@/lib/stripe";
 import { formatPrice, productImageUrl, storeCategoryLabel } from "@/lib/storeShared";
-import { BUILDER_BASE, builderModule, readBuilderOptions, readUpgradeOptions } from "@/lib/builder/catalog";
+import { BUILDER_BASE, BUILDER_COMBOS, builderModule, readBuilderOptions, readUpgradeOptions } from "@/lib/builder/catalog";
+import { isStoreTester } from "@/lib/storeTesters";
 import PaymentForm from "./PaymentForm";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +21,7 @@ export default async function PagarPage({ params }: { params: Promise<{ orderId:
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
   if (!userId) redirect("/login");
+  const tester = await isStoreTester(userId);
   if (!/^[0-9a-f-]{36}$/i.test(orderId)) notFound();
 
   const order = await prisma.storeOrder.findFirst({
@@ -29,7 +31,7 @@ export default async function PagarPage({ params }: { params: Promise<{ orderId:
   if (!order) notFound();
   if (order.status === "paid") redirect(`/loja/minhas-compras?pedido=${order.id}`);
 
-  const payable = (order.status === "pending" || order.status === "failed") && anyPaymentConfigured();
+  const payable = (order.status === "pending" || order.status === "failed") && (anyPaymentConfigured() || tester);
   const item = order.items[0];
   const image = item?.product ? productImageUrl(item.product.id, item.product.imageKey) : null;
   const cat = storeCategoryLabel(item?.product?.category ?? "bot");
@@ -51,6 +53,12 @@ export default async function PagarPage({ params }: { params: Promise<{ orderId:
             <Link href={`/loja/monte-o-seu?bot=${upgrade.botItemId}`} className="text-sm text-[#7d7588] hover:text-white">← Voltar aos módulos</Link>
           )}
           <h1 className="mt-4 text-3xl font-black">Pagamento</h1>
+          {tester && order.status !== "paid" && (
+            <p className="mt-3 rounded-2xl border border-[#f0b878]/30 bg-[#f0b878]/[0.08] px-4 py-3 text-sm text-[#f0d4b8]">
+              🧪 <strong>Modo teste:</strong> sua conta é testadora. Escolha <strong>Pix</strong>, coloque qualquer e-mail e o pedido é aprovado na hora,
+              sem cobrança (a entrega acontece normalmente).
+            </p>
+          )}
 
           <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_340px]">
             <div className="order-2 lg:order-1">
@@ -103,6 +111,14 @@ export default async function PagarPage({ params }: { params: Promise<{ orderId:
                         <span>{formatPrice(bot.precos?.[id] ?? builderModule(id)?.priceCents ?? 0)}</span>
                       </li>
                     ))}
+                    {Object.entries(bot.precos ?? {})
+                      .filter(([k]) => k.startsWith("combo:"))
+                      .map(([k, v]) => (
+                        <li key={k} className="flex justify-between gap-3 text-[#7ee2a8]">
+                          <span>🎁 Desconto do combo {BUILDER_COMBOS.find((c) => `combo:${c.id}` === k)?.name ?? ""}</span>
+                          <span>-{formatPrice(-v)}</span>
+                        </li>
+                      ))}
                   </ul>
                 )}
                 {upgrade && (

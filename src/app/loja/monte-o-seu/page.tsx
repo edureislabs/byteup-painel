@@ -5,7 +5,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import LandingNavbar from "../../components/LandingNavbar";
 import LandingFooter from "../../components/LandingFooter";
 import { anyPaymentConfigured } from "@/lib/stripe";
-import { getBuilderCatalog, modulesForSale } from "@/lib/builder/prices";
+import { combosForSale, getBuilderCatalog, modulesForSale } from "@/lib/builder/prices";
 import { ownedBot } from "@/lib/builder/owned";
 import Montador from "./Montador";
 
@@ -49,6 +49,7 @@ export default async function MonteOSeuPage({ searchParams }: { searchParams: Pr
             paymentsReady={anyPaymentConfigured()}
             base={{ name: catalogo.base.name, priceCents: catalogo.base.priceCents }}
             modules={modulesForSale(catalogo)}
+            combos={combosForSale(catalogo)}
             upgrade={
               bot ? { botItemId: bot.itemId, nome: bot.options.nome, cor: bot.options.cor, owned: bot.options.modulos } : undefined
             }

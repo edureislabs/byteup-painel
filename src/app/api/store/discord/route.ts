@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { timingSafeEqual } from "node:crypto";
 import { siteUrl } from "@/lib/mercadopago";
 import { checkoutLimited, generatePix, orderStatus, startBuilderPurchase, startPurchase } from "@/lib/storeCheckout";
-import { getBuilderCatalog, modulesForSale } from "@/lib/builder/prices";
+import { combosForSale, getBuilderCatalog, modulesForSale } from "@/lib/builder/prices";
 
 /**
  * Loja dentro do Discord: o bot chama esta rota em nome de quem clicou no botão.
@@ -66,6 +66,7 @@ export async function POST(req: NextRequest) {
           priceCents: m.priceCents,
           commands: m.commands.length,
         })),
+        combos: combosForSale(cat),
       });
     }
     case "builder_start": {

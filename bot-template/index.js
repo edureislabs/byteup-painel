@@ -70,7 +70,7 @@ const config = new SlashCommandBuilder()
   .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild);
 nucleo.montarConfigRaiz(config);
 for (const m of modulos) {
-  if (m.config) config.addSubcommandGroup((g) => m.config.montar(g.setName(m.config.grupo)));
+  if (m.config?.montar) config.addSubcommandGroup((g) => m.config.montar(g.setName(m.config.grupo)));
 }
 comandos.set('config', {
   data: config,

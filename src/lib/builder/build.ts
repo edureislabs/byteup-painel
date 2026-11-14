@@ -1,11 +1,11 @@
 import { slugify } from "@/lib/storeShared";
-import { BUILDER_MODULES, botModulesOnly, type BuilderOptions } from "./catalog";
+import { BUILDER_MODULES, botModulesOnly, builderModule, type BuilderOptions } from "./catalog";
 import { generateReadme } from "./readme";
 import { TEMPLATE_FILES, TEMPLATE_VERSION } from "./templateFiles";
 import { createZip, type ZipEntry } from "./zip";
 
 /** Arquivos que mudam em cada pedido (o resto vem igual da pasta bot-template/). */
-export const GENERATED_FILES = ["README.md", "package.json", "config.json"] as const;
+export const GENERATED_FILES = ["README.md", "package.json", "config.json", "discloud.config", "squarecloud.app"] as const;
 
 export function generatedFiles(opts: BuilderOptions, siteUrl: string): Record<(typeof GENERATED_FILES)[number], string> {
   const slug = slugify(opts.nome) || "meu-bot";
@@ -14,10 +14,14 @@ export function generatedFiles(opts: BuilderOptions, siteUrl: string): Record<(t
   const modulos = botModulesOnly(opts.modulos); // ferramentas extras não entram no config.json
   pkg.description = `${opts.nome}: bot para Discord (módulos: ${modulos.join(", ")})`;
   const config = { nome: opts.nome, cor: opts.cor, status: "Use /ajuda", modulos };
+  const nomeHost = opts.nome.replace(/[\r\n=]/g, " ").slice(0, 32);
   return {
     "README.md": generateReadme(opts, siteUrl),
     "package.json": `${JSON.stringify(pkg, null, 2)}\n`,
     "config.json": `${JSON.stringify(config, null, 2)}\n`,
+    // hospedagens brasileiras: já vão prontos (o README explica)
+    "discloud.config": `NAME=${nomeHost}\nTYPE=bot\nMAIN=index.js\nRAM=100\nVERSION=latest\n`,
+    "squarecloud.app": `MAIN=index.js\nMEMORY=256\nVERSION=recommended\nDISPLAY_NAME=${nomeHost}\nDESCRIPTION=Bot para Discord\n`,
   };
 }
 
@@ -50,7 +54,9 @@ export function buildBotZip(opts: BuilderOptions, siteUrl: string) {
     if ((GENERATED_FILES as readonly string[]).includes(nome)) continue;
     const modulo = moduleOfFile(nome);
     if (modulo && (!vendidos.has(modulo) || !escolhidos.has(modulo))) continue;
-    entries.push({ name: `${slug}/${destinoNoBot(nome)}`, data: paraWindows(nome, conteudo) });
+    // ferramentas "fora" (ex.: Inicializador) ficam na raiz do .zip, ao lado da pasta do bot
+    const fora = modulo ? builderModule(modulo)?.fora : false;
+    entries.push({ name: fora ? destinoNoBot(nome) : `${slug}/${destinoNoBot(nome)}`, data: paraWindows(nome, conteudo) });
   }
 
   return { fileName: `${slug}.zip`, buffer: createZip(entries), version: TEMPLATE_VERSION };

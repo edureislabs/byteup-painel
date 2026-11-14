@@ -706,3 +706,19 @@ model BuilderPrice {
   active     Boolean  @default(true) // false = módulo fora de venda
   updatedAt  DateTime @updatedAt
 }
+
+// Combos do "Monte o seu bot" (desconto editado em /admin/loja/montador).
+// Os módulos de cada combo ficam em src/lib/builder/catalog.ts no painel.
+model BuilderCombo {
+  id          String   @id // ex.: "seguranca"
+  discountPct Int      // desconto em % sobre os módulos do combo
+  active      Boolean  @default(true)
+  updatedAt   DateTime @updatedAt
+}
+
+// Contas do Discord que compram na loja sem pagar (para testes). Editado em /admin/loja/testadores.
+model StoreTester {
+  userId    String   @id // ID do Discord
+  note      String   @default("")
+  createdAt DateTime @default(now())
+}
