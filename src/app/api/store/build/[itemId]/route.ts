@@ -4,8 +4,8 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
 import { isAdmin } from "@/lib/admin";
 import { siteUrl } from "@/lib/mercadopago";
-import { readBuilderOptions } from "@/lib/builder/catalog";
 import { buildBotZip } from "@/lib/builder/build";
+import { botItemIdOf, ownedBot } from "@/lib/builder/owned";
 
 /**
  * Download do "Monte o seu bot": monta o .zip na hora com os módulos do pedido.
@@ -22,12 +22,15 @@ export async function GET(_req: Request, { params }: { params: Promise<{ itemId:
     where: { id: itemId },
     include: { order: { select: { userId: true, status: true } } },
   });
-  const opts = item && !item.productId ? readBuilderOptions(item.options) : null;
-  if (!item || !opts) return new NextResponse("Pedido não encontrado", { status: 404 });
-  if (item.order.userId !== userId && !isAdmin(userId)) return new NextResponse("Pedido não encontrado", { status: 404 });
-  if (item.order.status !== "paid" && !isAdmin(userId)) return new NextResponse("Este pedido não está pago.", { status: 403 });
+  const botItemId = item && !item.productId ? botItemIdOf(item) : null;
+  const admin = isAdmin(userId);
+  if (!item || !botItemId || (item.order.userId !== userId && !admin)) return new NextResponse("Pedido não encontrado", { status: 404 });
+  if (item.order.status !== "paid" && !admin) return new NextResponse("Este pedido não está pago.", { status: 403 });
 
-  const zip = buildBotZip(opts, siteUrl());
+  // sempre o bot completo: o original + todos os módulos adicionados depois
+  const bot = await ownedBot(botItemId, item.order.userId, { admin });
+  if (!bot) return new NextResponse("Este pedido não está pago.", { status: 403 });
+  const zip = buildBotZip(bot.options, siteUrl());
   return new NextResponse(new Uint8Array(zip.buffer), {
     headers: {
       "Content-Type": "application/zip",

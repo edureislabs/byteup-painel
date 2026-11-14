@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { getPayment, siteUrl } from "@/lib/mercadopago";
 import { formatPrice } from "@/lib/storeShared";
-import { readBuilderOptions } from "@/lib/builder/catalog";
 import { buildBotZip } from "@/lib/builder/build";
+import { botItemIdOf, ownedBot } from "@/lib/builder/owned";
 
 /**
  * Pedidos da loja: confirmação de pagamento e entrega.
@@ -73,10 +73,12 @@ export async function deliverOrder(orderId: string) {
   // bots montados: o .zip vai anexado na DM
   const files: DmFile[] = [];
   for (const item of order.items) {
-    const opts = item.productId ? null : readBuilderOptions(item.options);
-    if (!opts) continue;
+    // bot novo ou "Adicionar módulos": manda o bot completo, com tudo o que a pessoa já tem
+    const botItemId = item.productId ? null : botItemIdOf(item);
+    const bot = botItemId ? await ownedBot(botItemId, order.userId) : null;
+    if (!bot) continue;
     try {
-      const zip = buildBotZip(opts, base);
+      const zip = buildBotZip(bot.options, base);
       files.push({ name: zip.fileName, data: zip.buffer });
     } catch (err) {
       console.error("[loja] falha ao montar o bot", item.id, err);
@@ -92,7 +94,11 @@ export async function deliverOrder(orderId: string) {
       ...lines,
       "",
       ...(files.length
-        ? ["🤖 **Seu bot está anexado nesta mensagem.** Extraia o .zip e siga o **README.md**: em poucos minutos ele está online.", ""]
+        ? [
+            "🤖 **Seu bot está anexado nesta mensagem.** Extraia o .zip e siga o **README.md**: em poucos minutos ele está online.",
+            "♻️ Atualizando um bot que você já tinha? Guarde a pasta **data** e o **.env** do bot antigo (o README explica).",
+            "",
+          ]
         : []),
       hasService
         ? "🛠️ Este é um serviço sob medida: **abra um ticket** no nosso servidor e informe o número do pedido abaixo."

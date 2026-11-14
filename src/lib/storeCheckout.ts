@@ -3,12 +3,15 @@ import { anyPaymentConfigured } from "@/lib/stripe";
 import { createPayment, getPayment, mercadoPagoConfigured, type MpPayment } from "@/lib/mercadopago";
 import { markOrderPaid, syncMercadoPagoPayment, userOwnsProduct } from "@/lib/storeOrders";
 import { breakdownTotal, getBuilderCatalog, priceBreakdown } from "@/lib/builder/prices";
+import { ownedBot } from "@/lib/builder/owned";
 import {
   builderItemName,
   cleanBotName,
   cleanColor,
   parseModules,
+  upgradeItemName,
   type BuilderOptions,
+  type UpgradeOptions,
 } from "@/lib/builder/catalog";
 
 /**
@@ -140,6 +143,52 @@ export async function startBuilderPurchase(
       totalCents,
       provider: "mercadopago",
       items: { create: { productId: null, nameSnapshot: builderItemName(nome), priceCents: totalCents, options } },
+    },
+  });
+  await prisma.storeOrder.update({ where: { id: order.id }, data: { checkoutUrl: `/loja/pagar/${order.id}` } });
+  return { kind: "order", orderId: order.id, totalCents };
+}
+
+/**
+ * "Adicionar módulos" a um bot já comprado: cobra só os módulos novos (sem a base).
+ */
+export async function startUpgradePurchase(userId: string, input: { botItemId: unknown; modules: unknown }): Promise<BuilderStartResult> {
+  const bot = await ownedBot(String(input.botItemId ?? ""), userId);
+  if (!bot) return { kind: "invalid", error: "Bot não encontrado nas suas compras." };
+  const pedidos = parseModules(input.modules);
+  if (!pedidos) return { kind: "invalid", error: "Escolha pelo menos um módulo." };
+  const novos = pedidos.filter((id) => !bot.options.modulos.includes(id));
+  if (!novos.length) return { kind: "invalid", error: "Seu bot já tem esses módulos." };
+  if (!anyPaymentConfigured()) return { kind: "not_configured" };
+
+  const catalogo = await getBuilderCatalog();
+  if (novos.some((id) => !catalogo.modules.find((m) => m.id === id)?.active)) {
+    return { kind: "invalid", error: "Um dos módulos escolhidos não está mais à venda. Escolha de novo." };
+  }
+  const precos = priceBreakdown(catalogo, novos);
+  delete precos.base; // a base a pessoa já pagou
+  const totalCents = breakdownTotal(precos);
+  if (totalCents < 100) return { kind: "invalid", error: "O total precisa ser de pelo menos R$ 1,00." };
+  const options: UpgradeOptions = { tipo: "adicionar", botItemId: bot.itemId, modulos: novos, precos };
+
+  const recent = await prisma.storeOrder.findFirst({
+    where: {
+      userId,
+      status: { in: ["pending", "failed"] },
+      totalCents,
+      createdAt: { gt: new Date(Date.now() - 20 * 60 * 60 * 1000) },
+      items: { some: { productId: null, options: { equals: options } } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+  if (recent) return { kind: "order", orderId: recent.id, totalCents };
+
+  const order = await prisma.storeOrder.create({
+    data: {
+      userId,
+      totalCents,
+      provider: "mercadopago",
+      items: { create: { productId: null, nameSnapshot: upgradeItemName(bot.options.nome), priceCents: totalCents, options } },
     },
   });
   await prisma.storeOrder.update({ where: { id: order.id }, data: { checkoutUrl: `/loja/pagar/${order.id}` } });

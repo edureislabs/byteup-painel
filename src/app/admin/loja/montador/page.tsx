@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getAdminUserId } from "@/lib/admin";
 import { siteUrl } from "@/lib/mercadopago";
 import { formatPrice } from "@/lib/storeShared";
-import { BUILDER_MODULES, PRIVILEGED_LABEL, readBuilderOptions } from "@/lib/builder/catalog";
+import { BUILDER_MODULES, PRIVILEGED_LABEL, readBuilderOptions, readUpgradeOptions } from "@/lib/builder/catalog";
 import { getBuilderCatalog } from "@/lib/builder/prices";
 import { GENERATED_FILES, generatedFiles, moduleOfFile } from "@/lib/builder/build";
 import { TEMPLATE_FILES, TEMPLATE_VERSION } from "@/lib/builder/templateFiles";
@@ -51,7 +51,8 @@ export default async function AdminMontadorPage({ searchParams }: { searchParams
   const vendas = itensPagos.map((i) => readBuilderOptions(i.options)).filter(Boolean);
   const faturado = itensPagos.reduce((t, i) => t + i.priceCents, 0);
   const vezes = new Map<string, number>();
-  for (const v of vendas) for (const id of v!.modulos) vezes.set(id, (vezes.get(id) ?? 0) + 1);
+  const upgrades = itensPagos.map((i) => readUpgradeOptions(i.options)).filter(Boolean);
+  for (const v of [...vendas, ...upgrades]) for (const id of v!.modulos) vezes.set(id, (vezes.get(id) ?? 0) + 1);
 
   // arquivos
   const comuns = Object.entries(TEMPLATE_FILES).filter(([n]) => !moduleOfFile(n) && !(GENERATED_FILES as readonly string[]).includes(n));
@@ -70,7 +71,7 @@ export default async function AdminMontadorPage({ searchParams }: { searchParams
         </div>
         <h1 className="mt-3 text-3xl font-black">🧩 Monte o seu bot</h1>
         <p className="mt-2 text-sm text-[#aaa3b5]">
-          {vendas.length} bot(s) vendido(s) · {formatPrice(faturado)} faturado · código versão <code className="text-[#d9b4ff]">{TEMPLATE_VERSION}</code>
+          {vendas.length} bot(s) vendido(s) · {upgrades.length} módulo(s) adicionado(s) depois · {formatPrice(faturado)} faturado · código versão <code className="text-[#d9b4ff]">{TEMPLATE_VERSION}</code>
         </p>
 
         {salvo && <p className="mt-4 rounded-2xl border border-[#7ee2a8]/30 bg-[#7ee2a8]/[0.08] px-4 py-3 text-sm text-[#bff3d4]">✅ Preços salvos. Já valem no site e no Discord.</p>}

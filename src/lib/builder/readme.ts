@@ -53,7 +53,9 @@ const PRIMEIROS_PASSOS: Record<string, string[]> = {
 };
 
 export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
-  const mods = opts.modulos.map((id) => builderModule(id)!).filter(Boolean);
+  const todos = opts.modulos.map((id) => builderModule(id)!).filter(Boolean);
+  const mods = todos.filter((m) => !m.extra);
+  const extras = todos.filter((m) => m.extra);
   const privileged = new Set<PrivilegedIntent>();
   for (const m of mods) for (const p of m.privileged ?? []) privileged.add(p);
   const intents = [...privileged].map((p) => PRIVILEGED_LABEL[p]);
@@ -62,6 +64,8 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
   L.push(`# ${opts.nome}`, "");
   L.push(`Bot para Discord montado na Loja ByteUP. Funciona em **qualquer servidor** e é configurado por comandos, sem mexer no código.`, "");
   L.push(`**Módulos:** ${mods.map((m) => `${m.emoji} ${m.name}`).join(" · ")}`, "");
+  if (extras.length) L.push(`**Ferramentas:** ${extras.map((m) => `${m.emoji} ${m.name}`).join(" · ")}`, "");
+  L.push("> Já tinha um bot nosso e está atualizando? Vá direto para **Atualizar o bot sem perder os dados**, mais abaixo.", "");
 
   L.push("## Do que você precisa", "");
   L.push("- **Node.js 18.17 ou mais novo** (recomendado: a versão LTS em https://nodejs.org)");
@@ -113,7 +117,24 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
       L.push("Não precisa configurar nada: é só usar os comandos.", "");
     }
   }
+  for (const m of extras) L.push(`### ${m.emoji} ${m.name}`, "", m.description, "", "Veja como usar em **Atualizar o bot sem perder os dados**.", "");
   L.push(`### ⚙️ ${BUILDER_BASE.name}`, "", `**Comandos:** ${BUILDER_BASE.commands.map((c) => `\`${c}\``).join(" ")}`, "");
+
+  L.push("## Atualizar o bot sem perder os dados", "");
+  L.push("Comprou mais módulos ou recebeu uma versão nova? Os dados (XP, dinheiro, advertências, configurações) ficam na pasta **`data`** e o token no **`.env`**. O .zip novo nunca traz esses arquivos, então nada se perde:", "");
+  if (extras.some((m) => m.id === "transferidor")) {
+    L.push("1. Desligue o bot antigo e extraia este .zip numa pasta **nova**.");
+    L.push("2. Na pasta nova, dê **dois cliques em `Transferir dados.bat`**.");
+    L.push("3. Escolha a pasta do bot antigo e confirme. Ele copia a `data` e o `.env`, guarda uma cópia de segurança e já roda o `npm install`.");
+    L.push("4. Ligue o bot novo com `npm start`.");
+  } else {
+    L.push("1. Desligue o bot antigo e extraia este .zip numa pasta **nova**.");
+    L.push("2. Copie a pasta **`data`** e o arquivo **`.env`** do bot antigo para a pasta nova.");
+    L.push("3. Na pasta nova, rode `npm install` e depois `npm start`.");
+    L.push("");
+    L.push("> Prefere não mexer em pastas? O **Transferidor de dados** (na loja) faz isso com dois cliques.");
+  }
+  L.push("");
 
   L.push("## Deixar o bot ligado 24 horas", "");
   L.push("O bot só fica online enquanto o `npm start` estiver rodando. Para não depender do seu computador, use uma hospedagem que rode **Node.js** (uma VPS ou um serviço de hospedagem de bots):", "");

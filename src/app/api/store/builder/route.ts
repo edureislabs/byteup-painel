@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { checkoutLimited, startBuilderPurchase } from "@/lib/storeCheckout";
+import { checkoutLimited, startBuilderPurchase, startUpgradePurchase } from "@/lib/storeCheckout";
 
 /**
  * "Monte o seu bot": { modules: string[], botName: string, color?: string } -> { redirect }
@@ -14,7 +14,10 @@ export async function POST(req: NextRequest) {
   if (checkoutLimited(userId)) return NextResponse.json({ error: "Muitas tentativas. Espere um minuto." }, { status: 429 });
 
   const body = await req.json().catch(() => ({}));
-  const r = await startBuilderPurchase(userId, { modules: body.modules, botName: body.botName, color: body.color });
+  // com botItemId = "Adicionar módulos" a um bot que a pessoa já tem
+  const r = body.botItemId
+    ? await startUpgradePurchase(userId, { botItemId: body.botItemId, modules: body.modules })
+    : await startBuilderPurchase(userId, { modules: body.modules, botName: body.botName, color: body.color });
 
   switch (r.kind) {
     case "invalid":

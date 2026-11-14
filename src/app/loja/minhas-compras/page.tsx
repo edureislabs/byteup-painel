@@ -7,7 +7,7 @@ import LandingNavbar from "../../components/LandingNavbar";
 import LandingFooter from "../../components/LandingFooter";
 import { prisma } from "@/lib/prisma";
 import { daysAgo, formatBytes, formatPrice } from "@/lib/storeShared";
-import { builderModule, readBuilderOptions } from "@/lib/builder/catalog";
+import { builderModule, parseModules, readBuilderOptions, readUpgradeOptions } from "@/lib/builder/catalog";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Minhas compras | Loja ByteUP", robots: { index: false } };
@@ -50,6 +50,17 @@ export default async function MinhasComprasPage() {
   const cutoff = daysAgo(1);
   const visible = orders.filter((o) => o.status !== "pending" || o.createdAt > cutoff);
 
+  // "Adicionar módulos" pagos: somam aos módulos do bot original
+  const extrasDoBot = new Map<string, string[]>();
+  for (const o of orders) {
+    if (o.status !== "paid") continue;
+    for (const i of o.items) {
+      const up = i.productId ? null : readUpgradeOptions(i.options);
+      if (up) extrasDoBot.set(up.botItemId, [...(extrasDoBot.get(up.botItemId) ?? []), ...up.modulos]);
+    }
+  }
+  const nomeModulos = (ids: string[]) => ids.map((id) => `${builderModule(id)?.emoji ?? ""} ${builderModule(id)?.name ?? id}`).join(" · ");
+
   return (
     <main className="min-h-screen text-white">
       <LandingNavbar />
@@ -80,7 +91,11 @@ export default async function MinhasComprasPage() {
                   </div>
 
                   {o.items.map((item) => {
-                    const bot = item.productId ? null : readBuilderOptions(item.options);
+                    const original = item.productId ? null : readBuilderOptions(item.options);
+                    const bot = original
+                      ? { ...original, modulos: parseModules([...original.modulos, ...(extrasDoBot.get(item.id) ?? [])]) ?? original.modulos }
+                      : null;
+                    const upgrade = item.productId ? null : readUpgradeOptions(item.options);
                     return (
                     <div key={item.id} className="mt-3">
                       <div className="font-bold">
@@ -97,23 +112,32 @@ export default async function MinhasComprasPage() {
                         </p>
                       )}
 
-                      {bot && (
-                        <p className="mt-1 text-xs text-[#7d7588]">
-                          {bot.modulos.map((id) => `${builderModule(id)?.emoji ?? ""} ${builderModule(id)?.name ?? id}`).join(" · ")}
-                        </p>
-                      )}
+                      {bot && <p className="mt-1 text-xs text-[#7d7588]">{nomeModulos(bot.modulos)}</p>}
+                      {upgrade && <p className="mt-1 text-xs text-[#7d7588]">Adicionou: {nomeModulos(upgrade.modulos)}</p>}
 
                       {o.status === "paid" && bot && (
-                        <a
-                          href={`/api/store/build/${item.id}`}
-                          className="mt-2 flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm hover:border-[#b64cff]/50"
-                        >
-                          <span className="truncate">🤖 Baixar o bot (.zip)</span>
-                          <span className="shrink-0 text-xs text-[#7d7588]">sempre na versão mais nova • Baixar ↓</span>
-                        </a>
+                        <div className="mt-2 grid gap-2 sm:grid-cols-[1fr_auto]">
+                          <a
+                            href={`/api/store/build/${item.id}`}
+                            className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm hover:border-[#b64cff]/50"
+                          >
+                            <span className="truncate">🤖 Baixar o bot (.zip)</span>
+                            <span className="shrink-0 text-xs text-[#7d7588]">com todos os módulos • Baixar ↓</span>
+                          </a>
+                          <Link
+                            href={`/loja/monte-o-seu?bot=${item.id}`}
+                            className="flex items-center justify-center rounded-2xl bg-[#b64cff]/15 px-4 py-3 text-sm font-bold text-[#d9b4ff] hover:bg-[#b64cff]/25"
+                          >
+                            ➕ Adicionar módulos
+                          </Link>
+                        </div>
                       )}
 
-                      {o.status === "paid" && !bot && item.product?.kind !== "servico" && (
+                      {o.status === "paid" && upgrade && (
+                        <p className="mt-2 text-xs text-[#7d7588]">Já está no .zip do bot: baixe pelo pedido do bot ou pela mensagem na sua DM.</p>
+                      )}
+
+                      {o.status === "paid" && !bot && !upgrade && item.product?.kind !== "servico" && (
                         <div className="mt-2 space-y-2">
                           {(item.product?.files ?? []).map((f) => (
                             <a

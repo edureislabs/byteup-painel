@@ -23,6 +23,11 @@ export type BuilderModule = {
   configSubs?: string[];
   /** intents privilegiadas que precisam ser ligadas no Developer Portal */
   privileged?: PrivilegedIntent[];
+  /**
+   * "extra" = ferramenta que vai junto no .zip mas não é um módulo do bot
+   * (os arquivos ficam em bot-template/extras/<id>/ e vão para a raiz do bot).
+   */
+  extra?: boolean;
 };
 
 export const BUILDER_BASE = {
@@ -170,6 +175,16 @@ export const BUILDER_MODULES: BuilderModule[] = [
     priceCents: 490,
     commands: ["/caracoroa", "/dado", "/8ball", "/escolher", "/ship"],
   },
+  {
+    id: "transferidor",
+    bit: 13,
+    name: "Transferidor de dados",
+    emoji: "📦",
+    description: "Para trocar ou atualizar o bot sem perder nada: dois cliques, escolhe a pasta do bot antigo e ele leva XP, dinheiro, configurações e token. Para Windows.",
+    priceCents: 990,
+    commands: [],
+    extra: true,
+  },
 ];
 
 export const PRIVILEGED_LABEL: Record<PrivilegedIntent, string> = {
@@ -228,3 +243,29 @@ export function readBuilderOptions(json: unknown): BuilderOptions | null {
 }
 
 export const builderItemName = (nome: string) => `Bot personalizado: ${nome}`;
+export const upgradeItemName = (nome: string) => `Módulos extras: ${nome}`;
+
+/** Só os módulos do bot (sem as ferramentas extras): é o que vai no config.json. */
+export const botModulesOnly = (ids: string[]) => ids.filter((id) => !byId.get(id)?.extra);
+
+/** Pedido de "Adicionar módulos" a um bot que a pessoa já comprou. */
+export type UpgradeOptions = {
+  tipo: "adicionar";
+  /** id do item (StoreOrderItem) do bot original */
+  botItemId: string;
+  modulos: string[];
+  precos?: Record<string, number>;
+};
+
+export function readUpgradeOptions(json: unknown): UpgradeOptions | null {
+  if (!json || typeof json !== "object") return null;
+  const o = json as Record<string, unknown>;
+  if (o.tipo !== "adicionar" || typeof o.botItemId !== "string") return null;
+  const modulos = parseModules(o.modulos);
+  if (!modulos) return null;
+  const precos =
+    o.precos && typeof o.precos === "object"
+      ? (Object.fromEntries(Object.entries(o.precos as Record<string, unknown>).filter(([, v]) => Number.isInteger(v))) as Record<string, number>)
+      : undefined;
+  return { tipo: "adicionar", botItemId: o.botItemId, modulos, ...(precos ? { precos } : {}) };
+}

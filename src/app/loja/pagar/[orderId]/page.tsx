@@ -9,7 +9,7 @@ import { prisma } from "@/lib/prisma";
 import { mercadoPagoConfigured } from "@/lib/mercadopago";
 import { anyPaymentConfigured, stripeConfigured } from "@/lib/stripe";
 import { formatPrice, productImageUrl, storeCategoryLabel } from "@/lib/storeShared";
-import { BUILDER_BASE, builderModule, readBuilderOptions } from "@/lib/builder/catalog";
+import { BUILDER_BASE, builderModule, readBuilderOptions, readUpgradeOptions } from "@/lib/builder/catalog";
 import PaymentForm from "./PaymentForm";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +34,7 @@ export default async function PagarPage({ params }: { params: Promise<{ orderId:
   const image = item?.product ? productImageUrl(item.product.id, item.product.imageKey) : null;
   const cat = storeCategoryLabel(item?.product?.category ?? "bot");
   const bot = item && !item.productId ? readBuilderOptions(item.options) : null;
+  const upgrade = item && !item.productId ? readUpgradeOptions(item.options) : null;
 
   return (
     <main className="min-h-screen text-white">
@@ -45,6 +46,9 @@ export default async function PagarPage({ params }: { params: Promise<{ orderId:
           )}
           {bot && (
             <Link href="/loja/monte-o-seu" className="text-sm text-[#7d7588] hover:text-white">← Voltar ao Monte o seu bot</Link>
+          )}
+          {upgrade && (
+            <Link href={`/loja/monte-o-seu?bot=${upgrade.botItemId}`} className="text-sm text-[#7d7588] hover:text-white">← Voltar aos módulos</Link>
           )}
           <h1 className="mt-4 text-3xl font-black">Pagamento</h1>
 
@@ -97,6 +101,18 @@ export default async function PagarPage({ params }: { params: Promise<{ orderId:
                           {builderModule(id)?.emoji} {builderModule(id)?.name ?? id}
                         </span>
                         <span>{formatPrice(bot.precos?.[id] ?? builderModule(id)?.priceCents ?? 0)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {upgrade && (
+                  <ul className="space-y-1 border-l border-white/10 pl-3 text-xs text-[#aaa3b5]">
+                    {upgrade.modulos.map((id) => (
+                      <li key={id} className="flex justify-between gap-3">
+                        <span>
+                          ➕ {builderModule(id)?.emoji} {builderModule(id)?.name ?? id}
+                        </span>
+                        <span>{formatPrice(upgrade.precos?.[id] ?? builderModule(id)?.priceCents ?? 0)}</span>
                       </li>
                     ))}
                   </ul>

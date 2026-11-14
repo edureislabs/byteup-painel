@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { signIn } from "next-auth/react";
-import type { BuilderModule } from "@/lib/builder/catalog";
+import { builderModule, type BuilderModule } from "@/lib/builder/catalog";
 import { formatPrice } from "@/lib/storeShared";
 
 type Props = {
@@ -11,43 +11,79 @@ type Props = {
   /** preços valendo agora (vêm do servidor) e só os módulos à venda */
   base: { name: string; priceCents: number };
   modules: BuilderModule[];
+  /** "Adicionar módulos" a um bot que a pessoa já comprou */
+  upgrade?: { botItemId: string; nome: string; cor: string; owned: string[] };
 };
 
 const RASCUNHO = "byteup:monte-o-seu";
 type Form = { selected: string[]; botName: string; color: string };
 
-export default function Montador({ loggedIn, paymentsReady, base, modules: BUILDER_MODULES }: Props) {
-  const [form, setForm] = useState<Form>({ selected: [], botName: "", color: "#5865F2" });
+export default function Montador({
+  loggedIn,
+  paymentsReady,
+  base,
+  modules: BUILDER_MODULES,
+  upgrade,
+}: Props) {
+  const [form, setForm] = useState<Form>({
+    selected: [],
+    botName: upgrade?.nome ?? "",
+    color: upgrade?.cor ?? "#5865F2",
+  });
+  const owned = useMemo(() => new Set(upgrade?.owned ?? []), [upgrade]);
   const { selected, botName, color } = form;
-  const setSelected = (fn: (s: string[]) => string[]) => setForm((f) => ({ ...f, selected: fn(f.selected) }));
+  const setSelected = (fn: (s: string[]) => string[]) =>
+    setForm((f) => ({ ...f, selected: fn(f.selected) }));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // volta a seleção depois do login com o Discord
   useEffect(() => {
+    if (upgrade) return;
     try {
       const raw = sessionStorage.getItem(RASCUNHO);
       if (!raw) return;
       sessionStorage.removeItem(RASCUNHO);
       const d = JSON.parse(raw);
       const salvo: Form = {
-        selected: Array.isArray(d.selected) ? d.selected.filter((id: unknown) => BUILDER_MODULES.some((m) => m.id === id)) : [],
+        selected: Array.isArray(d.selected)
+          ? d.selected.filter((id: unknown) =>
+              BUILDER_MODULES.some((m) => m.id === id),
+            )
+          : [],
         botName: typeof d.botName === "string" ? d.botName.slice(0, 32) : "",
-        color: typeof d.color === "string" && /^#[0-9a-f]{6}$/i.test(d.color) ? d.color : "#5865F2",
+        color:
+          typeof d.color === "string" && /^#[0-9a-f]{6}$/i.test(d.color)
+            ? d.color
+            : "#5865F2",
       };
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setForm(salvo);
     } catch {
       // sem rascunho
     }
-  }, [BUILDER_MODULES]);
+  }, [BUILDER_MODULES, upgrade]);
 
-  const ordered = useMemo(() => BUILDER_MODULES.filter((m) => selected.includes(m.id)), [selected, BUILDER_MODULES]);
-  const total = base.priceCents + ordered.reduce((t, m) => t + m.priceCents, 0);
-  const allSelected = selected.length === BUILDER_MODULES.length;
-  const nameOk = botName.trim().length >= 2 && botName.trim().length <= 32;
+  const ordered = useMemo(
+    () => BUILDER_MODULES.filter((m) => selected.includes(m.id)),
+    [selected, BUILDER_MODULES],
+  );
+  const disponiveis = BUILDER_MODULES.filter((m) => !owned.has(m.id));
+  const total =
+    (upgrade ? 0 : base.priceCents) +
+    ordered.reduce((t, m) => t + m.priceCents, 0);
+  const allSelected =
+    disponiveis.length > 0 && disponiveis.every((m) => selected.includes(m.id));
+  const nameOk =
+    Boolean(upgrade) ||
+    (botName.trim().length >= 2 && botName.trim().length <= 32);
 
-  const toggle = (id: string) => setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
+  const toggle = (id: string) => {
+    if (owned.has(id)) return;
+    setSelected((s) =>
+      s.includes(id) ? s.filter((x) => x !== id) : [...s, id],
+    );
+  };
 
   async function comprar() {
     setError(null);
@@ -67,10 +103,22 @@ export default function Montador({ loggedIn, paymentsReady, base, modules: BUILD
       const res = await fetch("/api/store/builder", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ modules: ordered.map((m) => m.id), botName: botName.trim(), color }),
+        body: JSON.stringify(
+          upgrade
+            ? {
+                botItemId: upgrade.botItemId,
+                modules: ordered.map((m) => m.id),
+              }
+            : {
+                modules: ordered.map((m) => m.id),
+                botName: botName.trim(),
+                color,
+              },
+        ),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.redirect) throw new Error(data.error || "Erro ao iniciar a compra");
+      if (!res.ok || !data.redirect)
+        throw new Error(data.error || "Erro ao iniciar a compra");
       window.location.href = data.redirect;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erro");
@@ -85,7 +133,11 @@ export default function Montador({ loggedIn, paymentsReady, base, modules: BUILD
           <h2 className="text-lg font-black">Escolha os módulos</h2>
           <button
             type="button"
-            onClick={() => setSelected(() => (allSelected ? [] : BUILDER_MODULES.map((m) => m.id)))}
+            onClick={() =>
+              setSelected(() =>
+                allSelected ? [] : disponiveis.map((m) => m.id),
+              )
+            }
             className="rounded-full border border-white/10 px-4 py-1.5 text-xs font-bold text-[#aaa3b5] hover:text-white"
           >
             {allSelected ? "Limpar" : "Selecionar todos"}
@@ -94,22 +146,34 @@ export default function Montador({ loggedIn, paymentsReady, base, modules: BUILD
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {BUILDER_MODULES.map((m) => {
-            const on = selected.includes(m.id);
+            const tem = owned.has(m.id);
+            const on = tem || selected.includes(m.id);
             return (
               <button
                 key={m.id}
                 type="button"
                 onClick={() => toggle(m.id)}
                 aria-pressed={on}
+                disabled={tem}
                 className={`flex flex-col rounded-3xl border p-5 text-left transition-colors ${
-                  on ? "border-[#b64cff] bg-[#b64cff]/10" : "border-white/10 bg-white/[0.03] hover:border-white/25"
+                  tem
+                    ? "cursor-default border-[#7ee2a8]/30 bg-[#7ee2a8]/[0.04] opacity-70"
+                    : on
+                      ? "border-[#b64cff] bg-[#b64cff]/10"
+                      : "border-white/10 bg-white/[0.03] hover:border-white/25"
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
-                  <span className="text-2xl" aria-hidden>{m.emoji}</span>
+                  <span className="text-2xl" aria-hidden>
+                    {m.emoji}
+                  </span>
                   <span
                     className={`grid h-6 w-6 shrink-0 place-items-center rounded-lg border text-xs font-black ${
-                      on ? "border-[#b64cff] bg-[#b64cff] text-white" : "border-white/20 text-transparent"
+                      tem
+                        ? "border-[#7ee2a8] bg-[#7ee2a8] text-black"
+                        : on
+                          ? "border-[#b64cff] bg-[#b64cff] text-white"
+                          : "border-white/20 text-transparent"
                     }`}
                     aria-hidden
                   >
@@ -118,11 +182,19 @@ export default function Montador({ loggedIn, paymentsReady, base, modules: BUILD
                 </div>
                 <div className="mt-3 flex items-baseline justify-between gap-2">
                   <span className="font-black text-white">{m.name}</span>
-                  <span className="shrink-0 text-sm font-bold text-[#d9b4ff]">+ {formatPrice(m.priceCents)}</span>
+                  <span
+                    className={`shrink-0 text-sm font-bold ${tem ? "text-[#7ee2a8]" : "text-[#d9b4ff]"}`}
+                  >
+                    {tem ? "✓ já tem" : `+ ${formatPrice(m.priceCents)}`}
+                  </span>
                 </div>
-                <p className="mt-2 flex-1 text-sm leading-6 text-[#aaa3b5]">{m.description}</p>
+                <p className="mt-2 flex-1 text-sm leading-6 text-[#aaa3b5]">
+                  {m.description}
+                </p>
                 <p className="mt-3 text-xs text-[#7d7588]">
-                  {m.commands.length ? `${m.commands.length} comando(s)` : "Automático"}
+                  {m.commands.length
+                    ? `${m.commands.length} comando(s)`
+                    : "Automático"}
                   {m.configGroup ? " · configurável com /config" : ""}
                 </p>
               </button>
@@ -132,44 +204,86 @@ export default function Montador({ loggedIn, paymentsReady, base, modules: BUILD
       </div>
 
       <aside className="h-fit rounded-3xl border border-white/10 bg-white/[0.03] p-6 lg:sticky lg:top-24">
-        <h2 className="font-black">Seu bot</h2>
+        <h2 className="font-black">
+          {upgrade ? `Adicionar ao ${upgrade.nome}` : "Seu bot"}
+        </h2>
 
-        <label className="mt-4 block text-xs font-semibold text-[#aaa3b5]" htmlFor="nome-bot">Nome do bot</label>
-        <input
-          id="nome-bot"
-          value={botName}
-          onChange={(e) => setForm((f) => ({ ...f, botName: e.target.value }))}
-          maxLength={32}
-          placeholder="Ex.: Guardião"
-          className="mt-1 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-2.5 text-sm text-white outline-none focus:border-[#b64cff]"
-        />
+        {!upgrade && (
+          <>
+            <label
+              className="mt-4 block text-xs font-semibold text-[#aaa3b5]"
+              htmlFor="nome-bot"
+            >
+              Nome do bot
+            </label>
+            <input
+              id="nome-bot"
+              value={botName}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, botName: e.target.value }))
+              }
+              maxLength={32}
+              placeholder="Ex.: Guardião"
+              className="mt-1 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-2.5 text-sm text-white outline-none focus:border-[#b64cff]"
+            />
 
-        <label className="mt-4 block text-xs font-semibold text-[#aaa3b5]" htmlFor="cor-bot">Cor das mensagens</label>
-        <div className="mt-1 flex items-center gap-3">
-          <input
-            id="cor-bot"
-            type="color"
-            value={color}
-            onChange={(e) => setForm((f) => ({ ...f, color: e.target.value }))}
-            className="h-10 w-14 cursor-pointer rounded-xl border border-white/10 bg-transparent"
-          />
-          <span className="font-mono text-sm text-[#aaa3b5]">{color.toUpperCase()}</span>
-        </div>
+            <label
+              className="mt-4 block text-xs font-semibold text-[#aaa3b5]"
+              htmlFor="cor-bot"
+            >
+              Cor das mensagens
+            </label>
+            <div className="mt-1 flex items-center gap-3">
+              <input
+                id="cor-bot"
+                type="color"
+                value={color}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, color: e.target.value }))
+                }
+                className="h-10 w-14 cursor-pointer rounded-xl border border-white/10 bg-transparent"
+              />
+              <span className="font-mono text-sm text-[#aaa3b5]">
+                {color.toUpperCase()}
+              </span>
+            </div>
+          </>
+        )}
 
         <div className="mt-6 space-y-2 border-t border-white/10 pt-5 text-sm">
-          <div className="flex justify-between gap-3">
-            <span>⚙️ {base.name}</span>
-            <span className="text-[#aaa3b5]">{formatPrice(base.priceCents)}</span>
-          </div>
+          {upgrade ? (
+            <div className="text-xs text-[#7ee2a8]">
+              ✓ Já tem: ⚙️ {base.name}
+              {upgrade.owned
+                .map(
+                  (id) =>
+                    ` · ${builderModule(id)?.emoji ?? ""} ${builderModule(id)?.name ?? id}`,
+                )
+                .join("")}
+            </div>
+          ) : (
+            <div className="flex justify-between gap-3">
+              <span>⚙️ {base.name}</span>
+              <span className="text-[#aaa3b5]">
+                {formatPrice(base.priceCents)}
+              </span>
+            </div>
+          )}
           {ordered.map((m) => (
             <div key={m.id} className="flex justify-between gap-3">
               <span>
                 {m.emoji} {m.name}
               </span>
-              <span className="text-[#aaa3b5]">{formatPrice(m.priceCents)}</span>
+              <span className="text-[#aaa3b5]">
+                {formatPrice(m.priceCents)}
+              </span>
             </div>
           ))}
-          {!ordered.length && <p className="text-xs text-[#7d7588]">Nenhum módulo escolhido ainda.</p>}
+          {!ordered.length && (
+            <p className="text-xs text-[#7d7588]">
+              Nenhum módulo escolhido ainda.
+            </p>
+          )}
         </div>
 
         <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-4">
@@ -185,17 +299,29 @@ export default function Montador({ loggedIn, paymentsReady, base, modules: BUILD
               disabled={busy}
               className="flex w-full items-center justify-center rounded-2xl bg-[#b64cff] px-5 py-3.5 text-sm font-black text-white transition-colors hover:bg-[#c56bff] disabled:cursor-wait disabled:opacity-60"
             >
-              {busy ? "Abrindo..." : loggedIn ? "Continuar para o pagamento" : "Entrar com Discord para comprar"}
+              {busy
+                ? "Abrindo..."
+                : loggedIn
+                  ? "Continuar para o pagamento"
+                  : "Entrar com Discord para comprar"}
             </button>
           ) : (
-            <button type="button" disabled className="flex w-full cursor-not-allowed items-center justify-center rounded-2xl bg-[#b64cff]/40 px-5 py-3.5 text-sm font-black text-white/70">
+            <button
+              type="button"
+              disabled
+              className="flex w-full cursor-not-allowed items-center justify-center rounded-2xl bg-[#b64cff]/40 px-5 py-3.5 text-sm font-black text-white/70"
+            >
               Pagamento em breve
             </button>
           )}
           {error ? (
             <p className="mt-2 text-center text-xs text-[#f07878]">{error}</p>
           ) : (
-            <p className="mt-2 text-center text-xs text-[#7d7588]">Pix ou cartão. O bot chega na sua DM assim que o pagamento cair.</p>
+            <p className="mt-2 text-center text-xs text-[#7d7588]">
+              {upgrade
+                ? "Você paga só os módulos novos. O bot completo chega na sua DM; seus dados continuam (veja o README)."
+                : "Pix ou cartão. O bot chega na sua DM assim que o pagamento cair."}
+            </p>
           )}
         </div>
 
