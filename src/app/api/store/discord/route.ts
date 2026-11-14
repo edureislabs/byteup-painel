@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { timingSafeEqual } from "node:crypto";
 import { siteUrl } from "@/lib/mercadopago";
 import { checkoutLimited, generatePix, orderStatus, startBuilderPurchase, startPurchase } from "@/lib/storeCheckout";
-import { BUILDER_BASE, BUILDER_MODULES } from "@/lib/builder/catalog";
+import { getBuilderCatalog, modulesForSale } from "@/lib/builder/prices";
 
 /**
  * Loja dentro do Discord: o bot chama esta rota em nome de quem clicou no botão.
@@ -54,9 +54,10 @@ export async function POST(req: NextRequest) {
     }
     case "builder_catalog": {
       // módulos e preços do "Monte o seu bot" (o bot mostra no menu do Discord)
+      const cat = await getBuilderCatalog();
       return json({
-        base: { name: BUILDER_BASE.name, priceCents: BUILDER_BASE.priceCents, description: BUILDER_BASE.description },
-        modules: BUILDER_MODULES.map((m) => ({
+        base: { name: cat.base.name, priceCents: cat.base.priceCents, description: cat.base.description },
+        modules: modulesForSale(cat).map((m) => ({
           id: m.id,
           bit: m.bit,
           name: m.name,

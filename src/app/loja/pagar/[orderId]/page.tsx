@@ -89,14 +89,14 @@ export default async function PagarPage({ params }: { params: Promise<{ orderId:
                   <ul className="space-y-1 border-l border-white/10 pl-3 text-xs text-[#aaa3b5]">
                     <li className="flex justify-between gap-3">
                       <span>⚙️ {BUILDER_BASE.name}</span>
-                      <span>{formatPrice(BUILDER_BASE.priceCents)}</span>
+                      <span>{formatPrice(bot.precos?.base ?? BUILDER_BASE.priceCents)}</span>
                     </li>
                     {bot.modulos.map((id) => (
                       <li key={id} className="flex justify-between gap-3">
                         <span>
                           {builderModule(id)?.emoji} {builderModule(id)?.name ?? id}
                         </span>
-                        <span>{formatPrice(builderModule(id)?.priceCents ?? 0)}</span>
+                        <span>{formatPrice(bot.precos?.[id] ?? builderModule(id)?.priceCents ?? 0)}</span>
                       </li>
                     ))}
                   </ul>

@@ -697,3 +697,12 @@ model StoreOrderItem {
   @@index([orderId])
   @@index([productId])
 }
+
+// Preços do "Monte o seu bot" (editados em /admin/loja/montador).
+// Sem linha aqui = usa o preço padrão de src/lib/builder/catalog.ts no painel.
+model BuilderPrice {
+  moduleId   String   @id // "base" ou o id do módulo (ex.: "moderacao")
+  priceCents Int
+  active     Boolean  @default(true) // false = módulo fora de venda
+  updatedAt  DateTime @updatedAt
+}

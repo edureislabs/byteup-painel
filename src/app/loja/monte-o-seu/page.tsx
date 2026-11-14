@@ -5,6 +5,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import LandingNavbar from "../../components/LandingNavbar";
 import LandingFooter from "../../components/LandingFooter";
 import { anyPaymentConfigured } from "@/lib/stripe";
+import { getBuilderCatalog, modulesForSale } from "@/lib/builder/prices";
 import Montador from "./Montador";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default async function MonteOSeuPage() {
-  const session = await getServerSession(authOptions);
+  const [session, catalogo] = await Promise.all([getServerSession(authOptions), getBuilderCatalog()]);
 
   return (
     <main className="min-h-screen text-white">
@@ -32,7 +33,12 @@ export default async function MonteOSeuPage() {
             é configurado por comandos e chega na sua DM com um passo a passo para ligar.
           </p>
 
-          <Montador loggedIn={Boolean(session?.user?.id)} paymentsReady={anyPaymentConfigured()} />
+          <Montador
+            loggedIn={Boolean(session?.user?.id)}
+            paymentsReady={anyPaymentConfigured()}
+            base={{ name: catalogo.base.name, priceCents: catalogo.base.priceCents }}
+            modules={modulesForSale(catalogo)}
+          />
 
           <div className="mt-10 rounded-3xl border border-white/10 bg-white/[0.03] p-6 text-sm leading-6 text-[#aaa3b5]">
             <p className="font-bold text-white">Precisa de algo exclusivo?</p>

@@ -2,15 +2,21 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { signIn } from "next-auth/react";
-import { BUILDER_BASE, BUILDER_MODULES, builderTotal } from "@/lib/builder/catalog";
+import type { BuilderModule } from "@/lib/builder/catalog";
 import { formatPrice } from "@/lib/storeShared";
 
-type Props = { loggedIn: boolean; paymentsReady: boolean };
+type Props = {
+  loggedIn: boolean;
+  paymentsReady: boolean;
+  /** preços valendo agora (vêm do servidor) e só os módulos à venda */
+  base: { name: string; priceCents: number };
+  modules: BuilderModule[];
+};
 
 const RASCUNHO = "byteup:monte-o-seu";
 type Form = { selected: string[]; botName: string; color: string };
 
-export default function Montador({ loggedIn, paymentsReady }: Props) {
+export default function Montador({ loggedIn, paymentsReady, base, modules: BUILDER_MODULES }: Props) {
   const [form, setForm] = useState<Form>({ selected: [], botName: "", color: "#5865F2" });
   const { selected, botName, color } = form;
   const setSelected = (fn: (s: string[]) => string[]) => setForm((f) => ({ ...f, selected: fn(f.selected) }));
@@ -34,10 +40,10 @@ export default function Montador({ loggedIn, paymentsReady }: Props) {
     } catch {
       // sem rascunho
     }
-  }, []);
+  }, [BUILDER_MODULES]);
 
-  const ordered = useMemo(() => BUILDER_MODULES.filter((m) => selected.includes(m.id)), [selected]);
-  const total = builderTotal(ordered.map((m) => m.id));
+  const ordered = useMemo(() => BUILDER_MODULES.filter((m) => selected.includes(m.id)), [selected, BUILDER_MODULES]);
+  const total = base.priceCents + ordered.reduce((t, m) => t + m.priceCents, 0);
   const allSelected = selected.length === BUILDER_MODULES.length;
   const nameOk = botName.trim().length >= 2 && botName.trim().length <= 32;
 
@@ -152,8 +158,8 @@ export default function Montador({ loggedIn, paymentsReady }: Props) {
 
         <div className="mt-6 space-y-2 border-t border-white/10 pt-5 text-sm">
           <div className="flex justify-between gap-3">
-            <span>⚙️ {BUILDER_BASE.name}</span>
-            <span className="text-[#aaa3b5]">{formatPrice(BUILDER_BASE.priceCents)}</span>
+            <span>⚙️ {base.name}</span>
+            <span className="text-[#aaa3b5]">{formatPrice(base.priceCents)}</span>
           </div>
           {ordered.map((m) => (
             <div key={m.id} className="flex justify-between gap-3">

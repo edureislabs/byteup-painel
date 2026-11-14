@@ -2,9 +2,9 @@ import { prisma } from "@/lib/prisma";
 import { anyPaymentConfigured } from "@/lib/stripe";
 import { createPayment, getPayment, mercadoPagoConfigured, type MpPayment } from "@/lib/mercadopago";
 import { markOrderPaid, syncMercadoPagoPayment, userOwnsProduct } from "@/lib/storeOrders";
+import { breakdownTotal, getBuilderCatalog, priceBreakdown } from "@/lib/builder/prices";
 import {
   builderItemName,
-  builderTotal,
   cleanBotName,
   cleanColor,
   parseModules,
@@ -112,8 +112,14 @@ export async function startBuilderPurchase(
   if (!nome) return { kind: "invalid", error: "Dê um nome ao bot (de 2 a 32 caracteres)." };
   if (!anyPaymentConfigured()) return { kind: "not_configured" };
 
-  const options: BuilderOptions = { tipo: "monte-o-seu", modulos, nome, cor: cleanColor(input.color) };
-  const totalCents = builderTotal(modulos);
+  // preços valendo agora (editáveis no admin) e só módulos à venda
+  const catalogo = await getBuilderCatalog();
+  const fora = modulos.filter((id) => !catalogo.modules.find((m) => m.id === id)?.active);
+  if (fora.length) return { kind: "invalid", error: "Um dos módulos escolhidos não está mais à venda. Escolha de novo." };
+  const precos = priceBreakdown(catalogo, modulos);
+  const totalCents = breakdownTotal(precos);
+  if (totalCents < 100) return { kind: "invalid", error: "O total precisa ser de pelo menos R$ 1,00." };
+  const options: BuilderOptions = { tipo: "monte-o-seu", modulos, nome, cor: cleanColor(input.color), precos };
 
   // mesmo bot pedido de novo (clique duplo, voltou da página de pagamento): reaproveita o pedido pendente
   const recent = await prisma.storeOrder.findFirst({

@@ -2,7 +2,7 @@
  * "Monte o seu bot": módulos à venda e preços.
  * Pode ser importado no navegador (sem nada de servidor aqui).
  *
- * Para mudar um preço, altere `priceCents` (em centavos: 1490 = R$ 14,90).
+ * Os preços daqui são os PADRÃO. Para mudar, use /admin/loja/montador (fica salvo no banco).
  * O `id` é o nome do arquivo em bot-template/src/modules/<id>.js.
  * O `bit` identifica o módulo nos botões do Discord: nunca reaproveite um número.
  */
@@ -188,9 +188,6 @@ export function parseModules(input: unknown): string[] | null {
   return BUILDER_MODULES.filter((m) => ids.has(m.id)).map((m) => m.id);
 }
 
-export const builderTotal = (ids: string[]) =>
-  BUILDER_BASE.priceCents + ids.reduce((t, id) => t + (byId.get(id)?.priceCents ?? 0), 0);
-
 /** Nome do bot: 2 a 32 caracteres, sem quebras de linha nem símbolos que atrapalham. */
 export function cleanBotName(input: unknown): string | null {
   const s = String(input ?? "")
@@ -207,7 +204,14 @@ export function cleanColor(input: unknown): string {
 }
 
 /** O que fica salvo no item do pedido (StoreOrderItem.options). */
-export type BuilderOptions = { tipo: "monte-o-seu"; modulos: string[]; nome: string; cor: string };
+export type BuilderOptions = {
+  tipo: "monte-o-seu";
+  modulos: string[];
+  nome: string;
+  cor: string;
+  /** preço de cada parte no momento da compra ("base" + id de cada módulo), em centavos */
+  precos?: Record<string, number>;
+};
 
 export function readBuilderOptions(json: unknown): BuilderOptions | null {
   if (!json || typeof json !== "object") return null;
@@ -216,7 +220,11 @@ export function readBuilderOptions(json: unknown): BuilderOptions | null {
   const modulos = parseModules(o.modulos);
   const nome = cleanBotName(o.nome);
   if (!modulos || !nome) return null;
-  return { tipo: "monte-o-seu", modulos, nome, cor: cleanColor(o.cor) };
+  const precos =
+    o.precos && typeof o.precos === "object"
+      ? Object.fromEntries(Object.entries(o.precos as Record<string, unknown>).filter(([, v]) => Number.isInteger(v)))
+      : undefined;
+  return { tipo: "monte-o-seu", modulos, nome, cor: cleanColor(o.cor), ...(precos ? { precos: precos as Record<string, number> } : {}) };
 }
 
 export const builderItemName = (nome: string) => `Bot personalizado: ${nome}`;
