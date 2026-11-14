@@ -144,6 +144,24 @@ const tag = {
 
 export default {
   id: 'autorespostas',
+  painel: {
+    onde: { colecao: 'autorespostas', chaves: ['itens'] },
+    campos: [
+      {
+        k: 'lista', t: 'lista', titulo: 'gatilho', max: LIMITE, r: 'Respostas automáticas', nomeItem: 'Resposta',
+        a: 'Variáveis na resposta: {usuario} {nome} {servidor} {canal}',
+        campos: [
+          { k: 'gatilho', t: 'texto', max: 60, obrigatorio: true, r: 'Gatilho (palavra ou frase)' },
+          { k: 'resposta', t: 'texto', max: 1800, linhas: true, obrigatorio: true, r: 'Resposta' },
+          { k: 'modo', t: 'escolha', op: [['contem', 'Contém a palavra'], ['igual', 'É exatamente'], ['comeca', 'Começa com']], padrao: 'contem', r: 'Quando responder' },
+        ],
+        item(it, _velho, ctx) {
+          if (normalizar(it.gatilho).length < 2) { ctx.avisos.push(`${ctx.onde}: o gatilho precisa ter 2 letras ou mais (ignorado)`); return null; }
+          return it;
+        },
+      },
+    ],
+  },
   nome: tx('respostas_automaticas_2'),
   intents: [GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
   comandos: [autoresposta, tag],

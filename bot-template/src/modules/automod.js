@@ -313,6 +313,24 @@ const config = {
 
 export default {
   id: 'automod',
+  painel: {
+    padrao: PADRAO,
+    campos: [
+      { k: 'ativo', t: 'bool', r: 'AutoMod ligado' },
+      { k: 'links', t: 'bool', r: 'Apagar links' },
+      { k: 'dominiosPermitidos', t: 'palavras', dominio: true, max: 50, r: 'Sites liberados', a: 'Um por linha, ex.: youtube.com' },
+      { k: 'convites', t: 'bool', r: 'Apagar convites de outros servidores' },
+      { k: 'palavras', t: 'palavras', minusculo: true, max: 200, itemMax: 60, r: 'Palavras proibidas', a: 'Uma por linha' },
+      { k: 'spam', t: 'int', min: 0, max: 30, r: 'Flood: mensagens permitidas em 5 s', a: '0 = desligado' },
+      { k: 'maiusculas', t: 'bool', r: 'Apagar mensagens com excesso de MAIÚSCULAS' },
+      { k: 'mencoes', t: 'int', min: 0, max: 50, r: 'Máximo de menções numa mensagem', a: '0 = desligado' },
+      { k: 'acao', t: 'escolha', op: [['apagar', 'Só apagar'], ['castigo', 'Apagar e dar castigo']], r: 'O que fazer' },
+      { k: 'duracao', t: 'duracao', min: 60_000, max: 28 * 864e5, r: 'Duração do castigo' },
+      { k: 'imunes', t: 'cargos', max: 25, r: 'Cargos que o AutoMod ignora' },
+      { k: 'ignorados', t: 'canais', max: 50, r: 'Canais que o AutoMod ignora' },
+      { k: 'canalLog', t: 'canal', r: 'Canal de registro' },
+    ],
+  },
   nome: 'AutoMod',
   prioridade: 0, // roda antes dos outros módulos nas mensagens novas
   intents: [GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],

@@ -111,6 +111,16 @@ const contagem = {
 
 export default {
   id: 'contagem',
+  painel: {
+    padrao: PADRAO,
+    campos: [{ k: 'canal', t: 'canal', r: 'Canal da contagem', a: 'Trocar o canal recomeça do 1' }],
+    depois(c, antes) {
+      if (c.canal === antes.canal) return;
+      c.atual = 0;
+      c.ultimo = null;
+      c.recordeDaRodada = c.recorde ?? 0;
+    },
+  },
   nome: tx('jogo_contar_2'),
   intents: [GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
   comandos: [contagem],

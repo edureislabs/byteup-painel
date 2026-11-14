@@ -235,6 +235,13 @@ const avaliacoes = {
 
 export default {
   id: 'avaliacoes',
+  painel: {
+    padrao: PADRAO,
+    campos: [
+      { k: 'ativo', t: 'bool', r: 'Pedir avaliação ao fechar o ticket' },
+      { k: 'canal', t: 'canal', r: 'Canal onde as avaliações aparecem' },
+    ],
+  },
   nome: tx('avaliacao_atendimento'),
   comandos: [avaliacoes],
   componentes,

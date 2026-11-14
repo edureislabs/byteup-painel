@@ -435,6 +435,30 @@ const config = {
 
 export default {
   id: 'economia',
+  painel: {
+    padrao: PADRAO,
+    campos: [
+      { k: 'moeda', t: 'texto', max: 20, obrigatorio: true, r: 'Nome da moeda' },
+      { k: 'emoji', t: 'emoji', r: 'Emoji da moeda' },
+      { k: 'diario', t: 'int', min: 0, max: 1_000_000, r: 'Valor do /diario' },
+      { k: 'trabalhoMin', t: 'int', min: 0, max: 1_000_000, r: 'Mínimo do /trabalhar' },
+      { k: 'trabalhoMax', t: 'int', min: 0, max: 1_000_000, r: 'Máximo do /trabalhar' },
+      { k: 'trabalhoIntervalo', t: 'duracao', min: 60_000, max: 7 * 864e5, r: 'Tempo entre um /trabalhar e outro' },
+      { k: 'apostaMax', t: 'int', min: 0, max: 1_000_000_000, r: 'Aposta máxima', a: '0 = sem limite' },
+      {
+        k: 'loja', t: 'lista', id: 'tempo', titulo: 'nome', max: 25, r: 'Loja', nomeItem: 'Item',
+        campos: [
+          { k: 'nome', t: 'texto', max: 60, obrigatorio: true, r: 'Nome' },
+          { k: 'preco', t: 'int', min: 1, max: 1_000_000_000, r: 'Preço' },
+          { k: 'cargo', t: 'cargo', obrigatorio: true, r: 'Cargo que a pessoa ganha' },
+          { k: 'descricao', t: 'texto', max: 200, r: 'Descrição' },
+        ],
+      },
+    ],
+    depois(c) {
+      if (c.trabalhoMin > c.trabalhoMax) [c.trabalhoMin, c.trabalhoMax] = [c.trabalhoMax, c.trabalhoMin];
+    },
+  },
   nome: tx('economia'),
   permissoes: [PermissionFlagsBits.ManageRoles],
   comandos: [saldo, diario, trabalhar, pagar, movimentar('carteira', 'banco', 'depositar'), movimentar('banco', 'carteira', 'sacar'), apostar, ricos, loja, comprar, ecoAdmin],

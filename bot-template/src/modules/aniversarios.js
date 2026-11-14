@@ -2,6 +2,7 @@ import { ChannelType, PermissionFlagsBits, SlashCommandBuilder } from 'discord.j
 import { colecao } from '../core/db.js';
 import { CONFIG, ajustes, salvarAjustes, embed, responder, preencher, imagens } from '../core/util.js';
 import { textos, visuais } from '../core/textos.js';
+import { moduloLigado } from '../core/servidor.js';
 
 // Textos deste módulo (o dono do bot pode trocar todos no "Personalizar bot.html")
 const tx = textos('aniversarios', {
@@ -171,7 +172,7 @@ async function verificar(client) {
       if (membro && c.cargo) await membro.roles.remove(c.cargo, 'Fim do dia de aniversário').catch(() => {});
     }
 
-    if (c.canal || c.cargo) {
+    if ((c.canal || c.cargo) && moduloLigado(guild.id, 'aniversarios')) {
       const canal = c.canal && guild.channels.cache.get(c.canal);
       for (const [userId, d] of Object.entries(datas.ler(guild.id) ?? {})) {
         if (!fazHoje(d, h) || c.anunciados[userId] === chaveHoje) continue;
@@ -197,6 +198,13 @@ async function verificar(client) {
 
 export default {
   id: 'aniversarios',
+  painel: {
+    padrao: PADRAO,
+    campos: [
+      { k: 'canal', t: 'canal', r: 'Canal dos parabéns' },
+      { k: 'cargo', t: 'cargo', r: 'Cargo do dia do aniversário' },
+    ],
+  },
   nome: tx('aniversarios'),
   comandos: [aniversario],
   permissoes: [PermissionFlagsBits.ManageRoles],

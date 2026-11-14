@@ -240,6 +240,21 @@ const antiraid = {
 
 export default {
   id: 'antiraid',
+  painel: {
+    padrao: PADRAO,
+    campos: [
+      { k: 'ativo', t: 'bool', r: 'Anti-raid ligado' },
+      { k: 'limite', t: 'int', min: 3, max: 100, r: 'Entradas que disparam o modo raid' },
+      { k: 'segundos', t: 'int', min: 5, max: 600, r: 'Em quantos segundos' },
+      { k: 'acao', t: 'escolha', op: [['expulsar', 'Expulsar quem entrar'], ['castigo', 'Dar castigo'], ['nada', 'Só avisar']], r: 'Durante o raid' },
+      { k: 'alerta', t: 'canal', r: 'Canal do alerta' },
+      { k: 'cargoAlerta', t: 'cargo', r: 'Cargo marcado no alerta' },
+      { k: 'idadeMinima', t: 'int', min: 0, max: 365, r: 'Idade mínima da conta (dias)', a: 'Contas mais novas são expulsas sempre. 0 = não barra' },
+    ],
+    depois(c, antes, guild) {
+      if (antes.ativo && !c.ativo && c.emRaid) encerrarRaid(guild, null).catch(() => {});
+    },
+  },
   nome: tx('anti_raid'),
   prioridade: 1, // antes das boas-vindas: quem é expulso nem recebe a mensagem
   intents: [GatewayIntentBits.GuildMembers],

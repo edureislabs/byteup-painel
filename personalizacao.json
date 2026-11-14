@@ -2,7 +2,7 @@
  "formato": "byteup-personalizacao",
  "versao": 1,
  "bot": "teste",
- "gerado": "2026-11-14T19:27:46.113Z",
+ "gerado": "2026-11-14T19:59:15.945Z",
  "modulos": [
   {
    "id": "geral",
@@ -7685,7 +7685,9 @@
   }
  ],
  "valores": {
-  "textos": {},
+  "textos": {
+   "convites.msg_entrada_padrao": "📥 {usuario} entrou · convidado(a) por {convidou} ({convites} convite(s)) aaaaaaaaaaaaaa"
+  },
   "visuais": {
    "tickets.aberto": {
     "rodape": "sadfsdf"

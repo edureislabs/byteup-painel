@@ -320,6 +320,29 @@ const formulario = {
 
 export default {
   id: 'formularios',
+  painel: {
+    padrao: { lista: {} },
+    campos: [
+      {
+        k: 'lista', t: 'lista', objeto: true, id: 'slug:titulo', idMax: 20, titulo: 'titulo', max: 10, r: 'Formulários', nomeItem: 'Formulário',
+        a: 'Publique com /formulario painel',
+        campos: [
+          { k: 'titulo', t: 'texto', max: 45, obrigatorio: true, r: 'Título' },
+          { k: 'canal', t: 'canal', obrigatorio: true, r: 'Canal que recebe as respostas' },
+          { k: 'cargo', t: 'cargo', r: 'Cargo para quem for aprovado' },
+          { k: 'mencionar', t: 'cargo', r: 'Cargo marcado a cada resposta' },
+          {
+            k: 'perguntas', t: 'lista', titulo: 'texto', max: 5, r: 'Perguntas', nomeItem: 'Pergunta',
+            campos: [
+              { k: 'texto', t: 'texto', max: 45, obrigatorio: true, r: 'Pergunta' },
+              { k: 'longa', t: 'bool', r: 'Resposta longa' },
+              { k: 'obrigatoria', t: 'bool', padrao: true, r: 'Obrigatória' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
   nome: tx('formularios_2'),
   comandos: [formulario],
   componentes,

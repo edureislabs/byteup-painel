@@ -525,6 +525,26 @@ const config = {
 
 export default {
   id: 'tickets',
+  painel: {
+    padrao: PADRAO,
+    campos: [
+      { k: 'categoria', t: 'canal', canal: 'categoria', r: 'Categoria onde os tickets abrem' },
+      { k: 'equipe', t: 'cargo', r: 'Cargo que atende', a: 'Vazio = o cargo da equipe (Geral)' },
+      { k: 'registro', t: 'canal', r: 'Canal de registro (transcrições)' },
+      { k: 'limite', t: 'int', min: 1, max: 10, r: 'Tickets abertos ao mesmo tempo por pessoa' },
+      {
+        k: 'assuntos', t: 'lista', id: 'slug:nome', titulo: 'nome', max: 25, r: 'Assuntos (menu do painel)', nomeItem: 'Assunto',
+        a: 'Com assuntos, use /ticket painel modo:menu',
+        campos: [
+          { k: 'nome', t: 'texto', max: 80, obrigatorio: true, r: 'Nome' },
+          { k: 'emoji', t: 'emoji', r: 'Emoji' },
+          { k: 'descricao', t: 'texto', max: 100, r: 'Descrição no menu' },
+          { k: 'categoria', t: 'canal', canal: 'categoria', r: 'Categoria própria', a: 'Vazio = a categoria geral' },
+          { k: 'equipe', t: 'cargo', r: 'Equipe própria', a: 'Vazio = a equipe geral' },
+        ],
+      },
+    ],
+  },
   nome: tx('tickets'),
   // o conteúdo das mensagens é necessário para salvar o histórico ao fechar
   intents: [GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],

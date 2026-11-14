@@ -191,6 +191,14 @@ const salasCmd = {
 
 export default {
   id: 'callstemp',
+  painel: {
+    padrao: PADRAO,
+    campos: [
+      { k: 'criador', t: 'canal', canal: 'voz', r: 'Canal de voz "Criar sala"', a: 'Quem entrar nele ganha uma sala. Vazio = desligado' },
+      { k: 'categoria', t: 'canal', canal: 'categoria', r: 'Categoria das salas' },
+      { k: 'limite', t: 'int', min: 0, max: 99, r: 'Limite padrão de pessoas', a: '0 = sem limite' },
+    ],
+  },
   nome: tx('calls_temporarias'),
   intents: [GatewayIntentBits.GuildVoiceStates],
   permissoes: [PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageRoles, PermissionFlagsBits.MoveMembers, PermissionFlagsBits.Connect],

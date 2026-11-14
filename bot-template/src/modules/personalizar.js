@@ -15,6 +15,8 @@ import {
 import { colecao } from '../core/db.js';
 import { CONFIG, responder, aplicarPresenca, cortar, embed, imagens } from '../core/util.js';
 import { textos, botoes, preencher, ativarPersonalizacao, exportar, importar, resetar, valoresAtuais, criados } from '../core/textos.js';
+import { esquemas, exportarConfig, aplicarConfig } from '../core/servidor.js';
+import { modulosCarregados } from '../core/nucleo.js';
 
 /**
  * Personalização: o dono do bot troca todos os textos, botões (texto, emoji, cor, esconder),
@@ -34,12 +36,13 @@ ativarPersonalizacao();
 
 const tx = textos('personalizar', {
   so_dono: ['Só o dono do bot (quem criou a aplicação no Developer Portal) pode personalizar.', 'resposta'],
-  baixar_ok: ['Aqui está o arquivo com todos os textos do bot ({total} personalizado(s) até agora).\n\n**Como editar:** abra o **Personalizar bot.html** (está na pasta do bot), clique em **Abrir arquivo** e escolha este arquivo. Depois de salvar, use `/personalizar aplicar`.', 'resposta'],
+  baixar_ok: ['Aqui está o arquivo com os textos do bot ({total} personalizado(s) até agora) e a configuração dos servidores.\n\n**Como editar:** abra o **Personalizar bot.html** (está na pasta do bot), clique em **Abrir arquivo** e escolha este arquivo. Depois de salvar, use `/personalizar aplicar`.', 'resposta'],
   arquivo_json: ['Envie o arquivo **.json** salvo pelo Personalizar bot.html.', 'resposta'],
   arquivo_grande: ['Esse arquivo é grande demais (máximo 2 MB).', 'resposta'],
   arquivo_ler: ['Não consegui baixar o arquivo do Discord. Tente de novo.', 'resposta'],
   arquivo_invalido: ['Esse arquivo não é um JSON válido. Salve de novo pelo Personalizar bot.html.', 'resposta'],
   aplicado: ['Personalização aplicada: **{total}** item(ns) diferente(s) do padrão. Já está valendo.', 'resposta'],
+  aplicado_servidores: ['\nConfiguração de **{servidores}** servidor(es) atualizada ({campos} ajuste(s)).', 'resposta'],
   aplicado_paineis: ['\nOs painéis já enviados estão sendo atualizados.', 'resposta'],
   avisos: ['\n\n⚠️ Ignorei:\n{lista}', 'resposta'],
   resetar_pergunta: ['Isto apaga **toda** a personalização (textos, botões, cores, status, painéis e formulários criados) e volta ao padrão. Tem certeza?', 'resposta'],
@@ -92,7 +95,15 @@ async function ehDono(i) {
   return dono.id === i.user.id;
 }
 
-/** Cargos e canais dos servidores, para o painel HTML mostrar listas em vez de pedir IDs. */
+const TIPOS_CANAL = {
+  [ChannelType.GuildText]: 'texto',
+  [ChannelType.GuildAnnouncement]: 'texto',
+  [ChannelType.GuildVoice]: 'voz',
+  [ChannelType.GuildStageVoice]: 'voz',
+  [ChannelType.GuildCategory]: 'categoria',
+};
+
+/** Cargos, canais e a configuração de cada servidor, para o painel HTML mostrar listas em vez de pedir IDs. */
 function servidores(client) {
   return [...client.guilds.cache.values()].slice(0, 10).map((g) => ({
     id: g.id,
@@ -103,10 +114,11 @@ function servidores(client) {
       .slice(0, 250)
       .map((r) => ({ id: r.id, nome: r.name, cor: r.hexColor })),
     canais: [...g.channels.cache.values()]
-      .filter((c) => [ChannelType.GuildText, ChannelType.GuildAnnouncement, ChannelType.GuildCategory].includes(c.type))
-      .sort((a, b) => a.rawPosition - b.rawPosition)
+      .filter((c) => TIPOS_CANAL[c.type])
+      .sort((a, b) => (a.type === ChannelType.GuildCategory) - (b.type === ChannelType.GuildCategory) || a.rawPosition - b.rawPosition)
       .slice(0, 500)
-      .map((c) => ({ id: c.id, nome: c.name, tipo: c.type === ChannelType.GuildCategory ? 'categoria' : 'texto' })),
+      .map((c) => ({ id: c.id, nome: c.name, tipo: TIPOS_CANAL[c.type], pai: c.parent?.name ?? '' })),
+    config: exportarConfig(g.id, modulosCarregados()),
   }));
 }
 
@@ -271,7 +283,7 @@ async function enviarFormulario(i, [formId]) {
 const personalizar = {
   data: new SlashCommandBuilder()
     .setName('personalizar')
-    .setDescription('Personaliza os textos, botões, cores e status do bot (só o dono do bot)')
+    .setDescription('Personaliza os textos, botões, cores e a configuração dos servidores (só o dono do bot)')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addSubcommand((s) => s.setName('baixar').setDescription('Baixa o arquivo para editar no Personalizar bot.html'))
     .addSubcommand((s) =>
@@ -288,6 +300,7 @@ const personalizar = {
 
     if (sub === 'baixar') {
       const dados = exportar({ nomeBot: CONFIG.nome || i.client.user.username, servidores: servidores(i.client) });
+      dados.esquemas = esquemas(modulosCarregados());
       const v = dados.valores;
       const total = Object.keys(v.textos).length + Object.keys(v.visuais).length + Object.keys(v.botoes).length + v.criados.paineis.length + v.criados.formularios.length;
       const arquivo = new AttachmentBuilder(Buffer.from(JSON.stringify(dados, null, 1), 'utf8'), { name: 'personalizacao.json' });
@@ -315,11 +328,14 @@ const personalizar = {
       }
       const r = importar(json);
       if (!r.ok) return responder(i, r.erro, 'erro');
+      const sv = aplicarConfig(i.client, json.valores?.servidores, modulosCarregados());
+      r.avisos.push(...sv.avisos);
       aplicarPresenca(i.client);
       const temEnviados = [...i.client.guilds.cache.keys()].some((g) => Object.keys(enviados.ler(g) ?? {}).length);
       if (temEnviados) atualizarPaineis(i.client).catch((e) => console.error('[personalizar] painéis:', e.message));
       const avisos = r.avisos.length ? tx('avisos', { lista: cortar(r.avisos.slice(0, 15).map((a) => `• ${a}`).join('\n'), 1500) }) : '';
-      return responder(i, tx('aplicado', { total: r.total }) + (temEnviados ? tx('aplicado_paineis') : '') + avisos, r.avisos.length ? 'aviso' : 'sucesso');
+      const servs = sv.servidores ? tx('aplicado_servidores', { servidores: sv.servidores, campos: sv.campos }) : '';
+      return responder(i, tx('aplicado', { total: r.total }) + servs + (temEnviados ? tx('aplicado_paineis') : '') + avisos, r.avisos.length ? 'aviso' : 'sucesso');
     }
 
     if (sub === 'ver') {

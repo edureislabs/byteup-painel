@@ -268,6 +268,13 @@ const config = {
 
 export default {
   id: 'logs',
+  painel: {
+    padrao: PADRAO,
+    campos: [
+      { k: 'canal', t: 'canal', r: 'Canal dos registros', a: 'Vazio = desligado' },
+      { k: 'tipos', t: 'varias', op: Object.entries(TIPOS), r: 'O que registrar' },
+    ],
+  },
   nome: tx('logs'),
   intents: [
     GatewayIntentBits.GuildMembers,

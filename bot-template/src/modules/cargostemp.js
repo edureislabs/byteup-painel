@@ -142,6 +142,10 @@ const cargotemp = {
 
 export default {
   id: 'cargostemp',
+  painel: {
+    padrao: { registro: null },
+    campos: [{ k: 'registro', t: 'canal', r: 'Canal de registro' }],
+  },
   nome: tx('cargos_temporarios_2'),
   permissoes: [PermissionFlagsBits.ManageRoles],
   comandos: [cargotemp],

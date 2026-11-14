@@ -146,7 +146,30 @@ input.campo,select{width:100%;background:var(--surface2);border:1px solid var(--
 .linha2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
 .linha3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px}
 .mt{margin-top:10px}
-@media (max-width:860px){.linha2,.linha3{grid-template-columns:1fr}}
+/* configurar servidores */
+.srv-mod.desligado .nome-mod{color:var(--soft);text-decoration:line-through}
+.srv-mod .abre{width:26px;border:0;background:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0}
+.srv-mod .nome-mod{cursor:pointer}
+.liga{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:12.5px;font-weight:700;color:var(--muted)}
+.liga input{appearance:none;width:36px;height:20px;border-radius:999px;background:var(--surface3);border:1px solid var(--border2);position:relative;cursor:pointer;margin:0;transition:.15s}
+.liga input::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--soft);transition:.15s}
+.liga input:checked{background:var(--brand);border-color:var(--brand)}
+.liga input:checked::after{left:18px;background:#fff}
+.grade-srv{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
+.campo-srv.largo{grid-column:1/-1}
+.campo-srv .ajuda{display:block;color:var(--soft);font-size:11.5px;margin-top:4px}
+.campo-rot .obg{color:var(--red);font-style:normal}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--surface3);border:1px solid var(--border2);border-radius:999px;padding:3px 6px 3px 11px;font-size:12.5px}
+.chip button{border:0;background:none;color:var(--soft);cursor:pointer;padding:0 4px}
+.chip button:hover{color:var(--red)}
+.nada{color:var(--soft);font-size:12.5px}
+.checks{display:flex;flex-wrap:wrap;gap:8px 18px}
+.linha-mapa{display:grid;grid-template-columns:110px 1fr auto;gap:8px;align-items:center;margin-top:6px}
+.mapa-cab{display:grid;grid-template-columns:110px 1fr auto;gap:8px;font-size:11.5px;color:var(--soft)}
+input.campo.ruim,.falta{border-color:var(--red)!important}
+.item .grade-srv{margin-top:4px}
+@media (max-width:860px){.linha2,.linha3{grid-template-columns:1fr}.grade-srv{grid-template-columns:1fr}}
 @media (max-width:860px){.app{grid-template-columns:1fr}aside{display:none}.grade,.grade3,.grade4{grid-template-columns:1fr}}
 </style>
 </head>
@@ -213,7 +236,7 @@ let limiteLista = 120;
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const varsDe = (s) => [...new Set([...String(s).matchAll(/\{(\w+)\}/g)].map((m) => m[1]))];
-const vazio = () => ({ textos: {}, visuais: {}, emojis: {}, cores: {}, presenca: {}, botoes: {}, criados: { paineis: [], formularios: [] } });
+const vazio = () => ({ textos: {}, visuais: {}, emojis: {}, cores: {}, presenca: {}, botoes: {}, criados: { paineis: [], formularios: [] }, servidores: {} });
 
 function toast(msg) {
   const t = $('#toast');
@@ -270,6 +293,8 @@ function abrirJson(texto, nomeArquivo) {
   for (const k of Object.keys(vazio())) valores[k] = valores[k] || vazio()[k];
   valores.criados.paineis = valores.criados.paineis || [];
   valores.criados.formularios = valores.criados.formularios || [];
+  valores.servidores = valores.servidores || {};
+  dados.esquemas = dados.esquemas || [];
   dados.catalogo.botoes = dados.catalogo.botoes || {};
   dados.catalogo.modais = dados.catalogo.modais || {};
   dados.servidores = dados.servidores || [];
@@ -309,6 +334,12 @@ function limpar(v) {
     if (Object.keys(y).length) out.botoes[k] = y;
   }
   out.criados = structuredClone(v.criados || { paineis: [], formularios: [] });
+  for (const [sid, x] of Object.entries(v.servidores || {})) {
+    const y = {};
+    if (x?.modulos && Object.keys(x.modulos).length) y.modulos = structuredClone(x.modulos);
+    if (Array.isArray(x?.desligados)) y.desligados = [...x.desligados];
+    if (Object.keys(y).length) out.servidores[sid] = y;
+  }
   if (v.presenca.texto) out.presenca.texto = v.presenca.texto;
   if (v.presenca.tipo && v.presenca.tipo !== 'personalizado') out.presenca.tipo = v.presenca.tipo;
   if (v.presenca.status && v.presenca.status !== 'online') out.presenca.status = v.presenca.status;
@@ -363,6 +394,7 @@ function montarMenu() {
     <div class="sec">Criar</div>
     <button data-sec="criar-paineis" class="${atual === 'criar-paineis' ? 'on' : ''}"><span>🧩 Painéis</span><span class="qtd">${valores.criados.paineis.length ? `<span class="alt">${valores.criados.paineis.length}</span>` : ''}</span></button>
     <button data-sec="criar-formularios" class="${atual === 'criar-formularios' ? 'on' : ''}"><span>📝 Formulários</span><span class="qtd">${valores.criados.formularios.length ? `<span class="alt">${valores.criados.formularios.length}</span>` : ''}</span></button>
+    ${temConfig() ? `<div class="sec">Configurar servidores</div>${dados.servidores.filter((x) => x.config).map((x) => { const q = qtdEditadosSrv(x.id); return `<button data-sec="srv:${esc(x.id)}" class="${atual === `srv:${x.id}` ? 'on' : ''}"><span>⚙️ ${esc(x.nome)}</span><span class="qtd">${q ? `<span class="alt">${q}</span>` : ''}</span></button>`; }).join('')}` : ''}
     <div class="sec">Textos por módulo</div>`;
   for (const m of modulos) {
     const c = contagens(m.id);
@@ -387,7 +419,7 @@ function telaVazia() {
   $('#area').innerHTML = `<div class="vazio"><div class="solta" id="solta">
     <div class="icone-grande"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#d9b4ff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></div>
     <h2>Personalize todos os textos do seu bot</h2>
-    <p>Mensagens, títulos, botões, cores, emojis e o status. Tudo fica no seu computador.</p>
+    <p>Mensagens, títulos, botões, cores, emojis, o status e a configuração de cada servidor (canais, cargos, módulos ligados, listas). Tudo fica no seu computador.</p>
     <ol>
       <li>No Discord, use <code>/personalizar baixar</code> e salve o arquivo <code>personalizacao.json</code>.</li>
       <li>Arraste o arquivo para cá (ou clique em <b>Abrir arquivo</b>).</li>
@@ -405,6 +437,7 @@ function mostrar() {
   if (atual === 'geral-config') return telaGeral();
   if (atual === 'criar-paineis') return telaPaineis();
   if (atual === 'criar-formularios') return telaFormularios();
+  if (atual.startsWith('srv:')) return telaServidor(atual.slice(4));
   return telaModulo(atual);
 }
 
@@ -450,6 +483,7 @@ function ligarCartoes(raiz) {
 }
 
 $('#area').addEventListener('input', (e) => {
+  if (e.target.closest('[data-srv]')) { editarSrv(e); return; }
   const el = e.target.closest('.cartao[data-chave]');
   if (el && e.target.matches('textarea')) {
     const chave = el.dataset.chave;
@@ -473,6 +507,7 @@ $('#area').addEventListener('input', (e) => {
   if (g) { lerGeral(); marcarSujo(true); atualizarContagemMenu(); }
 });
 $('#area').addEventListener('change', (e) => {
+  if (e.target.closest('[data-srv]')) { editarSrv(e); return; }
   if (e.target.closest('[data-geral]')) { lerGeral(); marcarSujo(true); atualizarContagemMenu(); return; }
   if (e.target.matches('select, input[type=checkbox]')) {
     const bc = e.target.closest('.cartao[data-botao]');
@@ -519,7 +554,7 @@ $('#area').addEventListener('click', (e) => {
     return;
   }
   if (e.target.closest('[data-acao="mais"]')) { limiteLista += 150; mostrar(); return; }
-  if (cliqueBotao(e) || cliquePainel(e) || cliqueFormulario(e)) return;
+  if (cliqueSrv(e) || cliqueBotao(e) || cliquePainel(e) || cliqueFormulario(e)) return;
 });
 
 function atualizarContagemMenu() {
@@ -1177,6 +1212,305 @@ function cliqueFormulario(e) {
     redesenha();
     return true;
   }
+  return true;
+}
+
+// ---------------- configurar servidores ----------------
+// Canais, cargos, o que fica ligado e as listas (autorrespostas, loja, assuntos...) de cada servidor.
+// Só os módulos que você mexer vão no arquivo: o resto continua como está no bot.
+const srvAbertos = new Set();
+const srvDados = (sid) => (dados.servidores || []).find((s) => s.id === sid);
+const esquemaDe = (mid) => (dados.esquemas || []).find((m) => m.id === mid);
+const temConfig = () => (dados.esquemas || []).length && (dados.servidores || []).some((s) => s.config);
+const editadoSrv = (sid) => valores.servidores[sid] || null;
+const valorSrv = (sid, mid) => editadoSrv(sid)?.modulos?.[mid] ?? srvDados(sid)?.config?.modulos?.[mid] ?? {};
+const desligadosSrv = (sid) => editadoSrv(sid)?.desligados ?? srvDados(sid)?.config?.desligados ?? [];
+function editavelSrv(sid, mid) {
+  const e = (valores.servidores[sid] ||= { modulos: {} });
+  e.modulos ||= {};
+  if (!e.modulos[mid]) e.modulos[mid] = structuredClone(srvDados(sid)?.config?.modulos?.[mid] ?? {});
+  return e.modulos[mid];
+}
+const qtdEditadosSrv = (sid) => { const e = editadoSrv(sid); return e ? Object.keys(e.modulos || {}).length + (e.desligados ? 1 : 0) : 0; };
+
+function lerDuracaoJs(texto) {
+  const s = String(texto || '').toLowerCase().replace(/\s+/g, '');
+  if (!s) return null;
+  const re = /(\d+)(segundos?|seg|minutos?|min|horas?|dias?|semanas?|sem|s|m|h|d|w)/g;
+  const U = { s: 1e3, m: 6e4, h: 36e5, d: 864e5, w: 6048e5 };
+  const mult = (u) => U[u.startsWith('seg') ? 's' : u.startsWith('min') ? 'm' : u.startsWith('hora') ? 'h' : u.startsWith('dia') ? 'd' : u.startsWith('sem') ? 'w' : u];
+  let total = 0, lido = '';
+  for (const m of s.matchAll(re)) { total += Number(m[1]) * mult(m[2]); lido += m[0]; }
+  return lido === s && total > 0 ? total : NaN;
+}
+function duracaoJs(ms) {
+  if (!ms) return '';
+  const s = Math.round(ms / 1000), d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60), seg = s % 60;
+  return [d && `${d}d`, h && `${h}h`, m && `${m}min`, !d && !h && seg && `${seg}s`].filter(Boolean).join(' ');
+}
+const p2 = (n) => String(n).padStart(2, '0');
+const dataLocal = (ms) => { if (!ms) return ''; const d = new Date(ms); return `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}T${p2(d.getHours())}:${p2(d.getMinutes())}`; };
+
+function campoPadrao(s) {
+  if ('padrao' in s) return structuredClone(s.padrao);
+  if (s.t === 'bool') return false;
+  if (s.t === 'int') return s.min ?? 0;
+  if (s.t === 'escolha') return s.op[0][0];
+  if (s.t === 'datahora') { const d = new Date(Date.now() + 3600e3); d.setMinutes(0, 0, 0); return d.getTime(); }
+  if (['canais', 'cargos', 'varias', 'palavras', 'lista'].includes(s.t)) return [];
+  if (s.t === 'mapa') return {};
+  if (['canal', 'cargo', 'cor', 'duracao'].includes(s.t) || s.nulo) return null;
+  return '';
+}
+function novoItemSrv(c, n) {
+  const it = {};
+  for (const s of c.campos) it[s.k] = campoPadrao(s);
+  if (c.titulo && c.campos.find((s) => s.k === c.titulo)?.t === 'texto' && c.campos.find((s) => s.k === c.titulo).obrigatorio) it[c.titulo] = `${c.nomeItem || 'Item'} ${n}`;
+  return it;
+}
+
+/** Acha o campo do esquema e o lugar do valor a partir do caminho "loja.0.preco". */
+function resolverSrv(mid, caminho) {
+  const partes = caminho.split('.');
+  let campos = esquemaDe(mid).campos, campo = null;
+  for (let n = 0; n < partes.length; n++) {
+    if (/^\d+$/.test(partes[n])) continue;
+    campo = campos.find((c) => c.k === partes[n]);
+    if (!campo) return null;
+    campos = campo.campos || [];
+  }
+  return { campo, partes };
+}
+function lerCaminho(obj, partes) { return partes.reduce((o, k) => (o == null ? undefined : o[k]), obj); }
+function gravarCaminho(obj, partes, v) {
+  const pai = lerCaminho(obj, partes.slice(0, -1));
+  if (pai != null) pai[partes.at(-1)] = v;
+}
+
+function opcoesCanal(sid, tipo, atual, vazio = 'Nenhum') {
+  const lista = (srvDados(sid)?.canais || []).filter((c) => c.tipo === (tipo || 'texto'));
+  const pre = tipo === 'voz' ? '🔊 ' : tipo === 'categoria' ? '📁 ' : '# ';
+  return opcoes(lista.map((c) => ({ id: c.id, nome: c.pai && tipo !== 'categoria' ? `${c.nome}  (${c.pai})` : c.nome })), atual, vazio, pre);
+}
+const nomeCanal = (sid, id) => (srvDados(sid)?.canais || []).find((c) => c.id === id)?.nome;
+const nomeCargo = (sid, id) => cargosDe(sid).find((c) => c.id === id)?.nome;
+
+function campoSrv(sid, c, v, p) {
+  const rot = `<span class="campo-rot">${esc(c.r)}${c.obrigatorio ? ' <i class="obg">*</i>' : ''}</span>`;
+  const aj = c.a ? `<small class="ajuda">${esc(c.a)}</small>` : '';
+  const falta = c.obrigatorio && (v === null || v === undefined || v === '') ? ' falta' : '';
+  const at = `data-p="${esc(p)}" data-t="${c.t}"`;
+  switch (c.t) {
+    case 'bool':
+      return `<div class="campo-srv"><label class="chave-liga"><input type="checkbox" ${at} ${v ? 'checked' : ''}> ${esc(c.r)}</label>${aj}</div>`;
+    case 'int':
+      return `<div class="campo-srv">${rot}<input class="campo" type="number" ${at} min="${c.min ?? 0}" max="${c.max ?? ''}" value="${v ?? ''}">${aj}</div>`;
+    case 'texto':
+      return `<div class="campo-srv ${c.linhas ? 'largo' : ''}">${rot}${c.linhas ? `<textarea ${at} maxlength="${c.max}" rows="3">${esc(v)}</textarea>` : `<input class="campo${falta}" ${at} maxlength="${c.max}" value="${esc(v)}" ${c.obrigatorio ? 'placeholder="obrigatório"' : ''}>`}${aj}</div>`;
+    case 'emoji':
+      return `<div class="campo-srv">${rot}<input class="campo" ${at} maxlength="100" placeholder="ex.: ⭐ ou <:nome:id>" value="${esc(v)}">${aj}</div>`;
+    case 'url':
+      return `<div class="campo-srv">${rot}<input class="campo" ${at} maxlength="500" placeholder="https://..." value="${esc(v)}">${aj}</div>`;
+    case 'cor':
+      return `<div class="campo-srv">${rot}<div class="linha-cor"><input type="color" data-p="${esc(p)}" data-t="cor-pick" value="${esc(v || '#5865f2')}"><input class="campo" ${at} maxlength="7" placeholder="padrão do bot" value="${esc(v || '')}"></div>${aj}</div>`;
+    case 'escolha':
+      return `<div class="campo-srv">${rot}<select ${at}>${c.op.map(([val, nome]) => `<option value="${esc(val ?? '')}" ${val === v ? 'selected' : ''}>${esc(nome)}</option>`).join('')}</select>${aj}</div>`;
+    case 'varias':
+      return `<div class="campo-srv largo">${rot}<div class="checks">${c.op.map(([val, nome]) => `<label class="chave-liga"><input type="checkbox" ${at} data-v="${esc(val)}" ${(v || []).includes(val) ? 'checked' : ''}> ${esc(nome)}</label>`).join('')}</div>${aj}</div>`;
+    case 'canal':
+      return `<div class="campo-srv">${rot}<select class="${falta}" ${at}>${opcoesCanal(sid, c.canal, v, c.obrigatorio ? 'Escolha o canal' : 'Nenhum')}</select>${aj}</div>`;
+    case 'cargo':
+      return `<div class="campo-srv">${rot}<select class="${falta}" ${at}>${opcoes(cargosDe(sid), v, c.obrigatorio ? 'Escolha o cargo' : 'Nenhum', '@')}</select>${aj}</div>`;
+    case 'canais':
+    case 'cargos': {
+      const lista = v || [];
+      const ehCanal = c.t === 'canais';
+      const chips = lista.map((id, i) => `<span class="chip">${ehCanal ? (c.canal === 'voz' ? '🔊 ' : '# ') : '@'}${esc((ehCanal ? nomeCanal(sid, id) : nomeCargo(sid, id)) || `não encontrado (${id})`)}<button data-acao="srv-tira" data-p="${esc(p)}" data-i="${i}" title="Tirar">✕</button></span>`).join('');
+      const disp = ehCanal ? (srvDados(sid)?.canais || []).filter((x) => x.tipo === (c.canal || 'texto') && !lista.includes(x.id)) : cargosDe(sid).filter((x) => !lista.includes(x.id));
+      const sel = lista.length < (c.max ?? 50) ? `<select data-p="${esc(p)}" data-t="add-lista">${opcoes(disp, '', ehCanal ? '+ adicionar canal' : '+ adicionar cargo', ehCanal ? '# ' : '@')}</select>` : '';
+      return `<div class="campo-srv largo">${rot}<div class="chips">${chips || '<span class="nada">nenhum</span>'}</div>${sel}${aj}</div>`;
+    }
+    case 'duracao':
+      return `<div class="campo-srv">${rot}<input class="campo" ${at} maxlength="30" placeholder="${c.nulo ? 'vazio = desligado · ' : ''}ex.: 30min, 1h, 1d" value="${esc(duracaoJs(v))}">${aj}</div>`;
+    case 'datahora':
+      return `<div class="campo-srv">${rot}<input class="campo" type="datetime-local" ${at} value="${dataLocal(v)}">${aj}</div>`;
+    case 'palavras':
+      return `<div class="campo-srv largo">${rot}<textarea ${at} rows="4" placeholder="uma por linha">${esc((v || []).join('\n'))}</textarea>${aj}</div>`;
+    case 'mapa': {
+      const linhas = Object.entries(v || {}).sort((a, b) => a[0] - b[0]).map(([k, cargo]) => `<div class="linha-mapa">
+        <input class="campo" type="number" min="${c.chaveMin ?? 1}" max="${c.chaveMax ?? ''}" data-p="${esc(p)}" data-t="mapa-k" data-k="${esc(k)}" value="${esc(k)}">
+        <select data-p="${esc(p)}" data-t="mapa-v" data-k="${esc(k)}">${opcoes(cargosDe(sid), cargo, 'Escolha o cargo', '@')}</select>
+        <div class="mini-btns"><button class="perigo" data-acao="srv-mapa-tira" data-p="${esc(p)}" data-k="${esc(k)}">✕</button></div></div>`).join('');
+      return `<div class="campo-srv largo">${rot}<div class="mapa-cab"><span>${esc(c.chave)}</span><span>Cargo</span></div>${linhas || '<span class="nada">nenhum</span>'}
+        ${Object.keys(v || {}).length < (c.max ?? 50) ? `<button class="btn peq mt" data-acao="srv-mapa-novo" data-p="${esc(p)}">+ Adicionar</button>` : ''}${aj}</div>`;
+    }
+    case 'lista': {
+      const itens = v || [];
+      const corpo = itens.map((it, i) => {
+        const tit = (c.titulo && it[c.titulo]) || `${c.nomeItem || 'Item'} ${i + 1}`;
+        return `<div class="item">
+          <div class="cab"><b>${esc(String(tit).slice(0, 80))}</b><span class="esp"></span><div class="mini-btns">
+            <button data-acao="srv-sobe" data-p="${esc(p)}" data-i="${i}" title="Subir">↑</button><button data-acao="srv-desce" data-p="${esc(p)}" data-i="${i}" title="Descer">↓</button><button class="perigo" data-acao="srv-apaga" data-p="${esc(p)}" data-i="${i}" title="Apagar">✕</button></div></div>
+          <div class="grade-srv">${c.campos.map((s) => campoSrv(sid, s, it[s.k], `${p}.${i}.${s.k}`)).join('')}</div></div>`;
+      }).join('');
+      return `<div class="campo-srv largo"><div class="sub-grupo" style="margin:8px 0 0">${esc(c.r)} (${itens.length}/${c.max ?? 50})</div>${aj}${corpo}
+        ${itens.length < (c.max ?? 50) ? `<button class="btn mais" data-acao="srv-novo" data-p="${esc(p)}">+ ${esc(c.nomeItem || 'Adicionar')}</button>` : ''}</div>`;
+    }
+  }
+  return '';
+}
+
+function cartaoModuloSrv(sid, m) {
+  const desl = desligadosSrv(sid).includes(m.id);
+  const editado = !!editadoSrv(sid)?.modulos?.[m.id];
+  const aberto = srvAbertos.has(`${sid}:${m.id}`);
+  const v = valorSrv(sid, m.id);
+  const temCampos = m.campos.length > 0;
+  return `<div class="cartao srv-mod ${editado ? 'alterado' : ''} ${desl ? 'desligado' : ''}" data-mid="${esc(m.id)}">
+    <div class="cab" style="margin:0">
+      ${temCampos ? `<button class="abre" data-acao="srv-abre">${aberto ? '▾' : '▸'}</button>` : '<span class="abre"></span>'}
+      <b class="nome-mod" ${temCampos ? 'data-acao="srv-abre"' : ''}>${esc(m.nome)}</b>
+      ${editado ? '<span class="tag tipo">alterado</span>' : ''}
+      <span class="esp"></span>
+      ${m.desligavel ? `<label class="liga"><input type="checkbox" data-t="ligado" ${desl ? '' : 'checked'}><span>${desl ? 'Desligado' : 'Ligado'}</span></label>` : ''}
+    </div>
+    ${desl ? '<div class="alerta" style="margin-left:34px">Desligado neste servidor: os comandos e botões dele avisam que está desligado.</div>' : ''}
+    ${aberto && temCampos ? `<div class="grade-srv mt">${m.campos.map((c) => campoSrv(sid, c, v[c.k], c.k)).join('')}</div>
+      ${editado ? '<div class="mt" style="text-align:right"><button class="btn peq" data-acao="srv-desfaz">Desfazer mudanças deste módulo</button></div>' : ''}` : ''}
+  </div>`;
+}
+
+function telaServidor(sid) {
+  const s = srvDados(sid);
+  if (!s?.config) { atual = 'geral-config'; return mostrar(); }
+  $('#tituloPagina').textContent = `Configurar · ${s.nome}`;
+  const ms = (dados.esquemas || []).filter((m) => m.campos.length || m.desligavel);
+  const geral = ms.filter((m) => !m.desligavel);
+  const resto = ms.filter((m) => m.desligavel);
+  $('#area').innerHTML = `<div class="conteudo" data-srv="${esc(sid)}">
+    <div class="titulo-sec"><div><h2>${esc(s.nome)}</h2><p>Canais, cargos, o que fica ligado e as listas de cada módulo neste servidor.</p></div>
+      <div style="display:flex;gap:8px"><button class="btn peq" data-acao="srv-tudo">Abrir todos</button>${qtdEditadosSrv(sid) ? '<button class="btn peq" data-acao="srv-desfaz-tudo">Desfazer tudo</button>' : ''}</div></div>
+    <div class="dica">Só os módulos que você mexer (marcados como <b>alterado</b>) são gravados no <code>/personalizar aplicar</code>; o resto fica como está. Se alguém mudou algo pelo <code>/config</code> depois que você baixou o arquivo, baixe de novo antes de editar.</div>
+    ${geral.map((m) => cartaoModuloSrv(sid, m)).join('')}
+    <div class="sub-grupo">Módulos</div>
+    ${resto.map((m) => cartaoModuloSrv(sid, m)).join('')}
+  </div>`;
+}
+function redesenhaSrv() { const y = $('#principal').scrollTop; mostrar(); $('#principal').scrollTop = y; marcarSujo(true); atualizarContagemMenu(); }
+
+function editarSrv(e) {
+  const t = e.target;
+  const sid = t.closest('[data-srv]').dataset.srv;
+  const card = t.closest('[data-mid]');
+  if (!card || !t.dataset.t) return;
+  const mid = card.dataset.mid;
+  if (t.dataset.t === 'ligado') {
+    if (e.type !== 'change') return;
+    const ed = (valores.servidores[sid] ||= { modulos: {} });
+    const lista = new Set(desligadosSrv(sid));
+    if (t.checked) lista.delete(mid); else lista.add(mid);
+    ed.desligados = [...lista];
+    return redesenhaSrv();
+  }
+  const r = resolverSrv(mid, t.dataset.p);
+  if (!r) return;
+  const { campo, partes } = r;
+  const obj = editavelSrv(sid, mid);
+  const tipo = t.dataset.t;
+  const estrutura = ['add-lista', 'varias', 'mapa-k', 'escolha', 'bool'].includes(tipo) && e.type === 'change';
+  if (e.type === 'input' && ['add-lista', 'mapa-k', 'mapa-v'].includes(tipo)) return;
+  let v;
+  if (tipo === 'bool') v = t.checked;
+  else if (tipo === 'int') { v = parseInt(t.value, 10); if (!Number.isFinite(v)) return; v = Math.min(campo.max ?? 1e12, Math.max(campo.min ?? 0, v)); }
+  else if (tipo === 'texto' || tipo === 'emoji' || tipo === 'url') v = campo.nulo && !t.value.trim() ? null : t.value;
+  else if (tipo === 'cor') { if (t.value && !/^#[0-9a-f]{6}$/i.test(t.value)) { t.classList.add('ruim'); return; } t.classList.remove('ruim'); v = t.value || null; const pick = t.parentElement.querySelector('input[type=color]'); if (pick && v) pick.value = v; }
+  else if (tipo === 'cor-pick') { v = t.value; const txt = t.parentElement.querySelector('input.campo'); if (txt) txt.value = v; }
+  else if (tipo === 'escolha' || tipo === 'canal' || tipo === 'cargo') v = t.value || null;
+  else if (tipo === 'varias') { const atualV = new Set(lerCaminho(obj, partes) || []); if (t.checked) atualV.add(t.dataset.v); else atualV.delete(t.dataset.v); v = campo.op.map((o) => o[0]).filter((x) => atualV.has(x)); }
+  else if (tipo === 'add-lista') { if (!t.value) return; v = [...(lerCaminho(obj, partes) || []), t.value]; }
+  else if (tipo === 'duracao') { const ms = lerDuracaoJs(t.value); if (Number.isNaN(ms) || (ms === null && !campo.nulo) || (ms && campo.min && ms < campo.min)) { t.classList.add('ruim'); return; } t.classList.remove('ruim'); v = ms; }
+  else if (tipo === 'datahora') { const ms = new Date(t.value).getTime(); if (!Number.isFinite(ms)) return; v = ms; }
+  else if (tipo === 'palavras') v = t.value.split('\n').map((x) => x.trim()).filter(Boolean);
+  else if (tipo === 'mapa-v') { const m = lerCaminho(obj, partes) || {}; m[t.dataset.k] = t.value || null; v = m; }
+  else if (tipo === 'mapa-k') {
+    const m = lerCaminho(obj, partes) || {};
+    const novo = String(Math.min(campo.chaveMax ?? 1e6, Math.max(campo.chaveMin ?? 1, parseInt(t.value, 10) || 0)));
+    if (novo !== t.dataset.k) { if (novo in m) { toast(`Já existe ${campo.chave.toLowerCase()} ${novo}.`); t.value = t.dataset.k; return; } m[novo] = m[t.dataset.k]; delete m[t.dataset.k]; }
+    v = m;
+  } else return;
+  gravarCaminho(obj, partes, v);
+  t.classList.toggle('falta', !!campo.obrigatorio && (v === null || v === ''));
+  marcarSujo(true);
+  if (estrutura || tipo === 'add-lista' || tipo === 'mapa-k') return redesenhaSrv();
+  if (!card.classList.contains('alterado')) {
+    card.classList.add('alterado');
+    card.querySelector('.nome-mod').insertAdjacentHTML('afterend', '<span class="tag tipo">alterado</span>');
+    atualizarContagemMenu();
+  }
+  // título do item acompanha o texto
+  const item = t.closest('.item');
+  if (item && /^\w+\.\d+\.\w+$/.test(t.dataset.p)) {
+    const lc = resolverSrv(mid, t.dataset.p.split('.')[0])?.campo;
+    if (lc?.titulo === partes.at(-1) && typeof v === 'string') item.querySelector('.cab b').textContent = v || `${lc.nomeItem || 'Item'} ${+partes.at(-2) + 1}`;
+  }
+}
+
+function cliqueSrv(e) {
+  const b = e.target.closest('[data-acao]');
+  const raiz = e.target.closest('[data-srv]');
+  if (!b || !raiz || !/^srv-/.test(b.dataset.acao)) return false;
+  const sid = raiz.dataset.srv;
+  const ac = b.dataset.acao;
+  if (ac === 'srv-tudo') {
+    const ms = (dados.esquemas || []).filter((m) => m.campos.length);
+    const todos = ms.every((m) => srvAbertos.has(`${sid}:${m.id}`));
+    ms.forEach((m) => (todos ? srvAbertos.delete(`${sid}:${m.id}`) : srvAbertos.add(`${sid}:${m.id}`)));
+    const y = $('#principal').scrollTop; mostrar(); $('#principal').scrollTop = y;
+    return true;
+  }
+  if (ac === 'srv-desfaz-tudo') {
+    if (!confirm('Desfazer todas as mudanças deste servidor?')) return true;
+    delete valores.servidores[sid];
+    redesenhaSrv();
+    return true;
+  }
+  const card = b.closest('[data-mid]');
+  if (!card) return true;
+  const mid = card.dataset.mid;
+  if (ac === 'srv-abre') {
+    const k = `${sid}:${mid}`;
+    srvAbertos.has(k) ? srvAbertos.delete(k) : srvAbertos.add(k);
+    const y = $('#principal').scrollTop; mostrar(); $('#principal').scrollTop = y;
+    return true;
+  }
+  if (ac === 'srv-desfaz') {
+    delete valores.servidores[sid]?.modulos?.[mid];
+    if (valores.servidores[sid] && !Object.keys(valores.servidores[sid].modulos || {}).length && !valores.servidores[sid].desligados) delete valores.servidores[sid];
+    redesenhaSrv();
+    return true;
+  }
+  const r = resolverSrv(mid, b.dataset.p || '');
+  if (!r) return true;
+  const obj = editavelSrv(sid, mid);
+  const lista = lerCaminho(obj, r.partes);
+  const n = +b.dataset.i;
+  if (ac === 'srv-tira' && Array.isArray(lista)) lista.splice(n, 1);
+  else if (ac === 'srv-novo' && Array.isArray(lista)) {
+    if (lista.length < (r.campo.max ?? 50)) lista.push(novoItemSrv(r.campo, lista.length + 1));
+  } else if (ac === 'srv-apaga' && Array.isArray(lista)) {
+    const tit = (r.campo.titulo && lista[n]?.[r.campo.titulo]) || `${r.campo.nomeItem || 'item'} ${n + 1}`;
+    if (!confirm(`Apagar "${tit}"?`)) return true;
+    lista.splice(n, 1);
+  } else if (ac === 'srv-sobe' && n > 0) [lista[n - 1], lista[n]] = [lista[n], lista[n - 1]];
+  else if (ac === 'srv-desce' && n < lista.length - 1) [lista[n + 1], lista[n]] = [lista[n], lista[n + 1]];
+  else if (ac === 'srv-mapa-novo') {
+    const m = lista || {};
+    let k = r.campo.chaveMin ?? 1;
+    while (String(k) in m) k++;
+    m[k] = null;
+    gravarCaminho(obj, r.partes, m);
+  } else if (ac === 'srv-mapa-tira' && lista) delete lista[b.dataset.k];
+  redesenhaSrv();
   return true;
 }
 

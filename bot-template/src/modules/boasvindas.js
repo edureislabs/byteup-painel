@@ -178,6 +178,15 @@ const config = {
 
 export default {
   id: 'boasvindas',
+  painel: {
+    padrao: PADRAO,
+    campos: [
+      { k: 'entradaCanal', t: 'canal', r: 'Canal da mensagem de entrada', a: 'Vazio = desligada' },
+      { k: 'saidaCanal', t: 'canal', r: 'Canal da mensagem de saída', a: 'Vazio = desligada' },
+      { k: 'dm', t: 'bool', r: 'Mandar mensagem na DM de quem entra', ler: (c) => dmLigada(c) },
+      { k: 'cargos', t: 'cargos', max: 5, r: 'Cargos automáticos para quem entra' },
+    ],
+  },
   nome: tx('boas_vindas'),
   intents: [GatewayIntentBits.GuildMembers],
   partials: [Partials.GuildMember, Partials.User],

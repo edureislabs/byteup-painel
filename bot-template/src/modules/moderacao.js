@@ -548,6 +548,16 @@ const config = {
 
 export default {
   id: 'moderacao',
+  painel: {
+    padrao: PADRAO,
+    campos: [
+      { k: 'canalLog', t: 'canal', r: 'Canal de registro das punições' },
+      { k: 'avisarDm', t: 'bool', r: 'Avisar o membro na DM quando for punido' },
+      { k: 'limite', t: 'int', min: 0, max: 50, r: 'Advertências para a punição automática', a: '0 = desligada' },
+      { k: 'acaoLimite', t: 'escolha', op: [['castigo', 'Castigo'], ['expulsar', 'Expulsar'], ['banir', 'Banir']], r: 'Punição automática' },
+      { k: 'duracaoLimite', t: 'duracao', min: 60_000, max: 28 * 864e5, r: 'Duração do castigo automático' },
+    ],
+  },
   nome: tx('moderacao'),
   comandos: [banir, desbanir, expulsar, castigo, removerCastigo, advertir, verAdvertencias, removerAdvertencia, limpar, trancar, destrancar, lentidao],
   permissoes: [

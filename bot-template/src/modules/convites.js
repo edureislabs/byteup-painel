@@ -194,6 +194,13 @@ const convites = {
 
 export default {
   id: 'convites',
+  painel: {
+    padrao: PADRAO,
+    campos: [
+      { k: 'canal', t: 'canal', r: 'Canal que avisa quem convidou', a: 'Vazio = não avisa' },
+      { k: 'diasFalso', t: 'int', min: 0, max: 365, r: 'Contas com menos dias contam como falsas' },
+    ],
+  },
   nome: tx('rastreio_convites'),
   intents: [GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildInvites],
   permissoes: [PermissionFlagsBits.ManageGuild],

@@ -291,6 +291,21 @@ const config = {
 
 export default {
   id: 'niveis',
+  painel: {
+    padrao: PADRAO,
+    campos: [
+      { k: 'ativo', t: 'bool', r: 'Ganhar XP conversando' },
+      { k: 'canal', t: 'canal', r: 'Canal do aviso de nível', a: 'Vazio = avisa no mesmo canal' },
+      { k: 'xpMin', t: 'int', min: 1, max: 500, r: 'XP mínimo por mensagem' },
+      { k: 'xpMax', t: 'int', min: 1, max: 500, r: 'XP máximo por mensagem' },
+      { k: 'intervalo', t: 'int', min: 0, max: 3600, r: 'Segundos entre mensagens que valem XP' },
+      { k: 'recompensas', t: 'mapa', chave: 'Nível', chaveMin: 1, chaveMax: 500, max: 50, r: 'Cargos por nível' },
+      { k: 'ignorados', t: 'canais', max: 50, r: 'Canais que não dão XP' },
+    ],
+    depois(c) {
+      if (c.xpMin > c.xpMax) [c.xpMin, c.xpMax] = [c.xpMax, c.xpMin];
+    },
+  },
   nome: tx('niveis'),
   intents: [GatewayIntentBits.GuildMessages],
   permissoes: [PermissionFlagsBits.ManageRoles],

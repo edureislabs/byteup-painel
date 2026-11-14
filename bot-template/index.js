@@ -13,7 +13,8 @@ import {
   Routes,
   SlashCommandBuilder,
 } from 'discord.js';
-import { CONFIG, erroGenerico, aplicarPresenca } from './src/core/util.js';
+import { CONFIG, erroGenerico, avisoDesligado, aplicarPresenca } from './src/core/util.js';
+import { moduloLigado } from './src/core/servidor.js';
 import { registrarNomeModulo } from './src/core/textos.js';
 import { salvarTudo } from './src/core/db.js';
 import nucleo, { registrarModulos } from './src/core/nucleo.js';
@@ -93,11 +94,16 @@ for (const c of comandos.values()) c.data.setContexts?.(InteractionContextType.G
 const componentes = new Map();
 const prefixosDM = new Set(); // botões que também funcionam na DM (ex.: avaliação de atendimento)
 for (const m of modulos) {
-  for (const [prefixo, fn] of Object.entries(m.componentes ?? {})) componentes.set(prefixo, fn);
+  for (const [prefixo, fn] of Object.entries(m.componentes ?? {})) componentes.set(prefixo, { fn, modulo: m.id });
   for (const prefixo of m.componentesDM ?? []) prefixosDM.add(prefixo);
 }
 
 // ---------------- eventos dos módulos ----------------
+// Módulo desligado num servidor (pelo Personalizar bot): os eventos dele não rodam lá.
+function servidorDo(x) {
+  if (!x || typeof x !== 'object') return null;
+  return x.guildId ?? x.guild?.id ?? x.message?.guildId ?? (x.members && x.channels ? x.id : null); // o último é o próprio servidor
+}
 // Cada evento chama os módulos em sequência. Quem tem "prioridade" menor roda antes
 // (o AutoMod roda primeiro: assim os outros já sabem se a mensagem foi apagada).
 const eventos = new Map();
@@ -109,7 +115,9 @@ for (const m of [...modulos].sort((a, b) => (a.prioridade ?? 10) - (b.prioridade
 }
 for (const [nome, lista] of eventos) {
   client.on(nome, async (...args) => {
+    const guildId = servidorDo(args[0]) ?? servidorDo(args[1]);
     for (const { fn, modulo } of lista) {
+      if (guildId && !moduloLigado(guildId, modulo)) continue;
       try {
         await fn(...args);
       } catch (e) {
@@ -133,20 +141,24 @@ client.on(Events.InteractionCreate, async (i) => {
     if (!componente || !prefixosDM.has(i.customId.split(':')[0])) return;
   }
   try {
+    const desligado = (modulo) => i.inGuild() && !moduloLigado(i.guildId, modulo);
     if (i.isAutocomplete()) {
       const c = comandos.get(i.commandName);
+      if (c && desligado(c.modulo.id)) return i.respond([]).catch(() => {});
       if (c?.autocompletar) await c.autocompletar(i);
       return;
     }
     if (i.isChatInputCommand()) {
       const c = comandos.get(i.commandName);
+      if (c && desligado(c.modulo.id)) return i.reply({ content: avisoDesligado(), flags: MessageFlags.Ephemeral });
       if (c) await c.executar(i);
       return;
     }
     if (i.isButton() || i.isAnySelectMenu() || i.isModalSubmit()) {
       const partes = i.customId.split(':');
-      const fn = componentes.get(partes[0]);
-      if (fn) await fn(i, partes.slice(1));
+      const comp = componentes.get(partes[0]);
+      if (comp && desligado(comp.modulo)) return i.reply({ content: avisoDesligado(), flags: MessageFlags.Ephemeral });
+      if (comp) await comp.fn(i, partes.slice(1));
     }
   } catch (e) {
     console.error('[interação] erro:', e);

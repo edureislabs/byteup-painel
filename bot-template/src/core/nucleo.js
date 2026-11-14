@@ -1,6 +1,7 @@
 import { SlashCommandBuilder, version as djsVersion } from 'discord.js';
 import { CONFIG, ajustes, salvarAjustes, embed, responder, responderCampos, duracaoTexto, fmt } from './util.js';
 import { textos } from './textos.js';
+import { moduloLigado } from './servidor.js';
 
 // Textos deste módulo (o dono do bot pode trocar todos no "Personalizar bot.html")
 const tx = textos('geral', {
@@ -40,12 +41,14 @@ const tx = textos('geral', {
 
 let MODULOS = [];
 export const registrarModulos = (lista) => { MODULOS = lista; };
+export const modulosCarregados = () => MODULOS;
 
 const ajuda = {
   data: new SlashCommandBuilder().setName('ajuda').setDescription('Mostra todos os comandos do bot'),
   async executar(i) {
     const campos = [];
     for (const m of MODULOS) {
+      if (!moduloLigado(i.guildId, m.id)) continue;
       const linhas = (m.comandos ?? []).map((c) => `\`/${c.data.name}\` · ${c.data.description}`);
       if (m.config?.grupo) linhas.push(tx('config_configurar_este_modulo', { grupo: m.config.grupo }));
       if (!linhas.length) continue;
@@ -172,4 +175,11 @@ export default {
   comandos: [ajuda, ping, sobre],
   montarConfigRaiz,
   executarConfigRaiz,
+  painel: {
+    onde: { colecao: 'ajustes', chaves: ['geral'] },
+    campos: [
+      { k: 'cor', t: 'cor', r: 'Cor das mensagens neste servidor', a: 'Vazio = a cor padrão do bot' },
+      { k: 'staff', t: 'cargo', r: 'Cargo da equipe', a: 'Atende tickets, aprova sugestões e formulários...' },
+    ],
+  },
 };

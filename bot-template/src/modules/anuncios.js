@@ -2,6 +2,7 @@ import { ChannelType, PermissionFlagsBits, SlashCommandBuilder } from 'discord.j
 import { colecao } from '../core/db.js';
 import { CONFIG, embed, responder, cortar, lerDuracao, duracaoTexto, ts } from '../core/util.js';
 import { textos, visuais } from '../core/textos.js';
+import { moduloLigado } from '../core/servidor.js';
 
 // Textos deste módulo (o dono do bot pode trocar todos no "Personalizar bot.html")
 const tx = textos('anuncios', {
@@ -104,7 +105,7 @@ async function enviar(client, guildId, a) {
 async function verificar(client) {
   const agora = Date.now();
   for (const [guildId, g] of Object.entries(anuncios.raiz)) {
-    if (!client.guilds.cache.has(guildId) || !g.lista?.length) continue;
+    if (!client.guilds.cache.has(guildId) || !g.lista?.length || !moduloLigado(guildId, 'anuncios')) continue;
     let mudou = false;
     for (const a of [...g.lista]) {
       if (a.proximo > agora) continue;
@@ -203,6 +204,31 @@ const anuncio = {
 
 export default {
   id: 'anuncios',
+  painel: {
+    onde: { colecao: 'anuncios', chaves: [] },
+    campos: [
+      {
+        k: 'lista', t: 'lista', id: 'tempo', titulo: 'titulo', max: LIMITE, r: 'Anúncios agendados', nomeItem: 'Anúncio',
+        campos: [
+          { k: 'canal', t: 'canal', obrigatorio: true, r: 'Canal' },
+          { k: 'titulo', t: 'texto', max: 256, nulo: true, r: 'Título' },
+          { k: 'texto', t: 'texto', max: 2000, linhas: true, obrigatorio: true, r: 'Mensagem' },
+          { k: 'cargo', t: 'cargo', r: 'Cargo para marcar' },
+          { k: 'imagem', t: 'url', nulo: true, r: 'Imagem (link)' },
+          { k: 'proximo', t: 'datahora', r: 'Quando enviar (próxima vez)' },
+          { k: 'intervalo', t: 'duracao', nulo: true, min: MIN_INTERVALO, r: 'Repetir a cada', a: 'Vazio = uma vez só. Ex.: 1d, 12h, 7d' },
+        ],
+        item(it, velho, ctx) {
+          const agora = Date.now();
+          if (it.proximo <= agora && (!velho || velho.proximo !== it.proximo)) {
+            if (!it.intervalo) { ctx.avisos.push(`${ctx.onde}: a data já passou (ignorado)`); return velho ?? null; }
+            while (it.proximo <= agora) it.proximo += it.intervalo;
+          }
+          return it;
+        },
+      },
+    ],
+  },
   nome: tx('anuncios_agendados_2'),
   permissoes: [PermissionFlagsBits.MentionEveryone],
   comandos: [anuncio],

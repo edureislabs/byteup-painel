@@ -13,6 +13,7 @@ const tx = textos('geral', {
   cargo_maior_seu: 'Esse membro tem um cargo igual ou maior que o seu.',
   cargo_maior_meu: 'Esse membro tem um cargo igual ou maior que o meu. Suba o meu cargo na lista de cargos.',
   erro_generico: 'Algo deu errado. Tente de novo em instantes.',
+  modulo_desligado: ['Este recurso está desligado neste servidor.', 'resposta'],
 });
 
 /** config.json: nome do bot, cor padrão e módulos instalados. */
@@ -192,6 +193,7 @@ export const sinais = new EventEmitter();
 sinais.setMaxListeners(50);
 
 /** Mensagem padrão quando algo dá errado numa interação. */
+export const avisoDesligado = () => `${emojiTipo('aviso')} ${tx('modulo_desligado')}`;
 export const erroGenerico = () => `${emojiTipo('erro')} ${tx('erro_generico')}`;
 
 /** Status do bot (o que aparece embaixo do nome). O Personalizar bot pode trocar. */

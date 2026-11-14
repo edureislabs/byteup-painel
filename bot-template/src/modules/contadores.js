@@ -1,6 +1,7 @@
 import { ChannelType, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { ajustes, salvarAjustes, embed, responder, fmt } from '../core/util.js';
 import { textos } from '../core/textos.js';
+import { moduloLigado } from '../core/servidor.js';
 
 // Textos deste módulo (o dono do bot pode trocar todos no "Personalizar bot.html")
 const tx = textos('contadores', {
@@ -150,7 +151,7 @@ export default {
   permissoes: [PermissionFlagsBits.ManageChannels, PermissionFlagsBits.Connect],
   aoIniciar(client) {
     const rodar = async () => {
-      for (const guild of client.guilds.cache.values()) await atualizar(guild).catch((e) => console.error('[contadores]', e.message));
+      for (const guild of client.guilds.cache.values()) if (moduloLigado(guild.id, 'contadores')) await atualizar(guild).catch((e) => console.error('[contadores]', e.message));
     };
     rodar();
     setInterval(rodar, 10 * 60_000);

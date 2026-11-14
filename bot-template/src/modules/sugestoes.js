@@ -205,6 +205,10 @@ const config = {
 
 export default {
   id: 'sugestoes',
+  painel: {
+    padrao: PADRAO,
+    campos: [{ k: 'canal', t: 'canal', r: 'Canal das sugestões', a: 'Vazio = desligado' }],
+  },
   nome: tx('sugestoes'),
   comandos: [sugerir],
   componentes,

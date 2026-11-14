@@ -123,6 +123,7 @@ const PRIMEIROS_PASSOS: Record<string, string[]> = {
     "No Discord, use `/personalizar baixar`: o bot manda o arquivo **personalizacao.json** (só para você, que criou o bot)",
     "Abra o **Personalizar bot.html** (está na pasta do bot) com dois cliques, clique em **Abrir arquivo** e escolha o arquivo",
     "Mude textos, botões (texto, emoji, cor, mostrar/esconder), modais, cores, emojis, a aparência dos embeds e o status. A prévia mostra como fica no Discord",
+    "Na parte **Configurar servidores**, escolha o servidor e configure tudo por lá: canais, cargos, ligar/desligar cada módulo e as listas (respostas automáticas, loja da economia, assuntos de ticket, formulários, anúncios, palavras proibidas, cargos por nível...)",
     "Na parte **Criar**, monte seus **Painéis** (botões ou menu que dão cargo, respondem, abrem formulário, abrem ticket ou levam a um link) e **Formulários**",
     "Clique em **Salvar** e, no Discord, use `/personalizar aplicar arquivo:` com o arquivo salvo. Vale na hora, sem reiniciar",
     "Publique um painel criado com `/painel enviar`. Se mudar o painel e aplicar de novo, os já enviados se atualizam sozinhos",
@@ -217,7 +218,7 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
   L.push("**Importante:** em *Configurações do servidor → Cargos*, arraste o cargo do bot para **cima** dos cargos que ele vai dar, tirar ou punir.", "");
   L.push(
     mods.some((m) => m.id === "personalizar")
-      ? "Os comandos configuram canais, cargos e o que fica ligado. **Os textos das mensagens** (boas-vindas, nível, tickets, painéis...) mudam no **Personalizar bot** (veja em Personalizar)."
+      ? "Dá para configurar tudo pelo **Personalizar bot** (canais, cargos, ligar/desligar módulos, listas e os textos das mensagens) ou pelos comandos `/config`. **Os textos das mensagens** (boas-vindas, nível, tickets, painéis...) só mudam no Personalizar bot (veja em Personalizar)."
       : "Os comandos configuram canais, cargos e o que fica ligado. Os textos das mensagens já vêm prontos; para trocar, adicione o módulo **Personalização** na loja.",
     "",
   );
@@ -312,14 +313,14 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
   L.push("");
   L.push(temInicializador ? "Depois de mudar, reinicie o bot: no Inicializador, **Parar** e depois **Ligar**." : "Depois de mudar, reinicie o bot (Ctrl+C no terminal e `npm start` de novo).", "");
   if (mods.some((m) => m.id === "personalizar")) {
-    L.push("### Textos, cores, emojis e status (módulo Personalização)", "");
-    L.push("Todos os textos, botões (texto, emoji, cor, mostrar/esconder), modais, cores e o status do bot podem ser trocados sem mexer no código. Também dá para criar painéis com botões ou menu e formulários próprios:", "");
+    L.push("### Personalizar bot (módulo Personalização)", "");
+    L.push("Todos os textos, botões (texto, emoji, cor, mostrar/esconder), modais, cores e o status do bot podem ser trocados sem mexer no código. Também dá para criar painéis com botões ou menu e formulários próprios, e **configurar cada servidor**: canais, cargos, ligar/desligar módulos e as listas (respostas automáticas, loja, assuntos de ticket, formulários, anúncios...).", "");
     L.push("1. No Discord: `/personalizar baixar` (só quem criou o bot no Developer Portal pode usar).");
     L.push("2. Abra o **Personalizar bot.html** (na pasta do bot) no navegador e abra o arquivo baixado.");
-    L.push("3. Edite e clique em **Salvar**.");
+    L.push("3. Edite e clique em **Salvar**. Em **Configurar servidores** só os módulos que você mexer são gravados; se alguém mudou algo pelo `/config` depois, baixe o arquivo de novo antes de editar.");
     L.push("4. No Discord: `/personalizar aplicar` com o arquivo salvo. Vale na hora.");
     L.push("5. Painéis criados: publique com `/painel enviar` (veja todos com `/painel lista`).", "");
-    L.push("A personalização fica em `data/personalizacao.json` (o Transferidor de dados leva junto). Os textos das mensagens (boas-vindas, nível, aniversário, tickets, painéis...) só mudam por aqui: os comandos configuram canais, cargos e o que fica ligado.", "");
+    L.push("A personalização fica em `data/personalizacao.json` e a configuração dos servidores em `data/ajustes.json` (o Transferidor de dados leva os dois). Os textos das mensagens (boas-vindas, nível, aniversário, tickets, painéis...) só mudam por aqui. Um módulo desligado num servidor responde \"Este recurso está desligado neste servidor\" nos comandos e botões dele.", "");
   }
 
   L.push("## Problemas comuns", "");

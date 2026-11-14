@@ -158,6 +158,10 @@ const reputacao = {
 
 export default {
   id: 'reputacao',
+  painel: {
+    padrao: { recompensas: {} },
+    campos: [{ k: 'recompensas', t: 'mapa', chave: 'Pontos', chaveMin: 1, chaveMax: 100_000, max: 50, r: 'Cargos por pontos de reputação' }],
+  },
   nome: tx('reputacao'),
   comandos: [repCmd, reputacao],
   permissoes: [PermissionFlagsBits.ManageRoles],

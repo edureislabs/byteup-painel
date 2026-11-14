@@ -121,6 +121,14 @@ const destaques = {
 
 export default {
   id: 'destaques',
+  painel: {
+    padrao: PADRAO,
+    campos: [
+      { k: 'canal', t: 'canal', r: 'Canal de destaques', a: 'Vazio = desligado' },
+      { k: 'emoji', t: 'emoji', obrigatorio: true, r: 'Emoji que conta' },
+      { k: 'minimo', t: 'int', min: 1, max: 100, r: 'Reações para ir ao destaque' },
+    ],
+  },
   nome: tx('destaques'),
   intents: [GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.MessageContent],
   partials: [Partials.Message, Partials.Reaction, Partials.User, Partials.Channel],

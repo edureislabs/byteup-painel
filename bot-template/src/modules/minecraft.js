@@ -3,6 +3,7 @@ import dns from 'node:dns/promises';
 import { AttachmentBuilder, ChannelType, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { ajustes, salvarAjustes, embed, responder, cortar, fmt, CORES } from '../core/util.js';
 import { textos, visuais } from '../core/textos.js';
+import { moduloLigado } from '../core/servidor.js';
 
 // Textos deste módulo (o dono do bot pode trocar todos no "Personalizar bot.html")
 const tx = textos('minecraft', {
@@ -167,7 +168,7 @@ async function statusEmbed(guildId, endereco) {
 async function atualizarPaineis(client) {
   for (const guild of client.guilds.cache.values()) {
     const c = cfg(guild.id);
-    if (!c.paineis.length) continue;
+    if (!c.paineis.length || !moduloLigado(guild.id, 'minecraft')) continue;
     let mudou = false;
     for (const p of [...c.paineis]) {
       const canal = guild.channels.cache.get(p.canal);

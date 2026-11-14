@@ -194,6 +194,15 @@ setInterval(() => {
 
 export default {
   id: 'verificacao',
+  painel: {
+    padrao: PADRAO,
+    campos: [
+      { k: 'cargo', t: 'cargo', r: 'Cargo de verificado' },
+      { k: 'remover', t: 'cargo', r: 'Cargo tirado ao verificar', a: 'Ex.: "Não verificado". Opcional' },
+      { k: 'idadeMinima', t: 'int', min: 0, max: 365, r: 'Idade mínima da conta (dias)', a: '0 = sem limite' },
+      { k: 'registro', t: 'canal', r: 'Canal de registro' },
+    ],
+  },
   nome: tx('verificacao_2'),
   comandos: [verificacao],
   componentes,
