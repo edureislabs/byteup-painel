@@ -11,7 +11,7 @@ import {
   SlashCommandBuilder,
 } from 'discord.js';
 import { colecao } from '../core/db.js';
-import { ajustes, salvarAjustes, embed, responder, preencher, ehStaff, cortar, CORES } from '../core/util.js';
+import { ajustes, salvarAjustes, embed, responder, preencher, ehStaff, cortar, CORES, sinais } from '../core/util.js';
 
 /**
  * Tickets: painel com botão "Abrir ticket", canal privado para cada atendimento,
@@ -163,6 +163,9 @@ async function fechar(i, motivo = 'Sem motivo') {
   if (reg?.isTextBased()) await reg.send({ embeds: [resumo], files: [arquivo()], allowedMentions: { parse: [] } }).catch(() => {});
   const dono = await i.client.users.fetch(t.dono).catch(() => null);
   if (dono) await dono.send({ embeds: [resumo.setDescription(`Seu ticket em **${i.guild.name}** foi fechado. O histórico está em anexo.`)], files: [arquivo()] }).catch(() => {});
+
+  // outros módulos (ex.: Avaliação de atendimento) ficam sabendo
+  sinais.emit('ticketFechado', { guild: i.guild, client: i.client, dono: t.dono, atendente: t.assumido, fechadoPor: i.user.id, numero: t.numero });
 
   tickets.apagar(i.guildId, i.channelId);
   setTimeout(() => i.channel.delete(`Ticket fechado por ${i.user.tag}`).catch(() => {}), 5000);

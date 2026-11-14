@@ -55,6 +55,72 @@ const PRIMEIROS_PASSOS: Record<string, string[]> = {
     "`modo:` contém a palavra (padrão), é exatamente ou começa com",
     "`/tag nome:...` mostra qualquer resposta salva; `/autoresposta lista` mostra todas",
   ],
+  antiraid: [
+    "`/antiraid configurar alerta:#equipe limite:10 segundos:30` — liga a proteção (10 entradas em 30 s = modo raid)",
+    "`acao:` o que fazer com quem entra durante o raid: expulsar (padrão), castigo de 1 hora ou nada",
+    "`idade-minima:3` — expulsa sempre contas com menos de 3 dias (opcional)",
+    "No modo raid o bot sobe a verificação do servidor ao máximo e pausa os convites; encerre pelo botão ou com `/antiraid encerrar`",
+  ],
+  convites: [
+    "Dê ao bot a permissão **Gerenciar servidor** (sem ela o Discord não mostra os convites)",
+    "`/convites configurar canal:#entradas` — avisa quem entrou e quem convidou",
+    "`/convites ver`, `/convites ranking` e `/convites quem usuario:@pessoa`",
+    "Contas com menos de 7 dias contam como **falsas** (mude com `dias-falso:`)",
+  ],
+  reputacao: [
+    "`/rep usuario:@pessoa` — cada membro dá 1 ponto por dia",
+    "`/reputacao recompensa pontos:10 cargo:@Confiável` — cargo ao chegar em 10 pontos",
+    "`/reputacao ranking` e `/reputacao ver`",
+  ],
+  avaliacoes: [
+    "Já vem ligada: quando um ticket fecha, quem abriu recebe a avaliação na DM",
+    "`/avaliacoes configurar canal:#avaliacoes` — onde as notas aparecem",
+    "`/avaliacoes ranking` e `/avaliacoes atendente usuario:@pessoa`",
+    "Assuma o ticket (botão **Assumir**) para a nota contar para o atendente certo",
+  ],
+  formularios: [
+    "`/formulario criar titulo:Candidatura para a equipe canal:#candidaturas cargo:@Ajudante`",
+    "`/formulario pergunta formulario:... texto:Qual a sua idade?` — até 5 perguntas (limite do Discord), de até 45 letras",
+    "`/formulario painel formulario:...` — envia o botão **Preencher**",
+    "A equipe aprova ou recusa pelos botões; ao aprovar, a pessoa ganha o cargo (se configurado) e recebe a resposta na DM",
+  ],
+  cargostemp: [
+    "`/cargotemp dar usuario:@pessoa cargo:@VIP duracao:30d` — o cargo sai sozinho em 30 dias",
+    "Dar de novo o mesmo cargo renova o prazo; `/cargotemp lista` mostra os ativos",
+    "`/cargotemp registro canal:#logs` — registra quando cada cargo sai",
+  ],
+  callstemp: [
+    "`/salas configurar` — cria a call **➕ Criar sala** (ou escolha uma com `canal:`)",
+    "`nome:Sala de {nome}` e `limite:5` mudam o padrão das salas",
+    "Dentro da própria sala, o dono usa `/sala nome`, `/sala limite`, `/sala trancar`, `/sala permitir`, `/sala expulsar`",
+    "Se o dono sair, outra pessoa pode usar `/sala reivindicar`",
+  ],
+  contadores: [
+    "`/contadores criar tipo:Membros` — cria um canal \"👥 Membros: 1.234\" (também: online, boosts, canais, cargos)",
+    "`nome:` muda o texto; `{n}` vira o número. Atualiza a cada 10 minutos (limite do Discord para renomear canais)",
+  ],
+  destaques: [
+    "`/destaques configurar canal:#destaques minimo:3` — mensagens com 3 ⭐ vão para o destaque",
+    "`emoji:` troca a ⭐ por outro emoji (pode ser um do servidor)",
+  ],
+  contagem: [
+    "`/contagem canal canal:#contar` — liga o jogo",
+    "Dica: coloque esse canal nas exceções do AutoMod (`/config automod ignorar-canal`) e dos Níveis (`/config niveis ignorar-canal`)",
+  ],
+  afk: ["Cada membro usa `/afk motivo:almoçando`. Para mudar o apelido para \"[AFK]\", o bot precisa da permissão **Gerenciar apelidos**."],
+  anuncios: [
+    "`/anuncio criar canal:#avisos mensagem:Leiam as regras! quando:17/11 09:00 repetir:7d`",
+    "`quando:` aceita \"25/12 09:00\", \"18:30\", \"9h\" ou \"em 2h\"; `repetir:` aceita \"12h\", \"1d\", \"7d\" (mínimo 10 minutos)",
+    "Para marcar um cargo que não é mencionável, o bot precisa da permissão **Mencionar @everyone**",
+  ],
+  embeds: [
+    "`/embed criar canal:#regras botao1:Site | https://seusite.com` — abre o formulário (título, texto, cor, imagem, rodapé)",
+    "`/embed editar mensagem:<link da mensagem>` — muda um embed que o bot enviou",
+  ],
+  minecraft: [
+    "`/minecraft status ip:jogar.seuservidor.com` — mostra na hora (servidores Java)",
+    "`/minecraft painel ip:jogar.seuservidor.com canal:#status` — mensagem que se atualiza a cada 2 minutos",
+  ],
   aniversarios: [
     "`/aniversario configurar canal:#geral cargo:@Aniversariante` — onde dar parabéns e o cargo do dia",
     "Cada membro usa `/aniversario definir dia:14 mes:novembro`",

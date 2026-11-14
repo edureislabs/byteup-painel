@@ -30,6 +30,8 @@ export type BuilderModule = {
   extra?: boolean;
   /** extra que vai FORA da pasta do bot, na raiz do .zip (ex.: o Inicializador) */
   fora?: boolean;
+  /** módulos que precisam ir junto (ex.: Avaliação de atendimento precisa de Tickets) */
+  requires?: string[];
 };
 
 export const BUILDER_BASE = {
@@ -73,6 +75,16 @@ export const BUILDER_MODULES: BuilderModule[] = [
     commands: ["/verificacao"],
   },
   {
+    id: "antiraid",
+    bit: 18,
+    name: "Anti-raid",
+    emoji: "🚨",
+    description: "Se entrar gente demais de uma vez, trava o servidor sozinho (verificação máxima e convites pausados), expulsa quem chegar e avisa a equipe. Também barra contas novas demais.",
+    priceCents: 990,
+    commands: ["/antiraid"],
+    privileged: ["members"],
+  },
+  {
     id: "boasvindas",
     bit: 2,
     name: "Boas-vindas",
@@ -97,6 +109,16 @@ export const BUILDER_MODULES: BuilderModule[] = [
     privileged: ["members", "content"],
   },
   {
+    id: "convites",
+    bit: 19,
+    name: "Rastreio de convites",
+    emoji: "📨",
+    description: "Mostra quem convidou quem, conta entradas, saídas e contas falsas e tem ranking de convites. Ótimo para sorteios por convite.",
+    priceCents: 990,
+    commands: ["/convites"],
+    privileged: ["members"],
+  },
+  {
     id: "niveis",
     bit: 4,
     name: "Níveis",
@@ -119,6 +141,15 @@ export const BUILDER_MODULES: BuilderModule[] = [
     configSubs: ["moeda", "ganhos", "loja-adicionar", "loja-remover"],
   },
   {
+    id: "reputacao",
+    bit: 20,
+    name: "Reputação",
+    emoji: "👍",
+    description: "Cada membro dá +1 de reputação para alguém uma vez por dia. Ranking e cargos de recompensa por pontos.",
+    priceCents: 490,
+    commands: ["/rep", "/reputacao"],
+  },
+  {
     id: "tickets",
     bit: 6,
     name: "Tickets",
@@ -129,6 +160,25 @@ export const BUILDER_MODULES: BuilderModule[] = [
     configGroup: "tickets",
     configSubs: ["categoria", "equipe", "registro", "mensagem", "limite"],
     privileged: ["content"],
+  },
+  {
+    id: "avaliacoes",
+    bit: 21,
+    name: "Avaliação de atendimento",
+    emoji: "⭐",
+    description: "Ao fechar um ticket, quem abriu dá de 1 a 5 estrelas e um comentário na DM. Ranking dos atendentes. Precisa do módulo Tickets.",
+    priceCents: 690,
+    commands: ["/avaliacoes"],
+    requires: ["tickets"],
+  },
+  {
+    id: "formularios",
+    bit: 22,
+    name: "Formulários",
+    emoji: "📝",
+    description: "Candidatura para a equipe, parceria, denúncia: até 5 perguntas, botão para responder e a equipe aprova ou recusa (com cargo automático).",
+    priceCents: 1290,
+    commands: ["/formulario"],
   },
   {
     id: "sugestoes",
@@ -169,6 +219,62 @@ export const BUILDER_MODULES: BuilderModule[] = [
     commands: ["/cargos"],
   },
   {
+    id: "cargostemp",
+    bit: 23,
+    name: "Cargos temporários",
+    emoji: "⏳",
+    description: "Dá um cargo por um tempo (ex.: VIP por 30 dias) e ele sai sozinho no fim do prazo, mesmo se o bot reiniciar.",
+    priceCents: 590,
+    commands: ["/cargotemp"],
+  },
+  {
+    id: "callstemp",
+    bit: 24,
+    name: "Calls temporárias",
+    emoji: "🔊",
+    description: "Entrou em \"➕ Criar sala\", ganha uma call própria que some quando esvazia. O dono renomeia, limita, tranca e expulsa.",
+    priceCents: 990,
+    commands: ["/salas", "/sala"],
+  },
+  {
+    id: "contadores",
+    bit: 25,
+    name: "Contadores",
+    emoji: "📈",
+    description: "Canais que mostram \"👥 Membros: 1.234\", online e boosts, atualizando sozinhos.",
+    priceCents: 490,
+    commands: ["/contadores"],
+  },
+  {
+    id: "destaques",
+    bit: 26,
+    name: "Destaques",
+    emoji: "🌟",
+    description: "Mensagens que juntam ⭐ suficientes vão para o canal de destaques, com o contador sempre atualizado.",
+    priceCents: 590,
+    commands: ["/destaques"],
+    privileged: ["content"],
+  },
+  {
+    id: "contagem",
+    bit: 27,
+    name: "Jogo de contar",
+    emoji: "🔢",
+    description: "Canal onde todo mundo conta 1, 2, 3... sem a mesma pessoa repetir. Errou, volta para o 1. Com recorde do servidor.",
+    priceCents: 390,
+    commands: ["/contagem"],
+    privileged: ["content"],
+  },
+  {
+    id: "afk",
+    bit: 28,
+    name: "AFK",
+    emoji: "💤",
+    description: "/afk motivo: quem te marcar recebe o aviso. Quando você volta, o AFK sai sozinho e o bot mostra quem te chamou.",
+    priceCents: 390,
+    commands: ["/afk"],
+  },
+  {
     id: "autorespostas",
     bit: 15,
     name: "Respostas automáticas",
@@ -179,6 +285,24 @@ export const BUILDER_MODULES: BuilderModule[] = [
     privileged: ["content"],
   },
   {
+    id: "anuncios",
+    bit: 29,
+    name: "Anúncios agendados",
+    emoji: "📣",
+    description: "Mensagens que saem numa data marcada ou repetem sozinhas (ex.: regras toda semana), com cargo marcado e imagem.",
+    priceCents: 690,
+    commands: ["/anuncio"],
+  },
+  {
+    id: "embeds",
+    bit: 30,
+    name: "Criador de embeds",
+    emoji: "🧱",
+    description: "Monta mensagens bonitas (título, texto, cor, imagem, rodapé e botões de link) num formulário, sem saber código. Também edita.",
+    priceCents: 590,
+    commands: ["/embed"],
+  },
+  {
     id: "aniversarios",
     bit: 16,
     name: "Aniversários",
@@ -186,6 +310,15 @@ export const BUILDER_MODULES: BuilderModule[] = [
     description: "Cada membro cadastra o dia. No aniversário, o bot dá parabéns no canal e um cargo especial por 24 horas. Lista dos próximos aniversários.",
     priceCents: 590,
     commands: ["/aniversario"],
+  },
+  {
+    id: "minecraft",
+    bit: 31,
+    name: "Status Minecraft",
+    emoji: "⛏️",
+    description: "Mostra se o servidor de Minecraft (Java) está online, quantos jogam e a versão. Painel que se atualiza sozinho a cada 2 minutos.",
+    priceCents: 790,
+    commands: ["/minecraft"],
   },
   {
     id: "utilidades",
@@ -240,9 +373,15 @@ export type BuilderCombo = {
 };
 
 export const BUILDER_COMBOS: BuilderCombo[] = [
-  { id: "comunidade", name: "Comunidade", emoji: "🎉", modules: ["boasvindas", "niveis", "cargos", "enquetes", "sorteios", "aniversarios"], discountPct: 15 },
-  { id: "seguranca", name: "Segurança", emoji: "🛡️", modules: ["moderacao", "automod", "verificacao", "logs"], discountPct: 15 },
-  { id: "atendimento", name: "Atendimento", emoji: "🎫", modules: ["tickets", "sugestoes", "autorespostas", "logs"], discountPct: 15 },
+  {
+    id: "comunidade",
+    name: "Comunidade",
+    emoji: "🎉",
+    modules: ["boasvindas", "niveis", "cargos", "enquetes", "sorteios", "aniversarios", "reputacao", "destaques", "contadores", "contagem", "afk"],
+    discountPct: 20,
+  },
+  { id: "seguranca", name: "Segurança", emoji: "🛡️", modules: ["moderacao", "automod", "antiraid", "verificacao", "logs"], discountPct: 15 },
+  { id: "atendimento", name: "Atendimento", emoji: "🎫", modules: ["tickets", "avaliacoes", "formularios", "sugestoes", "autorespostas", "logs"], discountPct: 15 },
   { id: "completo", name: "Completo", emoji: "👑", modules: "todos", discountPct: 25 },
 ];
 
@@ -271,6 +410,16 @@ export const PRIVILEGED_LABEL: Record<PrivilegedIntent, string> = {
 
 const byId = new Map(BUILDER_MODULES.map((m) => [m.id, m]));
 export const builderModule = (id: string) => byId.get(id);
+
+/** Módulo escolhido sem o que ele precisa (ex.: Avaliação sem Tickets). `jaTem` = módulos que a pessoa já tem. */
+export function missingRequirement(ids: string[], jaTem: string[] = []): { module: BuilderModule; needs: BuilderModule } | null {
+  const todos = new Set([...ids, ...jaTem]);
+  for (const id of ids) {
+    const m = byId.get(id);
+    for (const r of m?.requires ?? []) if (!todos.has(r)) return { module: m!, needs: byId.get(r)! };
+  }
+  return null;
+}
 
 /** Lista de módulos válida, sem repetição e na ordem do catálogo. null se vazia ou com módulo desconhecido. */
 export function parseModules(input: unknown): string[] | null {

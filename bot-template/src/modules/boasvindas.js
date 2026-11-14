@@ -1,5 +1,5 @@
 import { ChannelType, GatewayIntentBits, Partials, PermissionFlagsBits } from 'discord.js';
-import { ajustes, salvarAjustes, embed, responder, preencher, cortar } from '../core/util.js';
+import { ajustes, salvarAjustes, embed, responder, preencher, cortar, foiRemovida } from '../core/util.js';
 
 /**
  * Boas-vindas: mensagem quando alguém entra e sai, mensagem na DM e cargos automáticos.
@@ -37,6 +37,7 @@ async function enviarEntrada(member, canalId, mensagem) {
 }
 
 async function aoEntrar(member) {
+  if (foiRemovida(`membro:${member.guild.id}:${member.id}`)) return; // barrado pelo anti-raid
   const c = cfg(member.guild.id);
   if (c.entradaCanal) await enviarEntrada(member, c.entradaCanal, c.entradaMensagem).catch(() => {});
   if (c.dmMensagem && !member.user.bot) {
@@ -47,6 +48,7 @@ async function aoEntrar(member) {
 }
 
 async function aoSair(member) {
+  if (foiRemovida(`membro:${member.guild.id}:${member.id}`)) return; // expulso pelo anti-raid: sem "saiu"
   const c = cfg(member.guild.id);
   if (!c.saidaCanal) return;
   const canal = member.guild.channels.cache.get(c.saidaCanal);

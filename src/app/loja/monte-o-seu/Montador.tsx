@@ -81,11 +81,19 @@ export default function Montador({
     Boolean(upgrade) ||
     (botName.trim().length >= 2 && botName.trim().length <= 32);
 
+  // marcar um módulo marca junto o que ele precisa (ex.: Avaliação → Tickets);
+  // desmarcar um módulo desmarca quem depende dele
   const toggle = (id: string) => {
     if (owned.has(id)) return;
-    setSelected((s) =>
-      s.includes(id) ? s.filter((x) => x !== id) : [...s, id],
-    );
+    setSelected((s) => {
+      if (s.includes(id)) {
+        const tirar = new Set([id]);
+        for (const m of BUILDER_MODULES) if (m.requires?.includes(id) && !owned.has(m.id)) tirar.add(m.id);
+        return s.filter((x) => !tirar.has(x));
+      }
+      const precisa = (BUILDER_MODULES.find((m) => m.id === id)?.requires ?? []).filter((r) => !owned.has(r) && !s.includes(r));
+      return [...s, id, ...precisa];
+    });
   };
 
   async function comprar() {
@@ -232,6 +240,7 @@ export default function Montador({
                     ? `${m.commands.length} comando(s)`
                     : "Automático"}
                   {m.configGroup ? " · configurável com /config" : ""}
+                  {m.requires?.length ? ` · precisa de ${m.requires.map((r) => builderModule(r)?.name ?? r).join(", ")}` : ""}
                 </p>
               </button>
             );

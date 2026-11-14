@@ -65,6 +65,8 @@ export async function POST(req: NextRequest) {
           description: m.description,
           priceCents: m.priceCents,
           commands: m.commands.length,
+          requires: m.requires ?? [],
+          extra: Boolean(m.extra),
         })),
         combos: combosForSale(cat),
       });

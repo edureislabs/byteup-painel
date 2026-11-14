@@ -89,8 +89,10 @@ for (const c of comandos.values()) c.data.setContexts?.(InteractionContextType.G
 
 // botões, menus e formulários: o customId começa com o prefixo do módulo ("tk:abrir", "sr:entrar:123"...)
 const componentes = new Map();
+const prefixosDM = new Set(); // botões que também funcionam na DM (ex.: avaliação de atendimento)
 for (const m of modulos) {
   for (const [prefixo, fn] of Object.entries(m.componentes ?? {})) componentes.set(prefixo, fn);
+  for (const prefixo of m.componentesDM ?? []) prefixosDM.add(prefixo);
 }
 
 // ---------------- eventos dos módulos ----------------
@@ -123,7 +125,11 @@ async function avisarErro(i) {
 }
 
 client.on(Events.InteractionCreate, async (i) => {
-  if (!i.inGuild()) return;
+  if (!i.inGuild()) {
+    // fora de servidor, só os botões/formulários que os módulos liberaram para a DM
+    const componente = i.isButton() || i.isAnySelectMenu() || i.isModalSubmit();
+    if (!componente || !prefixosDM.has(i.customId.split(':')[0])) return;
+  }
   try {
     if (i.isAutocomplete()) {
       const c = comandos.get(i.commandName);

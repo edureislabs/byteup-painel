@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { EventEmitter } from 'node:events';
 import { EmbedBuilder, MessageFlags, PermissionFlagsBits } from 'discord.js';
 import { colecao } from './db.js';
 
@@ -64,11 +65,13 @@ export function barra(fracao, tamanho = 12) {
 export function lerDuracao(texto) {
   const s = String(texto || '').toLowerCase().replace(/\s+/g, '');
   if (!s) return null;
-  const re = /(\d+)(s|seg|m|min|h|d|w|sem)/g;
-  const mult = { s: 1e3, seg: 1e3, m: 6e4, min: 6e4, h: 36e5, d: 864e5, w: 6048e5, sem: 6048e5 };
+  // as palavras mais longas vêm antes ("min" antes de "m"), senão "10min" não seria entendido
+  const re = /(\d+)(segundos?|seg|minutos?|min|horas?|dias?|semanas?|sem|s|m|h|d|w)/g;
+  const UNIDADE = { s: 1e3, m: 6e4, h: 36e5, d: 864e5, w: 6048e5 };
+  const mult = (u) => UNIDADE[u.startsWith('seg') ? 's' : u.startsWith('min') ? 'm' : u.startsWith('hora') ? 'h' : u.startsWith('dia') ? 'd' : u.startsWith('sem') ? 'w' : u];
   let total = 0, lido = '';
   for (const m of s.matchAll(re)) {
-    total += Number(m[1]) * mult[m[2]];
+    total += Number(m[1]) * mult(m[2]);
     lido += m[0];
   }
   return lido === s && total > 0 ? total : null;
@@ -162,3 +165,13 @@ export async function responderCampos(i, base, campos, { efemero = false } = {})
   await i.reply({ embeds: [partes[0]], flags, allowedMentions: { parse: [] } });
   for (const e of partes.slice(1)) await i.followUp({ embeds: [e], flags, allowedMentions: { parse: [] } });
 }
+
+// ---------------- avisos entre módulos ----------------
+/**
+ * Um módulo avisa, outro escuta (sem um depender do outro).
+ * Ex.: o Tickets avisa "ticketFechado" e a Avaliação de atendimento pergunta a nota.
+ *   sinais.emit('ticketFechado', { guild, dono, atendente, numero })
+ *   sinais.on('ticketFechado', (dados) => { ... })
+ */
+export const sinais = new EventEmitter();
+sinais.setMaxListeners(50);

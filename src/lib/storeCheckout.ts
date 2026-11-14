@@ -9,6 +9,7 @@ import {
   builderItemName,
   cleanBotName,
   cleanColor,
+  missingRequirement,
   parseModules,
   upgradeItemName,
   type BuilderOptions,
@@ -112,6 +113,8 @@ export async function startBuilderPurchase(
 ): Promise<BuilderStartResult> {
   const modulos = parseModules(input.modules);
   if (!modulos) return { kind: "invalid", error: "Escolha pelo menos um módulo." };
+  const falta = missingRequirement(modulos);
+  if (falta) return { kind: "invalid", error: `${falta.module.name} precisa do módulo ${falta.needs.name}.` };
   const nome = cleanBotName(input.botName);
   if (!nome) return { kind: "invalid", error: "Dê um nome ao bot (de 2 a 32 caracteres)." };
   if (!anyPaymentConfigured()) return { kind: "not_configured" };
@@ -160,6 +163,8 @@ export async function startUpgradePurchase(userId: string, input: { botItemId: u
   if (!pedidos) return { kind: "invalid", error: "Escolha pelo menos um módulo." };
   const novos = pedidos.filter((id) => !bot.options.modulos.includes(id));
   if (!novos.length) return { kind: "invalid", error: "Seu bot já tem esses módulos." };
+  const falta = missingRequirement(novos, bot.options.modulos);
+  if (falta) return { kind: "invalid", error: `${falta.module.name} precisa do módulo ${falta.needs.name}.` };
   if (!anyPaymentConfigured()) return { kind: "not_configured" };
 
   const catalogo = await getBuilderCatalog();
