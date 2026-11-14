@@ -3,7 +3,7 @@ import { guardApi } from '@/lib/apiGuard';
 import { prisma } from '@/lib/prisma';
 import { validateShopItem } from '@/lib/shopValidation';
 
-// Lista os itens da loja teste
+// Lista os itens da loja
 export async function GET(req: NextRequest, { params }: { params: Promise<{ guildId: string }> }) {
   const { guildId } = await params;
   const denied = await guardApi(guildId);

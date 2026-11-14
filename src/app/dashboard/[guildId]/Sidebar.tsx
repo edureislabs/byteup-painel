@@ -544,4 +544,4 @@ export default function Sidebar({ guildId }: Props) {
       </aside>
     </>
   );
-}
+} 

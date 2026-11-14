@@ -71,3 +71,4 @@ export const guildIconUrl = (guildId: string, icon: string | null, size = 128) =
 
 export const guildBannerUrl = (guildId: string, banner: string | null) =>
   banner ? `https://cdn.discordapp.com/banners/${guildId}/${banner}.png?size=1024` : null;
+

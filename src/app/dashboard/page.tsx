@@ -5,34 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getDiscordAccessToken } from "@/lib/discordToken";
 import { isAdmin } from "@/lib/admin";
-
-type UserGuild = { id: string; name: string; icon: string | null; owner: boolean; permissions: string };
-
-// Dono ou cargo com permissão de Administrador (0x8)
-function isGuildManager(guild: UserGuild): boolean {
-  if (guild.owner) return true;
-  try {
-    return (BigInt(guild.permissions) & BigInt(0x8)) === BigInt(0x8);
-  } catch {
-    return false;
-  }
-}
-
-// Busca no Discord os servidores do usuário logado
-async function fetchUserGuilds(accessToken: string): Promise<UserGuild[] | "unauthorized"> {
-  try {
-    const res = await fetch("https://discord.com/api/v10/users/@me/guilds", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-      cache: "no-store",
-      signal: AbortSignal.timeout(8000),
-    });
-    if (res.status === 401) return "unauthorized";
-    if (!res.ok) return [];
-    return (await res.json()) as UserGuild[];
-  } catch {
-    return [];
-  }
-}
+import { getUserGuilds, isGuildManager, type UserGuild } from "@/lib/userGuilds";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -52,11 +25,16 @@ export default async function DashboardPage() {
     ? await prisma.serverListingReport.count({ where: { resolved: false } })
     : 0;
 
-  // Lista de servidores do usuário, direto do Discord
-  const result = await fetchUserGuilds(accessToken);
-  // Token revogado ou inválido no Discord: login de novo
-  if (result === "unauthorized") redirect("/login");
-  const guilds: UserGuild[] = result;
+  // Lista de servidores do usuário, com cache (memória + banco).
+  // Antes: 1 chamada ao Discord a cada visita + 1 consulta ao banco
+  // para CADA servidor em que a pessoa não é admin.
+  let guilds: UserGuild[] = [];
+  try {
+    guilds = (await getUserGuilds(userId, accessToken)) ?? [];
+  } catch {
+    // Token revogado ou inválido no Discord: login de novo
+    redirect("/login");
+  }
 
   const managed = guilds.filter(isGuildManager);
   const others = guilds.filter((g) => !isGuildManager(g));

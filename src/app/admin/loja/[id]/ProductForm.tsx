@@ -112,4 +112,4 @@ export default function ProductForm({ product }: Props) {
       </div>
     </form>
   );
-}   
+}

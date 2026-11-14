@@ -1,9 +1,9 @@
 ﻿'use client';
 
 import { useState, useEffect, use, useCallback } from 'react';
-import EconomySettings from './economysettings';
-import ShopManager from './shopmanager';
-import AdjustBalance, { type AdjustPrefill } from './adjustbalance';
+import EconomySettings from './EconomySettings';
+import ShopManager from './ShopManager';
+import AdjustBalance, { type AdjustPrefill } from './AdjustBalance';
 
 type Currency = {
   id: string;

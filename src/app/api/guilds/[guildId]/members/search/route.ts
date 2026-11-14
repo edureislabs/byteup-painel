@@ -1,73 +1,47 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { guardApi } from '@/lib/apiGuard';
-import { prisma } from '@/lib/prisma';
+import { NextRequest, NextResponse } from "next/server";
+import { guardApi } from "@/lib/apiGuard";
 
 export async function GET(
-  req: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ guildId: string }> }
 ) {
+  const { guildId } = await params;
+  const denied = await guardApi(guildId);
+  if (denied) return denied;
+
+  const searchParams = request.nextUrl.searchParams;
+  const query = searchParams.get("q");
+
+  if (!query || query.length < 2) {
+    return NextResponse.json({ users: [] });
+  }
+
   try {
-    const { guildId } = await params;
-    const denied = await guardApi(guildId);
-    if (denied) return denied;
+    const response = await fetch(
+      `https://discord.com/api/v10/guilds/${guildId}/members/search?query=${encodeURIComponent(query.slice(0, 100))}&limit=10`,
+      {
+        headers: {
+          Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
+        },
+      }
+    );
 
-    const status = req.nextUrl.searchParams.get('status') || 'all';
-
-    const where: any = { guildId };
-    if (status !== 'all') where.status = status;
-
-    const reports = await prisma.report.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      take: 200,
-    });
-
-    const userIds = [
-      ...new Set(reports.flatMap((r) => [r.reporterId, r.targetId])),
-    ];
-
-    const usersData: Record<
-      string,
-      { username: string; avatar: string | null }
-    > = {};
-
-    for (const userId of userIds) {
-      try {
-        const res = await fetch(
-          `https://discord.com/api/v10/users/${userId}`,
-          {
-            headers: {
-              Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
-            },
-          }
-        );
-        if (res.ok) {
-          const data = await res.json();
-          usersData[userId] = {
-            username: data.username,
-            avatar: data.avatar
-              ? `https://cdn.discordapp.com/avatars/${userId}/${data.avatar}.png?size=128`
-              : null,
-          };
-        }
-      } catch {}
+    if (!response.ok) {
+      console.error("Discord API error:", response.status, await response.text());
+      return NextResponse.json({ users: [] });
     }
 
-    return NextResponse.json(
-      reports.map((r) => ({
-        ...r,
-        reporter: usersData[r.reporterId] || {
-          username: 'Desconhecido',
-          avatar: null,
-        },
-        target: usersData[r.targetId] || {
-          username: 'Desconhecido',
-          avatar: null,
-        },
-      }))
-    );
+    const members = await response.json();
+    const users = members.map((member: any) => ({
+      id: member.user.id,
+      name: member.user.username,
+      discriminator: member.user.discriminator || "0",
+      avatar: member.user.avatar,
+    }));
+
+    return NextResponse.json({ users });
   } catch (error) {
-    console.error('[reports] Erro:', error);
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 });
+    console.error("Erro ao buscar usuarios:", error);
+    return NextResponse.json({ users: [] });
   }
 }

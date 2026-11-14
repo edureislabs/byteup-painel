@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import LandingNavbar from "../components/LandingNavbar";
 import LandingFooter from "../components/LandingFooter";
-import ServerCard from "./servercard";
-import AdultGate, { LeaveAdultMode } from "./adultgate";
+import ServerCard from "./ServerCard";
+import AdultGate, { LeaveAdultMode } from "./AdultGate";
 import { CATEGORIES, getPopularTags, getPublicListings } from "@/lib/listing";
 import { getViewer } from "@/lib/adultGate";
 

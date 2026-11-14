@@ -46,6 +46,15 @@ export default async function AdminProductPage({
         </div>
         <h1 className="mt-3 text-3xl font-black">{product.name}</h1>
 
+        {!storage && (
+          <div className="mt-4 rounded-2xl border border-[#f0b878]/40 bg-[#f0b878]/[0.08] px-4 py-3 text-sm text-[#f0d4b8]">
+            <strong>⚠️ Envio de imagem e arquivos desativado:</strong> o armazenamento (Cloudflare R2) ainda não foi configurado.
+            Adicione <code className="rounded bg-black/30 px-1">R2_ACCOUNT_ID</code>, <code className="rounded bg-black/30 px-1">R2_ACCESS_KEY_ID</code>,{" "}
+            <code className="rounded bg-black/30 px-1">R2_SECRET_ACCESS_KEY</code> e <code className="rounded bg-black/30 px-1">R2_BUCKET</code> na Vercel
+            e faça um novo deploy.
+          </div>
+        )}
+
         {aviso === "vendido" && (
           <p className="mt-4 rounded-2xl border border-[#f0b878]/30 bg-[#f0b878]/[0.06] px-4 py-3 text-sm text-[#f0d4b8]">
             Este produto já foi vendido, então não pode ser apagado (quem comprou perderia o acesso). Ele foi desativado e saiu da loja.
