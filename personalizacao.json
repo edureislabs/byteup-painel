@@ -2,7 +2,9 @@
  "formato": "byteup-personalizacao",
  "versao": 1,
  "bot": "teste",
- "gerado": "2026-11-14T19:59:15.945Z",
+ "modo": "completo",
+ "basicas": [],
+ "gerado": "2026-11-14T22:29:28.527Z",
  "modulos": [
   {
    "id": "geral",
@@ -186,6 +188,12 @@
     "modulo": "geral",
     "padrao": "Algo deu errado. Tente de novo em instantes.",
     "tipo": "texto",
+    "vars": []
+   },
+   "geral.modulo_desligado": {
+    "modulo": "geral",
+    "padrao": "Este recurso está desligado neste servidor.",
+    "tipo": "resposta",
     "vars": []
    },
    "geral.config_configurar_este_modulo": {
@@ -1862,6 +1870,15 @@
      "modo_raid"
     ]
    },
+   "boasvindas.msg_dm_padrao": {
+    "modulo": "boasvindas",
+    "padrao": "Bem-vindo(a) ao **{servidor}**, {nome}! Leia as regras e divirta-se. 💜",
+    "tipo": "descricao",
+    "vars": [
+     "servidor",
+     "nome"
+    ]
+   },
    "boasvindas.msg_entrada_padrao": {
     "modulo": "boasvindas",
     "padrao": "Seja bem-vindo(a) ao **{servidor}**, {usuario}! Agora somos **{membros}** membros. 🎉",
@@ -1906,7 +1923,7 @@
    },
    "boasvindas.mensagem_dm_definida": {
     "modulo": "boasvindas",
-    "padrao": "Mensagem na DM definida.",
+    "padrao": "Mensagem na DM ligada. O texto dela muda no Personalizar bot.",
     "tipo": "texto",
     "vars": []
    },
@@ -3445,12 +3462,6 @@
      "equipe"
     ]
    },
-   "tickets.assunto_extra_mensagem": {
-    "modulo": "tickets",
-    "padrao": " · mensagem própria",
-    "tipo": "texto",
-    "vars": []
-   },
    "tickets.assunto_indisponivel": {
     "modulo": "tickets",
     "padrao": "Esse assunto não existe mais. Peça para a equipe enviar o painel de novo.",
@@ -3831,12 +3842,6 @@
    "tickets.registro_tickets_desligado": {
     "modulo": "tickets",
     "padrao": "Registro de tickets desligado.",
-    "tipo": "texto",
-    "vars": []
-   },
-   "tickets.mensagem_ticket_atualizada": {
-    "modulo": "tickets",
-    "padrao": "Mensagem do ticket atualizada.",
     "tipo": "texto",
     "vars": []
    },
@@ -5056,6 +5061,12 @@
     "modulo": "sorteios",
     "padrao": "Sorteios",
     "tipo": "texto",
+    "vars": []
+   },
+   "cargos.titulo_painel": {
+    "modulo": "cargos",
+    "padrao": "🎭 Escolha seus cargos",
+    "tipo": "titulo",
     "vars": []
    },
    "cargos.clique_nos_botoes_pegar": {
@@ -6917,7 +6928,7 @@
    },
    "personalizar.baixar_ok": {
     "modulo": "personalizar",
-    "padrao": "Aqui está o arquivo com todos os textos do bot ({total} personalizado(s) até agora).\n\n**Como editar:** abra o **Personalizar bot.html** (está na pasta do bot), clique em **Abrir arquivo** e escolha este arquivo. Depois de salvar, use `/personalizar aplicar`.",
+    "padrao": "Aqui está o arquivo com os textos do bot ({total} personalizado(s) até agora) e a configuração dos servidores.\n\n**Como editar:** abra o **Personalizar bot.html** (está na pasta do bot), clique em **Abrir arquivo** e escolha este arquivo. Depois de salvar, use `/personalizar aplicar`.",
     "tipo": "resposta",
     "vars": [
      "total"
@@ -6953,6 +6964,15 @@
     "tipo": "resposta",
     "vars": [
      "total"
+    ]
+   },
+   "personalizar.aplicado_servidores": {
+    "modulo": "personalizar",
+    "padrao": "\nConfiguração de **{servidores}** servidor(es) atualizada ({campos} ajuste(s)).",
+    "tipo": "resposta",
+    "vars": [
+     "servidores",
+     "campos"
     ]
    },
    "personalizar.aplicado_paineis": {
@@ -7657,42 +7677,178 @@
    ],
    "canais": [
     {
-     "id": "1487651128899534910",
-     "nome": "Canais de Texto",
-     "tipo": "categoria"
-    },
-    {
-     "id": "1487651128899534911",
-     "nome": "Canais de Voz",
-     "tipo": "categoria"
-    },
-    {
      "id": "1487651128899534912",
      "nome": "geral",
-     "tipo": "texto"
+     "tipo": "texto",
+     "pai": "Canais de Texto"
+    },
+    {
+     "id": "1487651128899534913",
+     "nome": "Geral",
+     "tipo": "voz",
+     "pai": "Canais de Voz"
     },
     {
      "id": "1571215806576984155",
      "nome": "saída",
-     "tipo": "texto"
+     "tipo": "texto",
+     "pai": "Canais de Texto"
     },
     {
      "id": "1571216556665475082",
      "nome": "logs",
-     "tipo": "texto"
+     "tipo": "texto",
+     "pai": "Canais de Texto"
+    },
+    {
+     "id": "1487651128899534910",
+     "nome": "Canais de Texto",
+     "tipo": "categoria",
+     "pai": ""
+    },
+    {
+     "id": "1487651128899534911",
+     "nome": "Canais de Voz",
+     "tipo": "categoria",
+     "pai": ""
     }
-   ]
+   ],
+   "config": {
+    "modulos": {
+     "nucleo": {
+      "cor": null,
+      "staff": null
+     },
+     "moderacao": {
+      "canalLog": null,
+      "avisarDm": true,
+      "limite": 0,
+      "acaoLimite": "castigo",
+      "duracaoLimite": 3600000
+     },
+     "automod": {
+      "ativo": false,
+      "links": false,
+      "dominiosPermitidos": [],
+      "convites": true,
+      "palavras": [],
+      "spam": 0,
+      "maiusculas": false,
+      "mencoes": 0,
+      "acao": "apagar",
+      "duracao": 300000,
+      "imunes": [],
+      "ignorados": [],
+      "canalLog": null
+     },
+     "verificacao": {
+      "cargo": null,
+      "remover": null,
+      "idadeMinima": 0,
+      "registro": null
+     },
+     "antiraid": {
+      "ativo": false,
+      "limite": 10,
+      "segundos": 30,
+      "acao": "expulsar",
+      "alerta": null,
+      "cargoAlerta": null,
+      "idadeMinima": 0
+     },
+     "boasvindas": {
+      "entradaCanal": null,
+      "saidaCanal": null,
+      "dm": false,
+      "cargos": []
+     },
+     "logs": {
+      "canal": null,
+      "tipos": [
+       "mensagens",
+       "membros",
+       "moderacao",
+       "canais",
+       "voz"
+      ]
+     },
+     "convites": {
+      "canal": null,
+      "diasFalso": 7
+     },
+     "niveis": {
+      "ativo": true,
+      "canal": null,
+      "xpMin": 15,
+      "xpMax": 25,
+      "intervalo": 60,
+      "recompensas": {},
+      "ignorados": []
+     },
+     "economia": {
+      "moeda": "moedas",
+      "emoji": "🪙",
+      "diario": 500,
+      "trabalhoMin": 100,
+      "trabalhoMax": 300,
+      "trabalhoIntervalo": 3600000,
+      "apostaMax": 0,
+      "loja": []
+     },
+     "reputacao": {
+      "recompensas": {}
+     },
+     "tickets": {
+      "categoria": null,
+      "equipe": null,
+      "registro": null,
+      "limite": 1,
+      "assuntos": []
+     },
+     "avaliacoes": {
+      "ativo": true,
+      "canal": null
+     },
+     "formularios": {
+      "lista": []
+     },
+     "sugestoes": {
+      "canal": null
+     },
+     "cargostemp": {
+      "registro": null
+     },
+     "callstemp": {
+      "criador": null,
+      "categoria": null,
+      "limite": 0
+     },
+     "destaques": {
+      "canal": null,
+      "emoji": "⭐",
+      "minimo": 3
+     },
+     "contagem": {
+      "canal": null
+     },
+     "autorespostas": {
+      "lista": []
+     },
+     "anuncios": {
+      "lista": []
+     },
+     "aniversarios": {
+      "canal": null,
+      "cargo": null
+     }
+    },
+    "desligados": []
+   }
   }
  ],
  "valores": {
-  "textos": {
-   "convites.msg_entrada_padrao": "📥 {usuario} entrou · convidado(a) por {convidou} ({convites} convite(s)) aaaaaaaaaaaaaa"
-  },
-  "visuais": {
-   "tickets.aberto": {
-    "rodape": "sadfsdf"
-   }
-  },
+  "textos": {},
+  "visuais": {},
   "emojis": {},
   "cores": {},
   "presenca": {},
@@ -7701,5 +7857,995 @@
    "paineis": [],
    "formularios": []
   }
- }
+ },
+ "esquemas": [
+  {
+   "id": "nucleo",
+   "nome": "Geral",
+   "desligavel": false,
+   "dica": "",
+   "campos": [
+    {
+     "k": "cor",
+     "t": "cor",
+     "r": "Cor das mensagens neste servidor",
+     "a": "Vazio = a cor padrão do bot"
+    },
+    {
+     "k": "staff",
+     "t": "cargo",
+     "r": "Cargo da equipe",
+     "a": "Atende tickets, aprova sugestões e formulários..."
+    }
+   ]
+  },
+  {
+   "id": "moderacao",
+   "nome": "Moderação",
+   "desligavel": true,
+   "dica": "",
+   "campos": [
+    {
+     "k": "canalLog",
+     "t": "canal",
+     "r": "Canal de registro das punições"
+    },
+    {
+     "k": "avisarDm",
+     "t": "bool",
+     "r": "Avisar o membro na DM quando for punido"
+    },
+    {
+     "k": "limite",
+     "t": "int",
+     "min": 0,
+     "max": 50,
+     "r": "Advertências para a punição automática",
+     "a": "0 = desligada"
+    },
+    {
+     "k": "acaoLimite",
+     "t": "escolha",
+     "op": [
+      [
+       "castigo",
+       "Castigo"
+      ],
+      [
+       "expulsar",
+       "Expulsar"
+      ],
+      [
+       "banir",
+       "Banir"
+      ]
+     ],
+     "r": "Punição automática"
+    },
+    {
+     "k": "duracaoLimite",
+     "t": "duracao",
+     "min": 60000,
+     "max": 2419200000,
+     "r": "Duração do castigo automático"
+    }
+   ]
+  },
+  {
+   "id": "automod",
+   "nome": "AutoMod",
+   "desligavel": true,
+   "dica": "",
+   "campos": [
+    {
+     "k": "ativo",
+     "t": "bool",
+     "r": "AutoMod ligado"
+    },
+    {
+     "k": "links",
+     "t": "bool",
+     "r": "Apagar links"
+    },
+    {
+     "k": "dominiosPermitidos",
+     "t": "palavras",
+     "dominio": true,
+     "max": 50,
+     "r": "Sites liberados",
+     "a": "Um por linha, ex.: youtube.com"
+    },
+    {
+     "k": "convites",
+     "t": "bool",
+     "r": "Apagar convites de outros servidores"
+    },
+    {
+     "k": "palavras",
+     "t": "palavras",
+     "minusculo": true,
+     "max": 200,
+     "itemMax": 60,
+     "r": "Palavras proibidas",
+     "a": "Uma por linha"
+    },
+    {
+     "k": "spam",
+     "t": "int",
+     "min": 0,
+     "max": 30,
+     "r": "Flood: mensagens permitidas em 5 s",
+     "a": "0 = desligado"
+    },
+    {
+     "k": "maiusculas",
+     "t": "bool",
+     "r": "Apagar mensagens com excesso de MAIÚSCULAS"
+    },
+    {
+     "k": "mencoes",
+     "t": "int",
+     "min": 0,
+     "max": 50,
+     "r": "Máximo de menções numa mensagem",
+     "a": "0 = desligado"
+    },
+    {
+     "k": "acao",
+     "t": "escolha",
+     "op": [
+      [
+       "apagar",
+       "Só apagar"
+      ],
+      [
+       "castigo",
+       "Apagar e dar castigo"
+      ]
+     ],
+     "r": "O que fazer"
+    },
+    {
+     "k": "duracao",
+     "t": "duracao",
+     "min": 60000,
+     "max": 2419200000,
+     "r": "Duração do castigo"
+    },
+    {
+     "k": "imunes",
+     "t": "cargos",
+     "max": 25,
+     "r": "Cargos que o AutoMod ignora"
+    },
+    {
+     "k": "ignorados",
+     "t": "canais",
+     "max": 50,
+     "r": "Canais que o AutoMod ignora"
+    },
+    {
+     "k": "canalLog",
+     "t": "canal",
+     "r": "Canal de registro"
+    }
+   ]
+  },
+  {
+   "id": "verificacao",
+   "nome": "Verificação",
+   "desligavel": true,
+   "dica": "",
+   "campos": [
+    {
+     "k": "cargo",
+     "t": "cargo",
+     "r": "Cargo de verificado"
+    },
+    {
+     "k": "remover",
+     "t": "cargo",
+     "r": "Cargo tirado ao verificar",
+     "a": "Ex.: \"Não verificado\". Opcional"
+    },
+    {
+     "k": "idadeMinima",
+     "t": "int",
+     "min": 0,
+     "max": 365,
+     "r": "Idade mínima da conta (dias)",
+     "a": "0 = sem limite"
+    },
+    {
+     "k": "registro",
+     "t": "canal",
+     "r": "Canal de registro"
+    }
+   ]
+  },
+  {
+   "id": "antiraid",
+   "nome": "Anti-raid",
+   "desligavel": true,
+   "dica": "",
+   "campos": [
+    {
+     "k": "ativo",
+     "t": "bool",
+     "r": "Anti-raid ligado"
+    },
+    {
+     "k": "limite",
+     "t": "int",
+     "min": 3,
+     "max": 100,
+     "r": "Entradas que disparam o modo raid"
+    },
+    {
+     "k": "segundos",
+     "t": "int",
+     "min": 5,
+     "max": 600,
+     "r": "Em quantos segundos"
+    },
+    {
+     "k": "acao",
+     "t": "escolha",
+     "op": [
+      [
+       "expulsar",
+       "Expulsar quem entrar"
+      ],
+      [
+       "castigo",
+       "Dar castigo"
+      ],
+      [
+       "nada",
+       "Só avisar"
+      ]
+     ],
+     "r": "Durante o raid"
+    },
+    {
+     "k": "alerta",
+     "t": "canal",
+     "r": "Canal do alerta"
+    },
+    {
+     "k": "cargoAlerta",
+     "t": "cargo",
+     "r": "Cargo marcado no alerta"
+    },
+    {
+     "k": "idadeMinima",
+     "t": "int",
+     "min": 0,
+     "max": 365,
+     "r": "Idade mínima da conta (dias)",
+     "a": "Contas mais novas são expulsas sempre. 0 = não barra"
+    }
+   ]
+  },
+  {
+   "id": "boasvindas",
+   "nome": "Boas-vindas",
+   "desligavel": true,
+   "dica": "",
+   "campos": [
+    {
+     "k": "entradaCanal",
+     "t": "canal",
+     "r": "Canal da mensagem de entrada",
+     "a": "Vazio = desligada"
+    },
+    {
+     "k": "saidaCanal",
+     "t": "canal",
+     "r": "Canal da mensagem de saída",
+     "a": "Vazio = desligada"
+    },
+    {
+     "k": "dm",
+     "t": "bool",
+     "r": "Mandar mensagem na DM de quem entra"
+    },
+    {
+     "k": "cargos",
+     "t": "cargos",
+     "max": 5,
+     "r": "Cargos automáticos para quem entra"
+    }
+   ]
+  },
+  {
+   "id": "logs",
+   "nome": "Logs",
+   "desligavel": true,
+   "dica": "",
+   "campos": [
+    {
+     "k": "canal",
+     "t": "canal",
+     "r": "Canal dos registros",
+     "a": "Vazio = desligado"
+    },
+    {
+     "k": "tipos",
+     "t": "varias",
+     "op": [
+      [
+       "mensagens",
+       "Mensagens apagadas e editadas"
+      ],
+      [
+       "membros",
+       "Entradas, saídas, apelidos e cargos"
+      ],
+      [
+       "moderacao",
+       "Banimentos"
+      ],
+      [
+       "canais",
+       "Canais criados e apagados"
+      ],
+      [
+       "voz",
+       "Entradas e saídas de canais de voz"
+      ]
+     ],
+     "r": "O que registrar"
+    }
+   ]
+  },
+  {
+   "id": "convites",
+   "nome": "Rastreio de convites",
+   "desligavel": true,
+   "dica": "",
+   "campos": [
+    {
+     "k": "canal",
+     "t": "canal",
+     "r": "Canal que avisa quem convidou",
+     "a": "Vazio = não avisa"
+    },
+    {
+     "k": "diasFalso",
+     "t": "int",
+     "min": 0,
+     "max": 365,
+     "r": "Contas com menos dias contam como falsas"
+    }
+   ]
+  },
+  {
+   "id": "niveis",
+   "nome": "Níveis",
+   "desligavel": true,
+   "dica": "",
+   "campos": [
+    {
+     "k": "ativo",
+     "t": "bool",
+     "r": "Ganhar XP conversando"
+    },
+    {
+     "k": "canal",
+     "t": "canal",
+     "r": "Canal do aviso de nível",
+     "a": "Vazio = avisa no mesmo canal"
+    },
+    {
+     "k": "xpMin",
+     "t": "int",
+     "min": 1,
+     "max": 500,
+     "r": "XP mínimo por mensagem"
+    },
+    {
+     "k": "xpMax",
+     "t": "int",
+     "min": 1,
+     "max": 500,
+     "r": "XP máximo por mensagem"
+    },
+    {
+     "k": "intervalo",
+     "t": "int",
+     "min": 0,
+     "max": 3600,
+     "r": "Segundos entre mensagens que valem XP"
+    },
+    {
+     "k": "recompensas",
+     "t": "mapa",
+     "chave": "Nível",
+     "chaveMin": 1,
+     "chaveMax": 500,
+     "max": 50,
+     "r": "Cargos por nível"
+    },
+    {
+     "k": "ignorados",
+     "t": "canais",
+     "max": 50,
+     "r": "Canais que não dão XP"
+    }
+   ]
+  },
+  {
+   "id": "economia",
+   "nome": "Economia",
+   "desligavel": true,
+   "dica": "",
+   "campos": [
+    {
+     "k": "moeda",
+     "t": "texto",
+     "max": 20,
+     "obrigatorio": true,
+     "r": "Nome da moeda"
+    },
+    {
+     "k": "emoji",
+     "t": "emoji",
+     "r": "Emoji da moeda"
+    },
+    {
+     "k": "diario",
+     "t": "int",
+     "min": 0,
+     "max": 1000000,
+     "r": "Valor do /diario"
+    },
+    {
+     "k": "trabalhoMin",
+     "t": "int",
+     "min": 0,
+     "max": 1000000,
+     "r": "Mínimo do /trabalhar"
+    },
+    {
+     "k": "trabalhoMax",
+     "t": "int",
+     "min": 0,
+     "max": 1000000,
+     "r": "Máximo do /trabalhar"
+    },
+    {
+     "k": "trabalhoIntervalo",
+     "t": "duracao",
+     "min": 60000,
+     "max": 604800000,
+     "r": "Tempo entre um /trabalhar e outro"
+    },
+    {
+     "k": "apostaMax",
+     "t": "int",
+     "min": 0,
+     "max": 1000000000,
+     "r": "Aposta máxima",
+     "a": "0 = sem limite"
+    },
+    {
+     "k": "loja",
+     "t": "lista",
+     "id": "tempo",
+     "titulo": "nome",
+     "max": 25,
+     "r": "Loja",
+     "nomeItem": "Item",
+     "campos": [
+      {
+       "k": "nome",
+       "t": "texto",
+       "max": 60,
+       "obrigatorio": true,
+       "r": "Nome"
+      },
+      {
+       "k": "preco",
+       "t": "int",
+       "min": 1,
+       "max": 1000000000,
+       "r": "Preço"
+      },
+      {
+       "k": "cargo",
+       "t": "cargo",
+       "obrigatorio": true,
+       "r": "Cargo que a pessoa ganha"
+      },
+      {
+       "k": "descricao",
+       "t": "texto",
+       "max": 200,
+       "r": "Descrição"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "reputacao",
+   "nome": "Reputação",
+   "desligavel": true,
+   "dica": "",
+   "campos": [
+    {
+     "k": "recompensas",
+     "t": "mapa",
+     "chave": "Pontos",
+     "chaveMin": 1,
+     "chaveMax": 100000,
+     "max": 50,
+     "r": "Cargos por pontos de reputação"
+    }
+   ]
+  },
+  {
+   "id": "tickets",
+   "nome": "Tickets",
+   "desligavel": true,
+   "dica": "",
+   "campos": [
+    {
+     "k": "categoria",
+     "t": "canal",
+     "canal": "categoria",
+     "r": "Categoria onde os tickets abrem"
+    },
+    {
+     "k": "equipe",
+     "t": "cargo",
+     "r": "Cargo que atende",
+     "a": "Vazio = o cargo da equipe (Geral)"
+    },
+    {
+     "k": "registro",
+     "t": "canal",
+     "r": "Canal de registro (transcrições)"
+    },
+    {
+     "k": "limite",
+     "t": "int",
+     "min": 1,
+     "max": 10,
+     "r": "Tickets abertos ao mesmo tempo por pessoa"
+    },
+    {
+     "k": "assuntos",
+     "t": "lista",
+     "id": "slug:nome",
+     "titulo": "nome",
+     "max": 25,
+     "r": "Assuntos (menu do painel)",
+     "nomeItem": "Assunto",
+     "a": "Com assuntos, use /ticket painel modo:menu",
+     "campos": [
+      {
+       "k": "nome",
+       "t": "texto",
+       "max": 80,
+       "obrigatorio": true,
+       "r": "Nome"
+      },
+      {
+       "k": "emoji",
+       "t": "emoji",
+       "r": "Emoji"
+      },
+      {
+       "k": "descricao",
+       "t": "texto",
+       "max": 100,
+       "r": "Descrição no menu"
+      },
+      {
+       "k": "categoria",
+       "t": "canal",
+       "canal": "categoria",
+       "r": "Categoria própria",
+       "a": "Vazio = a categoria geral"
+      },
+      {
+       "k": "equipe",
+       "t": "cargo",
+       "r": "Equipe própria",
+       "a": "Vazio = a equipe geral"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "avaliacoes",
+   "nome": "Avaliação de atendimento",
+   "desligavel": true,
+   "dica": "",
+   "campos": [
+    {
+     "k": "ativo",
+     "t": "bool",
+     "r": "Pedir avaliação ao fechar o ticket"
+    },
+    {
+     "k": "canal",
+     "t": "canal",
+     "r": "Canal onde as avaliações aparecem"
+    }
+   ]
+  },
+  {
+   "id": "formularios",
+   "nome": "Formulários",
+   "desligavel": true,
+   "dica": "",
+   "campos": [
+    {
+     "k": "lista",
+     "t": "lista",
+     "objeto": true,
+     "id": "slug:titulo",
+     "idMax": 20,
+     "titulo": "titulo",
+     "max": 10,
+     "r": "Formulários",
+     "nomeItem": "Formulário",
+     "a": "Publique com /formulario painel",
+     "campos": [
+      {
+       "k": "titulo",
+       "t": "texto",
+       "max": 45,
+       "obrigatorio": true,
+       "r": "Título"
+      },
+      {
+       "k": "canal",
+       "t": "canal",
+       "obrigatorio": true,
+       "r": "Canal que recebe as respostas"
+      },
+      {
+       "k": "cargo",
+       "t": "cargo",
+       "r": "Cargo para quem for aprovado"
+      },
+      {
+       "k": "mencionar",
+       "t": "cargo",
+       "r": "Cargo marcado a cada resposta"
+      },
+      {
+       "k": "perguntas",
+       "t": "lista",
+       "titulo": "texto",
+       "max": 5,
+       "r": "Perguntas",
+       "nomeItem": "Pergunta",
+       "campos": [
+        {
+         "k": "texto",
+         "t": "texto",
+         "max": 45,
+         "obrigatorio": true,
+         "r": "Pergunta"
+        },
+        {
+         "k": "longa",
+         "t": "bool",
+         "r": "Resposta longa"
+        },
+        {
+         "k": "obrigatoria",
+         "t": "bool",
+         "padrao": true,
+         "r": "Obrigatória"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sugestoes",
+   "nome": "Sugestões",
+   "desligavel": true,
+   "dica": "",
+   "campos": [
+    {
+     "k": "canal",
+     "t": "canal",
+     "r": "Canal das sugestões",
+     "a": "Vazio = desligado"
+    }
+   ]
+  },
+  {
+   "id": "enquetes",
+   "nome": "Enquetes",
+   "desligavel": true,
+   "dica": "",
+   "campos": []
+  },
+  {
+   "id": "sorteios",
+   "nome": "Sorteios",
+   "desligavel": true,
+   "dica": "",
+   "campos": []
+  },
+  {
+   "id": "cargos",
+   "nome": "Cargos por botão",
+   "desligavel": true,
+   "dica": "",
+   "campos": []
+  },
+  {
+   "id": "cargostemp",
+   "nome": "Cargos temporários",
+   "desligavel": true,
+   "dica": "",
+   "campos": [
+    {
+     "k": "registro",
+     "t": "canal",
+     "r": "Canal de registro"
+    }
+   ]
+  },
+  {
+   "id": "callstemp",
+   "nome": "Calls temporárias",
+   "desligavel": true,
+   "dica": "",
+   "campos": [
+    {
+     "k": "criador",
+     "t": "canal",
+     "canal": "voz",
+     "r": "Canal de voz \"Criar sala\"",
+     "a": "Quem entrar nele ganha uma sala. Vazio = desligado"
+    },
+    {
+     "k": "categoria",
+     "t": "canal",
+     "canal": "categoria",
+     "r": "Categoria das salas"
+    },
+    {
+     "k": "limite",
+     "t": "int",
+     "min": 0,
+     "max": 99,
+     "r": "Limite padrão de pessoas",
+     "a": "0 = sem limite"
+    }
+   ]
+  },
+  {
+   "id": "contadores",
+   "nome": "Contadores",
+   "desligavel": true,
+   "dica": "",
+   "campos": []
+  },
+  {
+   "id": "destaques",
+   "nome": "Destaques",
+   "desligavel": true,
+   "dica": "",
+   "campos": [
+    {
+     "k": "canal",
+     "t": "canal",
+     "r": "Canal de destaques",
+     "a": "Vazio = desligado"
+    },
+    {
+     "k": "emoji",
+     "t": "emoji",
+     "obrigatorio": true,
+     "r": "Emoji que conta"
+    },
+    {
+     "k": "minimo",
+     "t": "int",
+     "min": 1,
+     "max": 100,
+     "r": "Reações para ir ao destaque"
+    }
+   ]
+  },
+  {
+   "id": "contagem",
+   "nome": "Jogo de contar",
+   "desligavel": true,
+   "dica": "",
+   "campos": [
+    {
+     "k": "canal",
+     "t": "canal",
+     "r": "Canal da contagem",
+     "a": "Trocar o canal recomeça do 1"
+    }
+   ]
+  },
+  {
+   "id": "afk",
+   "nome": "AFK",
+   "desligavel": true,
+   "dica": "",
+   "campos": []
+  },
+  {
+   "id": "autorespostas",
+   "nome": "Respostas automáticas",
+   "desligavel": true,
+   "dica": "",
+   "campos": [
+    {
+     "k": "lista",
+     "t": "lista",
+     "titulo": "gatilho",
+     "max": 50,
+     "r": "Respostas automáticas",
+     "nomeItem": "Resposta",
+     "a": "Variáveis na resposta: {usuario} {nome} {servidor} {canal}",
+     "campos": [
+      {
+       "k": "gatilho",
+       "t": "texto",
+       "max": 60,
+       "obrigatorio": true,
+       "r": "Gatilho (palavra ou frase)"
+      },
+      {
+       "k": "resposta",
+       "t": "texto",
+       "max": 1800,
+       "linhas": true,
+       "obrigatorio": true,
+       "r": "Resposta"
+      },
+      {
+       "k": "modo",
+       "t": "escolha",
+       "op": [
+        [
+         "contem",
+         "Contém a palavra"
+        ],
+        [
+         "igual",
+         "É exatamente"
+        ],
+        [
+         "comeca",
+         "Começa com"
+        ]
+       ],
+       "padrao": "contem",
+       "r": "Quando responder"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "anuncios",
+   "nome": "Anúncios agendados",
+   "desligavel": true,
+   "dica": "",
+   "campos": [
+    {
+     "k": "lista",
+     "t": "lista",
+     "id": "tempo",
+     "titulo": "titulo",
+     "max": 20,
+     "r": "Anúncios agendados",
+     "nomeItem": "Anúncio",
+     "campos": [
+      {
+       "k": "canal",
+       "t": "canal",
+       "obrigatorio": true,
+       "r": "Canal"
+      },
+      {
+       "k": "titulo",
+       "t": "texto",
+       "max": 256,
+       "nulo": true,
+       "r": "Título"
+      },
+      {
+       "k": "texto",
+       "t": "texto",
+       "max": 2000,
+       "linhas": true,
+       "obrigatorio": true,
+       "r": "Mensagem"
+      },
+      {
+       "k": "cargo",
+       "t": "cargo",
+       "r": "Cargo para marcar"
+      },
+      {
+       "k": "imagem",
+       "t": "url",
+       "nulo": true,
+       "r": "Imagem (link)"
+      },
+      {
+       "k": "proximo",
+       "t": "datahora",
+       "r": "Quando enviar (próxima vez)"
+      },
+      {
+       "k": "intervalo",
+       "t": "duracao",
+       "nulo": true,
+       "min": 600000,
+       "r": "Repetir a cada",
+       "a": "Vazio = uma vez só. Ex.: 1d, 12h, 7d"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "embeds",
+   "nome": "Criador de embeds",
+   "desligavel": true,
+   "dica": "",
+   "campos": []
+  },
+  {
+   "id": "aniversarios",
+   "nome": "Aniversários",
+   "desligavel": true,
+   "dica": "",
+   "campos": [
+    {
+     "k": "canal",
+     "t": "canal",
+     "r": "Canal dos parabéns"
+    },
+    {
+     "k": "cargo",
+     "t": "cargo",
+     "r": "Cargo do dia do aniversário"
+    }
+   ]
+  },
+  {
+   "id": "minecraft",
+   "nome": "Status Minecraft",
+   "desligavel": true,
+   "dica": "",
+   "campos": []
+  },
+  {
+   "id": "utilidades",
+   "nome": "Utilidades",
+   "desligavel": true,
+   "dica": "",
+   "campos": []
+  },
+  {
+   "id": "diversao",
+   "nome": "Diversão",
+   "desligavel": true,
+   "dica": "",
+   "campos": []
+  }
+ ]
 }

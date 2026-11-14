@@ -1,6 +1,7 @@
-﻿# Inicializador de bots (usado pelo "Iniciar bot.bat").
-# Acha os bots no PC, faz a primeira configuração por janelas (Node.js, token, intents, servidor),
-# instala o que falta, liga o bot sem terminal e deixa parar, ver o registro e ligar junto com o Windows.
+﻿# Bots ByteUP: o Inicializador (aberto pelo atalho "Bots ByteUP" ou pelo "Iniciar bot.bat").
+# Acha no PC os bots comprados na loja ByteUP (os que têm licenca.json), faz a primeira configuração
+# por janelas (Node.js, token, intents, servidor), instala o que falta, liga o bot sem terminal e deixa
+# parar, ver o registro, ligar com o Windows, personalizar e trazer os dados de outro bot.
 # Ninguém precisa digitar comandos.
 param([string]$Ligar)
 
@@ -11,7 +12,7 @@ Add-Type -AssemblyName Microsoft.VisualBasic
 [System.Windows.Forms.Application]::EnableVisualStyles()
 try { [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12 } catch {}
 
-$titulo = 'Inicializador de bots'
+$titulo = 'Bots ByteUP'
 $pastaCache = Join-Path $env:APPDATA 'InicializadorBots'
 $arquivoCache = Join-Path $pastaCache 'bots.json'
 $fmt = 'dd/MM/yyyy HH:mm'
@@ -29,6 +30,192 @@ function Pergunta([string]$texto, [string]$icone = 'Question') {
 function Esperar([int]$ms) {
   $fim = (Get-Date).AddMilliseconds($ms)
   while ((Get-Date) -lt $fim) { [System.Windows.Forms.Application]::DoEvents(); Start-Sleep -Milliseconds 50 }
+}
+
+# ---------------- visual (cores da ByteUP) ----------------
+$C = @{
+  Fundo     = [System.Drawing.Color]::FromArgb(12, 10, 18)
+  Painel    = [System.Drawing.Color]::FromArgb(22, 18, 31)
+  Painel2   = [System.Drawing.Color]::FromArgb(33, 27, 46)
+  Borda     = [System.Drawing.Color]::FromArgb(54, 44, 76)
+  Texto     = [System.Drawing.Color]::FromArgb(236, 230, 245)
+  Suave     = [System.Drawing.Color]::FromArgb(158, 148, 178)
+  Roxo      = [System.Drawing.Color]::FromArgb(168, 85, 247)
+  RoxoEsc   = [System.Drawing.Color]::FromArgb(124, 58, 237)
+  Selecao   = [System.Drawing.Color]::FromArgb(58, 36, 94)
+  Verde     = [System.Drawing.Color]::FromArgb(52, 211, 153)
+  Vermelho  = [System.Drawing.Color]::FromArgb(248, 113, 113)
+  Amarelo   = [System.Drawing.Color]::FromArgb(251, 191, 36)
+}
+$FONTE = New-Object System.Drawing.Font('Segoe UI', 10)
+$FONTE_B = New-Object System.Drawing.Font('Segoe UI Semibold', 10)
+$FONTE_P = New-Object System.Drawing.Font('Segoe UI', 9)
+$FONTE_T = New-Object System.Drawing.Font('Segoe UI Semibold', 17)
+$arqIco = Join-Path $pastaCache 'byteup.ico'
+
+# barra de título escura (Windows 10/11)
+$script:temDwm = $false
+try {
+  Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+public static class ByteupDwm {
+  [DllImport("dwmapi.dll")] public static extern int DwmSetWindowAttribute(IntPtr h, int a, ref int v, int s);
+}
+'@ -ErrorAction Stop
+  $script:temDwm = $true
+} catch {}
+
+function EstiloBotao($b, [string]$tipo = 'normal') {
+  $b.FlatStyle = 'Flat'
+  $b.Cursor = [System.Windows.Forms.Cursors]::Hand
+  $b.Font = $FONTE_B
+  $b.FlatAppearance.BorderSize = 1
+  $b.UseVisualStyleBackColor = $false
+  switch ($tipo) {
+    'primario' {
+      $b.BackColor = $C.RoxoEsc; $b.ForeColor = [System.Drawing.Color]::White; $b.FlatAppearance.BorderColor = $C.Roxo
+      $b.FlatAppearance.MouseOverBackColor = $C.Roxo; $b.FlatAppearance.MouseDownBackColor = $C.RoxoEsc
+    }
+    'perigo' {
+      $b.BackColor = $C.Painel; $b.ForeColor = $C.Vermelho; $b.FlatAppearance.BorderColor = $C.Borda
+      $b.FlatAppearance.MouseOverBackColor = [System.Drawing.Color]::FromArgb(58, 22, 32); $b.FlatAppearance.MouseDownBackColor = $C.Painel2
+    }
+    default {
+      $b.BackColor = $C.Painel; $b.ForeColor = $C.Texto; $b.FlatAppearance.BorderColor = $C.Borda
+      $b.FlatAppearance.MouseOverBackColor = $C.Painel2; $b.FlatAppearance.MouseDownBackColor = $C.Borda
+    }
+  }
+  $b.Tag = "estilo:$tipo"
+}
+# Pinta a janela e tudo dentro dela com as cores da ByteUP
+function Tematizar($ctl) {
+  foreach ($c in @($ctl.Controls)) {
+    switch ($c.GetType().Name) {
+      'Button' { if (-not ([string]$c.Tag).StartsWith('estilo:')) { EstiloBotao $c 'normal' } }
+      'TextBox' { $c.BackColor = $C.Painel2; $c.ForeColor = $C.Texto; $c.BorderStyle = 'FixedSingle' }
+      'LinkLabel' { $c.LinkColor = $C.Roxo; $c.ActiveLinkColor = $C.Texto; $c.DisabledLinkColor = $C.Suave; $c.BackColor = [System.Drawing.Color]::Transparent }
+      'Label' { $c.ForeColor = $C.Texto; $c.BackColor = [System.Drawing.Color]::Transparent }
+      'CheckBox' { $c.ForeColor = $C.Texto; $c.BackColor = [System.Drawing.Color]::Transparent }
+      'ListBox' { $c.BackColor = $C.Painel; $c.ForeColor = $C.Texto; $c.BorderStyle = 'None' }
+      'GroupBox' { $c.BackColor = $C.Fundo; Tematizar $c; $c.ForeColor = $C.Roxo; foreach ($x in @($c.Controls)) { if ($x -is [System.Windows.Forms.Label] -and -not ($x -is [System.Windows.Forms.LinkLabel])) { $x.ForeColor = $C.Texto } } }
+      'Panel' { Tematizar $c }
+    }
+  }
+}
+function NovaJanela([string]$texto, [int]$l, [int]$a) {
+  $f = New-Object System.Windows.Forms.Form
+  $f.Text = $texto
+  $f.Size = New-Object System.Drawing.Size($l, $a)
+  $f.StartPosition = 'CenterScreen'
+  $f.BackColor = $C.Fundo
+  $f.ForeColor = $C.Texto
+  $f.Font = $FONTE
+  try {
+    if (-not $script:iconeJanela) { $script:iconeJanela = [System.Drawing.Icon]::FromHandle((DesenharLogo 32).GetHicon()) }
+    $f.Icon = $script:iconeJanela
+  } catch {}
+  if ($script:temDwm) {
+    $f.Add_HandleCreated({
+      param($s, $e)
+      try {
+        $v = 1; [void][ByteupDwm]::DwmSetWindowAttribute($s.Handle, 20, [ref]$v, 4)
+        $cor = 0x120A0C; [void][ByteupDwm]::DwmSetWindowAttribute($s.Handle, 35, [ref]$cor, 4)
+      } catch {}
+    })
+  }
+  return $f
+}
+
+# Ícone: um robozinho branco num quadrado roxo (desenhado aqui, sem arquivo de imagem)
+function Arredondado([single]$x, [single]$y, [single]$l, [single]$a, [single]$r) {
+  $p = New-Object System.Drawing.Drawing2D.GraphicsPath
+  $d = $r * 2
+  $p.AddArc($x, $y, $d, $d, 180, 90)
+  $p.AddArc($x + $l - $d, $y, $d, $d, 270, 90)
+  $p.AddArc($x + $l - $d, $y + $a - $d, $d, $d, 0, 90)
+  $p.AddArc($x, $y + $a - $d, $d, $d, 90, 90)
+  $p.CloseFigure()
+  return $p
+}
+function DesenharLogo([int]$t) {
+  $bmp = New-Object System.Drawing.Bitmap($t, $t)
+  $g = [System.Drawing.Graphics]::FromImage($bmp)
+  $g.SmoothingMode = 'AntiAlias'
+  $g.Clear([System.Drawing.Color]::Transparent)
+  $fundo = New-Object System.Drawing.Drawing2D.LinearGradientBrush((New-Object System.Drawing.PointF(0, 0)), (New-Object System.Drawing.PointF($t, $t)), $C.Roxo, [System.Drawing.Color]::FromArgb(59, 18, 120))
+  $g.FillPath($fundo, (Arredondado 0 0 ($t - 1) ($t - 1) ($t * 0.24)))
+  $branco = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::White)
+  $olho = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(76, 29, 149))
+  $g.FillRectangle($branco, [single]($t * 0.47), [single]($t * 0.17), [single]($t * 0.06), [single]($t * 0.13))
+  $g.FillEllipse($branco, [single]($t * 0.43), [single]($t * 0.12), [single]($t * 0.14), [single]($t * 0.14))
+  $g.FillPath($branco, (Arredondado ($t * 0.2) ($t * 0.3) ($t * 0.6) ($t * 0.46) ($t * 0.13)))
+  $g.FillEllipse($olho, [single]($t * 0.32), [single]($t * 0.44), [single]($t * 0.13), [single]($t * 0.13))
+  $g.FillEllipse($olho, [single]($t * 0.55), [single]($t * 0.44), [single]($t * 0.13), [single]($t * 0.13))
+  $g.FillRectangle($olho, [single]($t * 0.38), [single]($t * 0.63), [single]($t * 0.24), [single]($t * 0.04))
+  $g.Dispose()
+  return $bmp
+}
+# Grava o ícone (.ico com imagens PNG de 256, 48, 32 e 16 px)
+function SalvarIco([string]$arq) {
+  $pngs = @()
+  foreach ($t in @(256, 48, 32, 16)) {
+    $ms = New-Object System.IO.MemoryStream
+    $bmp = DesenharLogo $t
+    $bmp.Save($ms, [System.Drawing.Imaging.ImageFormat]::Png)
+    $bmp.Dispose()
+    $pngs += , @($t, $ms.ToArray())
+  }
+  $fs = [System.IO.File]::Create($arq)
+  $w = New-Object System.IO.BinaryWriter($fs)
+  $w.Write([uint16]0); $w.Write([uint16]1); $w.Write([uint16]$pngs.Count)
+  $pos = 6 + 16 * $pngs.Count
+  foreach ($p in $pngs) {
+    $lado = if ($p[0] -ge 256) { 0 } else { $p[0] }
+    $w.Write([byte]$lado); $w.Write([byte]$lado); $w.Write([byte]0); $w.Write([byte]0)
+    $w.Write([uint16]1); $w.Write([uint16]32); $w.Write([uint32]$p[1].Length); $w.Write([uint32]$pos)
+    $pos += $p[1].Length
+  }
+  foreach ($p in $pngs) { $w.Write([byte[]]$p[1]) }
+  $w.Close()
+}
+function GarantirIcone {
+  try {
+    if (-not (Test-Path -LiteralPath $pastaCache)) { New-Item -ItemType Directory -Path $pastaCache | Out-Null }
+    if (-not (Test-Path -LiteralPath $arqIco)) { SalvarIco $arqIco }
+  } catch {}
+}
+
+# ---------------- atalhos (sem extensão, com ícone e sem janela preta) ----------------
+$POWERSHELL = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
+function CriarAtalho([string]$lnk, [string]$argumentos, [string]$descricao, [string]$pasta) {
+  $sh = New-Object -ComObject WScript.Shell
+  $a = $sh.CreateShortcut($lnk)
+  $a.TargetPath = $POWERSHELL
+  $a.Arguments = $argumentos
+  $a.WorkingDirectory = $pasta
+  $a.WindowStyle = 7 # minimizado: a janela do PowerShell nunca aparece
+  $a.Description = $descricao
+  if (Test-Path -LiteralPath $arqIco) { $a.IconLocation = "$arqIco,0" }
+  $a.Save()
+}
+# Atalho "Bots ByteUP": na pasta do Inicializador sempre; na Área de Trabalho e no Menu Iniciar na primeira vez
+# (se a pessoa apagar, não volta). Se a pasta mudar de lugar, os atalhos que existem são corrigidos.
+function AtualizarAtalhos {
+  GarantirIcone
+  $argumentos = "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -STA -File `"$PSCommandPath`""
+  $descricao = 'Liga, configura e personaliza os seus bots da loja ByteUP'
+  $marca = Join-Path $pastaCache 'atalhos.ok'
+  $primeira = -not (Test-Path -LiteralPath $marca)
+  $locais = @($PSScriptRoot, [Environment]::GetFolderPath('Desktop'), [Environment]::GetFolderPath('Programs'))
+  for ($k = 0; $k -lt $locais.Count; $k++) {
+    if (-not $locais[$k]) { continue }
+    $lnk = Join-Path $locais[$k] 'Bots ByteUP.lnk'
+    if ($k -gt 0 -and -not $primeira -and -not (Test-Path -LiteralPath $lnk)) { continue }
+    try { CriarAtalho $lnk $argumentos $descricao $PSScriptRoot } catch {}
+  }
+  if ($primeira) { try { Set-Content -LiteralPath $marca -Value (Get-Date -Format o) } catch {} }
+  return $primeira
 }
 
 # ---------------- Node.js ----------------
@@ -55,7 +242,7 @@ function NodeServe([string]$v) {
   $m = [regex]::Match($v, 'v(\d+)\.(\d+)')
   if (-not $m.Success) { return $false }
   $maior = [int]$m.Groups[1].Value; $menor = [int]$m.Groups[2].Value
-  return ($maior -gt 18) -or ($maior -eq 18 -and $menor -ge 17)
+  return ($maior -gt 20) -or ($maior -eq 20 -and $menor -ge 6)
 }
 function Baixar([string]$url, [string]$destino, $rotulo) {
   $wc = New-Object System.Net.WebClient
@@ -90,10 +277,22 @@ function InstalarNode($rotulo) {
 }
 
 # ---------------- arquivos do bot ----------------
+# Licença do bot (licenca.json): só bots comprados na loja ByteUP aparecem aqui
+function LicencaDe([string]$pasta) {
+  $arq = Join-Path $pasta 'licenca.json'
+  if (-not (Test-Path -LiteralPath $arq)) { return $null }
+  try {
+    $l = Get-Content -LiteralPath $arq -Raw -Encoding UTF8 | ConvertFrom-Json
+    if ($l.formato -eq 'byteup-licenca' -and $l.comprador -and $l.assinatura) { return $l }
+  } catch {}
+  return $null
+}
 function EhBot([string]$pasta) {
-  return (Test-Path -LiteralPath (Join-Path $pasta 'index.js')) -and
-         (Test-Path -LiteralPath (Join-Path $pasta 'config.json')) -and
-         (Test-Path -LiteralPath (Join-Path $pasta 'src\core\nucleo.js'))
+  if (-not (Test-Path -LiteralPath (Join-Path $pasta 'index.js')) -or -not (Test-Path -LiteralPath (Join-Path $pasta 'config.json'))) { return $false }
+  if (Test-Path -LiteralPath (Join-Path $pasta 'protegido\index.js')) { return $false } # modelo do site, não é um bot
+  if ((Test-Path -LiteralPath (Join-Path $pasta 'bot.pack')) -and (LicencaDe $pasta)) { return $true }
+  # bots da loja baixados antes da licença (código aberto): aparecem pedindo para baixar de novo
+  return (Test-Path -LiteralPath (Join-Path $pasta 'src\core\nucleo.js')) -and (Test-Path -LiteralPath (Join-Path $pasta 'src\core\textos.js'))
 }
 function LerEnv([string]$pasta) {
   $h = @{}
@@ -128,7 +327,13 @@ function DepsOk([string]$pasta) { return (Test-Path -LiteralPath (Join-Path $pas
 # Intents privilegiadas que os módulos deste bot usam (lidas do próprio código)
 function IntentsNecessarios([string]$pasta) {
   $precisa = New-Object System.Collections.Generic.List[string]
-  try { $mods = @((Get-Content -LiteralPath (Join-Path $pasta 'config.json') -Raw -Encoding UTF8 | ConvertFrom-Json).modulos) } catch { $mods = @() }
+  try { $cfg = Get-Content -LiteralPath (Join-Path $pasta 'config.json') -Raw -Encoding UTF8 | ConvertFrom-Json } catch { $cfg = $null }
+  # bots novos: a loja já escreve no config.json o que os módulos precisam (o código fica no bot.pack)
+  if ($cfg -and $cfg.PSObject.Properties['intents']) {
+    foreach ($i in @($cfg.intents)) { if (@('members', 'content', 'presence') -contains $i) { $precisa.Add([string]$i) } }
+    return , $precisa
+  }
+  $mods = @(); if ($cfg) { $mods = @($cfg.modulos) }
   $textos = @()
   foreach ($id in $mods) {
     $arq = Join-Path $pasta "src\modules\$id.js"
@@ -154,7 +359,9 @@ function ConferirToken([string]$token) {
   try {
     $eu = Api $token '/users/@me'
     $app = Api $token '/applications/@me'
-    return @{ ok = $true; nome = $eu.username; appId = [string]$app.id; flags = [int64]$app.flags; erro = $null }
+    $dono = [string]$app.owner.id
+    if ($app.team) { $dono = [string]$app.team.owner_user_id }
+    return @{ ok = $true; nome = $eu.username; appId = [string]$app.id; flags = [int64]$app.flags; dono = $dono; erro = $null }
   } catch {
     $c = CodigoErro $_
     if ($c -eq 401) { return @{ ok = $false; erro = 'Token errado. Gere outro no Developer Portal (Bot → Reset Token) e cole aqui.' } }
@@ -291,14 +498,8 @@ function AlternarInicio($bot) {
     Aviso "Pronto: o bot $($bot.Nome) não liga mais sozinho com o Windows."
     return
   }
-  $sh = New-Object -ComObject WScript.Shell
-  $a = $sh.CreateShortcut($lnk)
-  $a.TargetPath = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
-  $a.Arguments = "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$PSCommandPath`" -Ligar `"$($bot.Pasta)`""
-  $a.WorkingDirectory = $bot.Pasta
-  $a.WindowStyle = 7
-  $a.Description = "Liga o bot $($bot.Nome)"
-  $a.Save()
+  GarantirIcone
+  CriarAtalho $lnk "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$PSCommandPath`" -Ligar `"$($bot.Pasta)`"" "Liga o bot $($bot.Nome)" $bot.Pasta
   Aviso "Pronto: o bot $($bot.Nome) vai ligar sozinho sempre que o computador ligar (sem abrir janela).`n`nPara desfazer, clique de novo em ""Ligar com o Windows""."
 }
 
@@ -326,11 +527,12 @@ if ($Ligar) {
 function InfoBot([string]$pasta) {
   $nome = '(sem nome)'
   try { $nome = (Get-Content -LiteralPath (Join-Path $pasta 'config.json') -Raw -Encoding UTF8 | ConvertFrom-Json).nome } catch {}
+  $lic = LicencaDe $pasta
   $versao = (Get-Item -LiteralPath (Join-Path $pasta 'index.js')).LastWriteTime
   $dados = @(Get-ChildItem -LiteralPath (Join-Path $pasta 'data') -Filter '*.json' -File -ErrorAction SilentlyContinue)
   $atividade = $null
   if ($dados.Count -gt 0) { $atividade = ($dados | Sort-Object LastWriteTime -Descending | Select-Object -First 1).LastWriteTime }
-  return [pscustomobject]@{ Nome = $nome; Pasta = $pasta; Versao = $versao; Atividade = $atividade; Dados = $dados.Count; Situacao = '' }
+  return [pscustomobject]@{ Nome = $nome; Pasta = $pasta; Versao = $versao; Atividade = $atividade; Dados = $dados.Count; Situacao = ''; Licenca = $lic; Antigo = (-not $lic) }
 }
 function Configurado($bot) {
   return ((LerEnv $bot.Pasta)['DISCORD_TOKEN']) -and (DepsOk $bot.Pasta) -and (NodeServe (NodeVersao))
@@ -385,9 +587,10 @@ function LerCache {
   try { return @((Get-Content -LiteralPath $arquivoCache -Raw -Encoding UTF8 | ConvertFrom-Json) | Where-Object { $_ -and (EhBot $_) }) } catch { return @() }
 }
 function MarcarSituacao($bots) {
+  foreach ($b in $bots) { if ($b.Antigo) { $b.Situacao = 'baixe de novo' } }
   foreach ($grupo in ($bots | Group-Object Nome)) {
-    if ($grupo.Count -lt 2) { continue }
-    $ordem = @($grupo.Group | Sort-Object Versao -Descending)
+    $ordem = @($grupo.Group | Where-Object { -not $_.Antigo } | Sort-Object Versao -Descending)
+    if ($ordem.Count -lt 2) { continue }
     $ordem[0].Situacao = 'mais novo'
     for ($k = 1; $k -lt $ordem.Count; $k++) { $ordem[$k].Situacao = 'mais antigo' }
     if ($ordem.Count -gt 2) { for ($k = 1; $k -lt $ordem.Count - 1; $k++) { $ordem[$k].Situacao = 'antigo' } }
@@ -419,21 +622,17 @@ function NovoBotaoEm($pai, [string]$texto, [int]$x, [int]$y, [int]$l) {
   $pai.Controls.Add($b)
   return $b
 }
-$VERDE = [System.Drawing.Color]::FromArgb(0, 128, 60)
-$VERMELHO = [System.Drawing.Color]::FromArgb(190, 30, 30)
+$VERDE = $C.Verde
+$VERMELHO = $C.Vermelho
 
 # Abre o assistente. Devolve $true se o bot ficou pronto para ligar.
 function Assistente($bot) {
   $script:wz = @{ bot = $bot; nodeOk = $false; tokenOk = $false; intentsOk = $false; info = $null; precisa = (IntentsNecessarios $bot.Pasta) }
   $env0 = LerEnv $bot.Pasta
 
-  $f = New-Object System.Windows.Forms.Form
-  $f.Text = "Configurar o bot $($bot.Nome)"
-  $f.Size = New-Object System.Drawing.Size(680, 690)
-  $f.StartPosition = 'CenterScreen'
+  $f = NovaJanela "Configurar o bot $($bot.Nome)" 680 690
   $f.FormBorderStyle = 'FixedDialog'
   $f.MaximizeBox = $false
-  $f.Font = New-Object System.Drawing.Font('Segoe UI', 9.5)
   $script:wz.form = $f
   [void](NovoRotulo $f "Vamos deixar o bot pronto. Siga os passos de cima para baixo; cada um fica verde quando estiver certo." 14 10 640 36)
 
@@ -494,7 +693,8 @@ function Assistente($bot) {
   $script:wz.barra.Visible = $false
   $f.Controls.Add($script:wz.barra)
   $script:wz.stF = NovoRotulo $f '' 14 584 640 22
-  $script:wz.btOk = NovoBotaoEm $f 'Instalar e ligar o bot' 392 608 160
+  $script:wz.btOk = NovoBotaoEm $f 'Instalar e ligar o bot' 372 608 180
+  EstiloBotao $script:wz.btOk 'primario'
   $script:wz.btOk.Enabled = $false
   $script:wz.btCancel = NovoBotaoEm $f 'Cancelar' 560 608 92
   $script:wz.pronto = $false
@@ -521,7 +721,7 @@ function Assistente($bot) {
     }
     # 4
     $g = $w.gid.Text.Trim()
-    if (-not $g) { $w.st4.Text = 'Pode deixar vazio.'; $w.st4.ForeColor = [System.Drawing.Color]::Gray }
+    if (-not $g) { $w.st4.Text = 'Pode deixar vazio.'; $w.st4.ForeColor = $C.Suave }
     elseif ($g -match '^\d{17,20}$') { $w.st4.Text = '✔ ID válido.'; $w.st4.ForeColor = $VERDE }
     else { $w.st4.Text = '✖ O ID tem só números (17 a 20).'; $w.st4.ForeColor = $VERMELHO }
     $gidOk = (-not $g) -or ($g -match '^\d{17,20}$')
@@ -532,11 +732,15 @@ function Assistente($bot) {
     $t = $w.tk.Text.Trim()
     $w.tokenOk = $false
     if (-not $t) { $w.st2.Text = 'Cole o token do bot.'; $w.st2.ForeColor = $VERMELHO; & $w.atualizar; return }
-    $w.st2.Text = 'Conferindo com o Discord...'; $w.st2.ForeColor = [System.Drawing.Color]::Gray
+    $w.st2.Text = 'Conferindo com o Discord...'; $w.st2.ForeColor = $C.Suave
     $w.form.Cursor = [System.Windows.Forms.Cursors]::WaitCursor; [System.Windows.Forms.Application]::DoEvents()
     $r = ConferirToken $t
     $w.form.Cursor = [System.Windows.Forms.Cursors]::Default
-    if ($r.ok) {
+    $lic = LicencaDe $w.bot.Pasta
+    if ($r.ok -and $lic -and $r.dono -ne [string]$lic.comprador) {
+      $w.st2.Text = "✖ Este token é de um bot criado em OUTRA conta do Discord. Este bot só funciona com um bot criado na conta que comprou na loja (ID $($lic.comprador)). Entre nessa conta no Developer Portal, crie o bot lá e cole o token dele."
+      $w.st2.ForeColor = $VERMELHO
+    } elseif ($r.ok) {
       $w.info = $r; $w.tokenOk = $true
       $w.st2.Text = "✔ Token certo: bot $($r.nome)."; $w.st2.ForeColor = $VERDE
     } else { $w.st2.Text = "✖ $($r.erro)"; $w.st2.ForeColor = $VERMELHO }
@@ -581,6 +785,7 @@ function Assistente($bot) {
       & $w.atualizar
     }
   })
+  Tematizar $f
   $f.Add_Shown({
     & $script:wz.atualizar
     if ($script:wz.tk.Text.Trim()) { & $script:wz.conferirToken }
@@ -620,6 +825,11 @@ function IniciarComResultado($bot, $rotulo) {
   $e = [string]$r.erro
   if ($e -match 'token est[aá] errado|TokenInvalid|invalid token') {
     if (Pergunta "O Discord recusou o token do bot.`n`nAbrir a configuração para colar o token novo?" 'Warning') { if (Assistente $bot) { IniciarComResultado $bot $rotulo } }
+  } elseif ($e -match 'licenciada para outra conta') {
+    if (Pergunta "O token é de um bot criado em OUTRA conta do Discord.`n`nEste bot só liga com um bot criado no Developer Portal na conta que comprou na loja. Abrir a configuração para colar o token certo?" 'Warning') { if (Assistente $bot) { IniciarComResultado $bot $rotulo } }
+  } elseif ($e -match 'licen[cç]a|bot\.pack') {
+    if ($e.Length -gt 1500) { $e = $e.Substring($e.Length - 1500) }
+    Aviso "O bot não ligou por causa da licença:`n`n$e" 'Warning'
   } elseif ($e -match 'disallowed intents|Privileged Gateway') {
     if (Pergunta "Faltam permissões especiais (intents) no Developer Portal.`n`nAbrir a configuração para conferir?" 'Warning') { if (Assistente $bot) { IniciarComResultado $bot $rotulo } }
   } else {
@@ -630,10 +840,7 @@ function IniciarComResultado($bot, $rotulo) {
 
 # ---------------- registro ----------------
 function VerRegistro($bot) {
-  $f = New-Object System.Windows.Forms.Form
-  $f.Text = "Registro do bot $($bot.Nome)"
-  $f.Size = New-Object System.Drawing.Size(860, 560)
-  $f.StartPosition = 'CenterScreen'
+  $f = NovaJanela "Registro do bot $($bot.Nome)" 860 560
   $t = New-Object System.Windows.Forms.TextBox
   $t.Multiline = $true; $t.ReadOnly = $true; $t.ScrollBars = 'Both'; $t.WordWrap = $false
   $t.Font = New-Object System.Drawing.Font('Consolas', 9.5)
@@ -653,103 +860,264 @@ function VerRegistro($bot) {
     $script:regTxt.SelectionStart = $script:regTxt.Text.Length
     $script:regTxt.ScrollToCaret()
   }
-  $b = NovoBotaoEm $f 'Atualizar' 10 480 110
+  $b = NovoBotaoEm $f 'Atualizar' 10 478 110
   $b.Anchor = 'Bottom, Left'
   $b.Add_Click($carregar)
+  Tematizar $f
+  $t.BackColor = [System.Drawing.Color]::FromArgb(8, 6, 12); $t.ForeColor = [System.Drawing.Color]::FromArgb(216, 208, 230); $t.BorderStyle = 'None'
   $f.Add_Shown($carregar)
   [void]$f.ShowDialog()
 }
 
+# ---------------- trazer os dados de outro bot ----------------
+function NomeDe([string]$pasta) {
+  try { return (Get-Content -LiteralPath (Join-Path $pasta 'config.json') -Raw -Encoding UTF8 | ConvertFrom-Json).nome } catch { return '(sem nome)' }
+}
+function UltimaMudanca($arquivos) {
+  if (-not $arquivos) { return $null }
+  return ($arquivos | Sort-Object LastWriteTime -Descending | Select-Object -First 1).LastWriteTime
+}
+# Copia a pasta "data" e o ".env" de $origem para $destino. Nada é apagado: o que o destino tinha vai para "data-backup-...".
+function CopiarDados([string]$origem, [string]$destino) {
+  $dataOrigem = Join-Path $origem 'data'
+  $arqOrigem = @(Get-ChildItem -LiteralPath $dataOrigem -Filter '*.json' -File -ErrorAction SilentlyContinue)
+  if ($arqOrigem.Count -eq 0) { Aviso "Essa pasta não tem dados de bot (a pasta data está vazia ou não existe).`n`n$origem" 'Warning'; return $false }
+  $dataDestino = Join-Path $destino 'data'
+  $arqDestino = @(Get-ChildItem -LiteralPath $dataDestino -Filter '*.json' -File -ErrorAction SilentlyContinue)
+  $ultOrigem = UltimaMudanca $arqOrigem
+  $ultDestino = UltimaMudanca $arqDestino
+  $temEnv = Test-Path -LiteralPath (Join-Path $origem '.env')
+  $linhas = @("DE: $(NomeDe $origem)", $origem, "$($arqOrigem.Count) arquivo(s) de dados · última atividade em $($ultOrigem.ToString($fmt))", '', "PARA: $(NomeDe $destino)", $destino, '')
+  if ($temEnv) { $linhas += 'O token (.env) também vem junto.' } else { $linhas += 'Não achei o .env no outro bot: configure o token depois.' }
+  $icone = 'Question'
+  if ($arqDestino.Count -gt 0) {
+    $linhas += "Os $($arqDestino.Count) arquivo(s) de dados que este bot já tem vão para uma cópia de segurança."
+    if ($ultDestino -gt $ultOrigem) {
+      $linhas += ''; $linhas += "ATENÇÃO: este bot tem dados MAIS NOVOS ($($ultDestino.ToString($fmt))) que o outro ($($ultOrigem.ToString($fmt))). Confira se escolheu certo."
+      $icone = 'Warning'
+    }
+  }
+  $linhas += ''; $linhas += 'Copiar agora?'
+  if (-not (Pergunta ($linhas -join "`n") $icone)) { return $false }
+  $carimbo = Get-Date -Format 'yyyy-MM-dd_HH-mm-ss'
+  $backup = $null
+  if (Test-Path -LiteralPath $dataDestino) {
+    $backup = Join-Path $destino "data-backup-$carimbo"
+    Move-Item -LiteralPath $dataDestino -Destination $backup
+  }
+  Copy-Item -LiteralPath $dataOrigem -Destination $dataDestino -Recurse -Force
+  if ($temEnv) {
+    $envDestino = Join-Path $destino '.env'
+    if (Test-Path -LiteralPath $envDestino) { Copy-Item -LiteralPath $envDestino -Destination (Join-Path $destino ".env.backup-$carimbo") -Force }
+    Copy-Item -LiteralPath (Join-Path $origem '.env') -Destination $envDestino -Force
+  }
+  $fim = @("Pronto! $($arqOrigem.Count) arquivo(s) de dados copiados.")
+  if ($backup) { $fim += "Os dados que este bot tinha estão guardados em: $(Split-Path $backup -Leaf)" }
+  $fim += ''; $fim += 'Agora é só clicar em Ligar. Depois de conferir que está tudo certo, você pode apagar o bot antigo.'
+  Aviso ($fim -join "`n")
+  return $true
+}
+function TransferirDados($destino) {
+  if (ProcessoDoBot $destino.Pasta) { Aviso "Pare o bot $($destino.Nome) antes de trazer os dados." 'Warning'; return }
+  $outros = @($script:bots | Where-Object { $_.Pasta -ne $destino.Pasta -and $_.Dados -gt 0 } | Sort-Object @{ Expression = { $_.Nome -eq $destino.Nome }; Descending = $true }, @{ Expression = { $_.Atividade }; Descending = $true })
+  $f = NovaJanela "Trazer dados para $($destino.Nome)" 680 430
+  $f.FormBorderStyle = 'FixedDialog'; $f.MaximizeBox = $false; $f.MinimizeBox = $false
+  $r = New-Object System.Windows.Forms.Label
+  $r.Text = "Escolha o bot ANTIGO de onde vêm os dados (XP, dinheiro, configurações, personalização) e o token. Eles vão para:`n$($destino.Pasta)"
+  $r.Location = New-Object System.Drawing.Point(16, 14); $r.Size = New-Object System.Drawing.Size(630, 48)
+  $f.Controls.Add($r)
+  $lb = New-Object System.Windows.Forms.ListBox
+  $lb.Location = New-Object System.Drawing.Point(16, 70); $lb.Size = New-Object System.Drawing.Size(630, 240)
+  $lb.Font = $FONTE; $lb.ItemHeight = 22
+  foreach ($o in $outros) {
+    $quando = if ($o.Atividade) { $o.Atividade.ToString($fmt) } else { 'sem dados' }
+    [void]$lb.Items.Add("$($o.Nome)  ·  dados de $quando  ·  $($o.Pasta)")
+  }
+  if ($lb.Items.Count) { $lb.SelectedIndex = 0 } else { [void]$lb.Items.Add('(nenhum outro bot com dados na lista: use "Outra pasta...")') }
+  $f.Controls.Add($lb)
+  $btOk = NovoBotaoEm $f 'Trazer deste bot' 16 326 170; EstiloBotao $btOk 'primario'
+  $btOutra = NovoBotaoEm $f 'Outra pasta...' 196 326 140
+  $btCancelar = NovoBotaoEm $f 'Cancelar' 526 326 120
+  $btOk.Enabled = $outros.Count -gt 0
+  $script:tdEscolha = $null
+  $btOk.Add_Click({ if ($lb.SelectedIndex -ge 0 -and $lb.SelectedIndex -lt $outros.Count) { $script:tdEscolha = $outros[$lb.SelectedIndex].Pasta; $f.Close() } })
+  $lb.Add_DoubleClick({ $btOk.PerformClick() })
+  $btOutra.Add_Click({
+    $j = New-Object System.Windows.Forms.FolderBrowserDialog
+    $j.Description = 'Escolha a pasta do bot ANTIGO (a que tem a pasta data)'
+    $j.ShowNewFolderButton = $false
+    if ($j.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
+      $p = $j.SelectedPath
+      if ((Split-Path $p -Leaf) -ieq 'data') { $p = Split-Path $p -Parent }
+      $script:tdEscolha = $p; $f.Close()
+    }
+  })
+  $btCancelar.Add_Click({ $f.Close() })
+  Tematizar $f
+  [void]$f.ShowDialog()
+  $origem = $script:tdEscolha
+  if (-not $origem) { return }
+  if ($origem.TrimEnd('\') -ieq $destino.Pasta.TrimEnd('\')) { Aviso 'Você escolheu a pasta deste mesmo bot.' 'Warning'; return }
+  if (ProcessoDoBot $origem) {
+    if (-not (Pergunta "O bot de onde vêm os dados está ligado. Desligar ele agora (para os dados ficarem completos)?" 'Warning')) { return }
+    PararBot $origem
+  }
+  try { [void](CopiarDados $origem $destino.Pasta) } catch { Aviso "Algo deu errado e nada foi apagado.`n`n$($_.Exception.Message)" 'Error' }
+}
+
+function SiteDaLoja($bot) {
+  if ($bot.Licenca -and $bot.Licenca.site) { return ([string]$bot.Licenca.site).TrimEnd('/') }
+  return $null
+}
+
 # ---------------- janela principal ----------------
-$form = New-Object System.Windows.Forms.Form
-$form.Text = $titulo
-$form.Size = New-Object System.Drawing.Size(940, 500)
-$form.StartPosition = 'CenterScreen'
-$form.Font = New-Object System.Drawing.Font('Segoe UI', 9.5)
+GarantirIcone
+$primeiraVez = AtualizarAtalhos
 
+$form = NovaJanela $titulo 1080 660
+$form.MinimumSize = New-Object System.Drawing.Size(980, 560)
+
+$topo = New-Object System.Windows.Forms.Panel
+$topo.Dock = 'Top'; $topo.Height = 84; $topo.BackColor = $C.Painel
+$form.Controls.Add($topo)
+$logo = New-Object System.Windows.Forms.PictureBox
+$logo.Location = New-Object System.Drawing.Point(22, 18); $logo.Size = New-Object System.Drawing.Size(48, 48)
+$logo.SizeMode = 'StretchImage'; $logo.Image = DesenharLogo 96
+$topo.Controls.Add($logo)
+$nomeApp = New-Object System.Windows.Forms.Label
+$nomeApp.Text = 'Bots ByteUP'; $nomeApp.Font = $FONTE_T; $nomeApp.ForeColor = $C.Texto
+$nomeApp.Location = New-Object System.Drawing.Point(82, 12); $nomeApp.AutoSize = $true
+$topo.Controls.Add($nomeApp)
 $rotulo = New-Object System.Windows.Forms.Label
-$rotulo.Location = New-Object System.Drawing.Point(12, 10)
-$rotulo.Size = New-Object System.Drawing.Size(900, 36)
+$rotulo.Location = New-Object System.Drawing.Point(84, 50); $rotulo.Size = New-Object System.Drawing.Size(960, 22)
+$rotulo.Anchor = 'Top, Left, Right'; $rotulo.ForeColor = $C.Suave; $rotulo.Font = $FONTE
 $rotulo.Text = 'Escolha o bot e use os botões abaixo.'
-$form.Controls.Add($rotulo)
+$topo.Controls.Add($rotulo)
+$faixa = New-Object System.Windows.Forms.Panel
+$faixa.Dock = 'Top'; $faixa.Height = 3; $faixa.BackColor = $C.RoxoEsc
+$form.Controls.Add($faixa)
+$faixa.BringToFront()
 
-$lista = New-Object System.Windows.Forms.ListView
-$lista.Location = New-Object System.Drawing.Point(12, 50)
-$lista.Size = New-Object System.Drawing.Size(900, 340)
-$lista.View = 'Details'
-$lista.FullRowSelect = $true
-$lista.MultiSelect = $false
-$lista.HideSelection = $false
-[void]$lista.Columns.Add('Bot', 150)
-[void]$lista.Columns.Add('Estado', 85)
-[void]$lista.Columns.Add('Situação', 85)
-[void]$lista.Columns.Add('Versão de', 115)
-[void]$lista.Columns.Add('Última atividade', 115)
-[void]$lista.Columns.Add('Pasta', 330)
-$form.Controls.Add($lista)
+$grade = New-Object System.Windows.Forms.DataGridView
+$grade.Location = New-Object System.Drawing.Point(22, 106)
+$grade.Size = New-Object System.Drawing.Size(1020, 330)
+$grade.Anchor = 'Top, Bottom, Left, Right'
+$grade.BackgroundColor = $C.Painel; $grade.BorderStyle = 'None'; $grade.GridColor = $C.Borda
+$grade.CellBorderStyle = 'SingleHorizontal'
+$grade.RowHeadersVisible = $false
+$grade.AllowUserToAddRows = $false; $grade.AllowUserToDeleteRows = $false; $grade.AllowUserToResizeRows = $false; $grade.AllowUserToOrderColumns = $false
+$grade.ReadOnly = $true; $grade.SelectionMode = 'FullRowSelect'; $grade.MultiSelect = $false
+$grade.EnableHeadersVisualStyles = $false
+$grade.ColumnHeadersBorderStyle = 'None'
+$grade.ColumnHeadersHeightSizeMode = 'DisableResizing'; $grade.ColumnHeadersHeight = 40
+$grade.ColumnHeadersDefaultCellStyle.BackColor = $C.Painel2
+$grade.ColumnHeadersDefaultCellStyle.ForeColor = $C.Suave
+$grade.ColumnHeadersDefaultCellStyle.SelectionBackColor = $C.Painel2
+$grade.ColumnHeadersDefaultCellStyle.Font = $FONTE_B
+$grade.ColumnHeadersDefaultCellStyle.Padding = New-Object System.Windows.Forms.Padding(10, 0, 0, 0)
+$grade.DefaultCellStyle.BackColor = $C.Painel
+$grade.DefaultCellStyle.ForeColor = $C.Texto
+$grade.DefaultCellStyle.SelectionBackColor = $C.Selecao
+$grade.DefaultCellStyle.SelectionForeColor = [System.Drawing.Color]::White
+$grade.DefaultCellStyle.Font = $FONTE
+$grade.DefaultCellStyle.Padding = New-Object System.Windows.Forms.Padding(10, 0, 0, 0)
+$grade.RowTemplate.Height = 42
+$grade.AutoSizeColumnsMode = 'Fill'
+foreach ($col in @(@('Bot', 20), @('Estado', 12), @('Situação', 13), @('Versão de', 13), @('Última atividade', 14), @('Pasta', 32))) {
+  $i = $grade.Columns.Add(($col[0] -replace '\W', ''), $col[0])
+  $grade.Columns[$i].FillWeight = $col[1]
+  $grade.Columns[$i].SortMode = 'NotSortable'
+}
+$form.Controls.Add($grade)
 
-function NovoBotao([string]$texto, [int]$x, [int]$largura) {
+$script:botoes = @()
+function NovoBotao([string]$texto, [int]$x, [int]$y, [int]$largura, [string]$tipo = 'normal') {
   $b = New-Object System.Windows.Forms.Button
   $b.Text = $texto
-  $b.Location = New-Object System.Drawing.Point($x, 402)
-  $b.Size = New-Object System.Drawing.Size($largura, 34)
+  $b.Location = New-Object System.Drawing.Point($x, $y)
+  $b.Size = New-Object System.Drawing.Size($largura, 38)
+  $b.Anchor = 'Bottom, Left'
+  EstiloBotao $b $tipo
   $form.Controls.Add($b)
   return $b
 }
-$btIniciar = NovoBotao 'Ligar' 12 90
-$btParar = NovoBotao 'Parar' 106 80
-$btConfig = NovoBotao 'Configurar' 190 100
-$btRegistro = NovoBotao 'Ver registro' 294 105
-$btWindows = NovoBotao 'Ligar com o Windows' 403 150
-$btAbrir = NovoBotao 'Abrir pasta' 557 100
-$btApagar = NovoBotao 'Apagar (Lixeira)' 661 125
-$btProcurar = NovoBotao 'Procurar de novo' 790 122
-$form.AcceptButton = $btIniciar
+$y1 = 452; $y2 = 500
+$btIniciar = NovoBotao '▶  Ligar' 22 $y1 130 'primario'
+$btParar = NovoBotao '■  Parar' 160 $y1 120
+$btConfig = NovoBotao '⚙  Configurar' 288 $y1 150
+$btPersonalizar = NovoBotao '✎  Personalizar' 446 $y1 160
+$btTransferir = NovoBotao '⇄  Trazer dados de outro bot' 614 $y1 250
+$btRegistro = NovoBotao '☰  Registro' 872 $y1 130
+$btWindows = NovoBotao 'Ligar com o Windows' 22 $y2 210
+$btAbrir = NovoBotao 'Abrir pasta' 240 $y2 130
+$btLoja = NovoBotao 'Minhas compras' 378 $y2 160
+$btProcurar = NovoBotao 'Procurar de novo' 546 $y2 170
+$btApagar = NovoBotao 'Apagar (Lixeira)' 724 $y2 170 'perigo'
+$dica = New-Object System.Windows.Forms.Label
+$dica.Location = New-Object System.Drawing.Point(24, 552); $dica.Size = New-Object System.Drawing.Size(1000, 40)
+$dica.Anchor = 'Bottom, Left, Right'; $dica.ForeColor = $C.Suave; $dica.Font = $FONTE_P
+$dica.Text = 'Dica: abra pelo atalho "Bots ByteUP" (Área de Trabalho ou Menu Iniciar). O bot continua ligado depois que você fecha esta janela.'
+$form.Controls.Add($dica)
 
 $script:bots = @()
 
+function TextoEstado([string]$e) {
+  switch ($e) { 'Ligado' { return '●  Ligado' } 'Configurar' { return '⚙  Configurar' } default { return '○  Desligado' } }
+}
+function CorEstado([string]$e) {
+  switch ($e) { 'Ligado' { return $C.Verde } 'Configurar' { return $C.Amarelo } default { return $C.Suave } }
+}
 function Preencher {
-  $lista.Items.Clear()
+  $grade.Rows.Clear()
   foreach ($b in $script:bots) {
-    $it = New-Object System.Windows.Forms.ListViewItem($b.Nome)
-    [void]$it.SubItems.Add((EstadoTexto $b))
-    [void]$it.SubItems.Add($b.Situacao)
-    [void]$it.SubItems.Add($b.Versao.ToString($fmt))
-    if ($b.Atividade) { [void]$it.SubItems.Add($b.Atividade.ToString($fmt)) } else { [void]$it.SubItems.Add('sem dados') }
-    [void]$it.SubItems.Add($b.Pasta)
-    if ($b.Situacao -like '*antigo') { $it.ForeColor = [System.Drawing.Color]::Gray }
-    $it.Tag = $b
-    [void]$lista.Items.Add($it)
+    $e = EstadoTexto $b
+    $ativ = 'sem dados'; if ($b.Atividade) { $ativ = $b.Atividade.ToString($fmt) }
+    $i = $grade.Rows.Add($b.Nome, (TextoEstado $e), $b.Situacao, $b.Versao.ToString($fmt), $ativ, $b.Pasta)
+    $linha = $grade.Rows[$i]
+    $linha.Tag = $b
+    $linha.Cells[1].Style.ForeColor = (CorEstado $e)
+    if ($b.Situacao -like '*antigo' -or $b.Antigo) { $linha.DefaultCellStyle.ForeColor = $C.Suave }
+    if ($b.Antigo) { $linha.Cells[2].Style.ForeColor = $C.Amarelo }
   }
-  if ($lista.Items.Count -gt 0) {
+  $grade.ClearSelection()
+  if ($grade.Rows.Count -gt 0) {
     $escolher = 0
     for ($k = 0; $k -lt $script:bots.Count; $k++) { if ($script:bots[$k].Situacao -eq 'mais novo') { $escolher = $k; break } }
-    $lista.Items[$escolher].Selected = $true
+    $grade.Rows[$escolher].Selected = $true
+    $grade.CurrentCell = $grade.Rows[$escolher].Cells[0]
   }
   $copias = @($script:bots | Where-Object { $_.Situacao -like '*antigo' }).Count
+  $antigos = @($script:bots | Where-Object { $_.Antigo }).Count
   if ($script:bots.Count -eq 0) {
-    $rotulo.Text = 'Não achei nenhum bot no seu PC. Extraia o .zip do bot numa pasta e clique em "Procurar de novo".'
+    $rotulo.Text = 'Não achei nenhum bot da loja no seu PC. Extraia o .zip do bot numa pasta e clique em "Procurar de novo".'
+  } elseif ($antigos -gt 0) {
+    $rotulo.Text = "Achei $($script:bots.Count) bot(s). $antigos é(são) de antes da licença: baixe de novo em Minhas compras e use ""Trazer dados de outro bot""."
   } elseif ($copias -gt 0) {
-    $rotulo.Text = "Achei $($script:bots.Count) bot(s). Há $copias cópia(s) antiga(s) de um mesmo bot (em cinza): depois de conferir que o mais novo está com os dados, você pode apagar a antiga."
+    $rotulo.Text = "Achei $($script:bots.Count) bot(s). Há $copias cópia(s) antiga(s) de um mesmo bot (em cinza): depois de trazer os dados para o mais novo, pode apagar a antiga."
   } else {
     $rotulo.Text = "Achei $($script:bots.Count) bot(s). Escolha um e clique em Ligar (na primeira vez, ele abre a configuração)."
   }
   AtualizarBotoes
 }
 function AtualizarEstados {
-  foreach ($it in $lista.Items) {
-    $e = EstadoTexto $it.Tag
-    if ($it.SubItems[1].Text -ne $e) { $it.SubItems[1].Text = $e }
-    if ($e -eq 'Ligado') { $it.ForeColor = $VERDE } elseif ($it.Tag.Situacao -like '*antigo') { $it.ForeColor = [System.Drawing.Color]::Gray } else { $it.ForeColor = [System.Drawing.SystemColors]::WindowText }
+  foreach ($linha in $grade.Rows) {
+    $e = EstadoTexto $linha.Tag
+    $t = TextoEstado $e
+    if ($linha.Cells[1].Value -ne $t) { $linha.Cells[1].Value = $t; $linha.Cells[1].Style.ForeColor = (CorEstado $e) }
   }
   AtualizarBotoes
 }
+function BotEscolhido {
+  if ($grade.SelectedRows.Count -eq 0) { return $null }
+  return $grade.SelectedRows[0].Tag
+}
 function AtualizarBotoes {
-  $b = $null
-  if ($lista.SelectedItems.Count) { $b = $lista.SelectedItems[0].Tag }
+  $b = BotEscolhido
   $ligado = $b -and (ProcessoDoBot $b.Pasta)
-  $btIniciar.Enabled = $b -and -not $ligado
+  $btIniciar.Enabled = $b -and -not $ligado -and -not $b.Antigo
   $btParar.Enabled = [bool]$ligado
+  foreach ($x in @($btConfig, $btRegistro, $btWindows, $btAbrir, $btApagar, $btTransferir, $btPersonalizar)) { $x.Enabled = [bool]$b }
+  $btLoja.Enabled = [bool]($b -and (SiteDaLoja $b))
   if ($b -and (Test-Path -LiteralPath (AtalhoInicio $b))) { $btWindows.Text = 'Não ligar com o Windows' } else { $btWindows.Text = 'Ligar com o Windows' }
 }
 
@@ -758,7 +1126,7 @@ function Carregar([bool]$procurarDeNovo) {
   if (-not $procurarDeNovo) { $pastas = LerCache }
   if ($pastas.Count -eq 0) {
     $form.Cursor = [System.Windows.Forms.Cursors]::WaitCursor
-    $rotulo.Text = 'Procurando bots no seu PC (na primeira vez pode levar alguns minutos)...'
+    $rotulo.Text = 'Procurando os seus bots no PC (na primeira vez pode levar alguns minutos)...'
     [System.Windows.Forms.Application]::DoEvents()
     $pastas = @(Procurar $rotulo)
     $form.Cursor = [System.Windows.Forms.Cursors]::Default
@@ -772,13 +1140,15 @@ function Carregar([bool]$procurarDeNovo) {
 }
 
 function Selecionado {
-  if ($lista.SelectedItems.Count -eq 0) { Aviso 'Escolha um bot na lista.'; return $null }
-  return $lista.SelectedItems[0].Tag
+  $b = BotEscolhido
+  if (-not $b) { Aviso 'Escolha um bot na lista.' }
+  return $b
 }
 
 $btIniciar.Add_Click({
   $b = Selecionado
   if (-not $b) { return }
+  if ($b.Antigo) { Aviso "Este bot foi baixado antes da licença da loja e não liga mais por aqui.`n`nBaixe de novo em Minhas compras, extraia e use ""Trazer dados de outro bot"" no bot novo." 'Warning'; return }
   if ($b.Situacao -like '*antigo') {
     if (-not (Pergunta "Este é uma cópia ANTIGA do bot $($b.Nome). Tem uma versão mais nova na lista.`n`nLigar esta mesmo assim?" 'Warning')) { return }
   }
@@ -791,8 +1161,8 @@ $btIniciar.Add_Click({
   try { IniciarComResultado $b $rotulo } catch { $form.Cursor = [System.Windows.Forms.Cursors]::Default; Aviso "Não consegui ligar: $($_.Exception.Message)" 'Error' }
   AtualizarEstados
 })
-$lista.Add_DoubleClick({ if ($btIniciar.Enabled) { $btIniciar.PerformClick() } })
-$lista.Add_SelectedIndexChanged({ AtualizarBotoes })
+$grade.Add_CellDoubleClick({ param($s, $e) if ($e.RowIndex -ge 0 -and $btIniciar.Enabled) { $btIniciar.PerformClick() } })
+$grade.Add_SelectionChanged({ AtualizarBotoes })
 
 $btParar.Add_Click({
   $b = Selecionado
@@ -815,6 +1185,21 @@ $btConfig.Add_Click({
   }
   AtualizarEstados
 })
+$btPersonalizar.Add_Click({
+  $b = Selecionado
+  if (-not $b) { return }
+  $html = Join-Path $b.Pasta 'Personalizar bot.html'
+  if (Test-Path -LiteralPath $html) {
+    $rotulo.Text = 'Abrindo o Personalizar bot no navegador. No Discord, use /personalizar baixar e abra o arquivo nele.'
+    Start-Process $html
+    return
+  }
+  $site = SiteDaLoja $b
+  if ($site) {
+    if (Pergunta "O bot $($b.Nome) não tem o módulo Personalização (textos, botões, cores e a configuração dos servidores num painel).`n`nAbrir a loja para adicionar?") { Start-Process "$site/loja/minhas-compras" }
+  } else { Aviso "O bot $($b.Nome) não tem o módulo Personalização." }
+})
+$btTransferir.Add_Click({ $b = Selecionado; if ($b) { TransferirDados $b; Carregar $false } })
 $btRegistro.Add_Click({ $b = Selecionado; if ($b) { VerRegistro $b } })
 $btWindows.Add_Click({
   $b = Selecionado
@@ -827,6 +1212,10 @@ $btAbrir.Add_Click({
   $b = Selecionado
   if ($b) { Start-Process explorer.exe -ArgumentList "`"$($b.Pasta)`"" }
 })
+$btLoja.Add_Click({
+  $b = Selecionado
+  if ($b -and (SiteDaLoja $b)) { Start-Process "$(SiteDaLoja $b)/loja/minhas-compras" }
+})
 $btApagar.Add_Click({
   $b = Selecionado
   if (-not $b) { return }
@@ -835,7 +1224,7 @@ $btApagar.Add_Click({
   $texto = "Mandar para a Lixeira a pasta do bot $($b.Nome)?`n`n$($b.Pasta)`n`nVersão de $($b.Versao.ToString($fmt))"
   $icone = 'Question'
   if ($novo -and $novo.Pasta -ne $b.Pasta -and $b.Atividade -and (-not $novo.Atividade -or $b.Atividade -gt $novo.Atividade)) {
-    $texto += "`n`nATENÇÃO: esta cópia tem dados MAIS RECENTES que a versão nova. Transfira os dados antes (Transferir dados.bat) ou você pode perder XP, dinheiro e configurações."
+    $texto += "`n`nATENÇÃO: esta cópia tem dados MAIS RECENTES que a versão nova. Use ""Trazer dados de outro bot"" no bot novo antes, ou você pode perder XP, dinheiro e configurações."
     $icone = 'Warning'
   } elseif ($b.Situacao -eq 'mais novo' -or -not $novo) {
     $texto += "`n`nEsta é a versão mais nova (ou a única) deste bot."
@@ -859,12 +1248,16 @@ $btProcurar.Add_Click({ Carregar $true })
 $relogio = New-Object System.Windows.Forms.Timer
 $relogio.Interval = 4000
 $relogio.Add_Tick({ AtualizarEstados })
-$form.Add_Shown({ Carregar $false; $relogio.Start() })
+$form.Add_Shown({
+  Carregar $false
+  $relogio.Start()
+  if ($primeiraVez) { $rotulo.Text = 'Criei o atalho "Bots ByteUP" na Área de Trabalho e no Menu Iniciar: da próxima vez, abra por ele. ' + $rotulo.Text }
+})
 $form.Add_FormClosing({
   $relogio.Stop()
   $ligados = @($script:bots | Where-Object { ProcessoDoBot $_.Pasta })
   if ($ligados.Count) {
-    [void][System.Windows.Forms.MessageBox]::Show("O bot continua ligado depois que você fechar esta janela.`nPara desligar, abra o Inicializador e clique em Parar.", $titulo, 'OK', 'Information')
+    [void][System.Windows.Forms.MessageBox]::Show("O bot continua ligado depois que você fechar esta janela.`nPara desligar, abra o Bots ByteUP e clique em Parar.", $titulo, 'OK', 'Information')
   }
 })
 

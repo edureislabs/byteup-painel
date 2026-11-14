@@ -30,7 +30,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ itemId:
   // sempre o bot completo: o original + todos os módulos adicionados depois
   const bot = await ownedBot(botItemId, item.order.userId, { admin });
   if (!bot) return new NextResponse("Este pedido não está pago.", { status: 403 });
-  const zip = buildBotZip(bot.options, siteUrl());
+  const zip = buildBotZip(bot.options, siteUrl(), { id: bot.itemId, comprador: bot.userId });
   return new NextResponse(new Uint8Array(zip.buffer), {
     headers: {
       "Content-Type": "application/zip",

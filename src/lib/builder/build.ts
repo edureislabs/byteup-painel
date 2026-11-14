@@ -3,6 +3,7 @@ import { BUILDER_MODULES, botModulesOnly, builderModule, type BuilderOptions } f
 import { generateReadme } from "./readme";
 import { TEMPLATE_FILES, TEMPLATE_VERSION } from "./templateFiles";
 import { createZip, type ZipEntry } from "./zip";
+import { chavePublica, emitirLicenca, empacotar } from "./licenca";
 
 /** Arquivos que mudam em cada pedido (o resto vem igual da pasta bot-template/). */
 export const GENERATED_FILES = ["README.md", "package.json", "config.json", "discloud.config", "squarecloud.app"] as const;
@@ -13,7 +14,16 @@ export function generatedFiles(opts: BuilderOptions, siteUrl: string): Record<(t
   pkg.name = slug;
   const modulos = botModulesOnly(opts.modulos); // ferramentas extras não entram no config.json
   pkg.description = `${opts.nome}: bot para Discord (módulos: ${modulos.join(", ")})`;
-  const config = { nome: opts.nome, cor: opts.cor, status: "Use /ajuda", modulos };
+  // o código vai criptografado: o Inicializador lê daqui as permissões especiais (intents) que os módulos precisam
+  const fontes = modulos.map((id) => TEMPLATE_FILES[`src/modules/${id}.js`] ?? "").join("\n");
+  const intents = [
+    ["members", "GatewayIntentBits.GuildMembers"],
+    ["content", "GatewayIntentBits.MessageContent"],
+    ["presence", "GatewayIntentBits.GuildPresences"],
+  ]
+    .filter(([, marca]) => fontes.includes(marca))
+    .map(([nome]) => nome);
+  const config = { nome: opts.nome, cor: opts.cor, status: "Use /ajuda", modulos, intents };
   const nomeHost = opts.nome.replace(/[\r\n=]/g, " ").slice(0, 32);
   return {
     "README.md": generateReadme(opts, siteUrl),
@@ -36,12 +46,20 @@ const destinoNoBot = (nome: string) => nome.replace(/^extras\/[\w-]+\//, "");
 /** Arquivos do Windows (.bat, .ps1) precisam de quebra de linha CRLF. */
 const paraWindows = (nome: string, conteudo: string) => (/\.(bat|cmd|ps1)$/i.test(nome) ? conteudo.replace(/\r?\n/g, "\r\n") : conteudo);
 
+/** Arquivos que vão criptografados no bot.pack (o código do bot). */
+const vaiNoPacote = (nome: string) => nome === "index.js" || /^src\/.+\.js$/.test(nome);
+
+/** Quem pode usar este bot: o ID da licença (o item do pedido) e o ID do Discord de quem comprou. */
+export type LicencaPedido = { id: string; comprador: string };
+
 /**
  * Monta o .zip do "Monte o seu bot" com os módulos escolhidos.
  * O código vem da pasta bot-template/ (empacotada em templateFiles.ts);
  * package.json, config.json e README.md são gerados para cada pedido.
+ * O código vai criptografado no bot.pack, e o index.js vira o carregador
+ * (bot-template/protegido/index.js) que confere a licença antes de abrir.
  */
-export function buildBotZip(opts: BuilderOptions, siteUrl: string) {
+export function buildBotZip(opts: BuilderOptions, siteUrl: string, licenca: LicencaPedido) {
   const slug = slugify(opts.nome) || "meu-bot";
   const escolhidos = new Set(opts.modulos);
   const vendidos = new Set(BUILDER_MODULES.map((m) => m.id));
@@ -50,14 +68,25 @@ export function buildBotZip(opts: BuilderOptions, siteUrl: string) {
   const gerados = generatedFiles(opts, siteUrl);
   for (const nome of GENERATED_FILES) entries.push({ name: `${slug}/${nome}`, data: gerados[nome] });
 
+  const codigo: Record<string, string> = {};
   for (const [nome, conteudo] of Object.entries(TEMPLATE_FILES)) {
-    if ((GENERATED_FILES as readonly string[]).includes(nome)) continue;
+    if ((GENERATED_FILES as readonly string[]).includes(nome) || nome.startsWith("protegido/")) continue;
     const modulo = moduleOfFile(nome);
     if (modulo && (!vendidos.has(modulo) || !escolhidos.has(modulo))) continue;
+    if (vaiNoPacote(nome)) {
+      codigo[nome === "index.js" ? "principal.js" : nome] = conteudo;
+      continue;
+    }
     // ferramentas "fora" (ex.: Inicializador) ficam na raiz do .zip, ao lado da pasta do bot
     const fora = modulo ? builderModule(modulo)?.fora : false;
     entries.push({ name: fora ? destinoNoBot(nome) : `${slug}/${destinoNoBot(nome)}`, data: paraWindows(nome, conteudo) });
   }
+
+  const lic = emitirLicenca({ id: licenca.id, comprador: licenca.comprador, bot: opts.nome, site: siteUrl });
+  entries.push({ name: `${slug}/licenca.json`, data: `${JSON.stringify(lic, null, 2)}\n` });
+  entries.push({ name: `${slug}/bot.pack`, data: empacotar(codigo, licenca.id) });
+  const carregador = TEMPLATE_FILES["protegido/index.js"].replace("__CHAVE_PUBLICA__", chavePublica()).replace("__VERSAO__", TEMPLATE_VERSION);
+  entries.push({ name: `${slug}/index.js`, data: carregador });
 
   return { fileName: `${slug}.zip`, buffer: createZip(entries), version: TEMPLATE_VERSION };
 }

@@ -1,3 +1,3 @@
 @echo off
-rem Inicializador: dois cliques para configurar e ligar o seu bot (pode ficar em qualquer pasta). Nada de terminal.
-start "" powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -STA -File "%~dp0inicializador.ps1"
+rem Abre o "Bots ByteUP" (Inicializador). Depois da primeira vez, use o atalho "Bots ByteUP" que ele cria (sem janela preta).
+start "" /min powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -STA -File "%~dp0inicializador.ps1"

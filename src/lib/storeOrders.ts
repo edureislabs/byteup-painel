@@ -78,7 +78,7 @@ export async function deliverOrder(orderId: string) {
     const bot = botItemId ? await ownedBot(botItemId, order.userId) : null;
     if (!bot) continue;
     try {
-      const zip = buildBotZip(bot.options, base);
+      const zip = buildBotZip(bot.options, base, { id: bot.itemId, comprador: bot.userId });
       files.push({ name: zip.fileName, data: zip.buffer });
     } catch (err) {
       console.error("[loja] falha ao montar o bot", item.id, err);

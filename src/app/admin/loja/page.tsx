@@ -26,6 +26,7 @@ export default async function AdminLojaPage() {
           <Link href="/admin/loja/pedidos" className="font-bold text-[#d9b4ff] hover:text-white">📋 Pedidos</Link>
           <Link href="/admin/loja/montador" className="font-bold text-[#d9b4ff] hover:text-white">🧩 Monte o seu bot</Link>
           <Link href="/admin/loja/testadores" className="font-bold text-[#d9b4ff] hover:text-white">🧪 Testadores</Link>
+          <Link href="/admin/loja/licencas" className="font-bold text-[#d9b4ff] hover:text-white">🔒 Licenças</Link>
         </div>
         <h1 className="mt-3 text-3xl font-black">Loja ByteUP</h1>
         <p className="mt-2 text-sm text-[#aaa3b5]">

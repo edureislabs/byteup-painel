@@ -9,14 +9,19 @@ import { buildBotZip } from "@/lib/builder/build";
  * ?modulos=moderacao,tickets (vazio = todos) &nome=Bot de Teste
  */
 export async function GET(req: NextRequest) {
-  if (!(await getAdminUserId())) return new NextResponse("Não encontrado", { status: 404 });
+  const admin = await getAdminUserId();
+  if (!admin) return new NextResponse("Não encontrado", { status: 404 });
   const q = req.nextUrl.searchParams;
   const lista = (q.get("modulos") || "").split(",").filter(Boolean);
   const modulos = parseModules(lista.length ? lista : BUILDER_MODULES.map((m) => m.id));
   if (!modulos) return new NextResponse("Módulos inválidos", { status: 400 });
   const nome = cleanBotName(q.get("nome")) ?? "Bot de Teste";
 
-  const zip = buildBotZip({ tipo: "monte-o-seu", modulos, nome, cor: cleanColor(q.get("cor")) }, siteUrl());
+  const zip = buildBotZip({ tipo: "monte-o-seu", modulos, nome, cor: cleanColor(q.get("cor")) }, siteUrl(), {
+    // bot de teste: licença no nome do admin que baixou
+    id: `previa-${admin}`,
+    comprador: admin,
+  });
   return new NextResponse(new Uint8Array(zip.buffer), {
     headers: {
       "Content-Type": "application/zip",

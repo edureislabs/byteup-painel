@@ -161,19 +161,21 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
   L.push(`**Módulos:** ${mods.map((m) => `${m.emoji} ${m.name}`).join(" · ")}`, "");
   if (extras.length) L.push(`**Ferramentas:** ${extras.map((m) => `${m.emoji} ${m.name}`).join(" · ")}`, "");
   L.push("> Já tinha um bot nosso e está atualizando? Vá direto para **Atualizar o bot sem perder os dados**, mais abaixo.", "");
+  L.push("> 🔒 **Este bot é licenciado para você.** Ele só liga com um bot criado na **sua conta do Discord** (a mesma que comprou na loja) e confere a licença no site quando liga. O código fica criptografado no `bot.pack`: não apague nem altere `bot.pack`, `licenca.json` e `index.js`.", "");
   if (extras.length) {
     L.push("> **Windows:** antes de extrair, clique com o botão direito no **.zip** → **Propriedades** → marque **Desbloquear** → **OK**. Sem isso, o Windows pode bloquear os arquivos `.bat` com o aviso \"O Controle Inteligente de Aplicativos bloqueou um arquivo\" ou \"O Windows protegeu o computador\".", "");
   }
 
   L.push("## Do que você precisa", "");
   if (temInicializador) L.push("- Um PC com **Windows** (o Inicializador instala o Node.js sozinho, se faltar)");
-  else L.push("- **Node.js 18.17 ou mais novo** (recomendado: a versão LTS em https://nodejs.org)");
+  else L.push("- **Node.js 20.6 ou mais novo** (recomendado: a versão LTS em https://nodejs.org)");
+  L.push("- **Internet** quando o bot liga (ele confere a licença no site; sem internet, usa a última conferência por até 7 dias)");
   L.push("- Uma conta no Discord e permissão de **Gerenciar servidor** no servidor onde o bot vai ficar");
   L.push("");
 
   L.push("## Passo a passo", "");
   L.push("### 1. Crie o bot no Discord", "");
-  L.push("1. Abra https://discord.com/developers/applications e clique em **New Application**. Dê um nome e confirme.");
+  L.push("1. **Entre com a mesma conta do Discord que comprou na loja**, abra https://discord.com/developers/applications e clique em **New Application**. Dê um nome e confirme. (Bot criado em outra conta não liga.)");
   L.push("2. No menu da esquerda, entre em **Bot**. Ali você pode mudar o nome e a foto do bot.");
   L.push("3. Clique em **Reset Token** e copie o token. **Não mostre o token para ninguém**: com ele, qualquer pessoa controla o seu bot.");
   if (intents.length) {
@@ -184,13 +186,14 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
   if (temInicializador) {
     L.push("### 2. Ligue com o Inicializador (sem terminal)", "");
     L.push("1. Extraia este .zip numa pasta (por exemplo, em Documentos).");
-    L.push("2. Dê **dois cliques em `Iniciar bot.bat`** e clique em **Ligar**. Na primeira vez abre a configuração, com 4 passos que ficam verdes quando estão certos:");
+    L.push("2. Dê **dois cliques em `Iniciar bot.bat`**. Abre o **Bots ByteUP** e ele cria o atalho **Bots ByteUP** na Área de Trabalho e no Menu Iniciar: da próxima vez, abra por ele (sem janela preta).");
+    L.push("3. Escolha o bot e clique em **Ligar**. Na primeira vez abre a configuração, com 4 passos que ficam verdes quando estão certos:");
     L.push("    - **Node.js:** se faltar, um botão baixa e instala sozinho.");
-    L.push("    - **Token:** cole o token do passo 1. Ele confere com o Discord na hora.");
+    L.push("    - **Token:** cole o token do passo 1. Ele confere com o Discord na hora (e avisa se o bot foi criado em outra conta).");
     L.push("    - **Permissões especiais (intents):** ele mostra quais faltam ligar e abre a página certa do Developer Portal.");
     L.push("    - **ID do servidor** (opcional): com ele, os comandos aparecem na hora.");
-    L.push("3. Clique em **Instalar e ligar o bot**. Ele instala o que precisa e liga o bot, sem abrir terminal.");
-    L.push("4. Se o bot ainda não estiver no seu servidor, ele oferece o **link de convite** com as permissões certas. Escolha o servidor e autorize.", "");
+    L.push("4. Clique em **Instalar e ligar o bot**. Ele instala o que precisa e liga o bot, sem abrir terminal.");
+    L.push("5. Se o bot ainda não estiver no seu servidor, ele oferece o **link de convite** com as permissões certas. Escolha o servidor e autorize.", "");
     L.push("Pode fechar o Inicializador: o bot continua ligado. Para desligar, abra de novo e clique em **Parar**. **Ligar com o Windows** faz o bot ligar sozinho quando o PC liga, e **Ver registro** mostra o que o bot está fazendo.", "");
     L.push("> Vai usar uma hospedagem? Pule para **Deixar o bot ligado 24 horas**.", "");
     L.push("<details><summary>Prefere fazer pelo terminal?</summary>", "");
@@ -240,11 +243,12 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
   for (const m of extras) {
     L.push(`### ${m.emoji} ${m.name}`, "", m.description, "");
     if (m.id === "inicializador") {
-      L.push("O arquivo **`Iniciar bot.bat`** fica fora da pasta do bot (pode deixar na Área de Trabalho). Dois cliques e ele:", "");
-      L.push("1. Procura no seu PC as pastas de bot (na primeira vez demora um pouco; depois ele lembra) e mostra se cada uma está **Ligado**, **Desligado** ou falta **Configurar**.");
+      L.push("O **`Iniciar bot.bat`** fica fora da pasta do bot. Na primeira vez ele abre o **Bots ByteUP** e cria o atalho **Bots ByteUP** (com ícone, sem janela preta) na Área de Trabalho e no Menu Iniciar. Ele:", "");
+      L.push("1. Procura no seu PC **só os bots comprados na loja** (os que têm `licenca.json`; na primeira vez demora um pouco, depois ele lembra) e mostra se cada um está **Ligado**, **Desligado** ou falta **Configurar**.");
       L.push("2. **Ligar:** na primeira vez, configura tudo por janelas (Node.js, token, permissões, servidor), instala o que precisa e liga o bot sem terminal.");
-      L.push("3. **Parar** (salva os dados antes), **Configurar** (trocar token ou servidor), **Ver registro**, **Ligar com o Windows**.");
-      L.push("4. Marca a cópia **mais nova** e a **mais antiga** do mesmo bot e manda as velhas para a Lixeira (avisa antes se ela tiver dados mais novos).", "");
+      L.push("3. **Parar** (salva os dados e tira o bot do ar na hora), **Configurar** (trocar token ou servidor), **Registro**, **Ligar com o Windows**.");
+      L.push("4. **Personalizar:** abre o Personalizar bot (se o bot tiver o módulo). **Trazer dados de outro bot:** copia a `data` e o `.env` de um bot antigo para o escolhido, com cópia de segurança. **Minhas compras:** abre a loja.");
+      L.push("5. Marca a cópia **mais nova** e a **mais antiga** do mesmo bot e manda as velhas para a Lixeira (avisa antes se ela tiver dados mais novos).", "");
       L.push("> Use o Inicializador enquanto o bot roda no seu PC. Quando for para uma hospedagem, siga **Deixar o bot ligado 24 horas**.", "");
     } else {
       L.push("Veja como usar em **Atualizar o bot sem perder os dados**.", "");
@@ -254,7 +258,12 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
 
   L.push("## Atualizar o bot sem perder os dados", "");
   L.push("Comprou mais módulos ou recebeu uma versão nova? Os dados (XP, dinheiro, advertências, configurações) ficam na pasta **`data`** e o token no **`.env`**. O .zip novo nunca traz esses arquivos, então nada se perde:", "");
-  if (extras.some((m) => m.id === "transferidor")) {
+  if (temInicializador) {
+    L.push("1. Extraia este .zip numa pasta **nova**.");
+    L.push("2. Abra o **Bots ByteUP**, escolha o bot **novo** e clique em **Trazer dados de outro bot**.");
+    L.push("3. Escolha o bot antigo na lista e confirme. Ele desliga o antigo, copia a `data` e o `.env` e guarda uma cópia de segurança.");
+    L.push("4. Clique em **Ligar**. Depois de conferir que está tudo certo, apague o antigo pelo botão **Apagar**.");
+  } else if (extras.some((m) => m.id === "transferidor")) {
     L.push("1. Desligue o bot antigo e extraia este .zip numa pasta **nova**.");
     L.push("2. Na pasta nova, dê **dois cliques em `Transferir dados.bat`**.");
     L.push("3. Escolha a pasta do bot antigo e confirme. Ele copia a `data` e o `.env`, guarda uma cópia de segurança e já roda o `npm install`.");
@@ -274,6 +283,7 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
   L.push("1. Ligue o bot no seu PC uma vez e confira que funciona (assim o `.env` já está certo).");
   L.push("2. Monte o arquivo para enviar: abra a pasta do bot, selecione **tudo o que está dentro dela, menos a pasta `node_modules`**, clique com o botão direito → **Enviar para → Pasta compactada**. O `discloud.config` e o `squarecloud.app` precisam ficar na **raiz** do .zip, não dentro de outra pasta.");
   L.push("3. O `.env` (com o token) vai junto. **Nunca mande esse .zip para ninguém.**");
+  L.push("4. O `bot.pack` e o `licenca.json` também precisam ir (sem eles o bot não liga). A hospedagem precisa da **versão 20 ou mais nova do Node.js** e de internet (todas têm).");
   L.push("");
   L.push("### Discloud", "");
   L.push("1. Crie a conta em https://discloud.com e entre no servidor deles no Discord (o envio é feito pelo bot da Discloud ou pelo painel do site).");
@@ -289,7 +299,7 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
   L.push("3. No painel, clique em **Upload** e envie o .zip. Para o bot voltar sozinho se cair, adicione a linha `AUTORESTART=true` (se o seu plano permitir).");
   L.push("");
   L.push("### Hospedagem com painel (Pterodactyl e parecidas)", "");
-  L.push("1. Crie um servidor do tipo **Node.js** (versão 18 ou mais nova).");
+  L.push("1. Crie um servidor do tipo **Node.js** (versão 20 ou mais nova).");
   L.push("2. Envie os arquivos pelo gerenciador de arquivos do painel (sem a `node_modules`).");
   L.push("3. Arquivo principal: `index.js` · comando de início: `npm start` (ou `node index.js`).");
   L.push("4. Se o painel tiver **variáveis de ambiente**, coloque `DISCORD_TOKEN` lá; senão, envie o `.env`.");
@@ -325,8 +335,10 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
 
   L.push("## Problemas comuns", "");
   if (extras.length) L.push("- **O Windows bloqueou o `.bat` (\"Controle Inteligente de Aplicativos\" ou \"O Windows protegeu o computador\")**: apague a pasta extraída, clique com o botão direito no .zip → Propriedades → marque **Desbloquear** → OK e extraia de novo. No aviso azul também dá para clicar em **Mais informações → Executar assim mesmo**.");
+  L.push("- **\"Esta cópia do bot está licenciada para outra conta do Discord\"**: o bot foi criado no Developer Portal com outra conta. Crie o bot na conta que comprou na loja e use o token dele.");
+  L.push("- **\"Não consegui conferir a licença no site da loja\"**: o PC ou a hospedagem está sem internet, ou o site está fora do ar. Tente de novo em alguns minutos.");
   L.push("- **\"Falta o token do bot\"**: o arquivo `.env` não existe ou o `DISCORD_TOKEN` está vazio.");
-  L.push("- **\"An invalid token was provided\"**: o token está errado. Gere outro em *Bot → Reset Token*.");
+  L.push("- **\"O token está errado\"**: gere outro em *Bot → Reset Token*.");
   if (intents.length) L.push(`- **\"Used disallowed intents\"**: ligue ${intents.map((i) => `**${i}**`).join(" e ")} no Developer Portal (passo 1).`);
   L.push("- **O bot não consegue dar cargo ou punir alguém**: o cargo do bot precisa estar acima do cargo da pessoa, e o bot precisa da permissão. Use o link do terminal para convidar de novo, se precisar.");
   L.push("- **Os comandos não aparecem**: espere alguns minutos e aperte Ctrl+R no Discord. Para testes, coloque o ID do servidor em `GUILD_ID` no `.env`: os comandos aparecem na hora nele.");
