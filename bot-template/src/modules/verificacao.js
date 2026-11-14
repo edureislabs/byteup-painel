@@ -149,7 +149,6 @@ const verificacao = {
         .setName('painel')
         .setDescription('Envia o painel com o botão "Verificar"')
         .addChannelOption((o) => o.setName('canal').setDescription('Onde enviar (padrão: aqui)').addChannelTypes(ChannelType.GuildText))
-        .addStringOption((o) => o.setName('mensagem').setDescription('Texto do painel').setMaxLength(1500))
     ),
   async executar(i) {
     const c = cfg(i.guildId);
@@ -175,7 +174,7 @@ const verificacao = {
 
     if (!c.cargo) return responder(i, tx('primeiro_use_verificacao_configurar'), 'erro');
     const canal = i.options.getChannel('canal') ?? i.channel;
-    const texto = i.options.getString('mensagem') || tx('clique_botao_abaixo_verificar');
+    const texto = tx('clique_botao_abaixo_verificar'); // o texto muda só no Personalizar bot
     const msg = await canal
       .send({
         embeds: [vis(embed(i.guildId).setTitle(tx('verificacao')).setDescription(texto), 'painel', imagens({ guild: i.guild }))],

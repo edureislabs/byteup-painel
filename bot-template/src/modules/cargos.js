@@ -5,6 +5,7 @@ import { textos, visuais, botoes as registrarBotoes } from '../core/textos.js';
 
 // Textos deste módulo (o dono do bot pode trocar todos no "Personalizar bot.html")
 const tx = textos('cargos', {
+  titulo_painel: ['🎭 Escolha seus cargos', 'titulo'],
   clique_nos_botoes_pegar: 'Clique nos botões para pegar ou tirar cargos.',
   consegui_enviar_mensagens_confira: ['Não consegui enviar mensagens em {canal}. Confira as minhas permissões.', 'resposta'],
   painel_criado_agora_use: ['Painel criado em {canal}. Agora use **/cargos adicionar painel:{mensagem_id}** para colocar os cargos.', 'resposta'],
@@ -75,8 +76,6 @@ const cargos = {
       s
         .setName('painel')
         .setDescription('Cria um painel novo (depois adicione cargos nele)')
-        .addStringOption((o) => o.setName('titulo').setDescription('Título').setRequired(true).setMaxLength(100))
-        .addStringOption((o) => o.setName('descricao').setDescription('Texto do painel').setMaxLength(1500))
         .addChannelOption((o) => o.setName('canal').setDescription('Padrão: este canal').addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement))
     )
     .addSubcommand((s) =>
@@ -100,8 +99,8 @@ const cargos = {
     if (sub === 'painel') {
       const canal = i.options.getChannel('canal') ?? i.channel;
       const e = embed(i.guildId)
-        .setTitle(i.options.getString('titulo'))
-        .setDescription(i.options.getString('descricao') || tx('clique_nos_botoes_pegar'));
+        .setTitle(tx('titulo_painel'))
+        .setDescription(tx('clique_nos_botoes_pegar')); // título e texto mudam só no Personalizar bot
       vis(e, 'painel', imagens({ guild: i.guild }));
       const msg = await canal.send({ embeds: [e] }).catch(() => null);
       if (!msg) return responder(i, tx('consegui_enviar_mensagens_confira', { canal }), 'erro');

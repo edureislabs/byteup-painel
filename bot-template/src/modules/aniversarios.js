@@ -1,7 +1,7 @@
 import { ChannelType, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { colecao } from '../core/db.js';
 import { CONFIG, ajustes, salvarAjustes, embed, responder, preencher, imagens } from '../core/util.js';
-import { textos, modeloOu, visuais } from '../core/textos.js';
+import { textos, visuais } from '../core/textos.js';
 
 // Textos deste módulo (o dono do bot pode trocar todos no "Personalizar bot.html")
 const tx = textos('aniversarios', {
@@ -48,8 +48,7 @@ const vis = visuais('aniversarios', {
 const datas = colecao('aniversarios'); // guild -> user -> { dia, mes }
 const PADRAO = { canal: null, cargo: null, mensagem: null, anunciados: {}, cargosAtivos: {} };
 const cfg = (guildId) => ajustes(guildId, 'aniversarios', PADRAO);
-const ANTIGA = '🎂 Hoje é aniversário de {usuario}! Parabéns! 🎉'; // padrão de versões anteriores
-const msgParabens = (c) => modeloOu(c.mensagem, ANTIGA, tx('msg_parabens_padrao'));
+const msgParabens = () => tx('msg_parabens_padrao'); // o texto muda só no Personalizar bot
 const FUSO = CONFIG.fuso || tx('america_sao_paulo');
 const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
 const DIAS_NO_MES = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -101,10 +100,9 @@ const aniversario = {
     .addSubcommand((s) =>
       s
         .setName('configurar')
-        .setDescription('(Equipe) Canal dos parabéns, cargo do dia e mensagem')
+        .setDescription('(Equipe) Canal dos parabéns e cargo do dia')
         .addChannelOption((o) => o.setName('canal').setDescription('Onde dar os parabéns').addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement))
         .addRoleOption((o) => o.setName('cargo').setDescription('Cargo que o aniversariante ganha por 24 h'))
-        .addStringOption((o) => o.setName('mensagem').setDescription('Mensagem. Variáveis: {usuario} {nome} {servidor}').setMaxLength(500))
     ),
   async executar(i) {
     const sub = i.options.getSubcommand();
@@ -144,15 +142,13 @@ const aniversario = {
     const c = cfg(i.guildId);
     const canal = i.options.getChannel('canal');
     const cargo = i.options.getRole('cargo');
-    const msg = i.options.getString('mensagem');
     if (cargo) {
       if (cargo.managed || cargo.id === i.guildId || cargo.permissions.has(PermissionFlagsBits.Administrator)) return responder(i, tx('escolha_cargo_comum_sem'), 'erro');
       if (!cargo.editable) return responder(i, tx('meu_cargo_precisa_ficar', { cargo }), 'erro');
       c.cargo = cargo.id;
     }
     if (canal) c.canal = canal.id;
-    if (msg) c.mensagem = msg;
-    if (!canal && !cargo && !msg) return responder(i, tx('escolha_pelo_menos_opcao'), 'aviso');
+    if (!canal && !cargo) return responder(i, tx('escolha_pelo_menos_opcao'), 'aviso');
     salvarAjustes();
     return responder(i, tx('aniversarios_parabens', { canal: c.canal ? `<#${c.canal}>` : tx('escolha_canal'), cargo: c.cargo ? tx('cargo_dia', { cargo: c.cargo }) : '' }), 'sucesso');
   },

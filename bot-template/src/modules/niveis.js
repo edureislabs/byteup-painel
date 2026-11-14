@@ -1,7 +1,7 @@
 import { ChannelType, GatewayIntentBits, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { colecao } from '../core/db.js';
 import { ajustes, salvarAjustes, embed, responder, preencher, barra, fmt, sorteio, foiRemovida, imagens } from '../core/util.js';
-import { textos, modeloOu, visuais } from '../core/textos.js';
+import { textos, visuais } from '../core/textos.js';
 
 // Textos deste módulo (o dono do bot pode trocar todos no "Personalizar bot.html")
 const tx = textos('niveis', {
@@ -63,7 +63,7 @@ const PADRAO = {
   ignorados: [],
 };
 const cfg = (guildId) => ajustes(guildId, 'niveis', PADRAO);
-const msgNivel = (c) => modeloOu(c.mensagem, '🎉 {usuario} subiu para o **nível {nivel}**!', tx('msg_nivel_padrao'));
+const msgNivel = () => tx('msg_nivel_padrao'); // o texto muda só no Personalizar bot
 
 /** XP para passar do nível n para o n+1. */
 export const xpDoNivel = (n) => 5 * n * n + 50 * n + 100;
@@ -214,9 +214,8 @@ const config = {
       .addSubcommand((s) =>
         s
           .setName('aviso')
-          .setDescription('Onde e como avisar quando alguém sobe de nível')
+          .setDescription('Onde avisar quando alguém sobe de nível')
           .addChannelOption((o) => o.setName('canal').setDescription('Vazio = no mesmo canal da mensagem').addChannelTypes(ChannelType.GuildText))
-          .addStringOption((o) => o.setName('mensagem').setDescription('Variáveis: {usuario} {nome} {nivel} {servidor}').setMaxLength(500))
       )
       .addSubcommand((s) =>
         s
@@ -248,8 +247,6 @@ const config = {
     } else if (sub === 'aviso') {
       const canal = i.options.getChannel('canal');
       c.canal = canal?.id ?? null;
-      const m = i.options.getString('mensagem');
-      if (m) c.mensagem = m;
       msg = tx('aviso_nivel', { canal: canal ? tx('em', { canal }) : tx('mesmo_canal_mensagem') });
     } else if (sub === 'recompensa') {
       const n = i.options.getInteger('nivel');

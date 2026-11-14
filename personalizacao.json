@@ -1,0 +1,7703 @@
+{
+ "formato": "byteup-personalizacao",
+ "versao": 1,
+ "bot": "teste",
+ "gerado": "2026-11-14T19:27:46.113Z",
+ "modulos": [
+  {
+   "id": "geral",
+   "nome": "Comandos gerais (/ajuda, /config…)"
+  },
+  {
+   "id": "moderacao",
+   "nome": "Moderação"
+  },
+  {
+   "id": "automod",
+   "nome": "AutoMod"
+  },
+  {
+   "id": "verificacao",
+   "nome": "Verificação"
+  },
+  {
+   "id": "antiraid",
+   "nome": "Anti-raid"
+  },
+  {
+   "id": "boasvindas",
+   "nome": "Boas-vindas"
+  },
+  {
+   "id": "logs",
+   "nome": "Logs"
+  },
+  {
+   "id": "convites",
+   "nome": "Rastreio de convites"
+  },
+  {
+   "id": "niveis",
+   "nome": "Níveis"
+  },
+  {
+   "id": "economia",
+   "nome": "Economia"
+  },
+  {
+   "id": "reputacao",
+   "nome": "Reputação"
+  },
+  {
+   "id": "tickets",
+   "nome": "Tickets"
+  },
+  {
+   "id": "avaliacoes",
+   "nome": "Avaliação de atendimento"
+  },
+  {
+   "id": "formularios",
+   "nome": "Formulários"
+  },
+  {
+   "id": "sugestoes",
+   "nome": "Sugestões"
+  },
+  {
+   "id": "enquetes",
+   "nome": "Enquetes"
+  },
+  {
+   "id": "sorteios",
+   "nome": "Sorteios"
+  },
+  {
+   "id": "cargos",
+   "nome": "Cargos por botão"
+  },
+  {
+   "id": "cargostemp",
+   "nome": "Cargos temporários"
+  },
+  {
+   "id": "callstemp",
+   "nome": "Calls temporárias"
+  },
+  {
+   "id": "contadores",
+   "nome": "Contadores"
+  },
+  {
+   "id": "destaques",
+   "nome": "Destaques"
+  },
+  {
+   "id": "contagem",
+   "nome": "Jogo de contar"
+  },
+  {
+   "id": "afk",
+   "nome": "AFK"
+  },
+  {
+   "id": "autorespostas",
+   "nome": "Respostas automáticas"
+  },
+  {
+   "id": "anuncios",
+   "nome": "Anúncios agendados"
+  },
+  {
+   "id": "embeds",
+   "nome": "Criador de embeds"
+  },
+  {
+   "id": "aniversarios",
+   "nome": "Aniversários"
+  },
+  {
+   "id": "minecraft",
+   "nome": "Status Minecraft"
+  },
+  {
+   "id": "utilidades",
+   "nome": "Utilidades"
+  },
+  {
+   "id": "diversao",
+   "nome": "Diversão"
+  },
+  {
+   "id": "personalizar",
+   "nome": "Personalização"
+  }
+ ],
+ "limites": {
+  "texto": 2000,
+  "resposta": 3900,
+  "descricao": 4000,
+  "conteudo": 2000,
+  "titulo": 256,
+  "campo": 256,
+  "valor": 1024,
+  "rodape": 2048,
+  "autor": 256,
+  "botao": 80,
+  "rotulo": 45,
+  "placeholder": 150,
+  "opcao": 100,
+  "motivo": 500,
+  "canal": 100
+ },
+ "catalogo": {
+  "textos": {
+   "geral.voce_mesmo": {
+    "modulo": "geral",
+    "padrao": "Você não pode usar isso em você mesmo.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "geral.dono_servidor": {
+    "modulo": "geral",
+    "padrao": "Não dá para punir o dono do servidor.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "geral.eu_mesmo": {
+    "modulo": "geral",
+    "padrao": "Não posso fazer isso comigo mesmo.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "geral.cargo_maior_seu": {
+    "modulo": "geral",
+    "padrao": "Esse membro tem um cargo igual ou maior que o seu.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "geral.cargo_maior_meu": {
+    "modulo": "geral",
+    "padrao": "Esse membro tem um cargo igual ou maior que o meu. Suba o meu cargo na lista de cargos.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "geral.erro_generico": {
+    "modulo": "geral",
+    "padrao": "Algo deu errado. Tente de novo em instantes.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "geral.config_configurar_este_modulo": {
+    "modulo": "geral",
+    "padrao": "`/config {grupo}` · configurar este módulo",
+    "tipo": "texto",
+    "vars": [
+     "grupo"
+    ]
+   },
+   "geral.cont": {
+    "modulo": "geral",
+    "padrao": "{nome} (cont.)",
+    "tipo": "texto",
+    "vars": [
+     "nome"
+    ]
+   },
+   "geral.comandos": {
+    "modulo": "geral",
+    "padrao": "📖 Comandos do {nome}",
+    "tipo": "titulo",
+    "vars": [
+     "nome"
+    ]
+   },
+   "geral.administradores_use_config_ver": {
+    "modulo": "geral",
+    "padrao": "Administradores: use /config ver para ver tudo o que está configurado",
+    "tipo": "rodape",
+    "vars": []
+   },
+   "geral.pong": {
+    "modulo": "geral",
+    "padrao": "🏓 Pong!",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "geral.conexao_gateway": {
+    "modulo": "geral",
+    "padrao": "Conexão (gateway)",
+    "tipo": "campo",
+    "vars": []
+   },
+   "geral.ms": {
+    "modulo": "geral",
+    "padrao": "{ws} ms",
+    "tipo": "texto",
+    "vars": [
+     "ws"
+    ]
+   },
+   "geral.medindo": {
+    "modulo": "geral",
+    "padrao": "medindo…",
+    "tipo": "texto",
+    "vars": []
+   },
+   "geral.resposta": {
+    "modulo": "geral",
+    "padrao": "Resposta",
+    "tipo": "campo",
+    "vars": []
+   },
+   "geral.ms_2": {
+    "modulo": "geral",
+    "padrao": "{api} ms",
+    "tipo": "texto",
+    "vars": [
+     "api"
+    ]
+   },
+   "geral.servidores": {
+    "modulo": "geral",
+    "padrao": "Servidores",
+    "tipo": "campo",
+    "vars": []
+   },
+   "geral.membros": {
+    "modulo": "geral",
+    "padrao": "Membros",
+    "tipo": "campo",
+    "vars": []
+   },
+   "geral.online_ha": {
+    "modulo": "geral",
+    "padrao": "Online há",
+    "tipo": "campo",
+    "vars": []
+   },
+   "geral.modulos": {
+    "modulo": "geral",
+    "padrao": "Módulos",
+    "tipo": "campo",
+    "vars": []
+   },
+   "geral.nenhum": {
+    "modulo": "geral",
+    "padrao": "nenhum",
+    "tipo": "texto",
+    "vars": []
+   },
+   "geral.discord_js_node": {
+    "modulo": "geral",
+    "padrao": "discord.js {djsVersion} · Node {node}",
+    "tipo": "rodape",
+    "vars": [
+     "djsVersion",
+     "node"
+    ]
+   },
+   "geral.use_cor_hexadecimal_como": {
+    "modulo": "geral",
+    "padrao": "Use uma cor em hexadecimal, como **#5865F2**.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "geral.cor_definida": {
+    "modulo": "geral",
+    "padrao": "Cor definida para **{cor}**.",
+    "tipo": "resposta",
+    "vars": [
+     "cor"
+    ]
+   },
+   "geral.cargo_equipe": {
+    "modulo": "geral",
+    "padrao": "Cargo da equipe: {cargo}.",
+    "tipo": "texto",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "geral.cargo_equipe_removido": {
+    "modulo": "geral",
+    "padrao": "Cargo da equipe removido.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "geral.geral": {
+    "modulo": "geral",
+    "padrao": "Geral",
+    "tipo": "campo",
+    "vars": []
+   },
+   "geral.padrao": {
+    "modulo": "geral",
+    "padrao": "padrão",
+    "tipo": "texto",
+    "vars": []
+   },
+   "geral.cor": {
+    "modulo": "geral",
+    "padrao": "Cor: **{cor}**",
+    "tipo": "texto",
+    "vars": [
+     "cor"
+    ]
+   },
+   "geral.definida_so_quem_tem": {
+    "modulo": "geral",
+    "padrao": "não definida (só quem tem Gerenciar servidor)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "geral.equipe": {
+    "modulo": "geral",
+    "padrao": "Equipe: {staff}",
+    "tipo": "texto",
+    "vars": [
+     "staff"
+    ]
+   },
+   "geral.configuracao_deste_servidor": {
+    "modulo": "geral",
+    "padrao": "⚙️ Configuração deste servidor",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "moderacao.membro": {
+    "modulo": "moderacao",
+    "padrao": "Membro",
+    "tipo": "campo",
+    "vars": []
+   },
+   "moderacao.por": {
+    "modulo": "moderacao",
+    "padrao": "Por",
+    "tipo": "campo",
+    "vars": []
+   },
+   "moderacao.automatico": {
+    "modulo": "moderacao",
+    "padrao": "automático",
+    "tipo": "texto",
+    "vars": []
+   },
+   "moderacao.motivo": {
+    "modulo": "moderacao",
+    "padrao": "Motivo",
+    "tipo": "campo",
+    "vars": []
+   },
+   "moderacao.sem_motivo": {
+    "modulo": "moderacao",
+    "padrao": "Sem motivo",
+    "tipo": "texto",
+    "vars": []
+   },
+   "moderacao.consegui_confira_eu_tenho": {
+    "modulo": "moderacao",
+    "padrao": "Não consegui. Confira se eu tenho a permissão **{perm}** e se o meu cargo está acima do cargo dessa pessoa.",
+    "tipo": "texto",
+    "vars": [
+     "perm"
+    ]
+   },
+   "moderacao.banir_membros": {
+    "modulo": "moderacao",
+    "padrao": "Banir membros",
+    "tipo": "texto",
+    "vars": []
+   },
+   "moderacao.voce_foi_banido_motivo": {
+    "modulo": "moderacao",
+    "padrao": "🔨 Você foi **banido(a)**.\n**Motivo:** {motivo}",
+    "tipo": "texto",
+    "vars": [
+     "motivo"
+    ]
+   },
+   "moderacao.banimento": {
+    "modulo": "moderacao",
+    "padrao": "🔨 Banimento",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "moderacao.foi_banido_motivo": {
+    "modulo": "moderacao",
+    "padrao": "**{tag}** foi banido(a). Motivo: {motivo}",
+    "tipo": "resposta",
+    "vars": [
+     "tag",
+     "motivo"
+    ]
+   },
+   "moderacao.informe_id_usuario_so": {
+    "modulo": "moderacao",
+    "padrao": "Informe o ID do usuário (só números).",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "moderacao.esse_id_esta_lista": {
+    "modulo": "moderacao",
+    "padrao": "Esse ID não está na lista de banidos.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "moderacao.por_2": {
+    "modulo": "moderacao",
+    "padrao": "{motivo} (por {tag})",
+    "tipo": "texto",
+    "vars": [
+     "motivo",
+     "tag"
+    ]
+   },
+   "moderacao.banimento_removido": {
+    "modulo": "moderacao",
+    "padrao": "🔓 Banimento removido",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "moderacao.foi_desbanido": {
+    "modulo": "moderacao",
+    "padrao": "**{tag}** foi desbanido(a).",
+    "tipo": "resposta",
+    "vars": [
+     "tag"
+    ]
+   },
+   "moderacao.esse_usuario_esta_servidor": {
+    "modulo": "moderacao",
+    "padrao": "Esse usuário não está no servidor.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "moderacao.expulsar_membros": {
+    "modulo": "moderacao",
+    "padrao": "Expulsar membros",
+    "tipo": "texto",
+    "vars": []
+   },
+   "moderacao.voce_foi_expulso_motivo": {
+    "modulo": "moderacao",
+    "padrao": "👢 Você foi **expulso(a)**.\n**Motivo:** {motivo}",
+    "tipo": "texto",
+    "vars": [
+     "motivo"
+    ]
+   },
+   "moderacao.expulsao": {
+    "modulo": "moderacao",
+    "padrao": "👢 Expulsão",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "moderacao.foi_expulso": {
+    "modulo": "moderacao",
+    "padrao": "**{tag}** foi expulso(a).",
+    "tipo": "resposta",
+    "vars": [
+     "tag"
+    ]
+   },
+   "moderacao.voce_esta_castigo_motivo": {
+    "modulo": "moderacao",
+    "padrao": "🔇 Você está de **castigo** por {duracao}.\n**Motivo:** {motivo}",
+    "tipo": "texto",
+    "vars": [
+     "duracao",
+     "motivo"
+    ]
+   },
+   "moderacao.castigo": {
+    "modulo": "moderacao",
+    "padrao": "🔇 Castigo",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "moderacao.duracao": {
+    "modulo": "moderacao",
+    "padrao": "Duração",
+    "tipo": "campo",
+    "vars": []
+   },
+   "moderacao.castigar_membros": {
+    "modulo": "moderacao",
+    "padrao": "Castigar membros",
+    "tipo": "texto",
+    "vars": []
+   },
+   "moderacao.administradores_podem_ficar_castigo": {
+    "modulo": "moderacao",
+    "padrao": "{erro} (Administradores não podem ficar de castigo.)",
+    "tipo": "resposta",
+    "vars": [
+     "erro"
+    ]
+   },
+   "moderacao.duracao_invalida_use_algo": {
+    "modulo": "moderacao",
+    "padrao": "Duração inválida. Use algo como **10m**, **1h** ou **2d** (no máximo 28d).",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "moderacao.esta_castigo": {
+    "modulo": "moderacao",
+    "padrao": "**{tag}** está de castigo por **{duracao}**.",
+    "tipo": "resposta",
+    "vars": [
+     "tag",
+     "duracao"
+    ]
+   },
+   "moderacao.esse_membro_esta_castigo": {
+    "modulo": "moderacao",
+    "padrao": "Esse membro não está de castigo.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "moderacao.castigo_removido": {
+    "modulo": "moderacao",
+    "padrao": "🔊 Castigo removido",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "moderacao.castigo_foi_removido": {
+    "modulo": "moderacao",
+    "padrao": "O castigo de **{tag}** foi removido.",
+    "tipo": "resposta",
+    "vars": [
+     "tag"
+    ]
+   },
+   "moderacao.advertir_bots": {
+    "modulo": "moderacao",
+    "padrao": "Não dá para advertir bots.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "moderacao.voce_recebeu_advertencia_total": {
+    "modulo": "moderacao",
+    "padrao": "⚠️ Você recebeu uma **advertência** ({total} no total).\n**Motivo:** {motivo}",
+    "tipo": "texto",
+    "vars": [
+     "total",
+     "motivo"
+    ]
+   },
+   "moderacao.advertencia": {
+    "modulo": "moderacao",
+    "padrao": "⚠️ Advertência",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "moderacao.total": {
+    "modulo": "moderacao",
+    "padrao": "Total",
+    "tipo": "campo",
+    "vars": []
+   },
+   "moderacao.chegou_advertencias": {
+    "modulo": "moderacao",
+    "padrao": "Chegou a {total} advertências",
+    "tipo": "texto",
+    "vars": [
+     "total"
+    ]
+   },
+   "moderacao.voce_foi_banido_motivo_2": {
+    "modulo": "moderacao",
+    "padrao": "🔨 Você foi **banido(a)**.\n**Motivo:** {motivoAuto}",
+    "tipo": "texto",
+    "vars": [
+     "motivoAuto"
+    ]
+   },
+   "moderacao.banimento_automatico": {
+    "modulo": "moderacao",
+    "padrao": "🔨 Banimento automático",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "moderacao.punicao_automatica_banimento": {
+    "modulo": "moderacao",
+    "padrao": "\nPunição automática: **banimento**.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "moderacao.voce_foi_expulso_motivo_2": {
+    "modulo": "moderacao",
+    "padrao": "👢 Você foi **expulso(a)**.\n**Motivo:** {motivoAuto}",
+    "tipo": "texto",
+    "vars": [
+     "motivoAuto"
+    ]
+   },
+   "moderacao.expulsao_automatica": {
+    "modulo": "moderacao",
+    "padrao": "👢 Expulsão automática",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "moderacao.punicao_automatica_expulsao": {
+    "modulo": "moderacao",
+    "padrao": "\nPunição automática: **expulsão**.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "moderacao.punicao_automatica_castigo": {
+    "modulo": "moderacao",
+    "padrao": "\nPunição automática: **castigo** de {duracao}.",
+    "tipo": "texto",
+    "vars": [
+     "duracao"
+    ]
+   },
+   "moderacao.consegui_aplicar_punicao_automatica": {
+    "modulo": "moderacao",
+    "padrao": "\n(Não consegui aplicar a punição automática: confira as minhas permissões.)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "moderacao.recebeu_advertencia_total": {
+    "modulo": "moderacao",
+    "padrao": "**{tag}** recebeu uma advertência (**{total}** no total).{extra}",
+    "tipo": "resposta",
+    "vars": [
+     "tag",
+     "total",
+     "extra"
+    ]
+   },
+   "moderacao.tem_advertencias": {
+    "modulo": "moderacao",
+    "padrao": "**{tag}** não tem advertências.",
+    "tipo": "resposta",
+    "vars": [
+     "tag"
+    ]
+   },
+   "moderacao.por_t_d": {
+    "modulo": "moderacao",
+    "padrao": "**{numero}.** {motivo} · por <@{por}> · <t:{em}:d>",
+    "tipo": "texto",
+    "vars": [
+     "numero",
+     "motivo",
+     "por",
+     "em"
+    ]
+   },
+   "moderacao.advertencias": {
+    "modulo": "moderacao",
+    "padrao": "⚠️ Advertências de {tag}",
+    "tipo": "titulo",
+    "vars": [
+     "tag"
+    ]
+   },
+   "moderacao.todas_advertencias_foram_apagadas": {
+    "modulo": "moderacao",
+    "padrao": "Todas as advertências de **{tag}** foram apagadas.",
+    "tipo": "resposta",
+    "vars": [
+     "tag"
+    ]
+   },
+   "moderacao.so_tem_advertencia": {
+    "modulo": "moderacao",
+    "padrao": "**{tag}** só tem {total} advertência(s).",
+    "tipo": "resposta",
+    "vars": [
+     "tag",
+     "total"
+    ]
+   },
+   "moderacao.advertencia_removida_restam": {
+    "modulo": "moderacao",
+    "padrao": "Advertência {numero} de **{tag}** removida. Restam {total}.",
+    "tipo": "resposta",
+    "vars": [
+     "numero",
+     "tag",
+     "total"
+    ]
+   },
+   "moderacao.apagar_mensagens_aqui": {
+    "modulo": "moderacao",
+    "padrao": "Não dá para apagar mensagens aqui.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "moderacao.achei_mensagens_apagar": {
+    "modulo": "moderacao",
+    "padrao": "Não achei mensagens para apagar.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "moderacao.consegui_apagar_preciso_permissao": {
+    "modulo": "moderacao",
+    "padrao": "❌ Não consegui apagar. Preciso da permissão **Gerenciar mensagens** neste canal.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "moderacao.mensagens_apagadas": {
+    "modulo": "moderacao",
+    "padrao": "🧹 Mensagens apagadas",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "moderacao.canal": {
+    "modulo": "moderacao",
+    "padrao": "Canal",
+    "tipo": "campo",
+    "vars": []
+   },
+   "moderacao.quantidade": {
+    "modulo": "moderacao",
+    "padrao": "Quantidade",
+    "tipo": "campo",
+    "vars": []
+   },
+   "moderacao.so": {
+    "modulo": "moderacao",
+    "padrao": "Só de",
+    "tipo": "campo",
+    "vars": []
+   },
+   "moderacao.discord_deixa_apagar_massa": {
+    "modulo": "moderacao",
+    "padrao": " (O Discord não deixa apagar em massa mensagens com mais de 14 dias.)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "moderacao.mensagem_ns_apagada": {
+    "modulo": "moderacao",
+    "padrao": "🧹 {total} mensagem(ns) apagada(s).{aviso}",
+    "tipo": "texto",
+    "vars": [
+     "total",
+     "aviso"
+    ]
+   },
+   "moderacao.consegui_trancar_preciso_permissoes": {
+    "modulo": "moderacao",
+    "padrao": "Não consegui trancar. Preciso das permissões **Gerenciar canais** e **Gerenciar cargos** nesse canal.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "moderacao.motivo_2": {
+    "modulo": "moderacao",
+    "padrao": "\n**Motivo:** {motivo}",
+    "tipo": "texto",
+    "vars": [
+     "motivo"
+    ]
+   },
+   "moderacao.canal_trancado_pela_moderacao": {
+    "modulo": "moderacao",
+    "padrao": "🔒 Canal trancado pela moderação.{motivo}",
+    "tipo": "descricao",
+    "vars": [
+     "motivo"
+    ]
+   },
+   "moderacao.canal_trancado": {
+    "modulo": "moderacao",
+    "padrao": "🔒 Canal trancado",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "moderacao.foi_trancado": {
+    "modulo": "moderacao",
+    "padrao": "{canal} foi trancado.",
+    "tipo": "resposta",
+    "vars": [
+     "canal"
+    ]
+   },
+   "moderacao.consegui_liberar_preciso_permissoes": {
+    "modulo": "moderacao",
+    "padrao": "Não consegui liberar. Preciso das permissões **Gerenciar canais** e **Gerenciar cargos** nesse canal.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "moderacao.canal_liberado": {
+    "modulo": "moderacao",
+    "padrao": "🔓 Canal liberado.",
+    "tipo": "descricao",
+    "vars": []
+   },
+   "moderacao.canal_liberado_2": {
+    "modulo": "moderacao",
+    "padrao": "🔓 Canal liberado",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "moderacao.foi_liberado": {
+    "modulo": "moderacao",
+    "padrao": "{canal} foi liberado.",
+    "tipo": "resposta",
+    "vars": [
+     "canal"
+    ]
+   },
+   "moderacao.por_3": {
+    "modulo": "moderacao",
+    "padrao": "por {tag}",
+    "tipo": "texto",
+    "vars": [
+     "tag"
+    ]
+   },
+   "moderacao.consegui_mudar_modo_lento": {
+    "modulo": "moderacao",
+    "padrao": "Não consegui mudar o modo lento. Preciso da permissão **Gerenciar canais** nesse canal.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "moderacao.modo_lento": {
+    "modulo": "moderacao",
+    "padrao": "🐢 Modo lento",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "moderacao.intervalo": {
+    "modulo": "moderacao",
+    "padrao": "Intervalo",
+    "tipo": "campo",
+    "vars": []
+   },
+   "moderacao.desligado": {
+    "modulo": "moderacao",
+    "padrao": "desligado",
+    "tipo": "texto",
+    "vars": []
+   },
+   "moderacao.modo_lento_entre_mensagens": {
+    "modulo": "moderacao",
+    "padrao": "Modo lento de {canal}: **{duracao}** entre mensagens.",
+    "tipo": "texto",
+    "vars": [
+     "canal",
+     "duracao"
+    ]
+   },
+   "moderacao.modo_lento_desligado": {
+    "modulo": "moderacao",
+    "padrao": "Modo lento de {canal} desligado.",
+    "tipo": "texto",
+    "vars": [
+     "canal"
+    ]
+   },
+   "moderacao.punicoes_serao_registradas": {
+    "modulo": "moderacao",
+    "padrao": "As punições serão registradas em {canal}.",
+    "tipo": "texto",
+    "vars": [
+     "canal"
+    ]
+   },
+   "moderacao.registro_punicoes_desligado": {
+    "modulo": "moderacao",
+    "padrao": "Registro de punições desligado.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "moderacao.membros_serao_avisados_dm": {
+    "modulo": "moderacao",
+    "padrao": "Os membros serão avisados na DM.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "moderacao.aviso_dm_desligado": {
+    "modulo": "moderacao",
+    "padrao": "Aviso na DM desligado.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "moderacao.duracao_invalida_ex_30m": {
+    "modulo": "moderacao",
+    "padrao": "Duração inválida (ex.: 30m, 1h, 1d; máximo 28d).",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "moderacao.de": {
+    "modulo": "moderacao",
+    "padrao": " de {duracao}",
+    "tipo": "texto",
+    "vars": [
+     "duracao"
+    ]
+   },
+   "moderacao.cada_advertencias": {
+    "modulo": "moderacao",
+    "padrao": "A cada **{limite}** advertências: **{acao}**{duracao}.",
+    "tipo": "texto",
+    "vars": [
+     "limite",
+     "acao",
+     "duracao"
+    ]
+   },
+   "moderacao.punicao_automatica_desligada": {
+    "modulo": "moderacao",
+    "padrao": "Punição automática desligada.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "moderacao.registro": {
+    "modulo": "moderacao",
+    "padrao": "Registro: {registro}",
+    "tipo": "texto",
+    "vars": [
+     "registro"
+    ]
+   },
+   "moderacao.sim": {
+    "modulo": "moderacao",
+    "padrao": "sim",
+    "tipo": "texto",
+    "vars": []
+   },
+   "moderacao.nao": {
+    "modulo": "moderacao",
+    "padrao": "não",
+    "tipo": "texto",
+    "vars": []
+   },
+   "moderacao.aviso_dm": {
+    "modulo": "moderacao",
+    "padrao": "Aviso na DM: {aviso_dm}",
+    "tipo": "texto",
+    "vars": [
+     "aviso_dm"
+    ]
+   },
+   "moderacao.cada_advertencias_2": {
+    "modulo": "moderacao",
+    "padrao": "a cada {limite} advertências → {acao}",
+    "tipo": "texto",
+    "vars": [
+     "limite",
+     "acao"
+    ]
+   },
+   "moderacao.desligada": {
+    "modulo": "moderacao",
+    "padrao": "desligada",
+    "tipo": "texto",
+    "vars": []
+   },
+   "moderacao.punicao_automatica": {
+    "modulo": "moderacao",
+    "padrao": "Punição automática: {limite}",
+    "tipo": "texto",
+    "vars": [
+     "limite"
+    ]
+   },
+   "moderacao.moderacao": {
+    "modulo": "moderacao",
+    "padrao": "Moderação",
+    "tipo": "texto",
+    "vars": []
+   },
+   "automod.convite_outro_servidor": {
+    "modulo": "automod",
+    "padrao": "Convite de outro servidor",
+    "tipo": "texto",
+    "vars": []
+   },
+   "automod.link_permitido": {
+    "modulo": "automod",
+    "padrao": "Link não permitido",
+    "tipo": "texto",
+    "vars": []
+   },
+   "automod.palavra_proibida": {
+    "modulo": "automod",
+    "padrao": "Palavra proibida",
+    "tipo": "texto",
+    "vars": []
+   },
+   "automod.mencoes_massa": {
+    "modulo": "automod",
+    "padrao": "Menções em massa ({limite})",
+    "tipo": "texto",
+    "vars": [
+     "limite"
+    ]
+   },
+   "automod.excesso_letras_maiusculas": {
+    "modulo": "automod",
+    "padrao": "Excesso de letras maiúsculas",
+    "tipo": "texto",
+    "vars": []
+   },
+   "automod.flood_mensagens_rapidas_demais": {
+    "modulo": "automod",
+    "padrao": "Flood (mensagens rápidas demais)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "automod.automod": {
+    "modulo": "automod",
+    "padrao": "🛡️ AutoMod",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "automod.membro": {
+    "modulo": "automod",
+    "padrao": "Membro",
+    "tipo": "campo",
+    "vars": []
+   },
+   "automod.canal": {
+    "modulo": "automod",
+    "padrao": "Canal",
+    "tipo": "campo",
+    "vars": []
+   },
+   "automod.motivo": {
+    "modulo": "automod",
+    "padrao": "Motivo",
+    "tipo": "campo",
+    "vars": []
+   },
+   "automod.mensagem": {
+    "modulo": "automod",
+    "padrao": "Mensagem",
+    "tipo": "campo",
+    "vars": []
+   },
+   "automod.sem_texto": {
+    "modulo": "automod",
+    "padrao": "(sem texto)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "automod.consegui_apagar_me_permissao": {
+    "modulo": "automod",
+    "padrao": "{motivo} (não consegui apagar: me dê a permissão Gerenciar mensagens)",
+    "tipo": "texto",
+    "vars": [
+     "motivo"
+    ]
+   },
+   "automod.sua_mensagem_foi_apagada": {
+    "modulo": "automod",
+    "padrao": "{autor}, sua mensagem foi apagada: **{motivo}**.",
+    "tipo": "texto",
+    "vars": [
+     "autor",
+     "motivo"
+    ]
+   },
+   "automod.castigo": {
+    "modulo": "automod",
+    "padrao": " Castigo de {duracao}.",
+    "tipo": "texto",
+    "vars": [
+     "duracao"
+    ]
+   },
+   "automod.automod_ligado_ajuste_filtros": {
+    "modulo": "automod",
+    "padrao": "AutoMod **ligado**. Ajuste os filtros com os outros /config automod.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "automod.automod_desligado": {
+    "modulo": "automod",
+    "padrao": "AutoMod **desligado**.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "automod.links_bloqueados_exceto_sites": {
+    "modulo": "automod",
+    "padrao": "Links bloqueados (exceto os sites liberados).",
+    "tipo": "texto",
+    "vars": []
+   },
+   "automod.links_liberados": {
+    "modulo": "automod",
+    "padrao": "Links liberados.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "automod.links_liberados_2": {
+    "modulo": "automod",
+    "padrao": "Links de **{site}** liberados.",
+    "tipo": "texto",
+    "vars": [
+     "site"
+    ]
+   },
+   "automod.links_bloqueados_novo": {
+    "modulo": "automod",
+    "padrao": "Links de **{site}** bloqueados de novo.",
+    "tipo": "texto",
+    "vars": [
+     "site"
+    ]
+   },
+   "automod.convites_outros_servidores_bloqueado": {
+    "modulo": "automod",
+    "padrao": "Convites de outros servidores bloqueados.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "automod.convites_liberados": {
+    "modulo": "automod",
+    "padrao": "Convites liberados.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "automod.palavra_adicionada_total": {
+    "modulo": "automod",
+    "padrao": "Palavra adicionada ({palavras_total} no total).",
+    "tipo": "texto",
+    "vars": [
+     "palavras_total"
+    ]
+   },
+   "automod.palavra_removida_total": {
+    "modulo": "automod",
+    "padrao": "Palavra removida ({palavras_total} no total).",
+    "tipo": "texto",
+    "vars": [
+     "palavras_total"
+    ]
+   },
+   "automod.flood_maximo_mensagens_cada": {
+    "modulo": "automod",
+    "padrao": "Flood: no máximo **{spam}** mensagens a cada 5 segundos.",
+    "tipo": "texto",
+    "vars": [
+     "spam"
+    ]
+   },
+   "automod.filtro_flood_desligado": {
+    "modulo": "automod",
+    "padrao": "Filtro de flood desligado.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "automod.mensagens_caps_serao_apagadas": {
+    "modulo": "automod",
+    "padrao": "Mensagens em CAPS serão apagadas.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "automod.filtro_caps_desligado": {
+    "modulo": "automod",
+    "padrao": "Filtro de CAPS desligado.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "automod.mensagens_ou_mais_mencoes": {
+    "modulo": "automod",
+    "padrao": "Mensagens com **{mencoes}** ou mais menções serão apagadas.",
+    "tipo": "texto",
+    "vars": [
+     "mencoes"
+    ]
+   },
+   "automod.filtro_mencoes_desligado": {
+    "modulo": "automod",
+    "padrao": "Filtro de menções desligado.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "automod.duracao_invalida_ex_5m": {
+    "modulo": "automod",
+    "padrao": "Duração inválida (ex.: 5m, 1h).",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "automod.alem_apagar_castigo": {
+    "modulo": "automod",
+    "padrao": "Além de apagar, castigo de **{duracao}**.",
+    "tipo": "texto",
+    "vars": [
+     "duracao"
+    ]
+   },
+   "automod.automod_so_vai_apagar": {
+    "modulo": "automod",
+    "padrao": "O AutoMod só vai apagar as mensagens.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "automod.agora_imune_automod": {
+    "modulo": "automod",
+    "padrao": "{cargo} agora é imune ao AutoMod.",
+    "tipo": "texto",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "automod.mais_imune": {
+    "modulo": "automod",
+    "padrao": "{cargo} não é mais imune.",
+    "tipo": "texto",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "automod.automod_vai_ignorar": {
+    "modulo": "automod",
+    "padrao": "O AutoMod vai ignorar {canal}.",
+    "tipo": "texto",
+    "vars": [
+     "canal"
+    ]
+   },
+   "automod.automod_volta_vigiar": {
+    "modulo": "automod",
+    "padrao": "O AutoMod volta a vigiar {canal}.",
+    "tipo": "texto",
+    "vars": [
+     "canal"
+    ]
+   },
+   "automod.automod_vai_registrar": {
+    "modulo": "automod",
+    "padrao": "O AutoMod vai registrar em {canal}.",
+    "tipo": "texto",
+    "vars": [
+     "canal"
+    ]
+   },
+   "automod.registro_automod_desligado": {
+    "modulo": "automod",
+    "padrao": "Registro do AutoMod desligado.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "automod.desligado_use_config_automod": {
+    "modulo": "automod",
+    "padrao": "Desligado (use /config automod ativar)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "automod.liberados": {
+    "modulo": "automod",
+    "padrao": " (liberados: {dominiosPermitidos})",
+    "tipo": "texto",
+    "vars": [
+     "dominiosPermitidos"
+    ]
+   },
+   "automod.links": {
+    "modulo": "automod",
+    "padrao": "links{dominiosPermitidos}",
+    "tipo": "texto",
+    "vars": [
+     "dominiosPermitidos"
+    ]
+   },
+   "automod.palavra": {
+    "modulo": "automod",
+    "padrao": "{palavras_total} palavra(s)",
+    "tipo": "texto",
+    "vars": [
+     "palavras_total"
+    ]
+   },
+   "automod.flood_5s": {
+    "modulo": "automod",
+    "padrao": "flood > {spam}/5s",
+    "tipo": "texto",
+    "vars": [
+     "spam"
+    ]
+   },
+   "automod.caps": {
+    "modulo": "automod",
+    "padrao": "CAPS",
+    "tipo": "texto",
+    "vars": []
+   },
+   "automod.mencoes": {
+    "modulo": "automod",
+    "padrao": "{mencoes}+ menções",
+    "tipo": "texto",
+    "vars": [
+     "mencoes"
+    ]
+   },
+   "automod.nenhum": {
+    "modulo": "automod",
+    "padrao": "nenhum",
+    "tipo": "texto",
+    "vars": []
+   },
+   "automod.filtros": {
+    "modulo": "automod",
+    "padrao": "Filtros: {filtros}",
+    "tipo": "texto",
+    "vars": [
+     "filtros"
+    ]
+   },
+   "automod.apagar_castigo": {
+    "modulo": "automod",
+    "padrao": "apagar + castigo de {duracao}",
+    "tipo": "texto",
+    "vars": [
+     "duracao"
+    ]
+   },
+   "automod.apagar": {
+    "modulo": "automod",
+    "padrao": "apagar",
+    "tipo": "texto",
+    "vars": []
+   },
+   "automod.punicao": {
+    "modulo": "automod",
+    "padrao": "Punição: {duracao}",
+    "tipo": "texto",
+    "vars": [
+     "duracao"
+    ]
+   },
+   "automod.desligado": {
+    "modulo": "automod",
+    "padrao": "desligado",
+    "tipo": "texto",
+    "vars": []
+   },
+   "automod.registro": {
+    "modulo": "automod",
+    "padrao": "Registro: {registro}",
+    "tipo": "texto",
+    "vars": [
+     "registro"
+    ]
+   },
+   "verificacao.verificacao": {
+    "modulo": "verificacao",
+    "padrao": "🔐 Verificação",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "verificacao.provar_voce_robo_clique": {
+    "modulo": "verificacao",
+    "padrao": "Para provar que você não é um robô, clique em **{resposta}**.\n\nVocê tem 2 minutos.",
+    "tipo": "descricao",
+    "vars": [
+     "resposta"
+    ]
+   },
+   "verificacao.verificacao_ainda_foi_configurada": {
+    "modulo": "verificacao",
+    "padrao": "A verificação ainda não foi configurada. Avise a equipe.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "verificacao.voce_ja_esta_verificado": {
+    "modulo": "verificacao",
+    "padrao": "Você já está verificado(a)!",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "verificacao.tentou_verificar_conta_dia": {
+    "modulo": "verificacao",
+    "padrao": "⛔ {usuario} ({tag}) tentou se verificar com uma conta de {dias} dia(s).",
+    "tipo": "texto",
+    "vars": [
+     "usuario",
+     "tag",
+     "dias"
+    ]
+   },
+   "verificacao.sua_conta_discord_precisa": {
+    "modulo": "verificacao",
+    "padrao": "Sua conta do Discord precisa ter pelo menos **{idadeMinima} dia(s)** para entrar aqui. Tente de novo mais tarde.",
+    "tipo": "resposta",
+    "vars": [
+     "idadeMinima"
+    ]
+   },
+   "verificacao.tempo_acabou_clique_verificar": {
+    "modulo": "verificacao",
+    "padrao": "⏱️ O tempo acabou. Clique em **Verificar** de novo.",
+    "tipo": "conteudo",
+    "vars": []
+   },
+   "verificacao.errou_verificacao_vezes": {
+    "modulo": "verificacao",
+    "padrao": "⚠️ {usuario} ({tag}) errou a verificação 3 vezes.",
+    "tipo": "texto",
+    "vars": [
+     "usuario",
+     "tag"
+    ]
+   },
+   "verificacao.voce_errou_vezes_espere": {
+    "modulo": "verificacao",
+    "padrao": "❌ Você errou 3 vezes. Espere um pouco e clique em **Verificar** de novo.",
+    "tipo": "conteudo",
+    "vars": []
+   },
+   "verificacao.foi_esse_tente_novo": {
+    "modulo": "verificacao",
+    "padrao": "❌ Não foi esse. Tente de novo:",
+    "tipo": "conteudo",
+    "vars": []
+   },
+   "verificacao.consigo_dar_cargo_meu": {
+    "modulo": "verificacao",
+    "padrao": "❌ Não consigo dar o cargo (o meu cargo está abaixo dele). Avise a equipe.",
+    "tipo": "conteudo",
+    "vars": []
+   },
+   "verificacao.consegui_te_dar_cargo": {
+    "modulo": "verificacao",
+    "padrao": "❌ Não consegui te dar o cargo. Avise a equipe.",
+    "tipo": "conteudo",
+    "vars": []
+   },
+   "verificacao.verificou": {
+    "modulo": "verificacao",
+    "padrao": "✅ {usuario} ({tag}) se verificou.",
+    "tipo": "texto",
+    "vars": [
+     "usuario",
+     "tag"
+    ]
+   },
+   "verificacao.verificado_voce_recebeu_bem": {
+    "modulo": "verificacao",
+    "padrao": "✅ Verificado(a)! Você recebeu {cargo}. Bem-vindo(a)!",
+    "tipo": "conteudo",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "verificacao.escolha_cargo_comum_pode": {
+    "modulo": "verificacao",
+    "padrao": "Escolha um cargo comum (não pode ser @everyone nem cargo de bot).",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "verificacao.seguranca_cargo_verificacao_pode": {
+    "modulo": "verificacao",
+    "padrao": "Por segurança, o cargo de verificação não pode ser de administrador.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "verificacao.meu_cargo_precisa_ficar": {
+    "modulo": "verificacao",
+    "padrao": "Meu cargo precisa ficar acima de {cargo} em Configurações do servidor → Cargos.",
+    "tipo": "resposta",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "verificacao.perde": {
+    "modulo": "verificacao",
+    "padrao": ", perde <@&{remover}>",
+    "tipo": "texto",
+    "vars": [
+     "remover"
+    ]
+   },
+   "verificacao.conta_pelo_menos_dia": {
+    "modulo": "verificacao",
+    "padrao": ", conta com pelo menos {idadeMinima} dia(s)",
+    "tipo": "texto",
+    "vars": [
+     "idadeMinima"
+    ]
+   },
+   "verificacao.verificacao_configurada_ganha_agora": {
+    "modulo": "verificacao",
+    "padrao": "Verificação configurada: ganha {cargo}{remover}{idadeMinima}.\nAgora use `/verificacao painel`.",
+    "tipo": "resposta",
+    "vars": [
+     "cargo",
+     "remover",
+     "idadeMinima"
+    ]
+   },
+   "verificacao.primeiro_use_verificacao_configurar": {
+    "modulo": "verificacao",
+    "padrao": "Primeiro use `/verificacao configurar` para escolher o cargo.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "verificacao.clique_botao_abaixo_verificar": {
+    "modulo": "verificacao",
+    "padrao": "Clique no botão abaixo para se verificar e liberar o servidor.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "verificacao.verificar": {
+    "modulo": "verificacao",
+    "padrao": "Verificar",
+    "tipo": "botao",
+    "vars": []
+   },
+   "verificacao.consegui_enviar_confira_minhas": {
+    "modulo": "verificacao",
+    "padrao": "Não consegui enviar em {canal}. Confira as minhas permissões.",
+    "tipo": "resposta",
+    "vars": [
+     "canal"
+    ]
+   },
+   "verificacao.painel_enviado": {
+    "modulo": "verificacao",
+    "padrao": "Painel enviado em {canal}.",
+    "tipo": "resposta",
+    "vars": [
+     "canal"
+    ]
+   },
+   "verificacao.verificacao_2": {
+    "modulo": "verificacao",
+    "padrao": "Verificação",
+    "tipo": "texto",
+    "vars": []
+   },
+   "verificacao.configurada_verificacao_configurar": {
+    "modulo": "verificacao",
+    "padrao": "Não configurada (`/verificacao configurar`)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "verificacao.remove": {
+    "modulo": "verificacao",
+    "padrao": " · remove <@&{remover}>",
+    "tipo": "texto",
+    "vars": [
+     "remover"
+    ]
+   },
+   "verificacao.cargo": {
+    "modulo": "verificacao",
+    "padrao": "Cargo: <@&{cargo}>{remover}",
+    "tipo": "texto",
+    "vars": [
+     "cargo",
+     "remover"
+    ]
+   },
+   "verificacao.dia": {
+    "modulo": "verificacao",
+    "padrao": "{idadeMinima} dia(s)",
+    "tipo": "texto",
+    "vars": [
+     "idadeMinima"
+    ]
+   },
+   "verificacao.sem_limite": {
+    "modulo": "verificacao",
+    "padrao": "sem limite",
+    "tipo": "texto",
+    "vars": []
+   },
+   "verificacao.idade_minima_conta": {
+    "modulo": "verificacao",
+    "padrao": "Idade mínima da conta: {idadeMinima}",
+    "tipo": "texto",
+    "vars": [
+     "idadeMinima"
+    ]
+   },
+   "verificacao.definido": {
+    "modulo": "verificacao",
+    "padrao": "não definido",
+    "tipo": "texto",
+    "vars": []
+   },
+   "verificacao.registro": {
+    "modulo": "verificacao",
+    "padrao": "Registro: {registro}",
+    "tipo": "texto",
+    "vars": [
+     "registro"
+    ]
+   },
+   "antiraid.encerrar_modo_raid": {
+    "modulo": "antiraid",
+    "padrao": "Encerrar modo raid",
+    "tipo": "botao",
+    "vars": []
+   },
+   "antiraid.anti_raid": {
+    "modulo": "antiraid",
+    "padrao": "Anti-raid",
+    "tipo": "texto",
+    "vars": []
+   },
+   "antiraid.nivel_verificacao_maximo_precisa": {
+    "modulo": "antiraid",
+    "padrao": "nível de verificação no **máximo** (precisa de telefone verificado)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "antiraid.convites_pausados": {
+    "modulo": "antiraid",
+    "padrao": "**convites pausados**",
+    "tipo": "texto",
+    "vars": []
+   },
+   "antiraid.fiz": {
+    "modulo": "antiraid",
+    "padrao": "Fiz: {feitos}.",
+    "tipo": "texto",
+    "vars": [
+     "feitos"
+    ]
+   },
+   "antiraid.consegui_mudar_servidor_preciso": {
+    "modulo": "antiraid",
+    "padrao": "Não consegui mudar o servidor (preciso de **Gerenciar servidor**).",
+    "tipo": "texto",
+    "vars": []
+   },
+   "antiraid.so_registro": {
+    "modulo": "antiraid",
+    "padrao": "só registro",
+    "tipo": "texto",
+    "vars": []
+   },
+   "antiraid.modo_raid_ativado_entraram": {
+    "modulo": "antiraid",
+    "padrao": "🚨 **Modo raid ativado!** Entraram **{quantos}** pessoas em {segundos}s.\n{feitos}\nQuem entrar agora: **{acao}**. Encerra sozinho em {duracao} ou pelo botão.",
+    "tipo": "texto",
+    "vars": [
+     "quantos",
+     "segundos",
+     "feitos",
+     "acao",
+     "duracao"
+    ]
+   },
+   "antiraid.fim_modo_raid": {
+    "modulo": "antiraid",
+    "padrao": "Fim do modo raid",
+    "tipo": "texto",
+    "vars": []
+   },
+   "antiraid.por": {
+    "modulo": "antiraid",
+    "padrao": " por <@{por}>",
+    "tipo": "texto",
+    "vars": [
+     "por"
+    ]
+   },
+   "antiraid.automaticamente": {
+    "modulo": "antiraid",
+    "padrao": " automaticamente",
+    "tipo": "texto",
+    "vars": []
+   },
+   "antiraid.modo_raid_encerrado_servidor": {
+    "modulo": "antiraid",
+    "padrao": "✅ Modo raid encerrado{por}. O servidor voltou ao normal.",
+    "tipo": "texto",
+    "vars": [
+     "por"
+    ]
+   },
+   "antiraid.voce_pode_entrar_agora": {
+    "modulo": "antiraid",
+    "padrao": "Você não pôde entrar em **{servidor}** agora ({motivo}). Tente de novo mais tarde.",
+    "tipo": "texto",
+    "vars": [
+     "servidor",
+     "motivo"
+    ]
+   },
+   "antiraid.sua_conta_nova_demais": {
+    "modulo": "antiraid",
+    "padrao": "Sua conta é nova demais para entrar em **{servidor}** (mínimo: {idadeMinima} dia(s)).",
+    "tipo": "texto",
+    "vars": [
+     "servidor",
+     "idadeMinima"
+    ]
+   },
+   "antiraid.expulsei_conta_dia": {
+    "modulo": "antiraid",
+    "padrao": "👶 Expulsei {tag} (`{id}`): conta com {dias} dia(s).",
+    "tipo": "texto",
+    "vars": [
+     "tag",
+     "id",
+     "dias"
+    ]
+   },
+   "antiraid.modo_raid": {
+    "modulo": "antiraid",
+    "padrao": "modo raid",
+    "tipo": "texto",
+    "vars": []
+   },
+   "antiraid.so_equipe_pode_encerrar": {
+    "modulo": "antiraid",
+    "padrao": "Só a equipe pode encerrar o modo raid.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "antiraid.modo_raid_encerrado": {
+    "modulo": "antiraid",
+    "padrao": "Modo raid encerrado.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "antiraid.modo_raid_ja_tinha": {
+    "modulo": "antiraid",
+    "padrao": "O modo raid já tinha acabado.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "antiraid.anti_raid_desligado": {
+    "modulo": "antiraid",
+    "padrao": "Anti-raid desligado.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "antiraid.servidor_esta_modo_raid": {
+    "modulo": "antiraid",
+    "padrao": "O servidor não está em modo raid.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "antiraid.configure_primeiro_antiraid_configur": {
+    "modulo": "antiraid",
+    "padrao": "Configure primeiro com `/antiraid configurar`.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "antiraid.modo_raid_ja_esta": {
+    "modulo": "antiraid",
+    "padrao": "O modo raid já está ligado.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "antiraid.modo_raid_ligado_encerre": {
+    "modulo": "antiraid",
+    "padrao": "🚨 Modo raid ligado. Encerre com `/antiraid encerrar` ou pelo botão no canal de alerta.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "antiraid.gerenciar_servidor": {
+    "modulo": "antiraid",
+    "padrao": "Gerenciar servidor",
+    "tipo": "texto",
+    "vars": []
+   },
+   "antiraid.expulsar_membros": {
+    "modulo": "antiraid",
+    "padrao": "Expulsar membros",
+    "tipo": "texto",
+    "vars": []
+   },
+   "antiraid.castigar_membros": {
+    "modulo": "antiraid",
+    "padrao": "Castigar membros",
+    "tipo": "texto",
+    "vars": []
+   },
+   "antiraid.contas_menos_dia_sao": {
+    "modulo": "antiraid",
+    "padrao": " Contas com menos de {idadeMinima} dia(s) são expulsas.",
+    "tipo": "texto",
+    "vars": [
+     "idadeMinima"
+    ]
+   },
+   "antiraid.me_falta": {
+    "modulo": "antiraid",
+    "padrao": "\n⚠️ Me falta: {faltam}.",
+    "tipo": "texto",
+    "vars": [
+     "faltam"
+    ]
+   },
+   "antiraid.anti_raid_ligado_entradas": {
+    "modulo": "antiraid",
+    "padrao": "Anti-raid ligado: **{limite}** entradas em **{segundos}s** ativam o modo raid (ação: {acao}). Avisos em <#{alerta}>.{idadeMinima}{faltam}",
+    "tipo": "resposta",
+    "vars": [
+     "limite",
+     "segundos",
+     "acao",
+     "alerta",
+     "idadeMinima",
+     "faltam"
+    ]
+   },
+   "antiraid.desligado_antiraid_configurar": {
+    "modulo": "antiraid",
+    "padrao": "Desligado (`/antiraid configurar`)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "antiraid.modo_raid_2": {
+    "modulo": "antiraid",
+    "padrao": " · 🚨 **EM MODO RAID**",
+    "tipo": "texto",
+    "vars": []
+   },
+   "antiraid.entradas_acao_alerta": {
+    "modulo": "antiraid",
+    "padrao": "{limite} entradas em {segundos}s · ação: {acao} · alerta em <#{alerta}>{modo_raid}",
+    "tipo": "texto",
+    "vars": [
+     "limite",
+     "segundos",
+     "acao",
+     "alerta",
+     "modo_raid"
+    ]
+   },
+   "boasvindas.msg_entrada_padrao": {
+    "modulo": "boasvindas",
+    "padrao": "Seja bem-vindo(a) ao **{servidor}**, {usuario}! Agora somos **{membros}** membros. 🎉",
+    "tipo": "texto",
+    "vars": [
+     "servidor",
+     "usuario",
+     "membros"
+    ]
+   },
+   "boasvindas.msg_saida_padrao": {
+    "modulo": "boasvindas",
+    "padrao": "**{tag}** saiu do servidor. Agora somos **{membros}** membros.",
+    "tipo": "texto",
+    "vars": [
+     "tag",
+     "membros"
+    ]
+   },
+   "boasvindas.alguem": {
+    "modulo": "boasvindas",
+    "padrao": "alguém",
+    "tipo": "texto",
+    "vars": []
+   },
+   "boasvindas.mensagem": {
+    "modulo": "boasvindas",
+    "padrao": "Mensagem de {nome} em {canal}.",
+    "tipo": "texto",
+    "vars": [
+     "nome",
+     "canal"
+    ]
+   },
+   "boasvindas.mensagem_desligada": {
+    "modulo": "boasvindas",
+    "padrao": "Mensagem de {nome} desligada.",
+    "tipo": "texto",
+    "vars": [
+     "nome"
+    ]
+   },
+   "boasvindas.mensagem_dm_definida": {
+    "modulo": "boasvindas",
+    "padrao": "Mensagem na DM definida.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "boasvindas.mensagem_dm_desligada": {
+    "modulo": "boasvindas",
+    "padrao": "Mensagem na DM desligada.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "boasvindas.esse_cargo_pode_ser": {
+    "modulo": "boasvindas",
+    "padrao": "Esse cargo não pode ser dado manualmente.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "boasvindas.sera_mais_dado_automaticamente": {
+    "modulo": "boasvindas",
+    "padrao": "{cargo} não será mais dado automaticamente.",
+    "tipo": "resposta",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "boasvindas.maximo_cargos_automaticos": {
+    "modulo": "boasvindas",
+    "padrao": "No máximo 5 cargos automáticos.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "boasvindas.meu_cargo_esta_abaixo": {
+    "modulo": "boasvindas",
+    "padrao": " ⚠️ O meu cargo está abaixo dele: suba o meu cargo na lista para funcionar.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "boasvindas.sera_dado_quem_entrar": {
+    "modulo": "boasvindas",
+    "padrao": "{cargo} será dado a quem entrar.{aviso}",
+    "tipo": "resposta",
+    "vars": [
+     "cargo",
+     "aviso"
+    ]
+   },
+   "boasvindas.defina_antes_canal_config": {
+    "modulo": "boasvindas",
+    "padrao": "Defina antes o canal com /config boasvindas entrada.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "boasvindas.mensagem_teste_enviada": {
+    "modulo": "boasvindas",
+    "padrao": "Mensagem de teste enviada em <#{canal}>.",
+    "tipo": "texto",
+    "vars": [
+     "canal"
+    ]
+   },
+   "boasvindas.consegui_enviar_canal_configurado": {
+    "modulo": "boasvindas",
+    "padrao": "Não consegui enviar no canal configurado: confira as minhas permissões.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "boasvindas.desligada": {
+    "modulo": "boasvindas",
+    "padrao": "desligada",
+    "tipo": "texto",
+    "vars": []
+   },
+   "boasvindas.entrada": {
+    "modulo": "boasvindas",
+    "padrao": "Entrada: {entrada}",
+    "tipo": "texto",
+    "vars": [
+     "entrada"
+    ]
+   },
+   "boasvindas.saida": {
+    "modulo": "boasvindas",
+    "padrao": "Saída: {saida}",
+    "tipo": "texto",
+    "vars": [
+     "saida"
+    ]
+   },
+   "boasvindas.ligada": {
+    "modulo": "boasvindas",
+    "padrao": "ligada",
+    "tipo": "texto",
+    "vars": []
+   },
+   "boasvindas.dm": {
+    "modulo": "boasvindas",
+    "padrao": "DM: {dm}",
+    "tipo": "texto",
+    "vars": [
+     "dm"
+    ]
+   },
+   "boasvindas.nenhum": {
+    "modulo": "boasvindas",
+    "padrao": "nenhum",
+    "tipo": "texto",
+    "vars": []
+   },
+   "boasvindas.cargos_automaticos": {
+    "modulo": "boasvindas",
+    "padrao": "Cargos automáticos: {cargos}",
+    "tipo": "texto",
+    "vars": [
+     "cargos"
+    ]
+   },
+   "boasvindas.boas_vindas": {
+    "modulo": "boasvindas",
+    "padrao": "Boas-vindas",
+    "tipo": "texto",
+    "vars": []
+   },
+   "logs.mensagens_apagadas_editadas": {
+    "modulo": "logs",
+    "padrao": "Mensagens apagadas e editadas",
+    "tipo": "texto",
+    "vars": []
+   },
+   "logs.entradas_saidas_apelidos_cargos": {
+    "modulo": "logs",
+    "padrao": "Entradas, saídas, apelidos e cargos",
+    "tipo": "texto",
+    "vars": []
+   },
+   "logs.banimentos": {
+    "modulo": "logs",
+    "padrao": "Banimentos",
+    "tipo": "texto",
+    "vars": []
+   },
+   "logs.canais_criados_apagados": {
+    "modulo": "logs",
+    "padrao": "Canais criados e apagados",
+    "tipo": "texto",
+    "vars": []
+   },
+   "logs.entradas_saidas_canais_voz": {
+    "modulo": "logs",
+    "padrao": "Entradas e saídas de canais de voz",
+    "tipo": "texto",
+    "vars": []
+   },
+   "logs.mensagem_apagada": {
+    "modulo": "logs",
+    "padrao": "🗑️ Mensagem apagada",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "logs.autor": {
+    "modulo": "logs",
+    "padrao": "Autor",
+    "tipo": "campo",
+    "vars": []
+   },
+   "logs.canal": {
+    "modulo": "logs",
+    "padrao": "Canal",
+    "tipo": "campo",
+    "vars": []
+   },
+   "logs.conteudo": {
+    "modulo": "logs",
+    "padrao": "Conteúdo",
+    "tipo": "campo",
+    "vars": []
+   },
+   "logs.mensagem_antiga_fora_memoria": {
+    "modulo": "logs",
+    "padrao": "(mensagem antiga, fora da memória do bot)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "logs.sem_texto": {
+    "modulo": "logs",
+    "padrao": "(sem texto)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "logs.anexos": {
+    "modulo": "logs",
+    "padrao": "Anexos",
+    "tipo": "campo",
+    "vars": []
+   },
+   "logs.mensagens_apagadas_massa": {
+    "modulo": "logs",
+    "padrao": "🧹 Mensagens apagadas em massa",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "logs.quantidade": {
+    "modulo": "logs",
+    "padrao": "Quantidade",
+    "tipo": "campo",
+    "vars": []
+   },
+   "logs.algumas_delas": {
+    "modulo": "logs",
+    "padrao": "Algumas delas",
+    "tipo": "campo",
+    "vars": []
+   },
+   "logs.mensagem_editada": {
+    "modulo": "logs",
+    "padrao": "✏️ Mensagem editada",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "logs.antes": {
+    "modulo": "logs",
+    "padrao": "Antes",
+    "tipo": "campo",
+    "vars": []
+   },
+   "logs.vazio": {
+    "modulo": "logs",
+    "padrao": "(vazio)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "logs.depois": {
+    "modulo": "logs",
+    "padrao": "Depois",
+    "tipo": "campo",
+    "vars": []
+   },
+   "logs.membro_entrou": {
+    "modulo": "logs",
+    "padrao": "📥 Membro entrou",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "logs.membro": {
+    "modulo": "logs",
+    "padrao": "Membro",
+    "tipo": "campo",
+    "vars": []
+   },
+   "logs.conta_criada": {
+    "modulo": "logs",
+    "padrao": "Conta criada",
+    "tipo": "campo",
+    "vars": []
+   },
+   "logs.conta_nova": {
+    "modulo": "logs",
+    "padrao": " ⚠️ conta nova",
+    "tipo": "texto",
+    "vars": []
+   },
+   "logs.membros_agora": {
+    "modulo": "logs",
+    "padrao": "Membros agora",
+    "tipo": "campo",
+    "vars": []
+   },
+   "logs.membro_saiu": {
+    "modulo": "logs",
+    "padrao": "📤 Membro saiu",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "logs.cargos": {
+    "modulo": "logs",
+    "padrao": "Cargos",
+    "tipo": "campo",
+    "vars": []
+   },
+   "logs.apelido_alterado": {
+    "modulo": "logs",
+    "padrao": "🏷️ Apelido alterado",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "logs.nenhum": {
+    "modulo": "logs",
+    "padrao": "(nenhum)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "logs.cargos_alterados": {
+    "modulo": "logs",
+    "padrao": "🎭 Cargos alterados",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "logs.recebeu": {
+    "modulo": "logs",
+    "padrao": "➕ Recebeu",
+    "tipo": "campo",
+    "vars": []
+   },
+   "logs.perdeu": {
+    "modulo": "logs",
+    "padrao": "➖ Perdeu",
+    "tipo": "campo",
+    "vars": []
+   },
+   "logs.membro_banido": {
+    "modulo": "logs",
+    "padrao": "🔨 Membro banido",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "logs.por": {
+    "modulo": "logs",
+    "padrao": "Por",
+    "tipo": "campo",
+    "vars": []
+   },
+   "logs.desconhecido": {
+    "modulo": "logs",
+    "padrao": "desconhecido",
+    "tipo": "texto",
+    "vars": []
+   },
+   "logs.motivo": {
+    "modulo": "logs",
+    "padrao": "Motivo",
+    "tipo": "campo",
+    "vars": []
+   },
+   "logs.sem_motivo": {
+    "modulo": "logs",
+    "padrao": "Sem motivo",
+    "tipo": "texto",
+    "vars": []
+   },
+   "logs.banimento_removido": {
+    "modulo": "logs",
+    "padrao": "🔓 Banimento removido",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "logs.canal_criado": {
+    "modulo": "logs",
+    "padrao": "📁 Canal criado",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "logs.canal_apagado": {
+    "modulo": "logs",
+    "padrao": "📁 Canal apagado",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "logs.entrou_call": {
+    "modulo": "logs",
+    "padrao": "🎤 Entrou na call",
+    "tipo": "texto",
+    "vars": []
+   },
+   "logs.saiu_call": {
+    "modulo": "logs",
+    "padrao": "🔇 Saiu da call",
+    "tipo": "texto",
+    "vars": []
+   },
+   "logs.trocou_call": {
+    "modulo": "logs",
+    "padrao": "🔄 Trocou de call",
+    "tipo": "texto",
+    "vars": []
+   },
+   "logs.registros_vao": {
+    "modulo": "logs",
+    "padrao": "Os registros vão para {canal}.",
+    "tipo": "texto",
+    "vars": [
+     "canal"
+    ]
+   },
+   "logs.registros_desligados": {
+    "modulo": "logs",
+    "padrao": "Registros desligados.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "logs.registrando": {
+    "modulo": "logs",
+    "padrao": "registrando",
+    "tipo": "texto",
+    "vars": []
+   },
+   "logs.registrando_2": {
+    "modulo": "logs",
+    "padrao": "não registrando",
+    "tipo": "texto",
+    "vars": []
+   },
+   "logs.desligado_use_config_logs": {
+    "modulo": "logs",
+    "padrao": "Desligado (use /config logs canal)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "logs.canal_2": {
+    "modulo": "logs",
+    "padrao": "Canal: <#{canal}>",
+    "tipo": "texto",
+    "vars": [
+     "canal"
+    ]
+   },
+   "logs.nada": {
+    "modulo": "logs",
+    "padrao": "nada",
+    "tipo": "texto",
+    "vars": []
+   },
+   "logs.registrando_3": {
+    "modulo": "logs",
+    "padrao": "Registrando: {tipos}",
+    "tipo": "texto",
+    "vars": [
+     "tipos"
+    ]
+   },
+   "logs.logs": {
+    "modulo": "logs",
+    "padrao": "Logs",
+    "tipo": "texto",
+    "vars": []
+   },
+   "convites.msg_entrada_padrao": {
+    "modulo": "convites",
+    "padrao": "📥 {usuario} entrou · convidado(a) por {convidou} ({convites} convite(s))",
+    "tipo": "texto",
+    "vars": [
+     "usuario",
+     "convidou",
+     "convites"
+    ]
+   },
+   "convites.link_personalizado_servidor": {
+    "modulo": "convites",
+    "padrao": "link personalizado do servidor",
+    "tipo": "texto",
+    "vars": []
+   },
+   "convites.convite_desconhecido": {
+    "modulo": "convites",
+    "padrao": "convite desconhecido",
+    "tipo": "texto",
+    "vars": []
+   },
+   "convites.conta_nova": {
+    "modulo": "convites",
+    "padrao": " ⚠️ conta nova",
+    "tipo": "texto",
+    "vars": []
+   },
+   "convites.so_quem_tem_gerenciar": {
+    "modulo": "convites",
+    "padrao": "Só quem tem **Gerenciar servidor** pode configurar.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "convites.avisos": {
+    "modulo": "convites",
+    "padrao": ": avisos em <#{canal}>",
+    "tipo": "texto",
+    "vars": [
+     "canal"
+    ]
+   },
+   "convites.consigo_ler_convites_me": {
+    "modulo": "convites",
+    "padrao": "\n⚠️ Não consigo ler os convites: me dê a permissão **Gerenciar servidor**.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "convites.rastreio_convites_configurado": {
+    "modulo": "convites",
+    "padrao": "Rastreio de convites configurado{canal}.{aviso}",
+    "tipo": "resposta",
+    "vars": [
+     "canal",
+     "aviso"
+    ]
+   },
+   "convites.ninguem_convidou_ninguem_ainda": {
+    "modulo": "convites",
+    "padrao": "Ninguém convidou ninguém ainda (desde que o bot entrou).",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "convites.entraram_sairam_falsos": {
+    "modulo": "convites",
+    "padrao": "**{posicao}.** <@{usuario}> · **{validos}** ({total} entraram, {saiu} saíram, {falsos} falsos)",
+    "tipo": "texto",
+    "vars": [
+     "posicao",
+     "usuario",
+     "validos",
+     "total",
+     "saiu",
+     "falsos"
+    ]
+   },
+   "convites.ranking_convites": {
+    "modulo": "convites",
+    "padrao": "📨 Ranking de convites",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "convites.sei_como_entrou_foi": {
+    "modulo": "convites",
+    "padrao": "Não sei como {usuario} entrou (foi antes do bot começar a rastrear).",
+    "tipo": "resposta",
+    "vars": [
+     "usuario"
+    ]
+   },
+   "convites.link_personalizado_servidor_2": {
+    "modulo": "convites",
+    "padrao": "o link personalizado do servidor",
+    "tipo": "texto",
+    "vars": []
+   },
+   "convites.convite_consegui_identificar": {
+    "modulo": "convites",
+    "padrao": "um convite que não consegui identificar",
+    "tipo": "texto",
+    "vars": []
+   },
+   "convites.convite": {
+    "modulo": "convites",
+    "padrao": " (convite `{codigo}`)",
+    "tipo": "texto",
+    "vars": [
+     "codigo"
+    ]
+   },
+   "convites.ja_saiu": {
+    "modulo": "convites",
+    "padrao": " · já saiu",
+    "tipo": "texto",
+    "vars": []
+   },
+   "convites.entrou": {
+    "modulo": "convites",
+    "padrao": "{usuario} entrou por {por}{codigo} · <t:{em}:R>{saiu}.",
+    "tipo": "resposta",
+    "vars": [
+     "usuario",
+     "por",
+     "codigo",
+     "em",
+     "saiu"
+    ]
+   },
+   "convites.convite_valido": {
+    "modulo": "convites",
+    "padrao": "**{validos}** convite(s) válido(s)",
+    "tipo": "descricao",
+    "vars": [
+     "validos"
+    ]
+   },
+   "convites.entraram": {
+    "modulo": "convites",
+    "padrao": "Entraram",
+    "tipo": "campo",
+    "vars": []
+   },
+   "convites.sairam": {
+    "modulo": "convites",
+    "padrao": "Saíram",
+    "tipo": "campo",
+    "vars": []
+   },
+   "convites.contas_falsas": {
+    "modulo": "convites",
+    "padrao": "Contas falsas",
+    "tipo": "campo",
+    "vars": []
+   },
+   "convites.rastreio_convites": {
+    "modulo": "convites",
+    "padrao": "Rastreio de convites",
+    "tipo": "texto",
+    "vars": []
+   },
+   "convites.nenhum_canal": {
+    "modulo": "convites",
+    "padrao": "nenhum canal",
+    "tipo": "texto",
+    "vars": []
+   },
+   "convites.avisos_entrada_rastreada": {
+    "modulo": "convites",
+    "padrao": "Avisos: {canal} · {total} entrada(s) rastreada(s)",
+    "tipo": "texto",
+    "vars": [
+     "canal",
+     "total"
+    ]
+   },
+   "niveis.msg_nivel_padrao": {
+    "modulo": "niveis",
+    "padrao": "🎉 {usuario} subiu para o **nível {nivel}**!",
+    "tipo": "texto",
+    "vars": [
+     "usuario",
+     "nivel"
+    ]
+   },
+   "niveis.nivel": {
+    "modulo": "niveis",
+    "padrao": "Nível",
+    "tipo": "campo",
+    "vars": []
+   },
+   "niveis.posicao": {
+    "modulo": "niveis",
+    "padrao": "Posição",
+    "tipo": "campo",
+    "vars": []
+   },
+   "niveis.xp_total": {
+    "modulo": "niveis",
+    "padrao": "XP total",
+    "tipo": "campo",
+    "vars": []
+   },
+   "niveis.progresso_nivel": {
+    "modulo": "niveis",
+    "padrao": "Progresso para o nível {nivel}",
+    "tipo": "campo",
+    "vars": [
+     "nivel"
+    ]
+   },
+   "niveis.xp": {
+    "modulo": "niveis",
+    "padrao": "{barra}  {atual}/{precisa} XP",
+    "tipo": "texto",
+    "vars": [
+     "barra",
+     "atual",
+     "precisa"
+    ]
+   },
+   "niveis.ninguem_ganhou_xp_ainda": {
+    "modulo": "niveis",
+    "padrao": "Ninguém ganhou XP ainda. Converse no chat!",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "niveis.nivel_xp": {
+    "modulo": "niveis",
+    "padrao": "{medalhas} <@{usuario}> · nível **{nivel}** · {xp} XP",
+    "tipo": "texto",
+    "vars": [
+     "medalhas",
+     "usuario",
+     "nivel",
+     "xp"
+    ]
+   },
+   "niveis.ranking": {
+    "modulo": "niveis",
+    "padrao": "🏆 Ranking de {servidor}",
+    "tipo": "titulo",
+    "vars": [
+     "servidor"
+    ]
+   },
+   "niveis.sua_posicao": {
+    "modulo": "niveis",
+    "padrao": "Sua posição: #{posicao}",
+    "tipo": "texto",
+    "vars": [
+     "posicao"
+    ]
+   },
+   "niveis.voce_ainda_tem_xp": {
+    "modulo": "niveis",
+    "padrao": "Você ainda não tem XP",
+    "tipo": "texto",
+    "vars": []
+   },
+   "niveis.bots_tem_xp": {
+    "modulo": "niveis",
+    "padrao": "Bots não têm XP.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "niveis.agora_tem_xp_nivel": {
+    "modulo": "niveis",
+    "padrao": "**{tag}** agora tem **{xp} XP** (nível {nivel}).",
+    "tipo": "resposta",
+    "vars": [
+     "tag",
+     "xp",
+     "nivel"
+    ]
+   },
+   "niveis.ganho_xp_ligado": {
+    "modulo": "niveis",
+    "padrao": "Ganho de XP ligado.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "niveis.ganho_xp_desligado": {
+    "modulo": "niveis",
+    "padrao": "Ganho de XP desligado.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "niveis.em": {
+    "modulo": "niveis",
+    "padrao": "em {canal}",
+    "tipo": "texto",
+    "vars": [
+     "canal"
+    ]
+   },
+   "niveis.mesmo_canal_mensagem": {
+    "modulo": "niveis",
+    "padrao": "no mesmo canal da mensagem",
+    "tipo": "texto",
+    "vars": []
+   },
+   "niveis.aviso_nivel": {
+    "modulo": "niveis",
+    "padrao": "Aviso de nível {canal}.",
+    "tipo": "texto",
+    "vars": [
+     "canal"
+    ]
+   },
+   "niveis.esse_cargo_pode_ser": {
+    "modulo": "niveis",
+    "padrao": "Esse cargo não pode ser dado.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "niveis.suba_meu_cargo_acima": {
+    "modulo": "niveis",
+    "padrao": " ⚠️ Suba o meu cargo acima dele para funcionar.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "niveis.chegar_nivel_membro_ganha": {
+    "modulo": "niveis",
+    "padrao": "Ao chegar no nível **{nivel}**, o membro ganha {cargo}.{aviso}",
+    "tipo": "texto",
+    "vars": [
+     "nivel",
+     "cargo",
+     "aviso"
+    ]
+   },
+   "niveis.recompensa_nivel_removida": {
+    "modulo": "niveis",
+    "padrao": "Recompensa do nível {nivel} removida.",
+    "tipo": "texto",
+    "vars": [
+     "nivel"
+    ]
+   },
+   "niveis.minimo_pode_ser_maior": {
+    "modulo": "niveis",
+    "padrao": "O mínimo não pode ser maior que o máximo.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "niveis.cada_mensagem_vale_xp": {
+    "modulo": "niveis",
+    "padrao": "Cada mensagem vale de **{min} a {max} XP**, uma vez a cada **{intervalo}s**.",
+    "tipo": "texto",
+    "vars": [
+     "min",
+     "max",
+     "intervalo"
+    ]
+   },
+   "niveis.volta_dar_xp": {
+    "modulo": "niveis",
+    "padrao": "{canal} volta a dar XP.",
+    "tipo": "texto",
+    "vars": [
+     "canal"
+    ]
+   },
+   "niveis.mais_xp": {
+    "modulo": "niveis",
+    "padrao": "{canal} não dá mais XP.",
+    "tipo": "texto",
+    "vars": [
+     "canal"
+    ]
+   },
+   "niveis.ligado_xp_cada": {
+    "modulo": "niveis",
+    "padrao": "ligado ({xpMin}–{xpMax} XP a cada {intervalo}s)",
+    "tipo": "texto",
+    "vars": [
+     "xpMin",
+     "xpMax",
+     "intervalo"
+    ]
+   },
+   "niveis.desligado": {
+    "modulo": "niveis",
+    "padrao": "desligado",
+    "tipo": "texto",
+    "vars": []
+   },
+   "niveis.ganho_xp": {
+    "modulo": "niveis",
+    "padrao": "Ganho de XP: {xpMin}",
+    "tipo": "texto",
+    "vars": [
+     "xpMin"
+    ]
+   },
+   "niveis.mesmo_canal": {
+    "modulo": "niveis",
+    "padrao": "no mesmo canal",
+    "tipo": "texto",
+    "vars": []
+   },
+   "niveis.aviso": {
+    "modulo": "niveis",
+    "padrao": "Aviso: {canal}",
+    "tipo": "texto",
+    "vars": [
+     "canal"
+    ]
+   },
+   "niveis.nenhuma": {
+    "modulo": "niveis",
+    "padrao": "nenhuma",
+    "tipo": "texto",
+    "vars": []
+   },
+   "niveis.recompensas": {
+    "modulo": "niveis",
+    "padrao": "Recompensas: {recompensas}",
+    "tipo": "texto",
+    "vars": [
+     "recompensas"
+    ]
+   },
+   "niveis.niveis": {
+    "modulo": "niveis",
+    "padrao": "Níveis",
+    "tipo": "texto",
+    "vars": []
+   },
+   "economia.ajudou_organizar_evento_servidor": {
+    "modulo": "economia",
+    "padrao": "ajudou a organizar um evento do servidor",
+    "tipo": "texto",
+    "vars": []
+   },
+   "economia.consertou_computador_vizinho": {
+    "modulo": "economia",
+    "padrao": "consertou o computador de um vizinho",
+    "tipo": "texto",
+    "vars": []
+   },
+   "economia.entregou_pizzas_noite_toda": {
+    "modulo": "economia",
+    "padrao": "entregou pizzas a noite toda",
+    "tipo": "texto",
+    "vars": []
+   },
+   "economia.programou_site_loja": {
+    "modulo": "economia",
+    "padrao": "programou um site para uma loja",
+    "tipo": "texto",
+    "vars": []
+   },
+   "economia.deu_aulas_particulares": {
+    "modulo": "economia",
+    "padrao": "deu aulas particulares",
+    "tipo": "texto",
+    "vars": []
+   },
+   "economia.editou_videos_criador_conteudo": {
+    "modulo": "economia",
+    "padrao": "editou vídeos para um criador de conteúdo",
+    "tipo": "texto",
+    "vars": []
+   },
+   "economia.cuidou_jardim": {
+    "modulo": "economia",
+    "padrao": "cuidou de um jardim",
+    "tipo": "texto",
+    "vars": []
+   },
+   "economia.trabalhou_garcom_num_casamento": {
+    "modulo": "economia",
+    "padrao": "trabalhou de garçom num casamento",
+    "tipo": "texto",
+    "vars": []
+   },
+   "economia.vendeu_artesanato_feira": {
+    "modulo": "economia",
+    "padrao": "vendeu artesanato na feira",
+    "tipo": "texto",
+    "vars": []
+   },
+   "economia.fez_faxina_caprichada": {
+    "modulo": "economia",
+    "padrao": "fez uma faxina caprichada",
+    "tipo": "texto",
+    "vars": []
+   },
+   "economia.valor_ou_tudo": {
+    "modulo": "economia",
+    "padrao": "Valor (ou \"tudo\")",
+    "tipo": "texto",
+    "vars": []
+   },
+   "economia.carteira": {
+    "modulo": "economia",
+    "padrao": "Carteira",
+    "tipo": "campo",
+    "vars": []
+   },
+   "economia.banco": {
+    "modulo": "economia",
+    "padrao": "Banco",
+    "tipo": "campo",
+    "vars": []
+   },
+   "economia.total": {
+    "modulo": "economia",
+    "padrao": "Total",
+    "tipo": "campo",
+    "vars": []
+   },
+   "economia.voce_ja_pegou_hoje": {
+    "modulo": "economia",
+    "padrao": "Você já pegou hoje. Volte {quando}.",
+    "tipo": "resposta",
+    "vars": [
+     "quando"
+    ]
+   },
+   "economia.voce_recebeu_volte_pegar": {
+    "modulo": "economia",
+    "padrao": "🎁 Você recebeu {dinheiro}!\nVolte {quando} para pegar de novo.",
+    "tipo": "descricao",
+    "vars": [
+     "dinheiro",
+     "quando"
+    ]
+   },
+   "economia.voce_esta_cansado_pode": {
+    "modulo": "economia",
+    "padrao": "Você está cansado(a). Pode trabalhar de novo {quando}.",
+    "tipo": "resposta",
+    "vars": [
+     "quando"
+    ]
+   },
+   "economia.voce_ganhou": {
+    "modulo": "economia",
+    "padrao": "💼 Você {oque} e ganhou {dinheiro}.",
+    "tipo": "descricao",
+    "vars": [
+     "oque",
+     "dinheiro"
+    ]
+   },
+   "economia.escolha_outra_pessoa_seja": {
+    "modulo": "economia",
+    "padrao": "Escolha outra pessoa (que não seja bot).",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "economia.valor_invalido": {
+    "modulo": "economia",
+    "padrao": "Valor inválido.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "economia.voce_so_tem_carteira": {
+    "modulo": "economia",
+    "padrao": "Você só tem {dinheiro} na carteira.",
+    "tipo": "resposta",
+    "vars": [
+     "dinheiro"
+    ]
+   },
+   "economia.enviou": {
+    "modulo": "economia",
+    "padrao": "💸 {usuario} enviou {dinheiro} para {alvo}.",
+    "tipo": "descricao",
+    "vars": [
+     "usuario",
+     "dinheiro",
+     "alvo"
+    ]
+   },
+   "economia.carteira_2": {
+    "modulo": "economia",
+    "padrao": "na carteira",
+    "tipo": "texto",
+    "vars": []
+   },
+   "economia.banco_2": {
+    "modulo": "economia",
+    "padrao": "no banco",
+    "tipo": "texto",
+    "vars": []
+   },
+   "economia.voce_so_tem": {
+    "modulo": "economia",
+    "padrao": "Você só tem {dinheiro} {onde}.",
+    "tipo": "resposta",
+    "vars": [
+     "dinheiro",
+     "onde"
+    ]
+   },
+   "economia.depositou": {
+    "modulo": "economia",
+    "padrao": "🏦 Depositou",
+    "tipo": "texto",
+    "vars": []
+   },
+   "economia.sacou": {
+    "modulo": "economia",
+    "padrao": "👛 Sacou",
+    "tipo": "texto",
+    "vars": []
+   },
+   "economia.aposta_maxima": {
+    "modulo": "economia",
+    "padrao": "A aposta máxima é {dinheiro}.",
+    "tipo": "resposta",
+    "vars": [
+     "dinheiro"
+    ]
+   },
+   "economia.deu": {
+    "modulo": "economia",
+    "padrao": "🪙 Deu {caiu}!",
+    "tipo": "titulo",
+    "vars": [
+     "caiu"
+    ]
+   },
+   "economia.voce_ganhou_2": {
+    "modulo": "economia",
+    "padrao": "Você ganhou {dinheiro}!",
+    "tipo": "texto",
+    "vars": [
+     "dinheiro"
+    ]
+   },
+   "economia.voce_perdeu": {
+    "modulo": "economia",
+    "padrao": "Você perdeu {dinheiro}.",
+    "tipo": "texto",
+    "vars": [
+     "dinheiro"
+    ]
+   },
+   "economia.carteira_3": {
+    "modulo": "economia",
+    "padrao": "Carteira: {carteira} {moeda}",
+    "tipo": "rodape",
+    "vars": [
+     "carteira",
+     "moeda"
+    ]
+   },
+   "economia.ninguem_tem_dinheiro_ainda": {
+    "modulo": "economia",
+    "padrao": "Ninguém tem dinheiro ainda. Use /diario!",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "economia.mais_ricos": {
+    "modulo": "economia",
+    "padrao": "💰 Mais ricos de {servidor}",
+    "tipo": "titulo",
+    "vars": [
+     "servidor"
+    ]
+   },
+   "economia.loja_esta_vazia_equipe": {
+    "modulo": "economia",
+    "padrao": "A loja está vazia. A equipe pode adicionar itens com /config economia loja-adicionar.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "economia.loja": {
+    "modulo": "economia",
+    "padrao": "🛒 Loja de {servidor}",
+    "tipo": "titulo",
+    "vars": [
+     "servidor"
+    ]
+   },
+   "economia.comprar_comprar": {
+    "modulo": "economia",
+    "padrao": "Para comprar: /comprar",
+    "tipo": "rodape",
+    "vars": []
+   },
+   "economia.cargo": {
+    "modulo": "economia",
+    "padrao": "{descricao}Cargo: <@&{cargo}>",
+    "tipo": "texto",
+    "vars": [
+     "descricao",
+     "cargo"
+    ]
+   },
+   "economia.item_encontrado_veja_loja": {
+    "modulo": "economia",
+    "padrao": "Item não encontrado. Veja a /loja.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "economia.cargo_deste_item_existe": {
+    "modulo": "economia",
+    "padrao": "O cargo deste item não existe mais. Avise a equipe.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "economia.voce_ja_tem_esse": {
+    "modulo": "economia",
+    "padrao": "Você já tem esse cargo.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "economia.consigo_dar_esse_cargo": {
+    "modulo": "economia",
+    "padrao": "Não consigo dar esse cargo (o meu cargo está abaixo dele). Avise a equipe.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "economia.faltam_carteira": {
+    "modulo": "economia",
+    "padrao": "Faltam {dinheiro} na carteira.",
+    "tipo": "resposta",
+    "vars": [
+     "dinheiro"
+    ]
+   },
+   "economia.consegui_te_dar_cargo": {
+    "modulo": "economia",
+    "padrao": "Não consegui te dar o cargo, então nada foi cobrado. Avise a equipe.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "economia.comprou_ganhou": {
+    "modulo": "economia",
+    "padrao": "🛍️ {usuario} comprou **{nome}** por {dinheiro} e ganhou {cargo}!",
+    "tipo": "descricao",
+    "vars": [
+     "usuario",
+     "nome",
+     "dinheiro",
+     "cargo"
+    ]
+   },
+   "economia.bots_tem_conta": {
+    "modulo": "economia",
+    "padrao": "Bots não têm conta.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "economia.carteira_banco": {
+    "modulo": "economia",
+    "padrao": "**{tag}**: carteira {dinheiro} · banco {banco}.",
+    "tipo": "resposta",
+    "vars": [
+     "tag",
+     "dinheiro",
+     "banco"
+    ]
+   },
+   "economia.moeda": {
+    "modulo": "economia",
+    "padrao": "Moeda: {emoji} **{moeda}**.",
+    "tipo": "texto",
+    "vars": [
+     "emoji",
+     "moeda"
+    ]
+   },
+   "economia.intervalo_invalido_ex_1h": {
+    "modulo": "economia",
+    "padrao": "Intervalo inválido (ex.: 1h, 30m).",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "economia.sem_limite": {
+    "modulo": "economia",
+    "padrao": "sem limite",
+    "tipo": "texto",
+    "vars": []
+   },
+   "economia.diario_trabalhar_cada_aposta": {
+    "modulo": "economia",
+    "padrao": "/diario: **{diario}** · /trabalhar: **{trabalhoMin}–{trabalhoMax}** a cada {duracao} · aposta máxima: {apostaMax}.",
+    "tipo": "texto",
+    "vars": [
+     "diario",
+     "trabalhoMin",
+     "trabalhoMax",
+     "duracao",
+     "apostaMax"
+    ]
+   },
+   "economia.esse_cargo_pode_ser": {
+    "modulo": "economia",
+    "padrao": "Esse cargo não pode ser vendido.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "economia.loja_aceita_maximo_25": {
+    "modulo": "economia",
+    "padrao": "A loja aceita no máximo 25 itens.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "economia.ja_existe_item_esse": {
+    "modulo": "economia",
+    "padrao": "Já existe um item com esse nome.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "economia.suba_meu_cargo_acima": {
+    "modulo": "economia",
+    "padrao": " ⚠️ Suba o meu cargo acima dele, senão não consigo entregar.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "economia.esta_venda": {
+    "modulo": "economia",
+    "padrao": "**{nome}** está à venda.{aviso}",
+    "tipo": "texto",
+    "vars": [
+     "nome",
+     "aviso"
+    ]
+   },
+   "economia.achei_item_esse_nome": {
+    "modulo": "economia",
+    "padrao": "Não achei um item com esse nome.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "economia.item_removido_loja": {
+    "modulo": "economia",
+    "padrao": "Item removido da loja.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "economia.moeda_2": {
+    "modulo": "economia",
+    "padrao": "Moeda: {emoji} {moeda}",
+    "tipo": "texto",
+    "vars": [
+     "emoji",
+     "moeda"
+    ]
+   },
+   "economia.diario_trabalhar_cada": {
+    "modulo": "economia",
+    "padrao": "/diario: {diario} · /trabalhar: {trabalhoMin}–{trabalhoMax} (a cada {duracao})",
+    "tipo": "texto",
+    "vars": [
+     "diario",
+     "trabalhoMin",
+     "trabalhoMax",
+     "duracao"
+    ]
+   },
+   "economia.loja_item_ns": {
+    "modulo": "economia",
+    "padrao": "Loja: {loja_total} item(ns)",
+    "tipo": "texto",
+    "vars": [
+     "loja_total"
+    ]
+   },
+   "economia.economia": {
+    "modulo": "economia",
+    "padrao": "Economia",
+    "tipo": "texto",
+    "vars": []
+   },
+   "reputacao.dar_reputacao_voce_mesmo": {
+    "modulo": "reputacao",
+    "padrao": "Não dá para dar reputação para você mesmo.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "reputacao.bots_tem_reputacao": {
+    "modulo": "reputacao",
+    "padrao": "Bots não têm reputação.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "reputacao.voce_ja_deu_reputacao": {
+    "modulo": "reputacao",
+    "padrao": "Você já deu reputação hoje. Volte em **{duracao}**.",
+    "tipo": "resposta",
+    "vars": [
+     "duracao"
+    ]
+   },
+   "reputacao.ganhou": {
+    "modulo": "reputacao",
+    "padrao": "\n🎁 Ganhou {novos}",
+    "tipo": "texto",
+    "vars": [
+     "novos"
+    ]
+   },
+   "reputacao.deu_reputacao_agora": {
+    "modulo": "reputacao",
+    "padrao": "👍 {usuario} deu **+1 de reputação** para {alvo}! Agora: **{pontos}**{motivo}{novos}",
+    "tipo": "descricao",
+    "vars": [
+     "usuario",
+     "alvo",
+     "pontos",
+     "motivo",
+     "novos"
+    ]
+   },
+   "reputacao.so_quem_tem_gerenciar": {
+    "modulo": "reputacao",
+    "padrao": "Só quem tem **Gerenciar servidor** pode fazer isso.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "reputacao.agora_tem_reputacao": {
+    "modulo": "reputacao",
+    "padrao": "{usuario} agora tem **{pontos}** de reputação.",
+    "tipo": "resposta",
+    "vars": [
+     "usuario",
+     "pontos"
+    ]
+   },
+   "reputacao.recompensa_pontos_removida": {
+    "modulo": "reputacao",
+    "padrao": "Recompensa de {pontos} pontos removida.",
+    "tipo": "resposta",
+    "vars": [
+     "pontos"
+    ]
+   },
+   "reputacao.escolha_cargo_comum_sem": {
+    "modulo": "reputacao",
+    "padrao": "Escolha um cargo comum (sem administrador).",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "reputacao.meu_cargo_precisa_ficar": {
+    "modulo": "reputacao",
+    "padrao": "Meu cargo precisa ficar acima de {cargo}.",
+    "tipo": "resposta",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "reputacao.reputacao_pessoa_ganha": {
+    "modulo": "reputacao",
+    "padrao": "Com **{pontos}** de reputação a pessoa ganha {cargo}.",
+    "tipo": "resposta",
+    "vars": [
+     "pontos",
+     "cargo"
+    ]
+   },
+   "reputacao.ninguem_tem_reputacao_ainda": {
+    "modulo": "reputacao",
+    "padrao": "Ninguém tem reputação ainda. Use `/rep`.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "reputacao.ranking_reputacao": {
+    "modulo": "reputacao",
+    "padrao": "👍 Ranking de reputação",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "reputacao.proxima_recompensa": {
+    "modulo": "reputacao",
+    "padrao": " Próxima recompensa: <@&{proxima}> com {pontos_proxima}.",
+    "tipo": "texto",
+    "vars": [
+     "proxima",
+     "pontos_proxima"
+    ]
+   },
+   "reputacao.tem_reputacao": {
+    "modulo": "reputacao",
+    "padrao": "{usuario} tem **{pontos}** de reputação.{proxima}",
+    "tipo": "resposta",
+    "vars": [
+     "usuario",
+     "pontos",
+     "proxima"
+    ]
+   },
+   "reputacao.reputacao": {
+    "modulo": "reputacao",
+    "padrao": "Reputação",
+    "tipo": "texto",
+    "vars": []
+   },
+   "reputacao.recompensas": {
+    "modulo": "reputacao",
+    "padrao": "Recompensas: {recompensas}",
+    "tipo": "texto",
+    "vars": [
+     "recompensas"
+    ]
+   },
+   "reputacao.sem_recompensas_reputacao_recompensa": {
+    "modulo": "reputacao",
+    "padrao": "Sem recompensas (`/reputacao recompensa`)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "tickets.assunto_campo": {
+    "modulo": "tickets",
+    "padrao": "Assunto",
+    "tipo": "campo",
+    "vars": []
+   },
+   "tickets.escolha_assunto": {
+    "modulo": "tickets",
+    "padrao": "Escolha o assunto do seu ticket",
+    "tipo": "placeholder",
+    "vars": []
+   },
+   "tickets.crie_assuntos": {
+    "modulo": "tickets",
+    "padrao": "Crie os assuntos primeiro com `/ticket assunto adicionar`.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "tickets.assunto_adicionado": {
+    "modulo": "tickets",
+    "padrao": "Assunto **{nome}** adicionado ({total}/25). Para usar, envie o painel com `/ticket painel modo:Menu`.",
+    "tipo": "resposta",
+    "vars": [
+     "nome",
+     "total"
+    ]
+   },
+   "tickets.assunto_existe": {
+    "modulo": "tickets",
+    "padrao": "Já existe um assunto com esse nome.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "tickets.assunto_limite": {
+    "modulo": "tickets",
+    "padrao": "O Discord aceita no máximo 25 assuntos.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "tickets.assunto_removido": {
+    "modulo": "tickets",
+    "padrao": "Assunto **{nome}** removido. Envie o painel de novo para atualizar o menu.",
+    "tipo": "resposta",
+    "vars": [
+     "nome"
+    ]
+   },
+   "tickets.assunto_nao_existe": {
+    "modulo": "tickets",
+    "padrao": "Não achei esse assunto.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "tickets.assunto_emoji_invalido": {
+    "modulo": "tickets",
+    "padrao": "Esse emoji não serve num menu. Use um emoji normal ou um do servidor (<:nome:id>).",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "tickets.assuntos_titulo": {
+    "modulo": "tickets",
+    "padrao": "📂 Assuntos dos tickets",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "tickets.assuntos_vazio": {
+    "modulo": "tickets",
+    "padrao": "Nenhum assunto. Crie com `/ticket assunto adicionar`.",
+    "tipo": "descricao",
+    "vars": []
+   },
+   "tickets.assunto_linha": {
+    "modulo": "tickets",
+    "padrao": "{emoji}**{nome}**{descricao}{extras}",
+    "tipo": "texto",
+    "vars": [
+     "emoji",
+     "nome",
+     "descricao",
+     "extras"
+    ]
+   },
+   "tickets.assunto_extra_categoria": {
+    "modulo": "tickets",
+    "padrao": " · categoria {categoria}",
+    "tipo": "texto",
+    "vars": [
+     "categoria"
+    ]
+   },
+   "tickets.assunto_extra_equipe": {
+    "modulo": "tickets",
+    "padrao": " · equipe {equipe}",
+    "tipo": "texto",
+    "vars": [
+     "equipe"
+    ]
+   },
+   "tickets.assunto_extra_mensagem": {
+    "modulo": "tickets",
+    "padrao": " · mensagem própria",
+    "tipo": "texto",
+    "vars": []
+   },
+   "tickets.assunto_indisponivel": {
+    "modulo": "tickets",
+    "padrao": "Esse assunto não existe mais. Peça para a equipe enviar o painel de novo.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "tickets.resumo_assuntos": {
+    "modulo": "tickets",
+    "padrao": "Assuntos: {total}",
+    "tipo": "texto",
+    "vars": [
+     "total"
+    ]
+   },
+   "tickets.aguardando": {
+    "modulo": "tickets",
+    "padrao": "aguardando",
+    "tipo": "valor",
+    "vars": []
+   },
+   "tickets.msg_ticket_padrao": {
+    "modulo": "tickets",
+    "padrao": "Olá {usuario}! Descreva o que você precisa com o máximo de detalhes. A equipe já foi avisada e responde assim que puder.",
+    "tipo": "texto",
+    "vars": [
+     "usuario"
+    ]
+   },
+   "tickets.fechar": {
+    "modulo": "tickets",
+    "padrao": "Fechar",
+    "tipo": "botao",
+    "vars": []
+   },
+   "tickets.assumido": {
+    "modulo": "tickets",
+    "padrao": "Assumido",
+    "tipo": "texto",
+    "vars": []
+   },
+   "tickets.assumir": {
+    "modulo": "tickets",
+    "padrao": "Assumir",
+    "tipo": "texto",
+    "vars": []
+   },
+   "tickets.tickets_abertos": {
+    "modulo": "tickets",
+    "padrao": "tickets abertos",
+    "tipo": "texto",
+    "vars": []
+   },
+   "tickets.ticket_aberto": {
+    "modulo": "tickets",
+    "padrao": "um ticket aberto",
+    "tipo": "texto",
+    "vars": []
+   },
+   "tickets.voce_ja_tem": {
+    "modulo": "tickets",
+    "padrao": "Você já tem {quantos}: {canais}",
+    "tipo": "texto",
+    "vars": [
+     "quantos",
+     "canais"
+    ]
+   },
+   "tickets.preciso_permissao_gerenciar_canais": {
+    "modulo": "tickets",
+    "padrao": "❌ Preciso da permissão **Gerenciar canais** para abrir tickets.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "tickets.ticket": {
+    "modulo": "tickets",
+    "padrao": "ticket-{numero}",
+    "tipo": "canal",
+    "vars": [
+     "numero"
+    ]
+   },
+   "tickets.ticket_2": {
+    "modulo": "tickets",
+    "padrao": "Ticket de {tag} ({usuario_id})",
+    "tipo": "texto",
+    "vars": [
+     "tag",
+     "usuario_id"
+    ]
+   },
+   "tickets.consegui_criar_canal_ticket": {
+    "modulo": "tickets",
+    "padrao": "❌ Não consegui criar o canal do ticket. Avise a equipe: confira as minhas permissões (Gerenciar canais e Gerenciar cargos) e se a categoria não está cheia (máximo de 50 canais).",
+    "tipo": "texto",
+    "vars": []
+   },
+   "tickets.ticket_3": {
+    "modulo": "tickets",
+    "padrao": "🎫 Ticket #{numero}",
+    "tipo": "titulo",
+    "vars": [
+     "numero"
+    ]
+   },
+   "tickets.aberto": {
+    "modulo": "tickets",
+    "padrao": "Aberto por",
+    "tipo": "campo",
+    "vars": []
+   },
+   "tickets.atendente": {
+    "modulo": "tickets",
+    "padrao": "Atendente",
+    "tipo": "campo",
+    "vars": []
+   },
+   "tickets.ticket_aberto_2": {
+    "modulo": "tickets",
+    "padrao": "✅ Ticket aberto: {canal}",
+    "tipo": "texto",
+    "vars": [
+     "canal"
+    ]
+   },
+   "tickets.anexos": {
+    "modulo": "tickets",
+    "padrao": " [anexos: {anexos}]",
+    "tipo": "texto",
+    "vars": [
+     "anexos"
+    ]
+   },
+   "tickets.embed": {
+    "modulo": "tickets",
+    "padrao": " [embed: {embed}]",
+    "tipo": "texto",
+    "vars": [
+     "embed"
+    ]
+   },
+   "tickets.sem_motivo": {
+    "modulo": "tickets",
+    "padrao": "Sem motivo",
+    "tipo": "texto",
+    "vars": []
+   },
+   "tickets.isto_ticket": {
+    "modulo": "tickets",
+    "padrao": "Isto não é um ticket.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "tickets.so_quem_abriu_ou": {
+    "modulo": "tickets",
+    "padrao": "Só quem abriu ou a equipe pode fechar.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "tickets.este_ticket_ja_esta": {
+    "modulo": "tickets",
+    "padrao": "Este ticket já está sendo fechado.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "tickets.ticket_fechado_este_canal": {
+    "modulo": "tickets",
+    "padrao": "🔒 Ticket fechado por {usuario}. Este canal será apagado em 5 segundos.",
+    "tipo": "descricao",
+    "vars": [
+     "usuario"
+    ]
+   },
+   "tickets.ticket_txt": {
+    "modulo": "tickets",
+    "padrao": "ticket-{numero}.txt",
+    "tipo": "campo",
+    "vars": [
+     "numero"
+    ]
+   },
+   "tickets.ticket_fechado": {
+    "modulo": "tickets",
+    "padrao": "🎫 Ticket #{numero} fechado",
+    "tipo": "titulo",
+    "vars": [
+     "numero"
+    ]
+   },
+   "tickets.fechado": {
+    "modulo": "tickets",
+    "padrao": "Fechado por",
+    "tipo": "campo",
+    "vars": []
+   },
+   "tickets.aberto_2": {
+    "modulo": "tickets",
+    "padrao": "Aberto",
+    "tipo": "campo",
+    "vars": []
+   },
+   "tickets.motivo": {
+    "modulo": "tickets",
+    "padrao": "Motivo",
+    "tipo": "campo",
+    "vars": []
+   },
+   "tickets.seu_ticket_foi_fechado": {
+    "modulo": "tickets",
+    "padrao": "Seu ticket em **{servidor}** foi fechado. O histórico está em anexo.",
+    "tipo": "descricao",
+    "vars": [
+     "servidor"
+    ]
+   },
+   "tickets.tem_certeza_quer_fechar": {
+    "modulo": "tickets",
+    "padrao": "Tem certeza que quer fechar este ticket?",
+    "tipo": "conteudo",
+    "vars": []
+   },
+   "tickets.sim_fechar": {
+    "modulo": "tickets",
+    "padrao": "Sim, fechar",
+    "tipo": "botao",
+    "vars": []
+   },
+   "tickets.fechado_pelo_botao": {
+    "modulo": "tickets",
+    "padrao": "Fechado pelo botão",
+    "tipo": "texto",
+    "vars": []
+   },
+   "tickets.so_equipe_pode_assumir": {
+    "modulo": "tickets",
+    "padrao": "Só a equipe pode assumir tickets.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "tickets.este_ticket_ja": {
+    "modulo": "tickets",
+    "padrao": "Este ticket já é de <@{assumido}>.",
+    "tipo": "resposta",
+    "vars": [
+     "assumido"
+    ]
+   },
+   "tickets.assumiu_este_ticket": {
+    "modulo": "tickets",
+    "padrao": "🙋 {usuario} assumiu este ticket.",
+    "tipo": "conteudo",
+    "vars": [
+     "usuario"
+    ]
+   },
+   "tickets.so_quem_tem_gerenciar": {
+    "modulo": "tickets",
+    "padrao": "Só quem tem Gerenciar servidor pode enviar o painel.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "tickets.atendimento": {
+    "modulo": "tickets",
+    "padrao": "🎫 Atendimento",
+    "tipo": "texto",
+    "vars": []
+   },
+   "tickets.precisa_ajuda_clique_botao": {
+    "modulo": "tickets",
+    "padrao": "Precisa de ajuda? Clique no botão abaixo e um canal privado será aberto para você falar com a equipe.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "tickets.abrir_ticket": {
+    "modulo": "tickets",
+    "padrao": "Abrir ticket",
+    "tipo": "texto",
+    "vars": []
+   },
+   "tickets.painel_enviado": {
+    "modulo": "tickets",
+    "padrao": "Painel enviado em {canal}.",
+    "tipo": "resposta",
+    "vars": [
+     "canal"
+    ]
+   },
+   "tickets.use_este_comando_dentro": {
+    "modulo": "tickets",
+    "padrao": "Use este comando dentro de um ticket.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "tickets.so_equipe_pode_fazer": {
+    "modulo": "tickets",
+    "padrao": "Só a equipe pode fazer isso.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "tickets.consegui_adicionar_preciso_permissao": {
+    "modulo": "tickets",
+    "padrao": "Não consegui adicionar. Preciso da permissão **Gerenciar cargos** para mexer nas permissões do canal.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "tickets.foi_adicionado_ticket": {
+    "modulo": "tickets",
+    "padrao": "➕ {usuario} foi adicionado(a) ao ticket por {usuario2}.",
+    "tipo": "conteudo",
+    "vars": [
+     "usuario",
+     "usuario2"
+    ]
+   },
+   "tickets.remover_quem_abriu_ticket": {
+    "modulo": "tickets",
+    "padrao": "Não dá para remover quem abriu o ticket.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "tickets.foi_removido_ticket": {
+    "modulo": "tickets",
+    "padrao": "➖ {usuario} foi removido(a) do ticket.",
+    "tipo": "conteudo",
+    "vars": [
+     "usuario"
+    ]
+   },
+   "tickets.ticket_renomeado": {
+    "modulo": "tickets",
+    "padrao": "✅ Ticket renomeado para **{nome}**.",
+    "tipo": "texto",
+    "vars": [
+     "nome"
+    ]
+   },
+   "tickets.consegui_renomear_agora": {
+    "modulo": "tickets",
+    "padrao": "❌ Não consegui renomear agora.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "tickets.tickets_serao_criados": {
+    "modulo": "tickets",
+    "padrao": "Os tickets serão criados em **{categoria}**.",
+    "tipo": "texto",
+    "vars": [
+     "categoria"
+    ]
+   },
+   "tickets.tickets_serao_criados_sem": {
+    "modulo": "tickets",
+    "padrao": "Os tickets serão criados sem categoria.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "tickets.atende_tickets": {
+    "modulo": "tickets",
+    "padrao": "{cargo} atende os tickets.",
+    "tipo": "texto",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "tickets.tickets_usam_cargo_config": {
+    "modulo": "tickets",
+    "padrao": "Os tickets usam o cargo de /config staff.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "tickets.historico_tickets_vai": {
+    "modulo": "tickets",
+    "padrao": "Histórico dos tickets vai para {canal}.",
+    "tipo": "texto",
+    "vars": [
+     "canal"
+    ]
+   },
+   "tickets.registro_tickets_desligado": {
+    "modulo": "tickets",
+    "padrao": "Registro de tickets desligado.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "tickets.mensagem_ticket_atualizada": {
+    "modulo": "tickets",
+    "padrao": "Mensagem do ticket atualizada.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "tickets.cada_pessoa_pode_ter": {
+    "modulo": "tickets",
+    "padrao": "Cada pessoa pode ter até **{limite}** ticket(s) aberto(s).",
+    "tipo": "texto",
+    "vars": [
+     "limite"
+    ]
+   },
+   "tickets.nenhuma": {
+    "modulo": "tickets",
+    "padrao": "nenhuma",
+    "tipo": "texto",
+    "vars": []
+   },
+   "tickets.categoria": {
+    "modulo": "tickets",
+    "padrao": "Categoria: {categoria}",
+    "tipo": "texto",
+    "vars": [
+     "categoria"
+    ]
+   },
+   "tickets.cargo_config_staff": {
+    "modulo": "tickets",
+    "padrao": "cargo de /config staff",
+    "tipo": "texto",
+    "vars": []
+   },
+   "tickets.equipe": {
+    "modulo": "tickets",
+    "padrao": "Equipe: {equipe}",
+    "tipo": "texto",
+    "vars": [
+     "equipe"
+    ]
+   },
+   "tickets.desligado": {
+    "modulo": "tickets",
+    "padrao": "desligado",
+    "tipo": "texto",
+    "vars": []
+   },
+   "tickets.registro": {
+    "modulo": "tickets",
+    "padrao": "Registro: {registro}",
+    "tipo": "texto",
+    "vars": [
+     "registro"
+    ]
+   },
+   "tickets.abertos_agora_limite_pessoa": {
+    "modulo": "tickets",
+    "padrao": "Abertos agora: {abertos} · Limite por pessoa: {limite}",
+    "tipo": "texto",
+    "vars": [
+     "abertos",
+     "limite"
+    ]
+   },
+   "tickets.tickets": {
+    "modulo": "tickets",
+    "padrao": "Tickets",
+    "tipo": "texto",
+    "vars": []
+   },
+   "avaliacoes.dica_comentario": {
+    "modulo": "avaliacoes",
+    "padrao": "",
+    "tipo": "placeholder",
+    "vars": []
+   },
+   "avaliacoes.como_foi_seu_atendimento": {
+    "modulo": "avaliacoes",
+    "padrao": "⭐ Como foi o seu atendimento?",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "avaliacoes.atendente": {
+    "modulo": "avaliacoes",
+    "padrao": " (atendente: <@{atendente}>)",
+    "tipo": "texto",
+    "vars": [
+     "atendente"
+    ]
+   },
+   "avaliacoes.seu_ticket_foi_fechado": {
+    "modulo": "avaliacoes",
+    "padrao": "Seu ticket **#{numero}** em **{servidor}** foi fechado{atendente}.\nDê uma nota de 1 a 5:",
+    "tipo": "descricao",
+    "vars": [
+     "numero",
+     "servidor",
+     "atendente"
+    ]
+   },
+   "avaliacoes.ticket": {
+    "modulo": "avaliacoes",
+    "padrao": "{estrelas}  Ticket #{numero}",
+    "tipo": "titulo",
+    "vars": [
+     "estrelas",
+     "numero"
+    ]
+   },
+   "avaliacoes.atendente_2": {
+    "modulo": "avaliacoes",
+    "padrao": "Atendente",
+    "tipo": "campo",
+    "vars": []
+   },
+   "avaliacoes.cliente": {
+    "modulo": "avaliacoes",
+    "padrao": "Cliente",
+    "tipo": "campo",
+    "vars": []
+   },
+   "avaliacoes.esta_avaliacao_expirou_obrigado": {
+    "modulo": "avaliacoes",
+    "padrao": "Esta avaliação expirou. Obrigado mesmo assim!",
+    "tipo": "texto",
+    "vars": []
+   },
+   "avaliacoes.voce_ja_avaliou_este": {
+    "modulo": "avaliacoes",
+    "padrao": "Você já avaliou este atendimento com {estrelas}. Obrigado!",
+    "tipo": "texto",
+    "vars": [
+     "estrelas"
+    ]
+   },
+   "avaliacoes.obrigado_voce_deu_ticket": {
+    "modulo": "avaliacoes",
+    "padrao": "Obrigado! Você deu **{estrelas}** para o ticket #{numero}.\nQuer deixar um comentário?",
+    "tipo": "descricao",
+    "vars": [
+     "estrelas",
+     "numero"
+    ]
+   },
+   "avaliacoes.comentar": {
+    "modulo": "avaliacoes",
+    "padrao": "Comentar",
+    "tipo": "botao",
+    "vars": []
+   },
+   "avaliacoes.ticket_2": {
+    "modulo": "avaliacoes",
+    "padrao": "Ticket #{numero}",
+    "tipo": "rotulo",
+    "vars": [
+     "numero"
+    ]
+   },
+   "avaliacoes.achou_atendimento": {
+    "modulo": "avaliacoes",
+    "padrao": "O que achou do atendimento?",
+    "tipo": "rotulo",
+    "vars": []
+   },
+   "avaliacoes.comentario_ticket": {
+    "modulo": "avaliacoes",
+    "padrao": "💬 Comentário · Ticket #{numero}",
+    "tipo": "titulo",
+    "vars": [
+     "numero"
+    ]
+   },
+   "avaliacoes.nota": {
+    "modulo": "avaliacoes",
+    "padrao": "Nota",
+    "tipo": "campo",
+    "vars": []
+   },
+   "avaliacoes.obrigado_pelo_comentario": {
+    "modulo": "avaliacoes",
+    "padrao": "💜 Obrigado pelo comentário!",
+    "tipo": "texto",
+    "vars": []
+   },
+   "avaliacoes.so_quem_tem_gerenciar": {
+    "modulo": "avaliacoes",
+    "padrao": "Só quem tem **Gerenciar servidor** pode configurar.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "avaliacoes.ligadas": {
+    "modulo": "avaliacoes",
+    "padrao": "ligadas",
+    "tipo": "texto",
+    "vars": []
+   },
+   "avaliacoes.desligadas": {
+    "modulo": "avaliacoes",
+    "padrao": "desligadas",
+    "tipo": "texto",
+    "vars": []
+   },
+   "avaliacoes.aparecem": {
+    "modulo": "avaliacoes",
+    "padrao": " · aparecem em <#{canal}>",
+    "tipo": "texto",
+    "vars": [
+     "canal"
+    ]
+   },
+   "avaliacoes.avaliacoes": {
+    "modulo": "avaliacoes",
+    "padrao": "Avaliações {estado}{canal}.",
+    "tipo": "resposta",
+    "vars": [
+     "estado",
+     "canal"
+    ]
+   },
+   "avaliacoes.ainda_ha_avaliacoes": {
+    "modulo": "avaliacoes",
+    "padrao": "Ainda não há avaliações.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "avaliacoes.avaliacao_oes": {
+    "modulo": "avaliacoes",
+    "padrao": "**{posicao}.** <@{atendente}> · {media} ⭐ ({avaliacoes} avaliação(ões))",
+    "tipo": "texto",
+    "vars": [
+     "posicao",
+     "atendente",
+     "media",
+     "avaliacoes"
+    ]
+   },
+   "avaliacoes.ranking_atendimento": {
+    "modulo": "avaliacoes",
+    "padrao": "🏆 Ranking de atendimento",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "avaliacoes.sem_atendentes_avaliados": {
+    "modulo": "avaliacoes",
+    "padrao": "Sem atendentes avaliados.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "avaliacoes.media_geral_avaliacao_oes": {
+    "modulo": "avaliacoes",
+    "padrao": "Média geral: {media} ⭐ em {total} avaliação(ões)",
+    "tipo": "rodape",
+    "vars": [
+     "media",
+     "total"
+    ]
+   },
+   "avaliacoes.ainda_tem_avaliacoes": {
+    "modulo": "avaliacoes",
+    "padrao": "{usuario} ainda não tem avaliações.",
+    "tipo": "resposta",
+    "vars": [
+     "usuario"
+    ]
+   },
+   "avaliacoes.media_avaliacao_oes": {
+    "modulo": "avaliacoes",
+    "padrao": "Média **{media}** em {total} avaliação(ões)\n\n{ultimas}",
+    "tipo": "descricao",
+    "vars": [
+     "media",
+     "total",
+     "ultimas"
+    ]
+   },
+   "avaliacoes.avaliacao_atendimento": {
+    "modulo": "avaliacoes",
+    "padrao": "Avaliação de atendimento",
+    "tipo": "texto",
+    "vars": []
+   },
+   "avaliacoes.ligadas_2": {
+    "modulo": "avaliacoes",
+    "padrao": "Ligadas",
+    "tipo": "texto",
+    "vars": []
+   },
+   "avaliacoes.desligadas_2": {
+    "modulo": "avaliacoes",
+    "padrao": "Desligadas",
+    "tipo": "texto",
+    "vars": []
+   },
+   "avaliacoes.nenhum": {
+    "modulo": "avaliacoes",
+    "padrao": "nenhum",
+    "tipo": "texto",
+    "vars": []
+   },
+   "avaliacoes.canal_avaliacao_oes": {
+    "modulo": "avaliacoes",
+    "padrao": "{estado} · canal: {canal} · {total} avaliação(ões)",
+    "tipo": "texto",
+    "vars": [
+     "estado",
+     "canal",
+     "total"
+    ]
+   },
+   "formularios.dica_motivo": {
+    "modulo": "formularios",
+    "padrao": "",
+    "tipo": "placeholder",
+    "vars": []
+   },
+   "formularios.pergunta": {
+    "modulo": "formularios",
+    "padrao": "{titulo} ({perguntas_total} pergunta(s))",
+    "tipo": "texto",
+    "vars": [
+     "titulo",
+     "perguntas_total"
+    ]
+   },
+   "formularios.aprovar": {
+    "modulo": "formularios",
+    "padrao": "Aprovar",
+    "tipo": "botao",
+    "vars": []
+   },
+   "formularios.recusar": {
+    "modulo": "formularios",
+    "padrao": "Recusar",
+    "tipo": "botao",
+    "vars": []
+   },
+   "formularios.esta_resposta_esta_mais": {
+    "modulo": "formularios",
+    "padrao": "Esta resposta não está mais no sistema.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "formularios.ja_foi": {
+    "modulo": "formularios",
+    "padrao": "Já foi {status}.",
+    "tipo": "resposta",
+    "vars": [
+     "status"
+    ]
+   },
+   "formularios.recebeu": {
+    "modulo": "formularios",
+    "padrao": " · recebeu {cargo}",
+    "tipo": "texto",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "formularios.consegui_dar_cargo": {
+    "modulo": "formularios",
+    "padrao": " · (não consegui dar o cargo)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "formularios.pessoa_saiu_servidor": {
+    "modulo": "formularios",
+    "padrao": " · (a pessoa saiu do servidor)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "formularios.aprovada": {
+    "modulo": "formularios",
+    "padrao": "✅ Aprovada",
+    "tipo": "texto",
+    "vars": []
+   },
+   "formularios.recusada": {
+    "modulo": "formularios",
+    "padrao": "❌ Recusada",
+    "tipo": "texto",
+    "vars": []
+   },
+   "formularios.motivo": {
+    "modulo": "formularios",
+    "padrao": "\n**Motivo:** {motivo}",
+    "tipo": "texto",
+    "vars": [
+     "motivo"
+    ]
+   },
+   "formularios.por": {
+    "modulo": "formularios",
+    "padrao": "por {usuario}{extra}{motivo}",
+    "tipo": "texto",
+    "vars": [
+     "usuario",
+     "extra",
+     "motivo"
+    ]
+   },
+   "formularios.aprovado": {
+    "modulo": "formularios",
+    "padrao": "aprovado",
+    "tipo": "texto",
+    "vars": []
+   },
+   "formularios.recusado": {
+    "modulo": "formularios",
+    "padrao": "recusado",
+    "tipo": "texto",
+    "vars": []
+   },
+   "formularios.seu_formulario_foi": {
+    "modulo": "formularios",
+    "padrao": "Seu formulário **{titulo}** em **{servidor}** foi **{resultado}**.{motivo}",
+    "tipo": "descricao",
+    "vars": [
+     "titulo",
+     "servidor",
+     "resultado",
+     "motivo"
+    ]
+   },
+   "formularios.resposta": {
+    "modulo": "formularios",
+    "padrao": "Resposta {status}{extra}.",
+    "tipo": "resposta",
+    "vars": [
+     "status",
+     "extra"
+    ]
+   },
+   "formularios.este_formulario_esta_mais": {
+    "modulo": "formularios",
+    "padrao": "Este formulário não está mais disponível.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "formularios.este_formulario_ainda_tem": {
+    "modulo": "formularios",
+    "padrao": "Este formulário ainda não tem canal de respostas. Avise a equipe.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "formularios.voce_ja_enviou_este": {
+    "modulo": "formularios",
+    "padrao": "Você já enviou este formulário e ele ainda está sendo analisado.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "formularios.achei_canal_respostas_avise": {
+    "modulo": "formularios",
+    "padrao": "Não achei o canal de respostas. Avise a equipe.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "formularios.conta_criada": {
+    "modulo": "formularios",
+    "padrao": "Conta criada",
+    "tipo": "campo",
+    "vars": []
+   },
+   "formularios.consegui_enviar_avise_equipe": {
+    "modulo": "formularios",
+    "padrao": "Não consegui enviar. Avise a equipe para conferir as minhas permissões.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "formularios.formulario_enviado_voce_recebe": {
+    "modulo": "formularios",
+    "padrao": "Formulário enviado! Você recebe a resposta na DM.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "formularios.so_equipe_pode_decidir": {
+    "modulo": "formularios",
+    "padrao": "Só a equipe pode decidir.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "formularios.motivo_vai_dm_pessoa": {
+    "modulo": "formularios",
+    "padrao": "Motivo (vai na DM da pessoa)",
+    "tipo": "rotulo",
+    "vars": []
+   },
+   "formularios.achei_mensagem": {
+    "modulo": "formularios",
+    "padrao": "Não achei a mensagem.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "formularios.nenhum_formulario_use_formulario": {
+    "modulo": "formularios",
+    "padrao": "Nenhum formulário. Use `/formulario criar`.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "formularios.formularios": {
+    "modulo": "formularios",
+    "padrao": "📝 Formulários",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "formularios.aprovado_ganha": {
+    "modulo": "formularios",
+    "padrao": " · aprovado ganha <@&{cargo}>",
+    "tipo": "texto",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "formularios.respostas": {
+    "modulo": "formularios",
+    "padrao": "Respostas em <#{canal}>{cargo}",
+    "tipo": "texto",
+    "vars": [
+     "canal",
+     "cargo"
+    ]
+   },
+   "formularios.longa": {
+    "modulo": "formularios",
+    "padrao": " (longa)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "formularios.opcional": {
+    "modulo": "formularios",
+    "padrao": " (opcional)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "formularios.sem_perguntas": {
+    "modulo": "formularios",
+    "padrao": "Sem perguntas",
+    "tipo": "texto",
+    "vars": []
+   },
+   "formularios.maximo_formularios": {
+    "modulo": "formularios",
+    "padrao": "No máximo {limite} formulários.",
+    "tipo": "resposta",
+    "vars": [
+     "limite"
+    ]
+   },
+   "formularios.cargo_aprovacao_pode_ser": {
+    "modulo": "formularios",
+    "padrao": "O cargo de aprovação não pode ser de administrador nem de bot.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "formularios.meu_cargo_precisa_ficar": {
+    "modulo": "formularios",
+    "padrao": "Meu cargo precisa ficar acima de {cargo}.",
+    "tipo": "resposta",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "formularios.formulario_criado_agora_adicione": {
+    "modulo": "formularios",
+    "padrao": "Formulário **{titulo}** criado. Agora adicione as perguntas com `/formulario pergunta` (até 5) e envie o painel com `/formulario painel`.",
+    "tipo": "resposta",
+    "vars": [
+     "titulo"
+    ]
+   },
+   "formularios.formulario_encontrado_escolha_lista": {
+    "modulo": "formularios",
+    "padrao": "Formulário não encontrado. Escolha na lista enquanto digita.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "formularios.discord_aceita_maximo_perguntas": {
+    "modulo": "formularios",
+    "padrao": "O Discord aceita no máximo 5 perguntas por formulário.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "formularios.pergunta_adicionada": {
+    "modulo": "formularios",
+    "padrao": "Pergunta {perguntas_total}/5 adicionada em **{titulo}**.",
+    "tipo": "resposta",
+    "vars": [
+     "perguntas_total",
+     "titulo"
+    ]
+   },
+   "formularios.este_formulario_tem_pergunta": {
+    "modulo": "formularios",
+    "padrao": "Este formulário tem {perguntas_total} pergunta(s).",
+    "tipo": "resposta",
+    "vars": [
+     "perguntas_total"
+    ]
+   },
+   "formularios.pergunta_removida": {
+    "modulo": "formularios",
+    "padrao": "Pergunta {numero} removida.",
+    "tipo": "resposta",
+    "vars": [
+     "numero"
+    ]
+   },
+   "formularios.formulario_apagado_paineis_ja": {
+    "modulo": "formularios",
+    "padrao": "Formulário **{titulo}** apagado. (Painéis já enviados param de funcionar.)",
+    "tipo": "resposta",
+    "vars": [
+     "titulo"
+    ]
+   },
+   "formularios.adicione_pelo_menos_pergunta": {
+    "modulo": "formularios",
+    "padrao": "Adicione pelo menos uma pergunta antes (`/formulario pergunta`).",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "formularios.clique_botao_abaixo_preencher": {
+    "modulo": "formularios",
+    "padrao": "Clique no botão abaixo para preencher.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "formularios.preencher": {
+    "modulo": "formularios",
+    "padrao": "Preencher",
+    "tipo": "botao",
+    "vars": []
+   },
+   "formularios.consegui_enviar_confira_minhas": {
+    "modulo": "formularios",
+    "padrao": "Não consegui enviar em {canal}. Confira as minhas permissões.",
+    "tipo": "resposta",
+    "vars": [
+     "canal"
+    ]
+   },
+   "formularios.painel_enviado": {
+    "modulo": "formularios",
+    "padrao": "Painel enviado em {canal}.",
+    "tipo": "resposta",
+    "vars": [
+     "canal"
+    ]
+   },
+   "formularios.formularios_2": {
+    "modulo": "formularios",
+    "padrao": "Formulários",
+    "tipo": "texto",
+    "vars": []
+   },
+   "formularios.formulario_resposta_esperando_equipe": {
+    "modulo": "formularios",
+    "padrao": "{total} formulário(s) · {pendentes} resposta(s) esperando a equipe",
+    "tipo": "texto",
+    "vars": [
+     "total",
+     "pendentes"
+    ]
+   },
+   "formularios.nenhum_formulario_criar": {
+    "modulo": "formularios",
+    "padrao": "Nenhum (`/formulario criar`)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "sugestoes.dica_motivo": {
+    "modulo": "sugestoes",
+    "padrao": "",
+    "tipo": "placeholder",
+    "vars": []
+   },
+   "sugestoes.equipe": {
+    "modulo": "sugestoes",
+    "padrao": "Equipe",
+    "tipo": "botao",
+    "vars": []
+   },
+   "sugestoes.canal_sugestoes_foi_configurado": {
+    "modulo": "sugestoes",
+    "padrao": "O canal de sugestões não foi configurado. Avise a equipe (/config sugestoes canal).",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "sugestoes.sugestao": {
+    "modulo": "sugestoes",
+    "padrao": "💡 Sugestão #{numero}",
+    "tipo": "titulo",
+    "vars": [
+     "numero"
+    ]
+   },
+   "sugestoes.situacao": {
+    "modulo": "sugestoes",
+    "padrao": "Situação",
+    "tipo": "campo",
+    "vars": []
+   },
+   "sugestoes.votacao": {
+    "modulo": "sugestoes",
+    "padrao": "🕐 Em votação",
+    "tipo": "texto",
+    "vars": []
+   },
+   "sugestoes.consegui_enviar_avise_equipe": {
+    "modulo": "sugestoes",
+    "padrao": "Não consegui enviar em {canal}. Avise a equipe para conferir as minhas permissões.",
+    "tipo": "resposta",
+    "vars": [
+     "canal"
+    ]
+   },
+   "sugestoes.sugestao_2": {
+    "modulo": "sugestoes",
+    "padrao": "Sugestão #{numero}",
+    "tipo": "campo",
+    "vars": [
+     "numero"
+    ]
+   },
+   "sugestoes.sugestao_enviada": {
+    "modulo": "sugestoes",
+    "padrao": "Sugestão enviada em {canal}!",
+    "tipo": "resposta",
+    "vars": [
+     "canal"
+    ]
+   },
+   "sugestoes.so_equipe_pode_decidir": {
+    "modulo": "sugestoes",
+    "padrao": "Só a equipe pode decidir sugestões.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "sugestoes.sugestao_encontrada": {
+    "modulo": "sugestoes",
+    "padrao": "Sugestão não encontrada.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "sugestoes.esta_sugestao_ja_foi": {
+    "modulo": "sugestoes",
+    "padrao": "Esta sugestão já foi {status}.",
+    "tipo": "resposta",
+    "vars": [
+     "status"
+    ]
+   },
+   "sugestoes.achei_mensagem_sugestao": {
+    "modulo": "sugestoes",
+    "padrao": "Não achei a mensagem da sugestão.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "sugestoes.aprovada": {
+    "modulo": "sugestoes",
+    "padrao": "✅ Aprovada por {usuario}",
+    "tipo": "texto",
+    "vars": [
+     "usuario"
+    ]
+   },
+   "sugestoes.recusada": {
+    "modulo": "sugestoes",
+    "padrao": "❌ Recusada por {usuario}",
+    "tipo": "texto",
+    "vars": [
+     "usuario"
+    ]
+   },
+   "sugestoes.motivo": {
+    "modulo": "sugestoes",
+    "padrao": "Motivo",
+    "tipo": "campo",
+    "vars": []
+   },
+   "sugestoes.votos": {
+    "modulo": "sugestoes",
+    "padrao": "Votos",
+    "tipo": "campo",
+    "vars": []
+   },
+   "sugestoes.motivo_2": {
+    "modulo": "sugestoes",
+    "padrao": "\n**Motivo:** {motivo}",
+    "tipo": "texto",
+    "vars": [
+     "motivo"
+    ]
+   },
+   "sugestoes.sua_sugestao_foi": {
+    "modulo": "sugestoes",
+    "padrao": "Sua sugestão #{numero} em **{servidor}** foi **{status}**.{motivo}",
+    "tipo": "descricao",
+    "vars": [
+     "numero",
+     "servidor",
+     "status",
+     "motivo"
+    ]
+   },
+   "sugestoes.sugestao_3": {
+    "modulo": "sugestoes",
+    "padrao": "Sugestão #{numero} {status}.",
+    "tipo": "resposta",
+    "vars": [
+     "numero",
+     "status"
+    ]
+   },
+   "sugestoes.aprovar_sugestao": {
+    "modulo": "sugestoes",
+    "padrao": "Aprovar sugestão",
+    "tipo": "texto",
+    "vars": []
+   },
+   "sugestoes.recusar_sugestao": {
+    "modulo": "sugestoes",
+    "padrao": "Recusar sugestão",
+    "tipo": "texto",
+    "vars": []
+   },
+   "sugestoes.motivo_opcional": {
+    "modulo": "sugestoes",
+    "padrao": "Motivo (opcional)",
+    "tipo": "rotulo",
+    "vars": []
+   },
+   "sugestoes.esta_sugestao_esta_mais": {
+    "modulo": "sugestoes",
+    "padrao": "Esta sugestão não está mais no sistema.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "sugestoes.votacao_desta_sugestao_ja": {
+    "modulo": "sugestoes",
+    "padrao": "A votação desta sugestão já terminou.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "sugestoes.so_equipe_pode_usar": {
+    "modulo": "sugestoes",
+    "padrao": "Só a equipe pode usar este botão.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "sugestoes.fazer_esta_sugestao": {
+    "modulo": "sugestoes",
+    "padrao": "O que fazer com esta sugestão?",
+    "tipo": "conteudo",
+    "vars": []
+   },
+   "sugestoes.aprovar": {
+    "modulo": "sugestoes",
+    "padrao": "Aprovar",
+    "tipo": "botao",
+    "vars": []
+   },
+   "sugestoes.recusar": {
+    "modulo": "sugestoes",
+    "padrao": "Recusar",
+    "tipo": "botao",
+    "vars": []
+   },
+   "sugestoes.sugestoes_serao_publicadas": {
+    "modulo": "sugestoes",
+    "padrao": "Sugestões serão publicadas em {canal}.",
+    "tipo": "texto",
+    "vars": [
+     "canal"
+    ]
+   },
+   "sugestoes.sugestoes_desligadas": {
+    "modulo": "sugestoes",
+    "padrao": "Sugestões desligadas.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "sugestoes.definido": {
+    "modulo": "sugestoes",
+    "padrao": "não definido",
+    "tipo": "texto",
+    "vars": []
+   },
+   "sugestoes.canal": {
+    "modulo": "sugestoes",
+    "padrao": "Canal: {canal}",
+    "tipo": "texto",
+    "vars": [
+     "canal"
+    ]
+   },
+   "sugestoes.sugestoes_enviadas": {
+    "modulo": "sugestoes",
+    "padrao": "Sugestões enviadas: {contador}",
+    "tipo": "texto",
+    "vars": [
+     "contador"
+    ]
+   },
+   "sugestoes.sugestoes": {
+    "modulo": "sugestoes",
+    "padrao": "Sugestões",
+    "tipo": "texto",
+    "vars": []
+   },
+   "enquetes.ninguem_votou": {
+    "modulo": "enquetes",
+    "padrao": "Ninguém votou.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "enquetes.empate_entre": {
+    "modulo": "enquetes",
+    "padrao": "Empate entre {lideres}",
+    "tipo": "texto",
+    "vars": [
+     "lideres"
+    ]
+   },
+   "enquetes.vencedora": {
+    "modulo": "enquetes",
+    "padrao": "Vencedora: {lideres}",
+    "tipo": "texto",
+    "vars": [
+     "lideres"
+    ]
+   },
+   "enquetes.coloque_pelo_menos_opcoes": {
+    "modulo": "enquetes",
+    "padrao": "Coloque pelo menos 2 opções separadas por **|**.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "enquetes.duracao_invalida_ex_30m": {
+    "modulo": "enquetes",
+    "padrao": "Duração inválida (ex.: 30m, 1h, 2d; máximo 30d).",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "enquetes.enquete_encontrada": {
+    "modulo": "enquetes",
+    "padrao": "Enquete não encontrada.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "enquetes.so_quem_criou_ou": {
+    "modulo": "enquetes",
+    "padrao": "Só quem criou ou a equipe pode encerrar.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "enquetes.enquete_encerrada": {
+    "modulo": "enquetes",
+    "padrao": "Enquete encerrada.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "enquetes.esta_enquete_ja_foi": {
+    "modulo": "enquetes",
+    "padrao": "Esta enquete já foi encerrada.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "enquetes.enquetes": {
+    "modulo": "enquetes",
+    "padrao": "Enquetes",
+    "tipo": "texto",
+    "vars": []
+   },
+   "enquetes.pode_votar_mais": {
+    "modulo": "enquetes",
+    "padrao": " · pode votar em mais de uma",
+    "tipo": "texto",
+    "vars": []
+   },
+   "enquetes.voto": {
+    "modulo": "enquetes",
+    "padrao": "{total} voto(s){multipla}",
+    "tipo": "rodape",
+    "vars": [
+     "total",
+     "multipla"
+    ]
+   },
+   "enquetes.encerrada": {
+    "modulo": "enquetes",
+    "padrao": "Encerrada",
+    "tipo": "campo",
+    "vars": []
+   },
+   "enquetes.termina": {
+    "modulo": "enquetes",
+    "padrao": "Termina",
+    "tipo": "campo",
+    "vars": []
+   },
+   "sorteios.encerrado": {
+    "modulo": "sorteios",
+    "padrao": "Encerrado {quando}",
+    "tipo": "texto",
+    "vars": [
+     "quando"
+    ]
+   },
+   "sorteios.termina": {
+    "modulo": "sorteios",
+    "padrao": "Termina {quando} ({data})",
+    "tipo": "texto",
+    "vars": [
+     "quando",
+     "data"
+    ]
+   },
+   "sorteios.vencedores": {
+    "modulo": "sorteios",
+    "padrao": "Vencedores: **{vencedores}**",
+    "tipo": "texto",
+    "vars": [
+     "vencedores"
+    ]
+   },
+   "sorteios.so_participa_quem_tem": {
+    "modulo": "sorteios",
+    "padrao": "Só participa quem tem <@&{cargo}>",
+    "tipo": "texto",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "sorteios.criado": {
+    "modulo": "sorteios",
+    "padrao": "Criado por <@{autor}>",
+    "tipo": "texto",
+    "vars": [
+     "autor"
+    ]
+   },
+   "sorteios.participante": {
+    "modulo": "sorteios",
+    "padrao": "{participantes_total} participante(s)",
+    "tipo": "rodape",
+    "vars": [
+     "participantes_total"
+    ]
+   },
+   "sorteios.ganhador_es": {
+    "modulo": "sorteios",
+    "padrao": "Ganhador(es)",
+    "tipo": "campo",
+    "vars": []
+   },
+   "sorteios.ninguem_participou": {
+    "modulo": "sorteios",
+    "padrao": "Ninguém participou.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "sorteios.encerrado_2": {
+    "modulo": "sorteios",
+    "padrao": "Encerrado",
+    "tipo": "texto",
+    "vars": []
+   },
+   "sorteios.participar": {
+    "modulo": "sorteios",
+    "padrao": "Participar ({participantes_total})",
+    "tipo": "texto",
+    "vars": [
+     "participantes_total"
+    ]
+   },
+   "sorteios.ganharam": {
+    "modulo": "sorteios",
+    "padrao": "s ganharam",
+    "tipo": "texto",
+    "vars": []
+   },
+   "sorteios.ganhou": {
+    "modulo": "sorteios",
+    "padrao": " ganhou",
+    "tipo": "texto",
+    "vars": []
+   },
+   "sorteios.parabens_voce": {
+    "modulo": "sorteios",
+    "padrao": "🎉 Parabéns {ganhadores}! Você{verbo} **{premio}**!",
+    "tipo": "texto",
+    "vars": [
+     "ganhadores",
+     "verbo",
+     "premio"
+    ]
+   },
+   "sorteios.sorteio_terminou_sem_participantes": {
+    "modulo": "sorteios",
+    "padrao": "😕 O sorteio de **{premio}** terminou sem participantes.",
+    "tipo": "texto",
+    "vars": [
+     "premio"
+    ]
+   },
+   "sorteios.duracao_invalida_ex_1h": {
+    "modulo": "sorteios",
+    "padrao": "Duração inválida (ex.: 1h, 2d; entre 10s e 60d).",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "sorteios.consegui_enviar_mensagens_confira": {
+    "modulo": "sorteios",
+    "padrao": "Não consegui enviar mensagens em {canal}. Confira as minhas permissões.",
+    "tipo": "resposta",
+    "vars": [
+     "canal"
+    ]
+   },
+   "sorteios.sorteio_criado_termina": {
+    "modulo": "sorteios",
+    "padrao": "Sorteio criado em {canal}! Termina {quando}.",
+    "tipo": "resposta",
+    "vars": [
+     "canal",
+     "quando"
+    ]
+   },
+   "sorteios.sorteio_encontrado": {
+    "modulo": "sorteios",
+    "padrao": "Sorteio não encontrado.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "sorteios.esse_sorteio_ja_terminou": {
+    "modulo": "sorteios",
+    "padrao": "Esse sorteio já terminou. Use /sorteio refazer para sortear de novo.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "sorteios.sorteio_encerrado": {
+    "modulo": "sorteios",
+    "padrao": "✅ Sorteio encerrado.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "sorteios.esse_sorteio_ainda_terminou": {
+    "modulo": "sorteios",
+    "padrao": "Esse sorteio ainda não terminou.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "sorteios.ninguem_participou_desse_sorteio": {
+    "modulo": "sorteios",
+    "padrao": "Ninguém participou desse sorteio.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "sorteios.novo_sorteio": {
+    "modulo": "sorteios",
+    "padrao": "🎉 Novo sorteio de **{premio}**: {ganhadores}!",
+    "tipo": "conteudo",
+    "vars": [
+     "premio",
+     "ganhadores"
+    ]
+   },
+   "sorteios.nenhum_sorteio_andamento": {
+    "modulo": "sorteios",
+    "padrao": "Nenhum sorteio em andamento.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "sorteios.termina_participante_id": {
+    "modulo": "sorteios",
+    "padrao": "**{premio}** · <#{canal}> · termina {quando} · {participantes_total} participante(s) · ID `{id}`",
+    "tipo": "texto",
+    "vars": [
+     "premio",
+     "canal",
+     "quando",
+     "participantes_total",
+     "id"
+    ]
+   },
+   "sorteios.sorteios_andamento": {
+    "modulo": "sorteios",
+    "padrao": "🎉 Sorteios em andamento",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "sorteios.este_sorteio_ja_terminou": {
+    "modulo": "sorteios",
+    "padrao": "Este sorteio já terminou.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "sorteios.participar_voce_precisa_cargo": {
+    "modulo": "sorteios",
+    "padrao": "Para participar você precisa do cargo <@&{cargo}>.",
+    "tipo": "resposta",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "sorteios.voce_saiu_sorteio": {
+    "modulo": "sorteios",
+    "padrao": "Você saiu do sorteio.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "sorteios.voce_esta_participando_clique": {
+    "modulo": "sorteios",
+    "padrao": "🎉 Você está participando! Clique de novo para sair.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "sorteios.sorteios": {
+    "modulo": "sorteios",
+    "padrao": "Sorteios",
+    "tipo": "texto",
+    "vars": []
+   },
+   "cargos.clique_nos_botoes_pegar": {
+    "modulo": "cargos",
+    "padrao": "Clique nos botões para pegar ou tirar cargos.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "cargos.consegui_enviar_mensagens_confira": {
+    "modulo": "cargos",
+    "padrao": "Não consegui enviar mensagens em {canal}. Confira as minhas permissões.",
+    "tipo": "resposta",
+    "vars": [
+     "canal"
+    ]
+   },
+   "cargos.painel_criado_agora_use": {
+    "modulo": "cargos",
+    "padrao": "Painel criado em {canal}. Agora use **/cargos adicionar painel:{mensagem_id}** para colocar os cargos.",
+    "tipo": "resposta",
+    "vars": [
+     "canal",
+     "mensagem_id"
+    ]
+   },
+   "cargos.painel_encontrado_use_id": {
+    "modulo": "cargos",
+    "padrao": "Painel não encontrado. Use o ID ou o link da mensagem do painel.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "cargos.esse_cargo_pode_ser": {
+    "modulo": "cargos",
+    "padrao": "Esse cargo não pode ser dado por botão.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "cargos.consigo_dar_suba_meu": {
+    "modulo": "cargos",
+    "padrao": "Não consigo dar {cargo}: suba o meu cargo acima dele na lista de cargos.",
+    "tipo": "resposta",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "cargos.seguranca_cargos_permissoes_administ": {
+    "modulo": "cargos",
+    "padrao": "Por segurança, cargos com permissões de administração não podem ir para painéis.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "cargos.esse_cargo_ja_esta": {
+    "modulo": "cargos",
+    "padrao": "Esse cargo já está no painel.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "cargos.painel_aceita_maximo_25": {
+    "modulo": "cargos",
+    "padrao": "Um painel aceita no máximo 25 cargos.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "cargos.consegui_atualizar_painel_confira": {
+    "modulo": "cargos",
+    "padrao": "Não consegui atualizar o painel. Confira se o emoji é válido.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "cargos.adicionado_painel": {
+    "modulo": "cargos",
+    "padrao": "{cargo} adicionado ao painel.",
+    "tipo": "resposta",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "cargos.esse_cargo_esta_painel": {
+    "modulo": "cargos",
+    "padrao": "Esse cargo não está no painel.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "cargos.removido_painel": {
+    "modulo": "cargos",
+    "padrao": "{cargo} removido do painel.",
+    "tipo": "resposta",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "cargos.este_botao_esta_mais": {
+    "modulo": "cargos",
+    "padrao": "Este botão não está mais ativo.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "cargos.esse_cargo_existe_mais": {
+    "modulo": "cargos",
+    "padrao": "Esse cargo não existe mais. Avise a equipe.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "cargos.consigo_dar_esse_cargo": {
+    "modulo": "cargos",
+    "padrao": "Não consigo dar esse cargo agora (o meu cargo está abaixo dele). Avise a equipe.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "cargos.consegui_mudar_seu_cargo": {
+    "modulo": "cargos",
+    "padrao": "Não consegui mudar o seu cargo agora. Avise a equipe.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "cargos.cargo_removido": {
+    "modulo": "cargos",
+    "padrao": "Cargo {cargo} removido.",
+    "tipo": "texto",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "cargos.voce_recebeu": {
+    "modulo": "cargos",
+    "padrao": "Você recebeu {cargo}!",
+    "tipo": "texto",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "cargos.cargos_botao": {
+    "modulo": "cargos",
+    "padrao": "Cargos por botão",
+    "tipo": "texto",
+    "vars": []
+   },
+   "cargostemp.tirei": {
+    "modulo": "cargostemp",
+    "padrao": "Tirei",
+    "tipo": "texto",
+    "vars": []
+   },
+   "cargostemp.consegui_tirar": {
+    "modulo": "cargostemp",
+    "padrao": "Não consegui tirar",
+    "tipo": "texto",
+    "vars": []
+   },
+   "cargostemp.fim_prazo": {
+    "modulo": "cargostemp",
+    "padrao": "⏳ {resultado} <@&{cargo}> de <@{usuario}> (fim do prazo).",
+    "tipo": "texto",
+    "vars": [
+     "resultado",
+     "cargo",
+     "usuario"
+    ]
+   },
+   "cargostemp.canal_registro_salvo": {
+    "modulo": "cargostemp",
+    "padrao": "Canal de registro salvo.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "cargostemp.nenhum_cargo_temporario_ativo": {
+    "modulo": "cargostemp",
+    "padrao": "Nenhum cargo temporário ativo.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "cargostemp.sai": {
+    "modulo": "cargostemp",
+    "padrao": "<@{usuario}> · <@&{cargo}> · sai {quando}",
+    "tipo": "texto",
+    "vars": [
+     "usuario",
+     "cargo",
+     "quando"
+    ]
+   },
+   "cargostemp.cargos_temporarios": {
+    "modulo": "cargostemp",
+    "padrao": "⏳ Cargos temporários",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "cargostemp.essa_pessoa_esta_servidor": {
+    "modulo": "cargostemp",
+    "padrao": "Essa pessoa não está no servidor.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "cargostemp.tirei_2": {
+    "modulo": "cargostemp",
+    "padrao": "Tirei {cargo} de {usuario}.",
+    "tipo": "texto",
+    "vars": [
+     "cargo",
+     "usuario"
+    ]
+   },
+   "cargostemp.consegui_tirar_cargo_confira": {
+    "modulo": "cargostemp",
+    "padrao": "Não consegui tirar o cargo (confira a minha posição na lista de cargos).",
+    "tipo": "texto",
+    "vars": []
+   },
+   "cargostemp.duracao_invalida_use_algo": {
+    "modulo": "cargostemp",
+    "padrao": "Duração inválida. Use algo como **7d**, **30d** ou **12h** (máximo 365d).",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "cargostemp.esse_cargo_pode_ser": {
+    "modulo": "cargostemp",
+    "padrao": "Esse cargo não pode ser dado.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "cargostemp.meu_cargo_precisa_ficar": {
+    "modulo": "cargostemp",
+    "padrao": "Meu cargo precisa ficar acima de {cargo}.",
+    "tipo": "resposta",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "cargostemp.voce_so_pode_dar": {
+    "modulo": "cargostemp",
+    "padrao": "Você só pode dar cargos abaixo do seu.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "cargostemp.consegui_dar_cargo": {
+    "modulo": "cargostemp",
+    "padrao": "Não consegui dar o cargo.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "cargostemp.deu_ate": {
+    "modulo": "cargostemp",
+    "padrao": "⏳ {autor} deu <@&{cargo_id}> para {usuario} até {quando}{motivo}",
+    "tipo": "texto",
+    "vars": [
+     "autor",
+     "cargo_id",
+     "usuario",
+     "quando",
+     "motivo"
+    ]
+   },
+   "cargostemp.prazo_renovado": {
+    "modulo": "cargostemp",
+    "padrao": " (prazo renovado)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "cargostemp.recebeu_ate": {
+    "modulo": "cargostemp",
+    "padrao": "{usuario} recebeu {cargo} até {quando} ({relativo}).{renovado}",
+    "tipo": "resposta",
+    "vars": [
+     "usuario",
+     "cargo",
+     "quando",
+     "relativo",
+     "renovado"
+    ]
+   },
+   "cargostemp.cargos_temporarios_2": {
+    "modulo": "cargostemp",
+    "padrao": "Cargos temporários",
+    "tipo": "texto",
+    "vars": []
+   },
+   "cargostemp.registro": {
+    "modulo": "cargostemp",
+    "padrao": " · registro em <#{registro}>",
+    "tipo": "texto",
+    "vars": [
+     "registro"
+    ]
+   },
+   "cargostemp.cargo_temporario_ativo": {
+    "modulo": "cargostemp",
+    "padrao": "{total} cargo(s) temporário(s) ativo(s){registro}",
+    "tipo": "texto",
+    "vars": [
+     "total",
+     "registro"
+    ]
+   },
+   "callstemp.nome_sala_padrao": {
+    "modulo": "callstemp",
+    "padrao": "Sala de {nome}",
+    "tipo": "texto",
+    "vars": [
+     "nome"
+    ]
+   },
+   "callstemp.aguarde_criar_outra_sala": {
+    "modulo": "callstemp",
+    "padrao": "Aguarde para criar outra sala",
+    "tipo": "texto",
+    "vars": []
+   },
+   "callstemp.sala_temporaria": {
+    "modulo": "callstemp",
+    "padrao": "Sala temporária",
+    "tipo": "texto",
+    "vars": []
+   },
+   "callstemp.entre_sua_sala_temporaria": {
+    "modulo": "callstemp",
+    "padrao": "Entre na sua sala temporária para usar este comando.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "callstemp.voce_ja_dono_desta": {
+    "modulo": "callstemp",
+    "padrao": "Você já é o dono desta sala.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "callstemp.dono_ainda_esta_sala": {
+    "modulo": "callstemp",
+    "padrao": "O dono (<@{dono}>) ainda está na sala.",
+    "tipo": "resposta",
+    "vars": [
+     "dono"
+    ]
+   },
+   "callstemp.agora_sala_sua_use": {
+    "modulo": "callstemp",
+    "padrao": "Agora a sala é sua. Use /sala para controlar.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "callstemp.so_dono_sala_pode": {
+    "modulo": "callstemp",
+    "padrao": "Só o dono da sala (<@{dono}>) pode fazer isso.",
+    "tipo": "resposta",
+    "vars": [
+     "dono"
+    ]
+   },
+   "callstemp.consegui_confira_minhas_permissoes": {
+    "modulo": "callstemp",
+    "padrao": "Não consegui. Confira as minhas permissões (Gerenciar canais e Gerenciar cargos).",
+    "tipo": "texto",
+    "vars": []
+   },
+   "callstemp.sala_renomeada": {
+    "modulo": "callstemp",
+    "padrao": "✅ Sala renomeada para **{nome}**.",
+    "tipo": "texto",
+    "vars": [
+     "nome"
+    ]
+   },
+   "callstemp.consegui_renomear_agora_discord": {
+    "modulo": "callstemp",
+    "padrao": "❌ Não consegui renomear agora (o Discord limita a 2 vezes a cada 10 minutos).",
+    "tipo": "texto",
+    "vars": []
+   },
+   "callstemp.limite_pessoa": {
+    "modulo": "callstemp",
+    "padrao": "Limite: **{limite}** pessoa(s).",
+    "tipo": "texto",
+    "vars": [
+     "limite"
+    ]
+   },
+   "callstemp.sala_sem_limite": {
+    "modulo": "callstemp",
+    "padrao": "Sala sem limite.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "callstemp.sala_trancada": {
+    "modulo": "callstemp",
+    "padrao": "🔒 Sala trancada.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "callstemp.sala_liberada": {
+    "modulo": "callstemp",
+    "padrao": "🔓 Sala liberada.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "callstemp.escolha_outra_pessoa": {
+    "modulo": "callstemp",
+    "padrao": "Escolha outra pessoa.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "callstemp.pode_entrar_sala": {
+    "modulo": "callstemp",
+    "padrao": "{usuario} pode entrar na sala.",
+    "tipo": "texto",
+    "vars": [
+     "usuario"
+    ]
+   },
+   "callstemp.expulso_sala_temporaria": {
+    "modulo": "callstemp",
+    "padrao": "Expulso da sala temporária",
+    "tipo": "texto",
+    "vars": []
+   },
+   "callstemp.foi_tirado_sala_pode": {
+    "modulo": "callstemp",
+    "padrao": "{usuario} foi tirado(a) da sala e não pode voltar.",
+    "tipo": "texto",
+    "vars": [
+     "usuario"
+    ]
+   },
+   "callstemp.calls_temporarias_desligadas": {
+    "modulo": "callstemp",
+    "padrao": "Calls temporárias desligadas.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "callstemp.criar_sala": {
+    "modulo": "callstemp",
+    "padrao": "➕ Criar sala",
+    "tipo": "campo",
+    "vars": []
+   },
+   "callstemp.consegui_criar_call_preciso": {
+    "modulo": "callstemp",
+    "padrao": "Não consegui criar a call. Preciso da permissão **Gerenciar canais**.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "callstemp.pronto_quem_entrar_ganha": {
+    "modulo": "callstemp",
+    "padrao": "Pronto! Quem entrar em {canal} ganha uma sala própria (nome: \"{nome}\"). O dono controla com `/sala`.",
+    "tipo": "resposta",
+    "vars": [
+     "canal",
+     "nome"
+    ]
+   },
+   "callstemp.calls_temporarias": {
+    "modulo": "callstemp",
+    "padrao": "Calls temporárias",
+    "tipo": "texto",
+    "vars": []
+   },
+   "callstemp.criar_sala_nome_sala": {
+    "modulo": "callstemp",
+    "padrao": "Criar sala: <#{criador}> · nome \"{nome}\" · {total} sala(s) aberta(s)",
+    "tipo": "texto",
+    "vars": [
+     "criador",
+     "nome",
+     "total"
+    ]
+   },
+   "callstemp.desligado_salas_configurar": {
+    "modulo": "callstemp",
+    "padrao": "Desligado (`/salas configurar`)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "contadores.membros": {
+    "modulo": "contadores",
+    "padrao": "Membros",
+    "tipo": "texto",
+    "vars": []
+   },
+   "contadores.membros_2": {
+    "modulo": "contadores",
+    "padrao": "👥 Membros: {n}",
+    "tipo": "texto",
+    "vars": [
+     "n"
+    ]
+   },
+   "contadores.online_agora": {
+    "modulo": "contadores",
+    "padrao": "Online agora",
+    "tipo": "texto",
+    "vars": []
+   },
+   "contadores.online": {
+    "modulo": "contadores",
+    "padrao": "🟢 Online: {n}",
+    "tipo": "texto",
+    "vars": [
+     "n"
+    ]
+   },
+   "contadores.boosts": {
+    "modulo": "contadores",
+    "padrao": "Boosts",
+    "tipo": "texto",
+    "vars": []
+   },
+   "contadores.boosts_2": {
+    "modulo": "contadores",
+    "padrao": "🚀 Boosts: {n}",
+    "tipo": "texto",
+    "vars": [
+     "n"
+    ]
+   },
+   "contadores.canais": {
+    "modulo": "contadores",
+    "padrao": "Canais",
+    "tipo": "texto",
+    "vars": []
+   },
+   "contadores.canais_2": {
+    "modulo": "contadores",
+    "padrao": "💬 Canais: {n}",
+    "tipo": "texto",
+    "vars": [
+     "n"
+    ]
+   },
+   "contadores.cargos": {
+    "modulo": "contadores",
+    "padrao": "Cargos",
+    "tipo": "texto",
+    "vars": []
+   },
+   "contadores.cargos_2": {
+    "modulo": "contadores",
+    "padrao": "🎭 Cargos: {n}",
+    "tipo": "texto",
+    "vars": [
+     "n"
+    ]
+   },
+   "contadores.nenhum_contador_use_contadores": {
+    "modulo": "contadores",
+    "padrao": "Nenhum contador. Use `/contadores criar`.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "contadores.contadores": {
+    "modulo": "contadores",
+    "padrao": "📈 Contadores",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "contadores.esse_canal_contador": {
+    "modulo": "contadores",
+    "padrao": "Esse canal não é um contador.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "contadores.contador_removido": {
+    "modulo": "contadores",
+    "padrao": "Contador removido.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "contadores.maximo_contadores": {
+    "modulo": "contadores",
+    "padrao": "No máximo {limite} contadores.",
+    "tipo": "resposta",
+    "vars": [
+     "limite"
+    ]
+   },
+   "contadores.consegui_criar_canal_preciso": {
+    "modulo": "contadores",
+    "padrao": "❌ Não consegui criar o canal. Preciso das permissões **Gerenciar canais** e **Conectar**.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "contadores.contador_criado_ele_atualiza": {
+    "modulo": "contadores",
+    "padrao": "✅ Contador criado: {canal}. Ele se atualiza a cada 10 minutos.",
+    "tipo": "texto",
+    "vars": [
+     "canal"
+    ]
+   },
+   "contadores.contadores_2": {
+    "modulo": "contadores",
+    "padrao": "Contadores",
+    "tipo": "texto",
+    "vars": []
+   },
+   "contadores.nenhum_contadores_criar": {
+    "modulo": "contadores",
+    "padrao": "Nenhum (`/contadores criar`)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "destaques.anexos": {
+    "modulo": "destaques",
+    "padrao": "Anexos",
+    "tipo": "campo",
+    "vars": []
+   },
+   "destaques.ver_mensagem": {
+    "modulo": "destaques",
+    "padrao": "Ver mensagem",
+    "tipo": "botao",
+    "vars": []
+   },
+   "destaques.destaques_desligados": {
+    "modulo": "destaques",
+    "padrao": "Destaques desligados.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "destaques.destaques_ligados_mensagens_vao": {
+    "modulo": "destaques",
+    "padrao": "Destaques ligados: mensagens com **{minimo}** {mostra} vão para {canal}.",
+    "tipo": "resposta",
+    "vars": [
+     "minimo",
+     "mostra",
+     "canal"
+    ]
+   },
+   "destaques.destaques": {
+    "modulo": "destaques",
+    "padrao": "Destaques",
+    "tipo": "texto",
+    "vars": []
+   },
+   "destaques.reacao_oes": {
+    "modulo": "destaques",
+    "padrao": "<#{canal}> · {minimo} reação(ões)",
+    "tipo": "texto",
+    "vars": [
+     "canal",
+     "minimo"
+    ]
+   },
+   "destaques.desligado_destaques_configurar": {
+    "modulo": "destaques",
+    "padrao": "Desligado (`/destaques configurar`)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "contagem.proximo_era": {
+    "modulo": "contagem",
+    "padrao": "O próximo era **{esperado}**.",
+    "tipo": "texto",
+    "vars": [
+     "esperado"
+    ]
+   },
+   "contagem.vale_contar_duas_vezes": {
+    "modulo": "contagem",
+    "padrao": "Não vale contar duas vezes seguidas.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "contagem.errou_voces_chegaram_recomecando": {
+    "modulo": "contagem",
+    "padrao": "💥 {autor} errou! {erro}\nVocês chegaram a **{chegou}**. Recomeçando do **1**. (Recorde: {recorde})",
+    "tipo": "descricao",
+    "vars": [
+     "autor",
+     "erro",
+     "chegou",
+     "recorde"
+    ]
+   },
+   "contagem.novo_recorde_voces_passaram": {
+    "modulo": "contagem",
+    "padrao": "🏆 **Novo recorde!** Vocês passaram de {recorde_anterior}.",
+    "tipo": "descricao",
+    "vars": [
+     "recorde_anterior"
+    ]
+   },
+   "contagem.jogo_contar_esta_ligado": {
+    "modulo": "contagem",
+    "padrao": "O jogo de contar não está ligado.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "contagem.estamos_proximo_recorde": {
+    "modulo": "contagem",
+    "padrao": "🔢 Em <#{canal}>: estamos no **{atual}** (próximo: {proximo}).\n🏆 Recorde: **{recorde}**{quando_recorde}",
+    "tipo": "resposta",
+    "vars": [
+     "canal",
+     "atual",
+     "proximo",
+     "recorde",
+     "quando_recorde"
+    ]
+   },
+   "contagem.so_quem_tem_gerenciar": {
+    "modulo": "contagem",
+    "padrao": "Só quem tem **Gerenciar servidor** pode fazer isso.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "contagem.contagem_zerada_proximo_numero": {
+    "modulo": "contagem",
+    "padrao": "Contagem zerada. O próximo número é 1.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "contagem.jogo_contar": {
+    "modulo": "contagem",
+    "padrao": "🔢 Jogo de contar",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "contagem.contem_partir_numero_mensagem": {
+    "modulo": "contagem",
+    "padrao": "Contem a partir do **1**, um número por mensagem.\nA mesma pessoa não pode contar duas vezes seguidas. Errou, volta para o 1!",
+    "tipo": "descricao",
+    "vars": []
+   },
+   "contagem.jogo_contar_ligado": {
+    "modulo": "contagem",
+    "padrao": "Jogo de contar ligado em {canal}.",
+    "tipo": "resposta",
+    "vars": [
+     "canal"
+    ]
+   },
+   "contagem.jogo_contar_2": {
+    "modulo": "contagem",
+    "padrao": "Jogo de contar",
+    "tipo": "texto",
+    "vars": []
+   },
+   "contagem.atual_recorde": {
+    "modulo": "contagem",
+    "padrao": "<#{canal}> · atual {atual} · recorde {recorde}",
+    "tipo": "texto",
+    "vars": [
+     "canal",
+     "atual",
+     "recorde"
+    ]
+   },
+   "contagem.desligado_contagem_canal": {
+    "modulo": "contagem",
+    "padrao": "Desligado (`/contagem canal`)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "afk.afk": {
+    "modulo": "afk",
+    "padrao": "[AFK] ",
+    "tipo": "texto",
+    "vars": []
+   },
+   "afk.em": {
+    "modulo": "afk",
+    "padrao": "• <@{por}> em {link}",
+    "tipo": "texto",
+    "vars": [
+     "por",
+     "link"
+    ]
+   },
+   "afk.te_chamaram_vez_es": {
+    "modulo": "afk",
+    "padrao": "\nTe chamaram {vezes} vez(es):\n{lista}",
+    "tipo": "texto",
+    "vars": [
+     "vezes",
+     "lista"
+    ]
+   },
+   "afk.bem_vindo_volta_voce": {
+    "modulo": "afk",
+    "padrao": "👋 Bem-vindo(a) de volta, {autor}! Você ficou AFK por **{duracao}**.{chamados}",
+    "tipo": "texto",
+    "vars": [
+     "autor",
+     "duracao",
+     "chamados"
+    ]
+   },
+   "afk.esta_afk": {
+    "modulo": "afk",
+    "padrao": "💤 <@{usuario}> está AFK{motivo} · <t:{desde}:R>",
+    "tipo": "conteudo",
+    "vars": [
+     "usuario",
+     "motivo",
+     "desde"
+    ]
+   },
+   "afk.voce_esta_afk_quando": {
+    "modulo": "afk",
+    "padrao": "Você está AFK{motivo}. Quando mandar uma mensagem, o AFK sai sozinho.",
+    "tipo": "resposta",
+    "vars": [
+     "motivo"
+    ]
+   },
+   "afk.afk_2": {
+    "modulo": "afk",
+    "padrao": "AFK",
+    "tipo": "texto",
+    "vars": []
+   },
+   "autorespostas.contem_palavra": {
+    "modulo": "autorespostas",
+    "padrao": "contém a palavra",
+    "tipo": "texto",
+    "vars": []
+   },
+   "autorespostas.exatamente": {
+    "modulo": "autorespostas",
+    "padrao": "é exatamente",
+    "tipo": "texto",
+    "vars": []
+   },
+   "autorespostas.comeca": {
+    "modulo": "autorespostas",
+    "padrao": "começa com",
+    "tipo": "texto",
+    "vars": []
+   },
+   "autorespostas.gatilho_precisa_ter_pelo": {
+    "modulo": "autorespostas",
+    "padrao": "O gatilho precisa ter pelo menos 2 letras.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "autorespostas.limite_respostas_automaticas_apague": {
+    "modulo": "autorespostas",
+    "padrao": "Limite de {limite} respostas automáticas. Apague alguma antes.",
+    "tipo": "resposta",
+    "vars": [
+     "limite"
+    ]
+   },
+   "autorespostas.atualizada": {
+    "modulo": "autorespostas",
+    "padrao": "Atualizada",
+    "tipo": "texto",
+    "vars": []
+   },
+   "autorespostas.criada": {
+    "modulo": "autorespostas",
+    "padrao": "Criada",
+    "tipo": "texto",
+    "vars": []
+   },
+   "autorespostas.quando_mensagem_eu_respondo": {
+    "modulo": "autorespostas",
+    "padrao": "{acao}: quando a mensagem **{modo}** `{gatilho}`, eu respondo. Também dá para usar `/tag {gatilho}`.",
+    "tipo": "resposta",
+    "vars": [
+     "acao",
+     "modo",
+     "gatilho"
+    ]
+   },
+   "autorespostas.achei_essa_resposta_automatica": {
+    "modulo": "autorespostas",
+    "padrao": "Não achei essa resposta automática.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "autorespostas.resposta_automatica_apagada": {
+    "modulo": "autorespostas",
+    "padrao": "Resposta automática apagada.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "autorespostas.nenhuma_resposta_automatica_ainda": {
+    "modulo": "autorespostas",
+    "padrao": "Nenhuma resposta automática ainda. Use `/autoresposta adicionar`.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "autorespostas.respostas_automaticas": {
+    "modulo": "autorespostas",
+    "padrao": "💬 Respostas automáticas ({total})",
+    "tipo": "titulo",
+    "vars": [
+     "total"
+    ]
+   },
+   "autorespostas.achei_essa_resposta_veja": {
+    "modulo": "autorespostas",
+    "padrao": "Não achei essa resposta. Veja as opções enquanto digita.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "autorespostas.respostas_automaticas_2": {
+    "modulo": "autorespostas",
+    "padrao": "Respostas automáticas",
+    "tipo": "texto",
+    "vars": []
+   },
+   "autorespostas.resposta_automatica_autoresposta_lis": {
+    "modulo": "autorespostas",
+    "padrao": "{total} resposta(s) automática(s) (`/autoresposta lista`)",
+    "tipo": "texto",
+    "vars": [
+     "total"
+    ]
+   },
+   "autorespostas.nenhuma_ainda_autoresposta_adicionar": {
+    "modulo": "autorespostas",
+    "padrao": "Nenhuma ainda (`/autoresposta adicionar`)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "anuncios.america_sao_paulo": {
+    "modulo": "anuncios",
+    "padrao": "America/Sao_Paulo",
+    "tipo": "texto",
+    "vars": []
+   },
+   "anuncios.nenhum_anuncio_agendado_use": {
+    "modulo": "anuncios",
+    "padrao": "Nenhum anúncio agendado. Use `/anuncio criar`.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "anuncios.cada": {
+    "modulo": "anuncios",
+    "padrao": " · a cada {duracao}",
+    "tipo": "texto",
+    "vars": [
+     "duracao"
+    ]
+   },
+   "anuncios.anuncios_agendados": {
+    "modulo": "anuncios",
+    "padrao": "📣 Anúncios agendados",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "anuncios.anuncio_encontrado_escolha_lista": {
+    "modulo": "anuncios",
+    "padrao": "Anúncio não encontrado. Escolha na lista enquanto digita.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "anuncios.enviado": {
+    "modulo": "anuncios",
+    "padrao": "Enviado em <#{canal}>.",
+    "tipo": "texto",
+    "vars": [
+     "canal"
+    ]
+   },
+   "anuncios.consegui_enviar_confira_minhas": {
+    "modulo": "anuncios",
+    "padrao": "Não consegui enviar. Confira as minhas permissões no canal.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "anuncios.anuncio_cancelado": {
+    "modulo": "anuncios",
+    "padrao": "Anúncio cancelado.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "anuncios.maximo_anuncios_agendados": {
+    "modulo": "anuncios",
+    "padrao": "No máximo {limite} anúncios agendados.",
+    "tipo": "resposta",
+    "vars": [
+     "limite"
+    ]
+   },
+   "anuncios.essa_data_ja_passou": {
+    "modulo": "anuncios",
+    "padrao": "Essa data já passou. Confira o dia e o horário.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "anuncios.entendi_data_use_algo": {
+    "modulo": "anuncios",
+    "padrao": "Não entendi a data. Use algo como **25/12 09:00**, **18:30**, **9h** ou **em 2h**.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "anuncios.entendi_repetir_use_algo": {
+    "modulo": "anuncios",
+    "padrao": "Não entendi o \"repetir\". Use algo como **12h**, **1d** ou **7d**.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "anuncios.virar_spam_intervalo_minimo": {
+    "modulo": "anuncios",
+    "padrao": "Para não virar spam, o intervalo mínimo é de 10 minutos.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "anuncios.link_imagem_precisa_comecar": {
+    "modulo": "anuncios",
+    "padrao": "O link da imagem precisa começar com https://",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "anuncios.depois_cada": {
+    "modulo": "anuncios",
+    "padrao": " e depois a cada **{duracao}**",
+    "tipo": "texto",
+    "vars": [
+     "duracao"
+    ]
+   },
+   "anuncios.anuncio_agendado": {
+    "modulo": "anuncios",
+    "padrao": "Anúncio agendado para {quando} ({relativo}){duracao} em <#{canal}>.",
+    "tipo": "resposta",
+    "vars": [
+     "quando",
+     "relativo",
+     "duracao",
+     "canal"
+    ]
+   },
+   "anuncios.anuncios_agendados_2": {
+    "modulo": "anuncios",
+    "padrao": "Anúncios agendados",
+    "tipo": "texto",
+    "vars": []
+   },
+   "anuncios.anuncio_agendado_anuncio_lista": {
+    "modulo": "anuncios",
+    "padrao": "{total} anúncio(s) agendado(s) (`/anuncio lista`)",
+    "tipo": "texto",
+    "vars": [
+     "total"
+    ]
+   },
+   "anuncios.nenhum_anuncio_criar": {
+    "modulo": "anuncios",
+    "padrao": "Nenhum (`/anuncio criar`)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "embeds.criador_embed": {
+    "modulo": "embeds",
+    "padrao": "Criador de embed",
+    "tipo": "rotulo",
+    "vars": []
+   },
+   "embeds.titulo": {
+    "modulo": "embeds",
+    "padrao": "Título",
+    "tipo": "texto",
+    "vars": []
+   },
+   "embeds.texto_aceita_negrito_listas": {
+    "modulo": "embeds",
+    "padrao": "Texto (aceita **negrito**, listas, links...)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "embeds.cor_ex_5865f2": {
+    "modulo": "embeds",
+    "padrao": "Cor (ex.: #5865F2)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "embeds.link_imagem_grande_opcional": {
+    "modulo": "embeds",
+    "padrao": "Link da imagem grande (opcional)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "embeds.rodape_opcional": {
+    "modulo": "embeds",
+    "padrao": "Rodapé (opcional)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "embeds.formulario_expirou_use_comando": {
+    "modulo": "embeds",
+    "padrao": "O formulário expirou. Use o comando de novo.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "embeds.ignorei": {
+    "modulo": "embeds",
+    "padrao": "\n⚠️ Ignorei: {erros}.",
+    "tipo": "texto",
+    "vars": [
+     "erros"
+    ]
+   },
+   "embeds.embed_enviado": {
+    "modulo": "embeds",
+    "padrao": "Embed enviado em {canal}.{aviso}",
+    "tipo": "texto",
+    "vars": [
+     "canal",
+     "aviso"
+    ]
+   },
+   "embeds.consegui_enviar_confira_minhas": {
+    "modulo": "embeds",
+    "padrao": "Não consegui enviar. Confira as minhas permissões no canal.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "embeds.achei_mais_mensagem": {
+    "modulo": "embeds",
+    "padrao": "Não achei mais a mensagem.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "embeds.embed_atualizado": {
+    "modulo": "embeds",
+    "padrao": "Embed atualizado.{aviso}",
+    "tipo": "texto",
+    "vars": [
+     "aviso"
+    ]
+   },
+   "embeds.consegui_editar": {
+    "modulo": "embeds",
+    "padrao": "Não consegui editar.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "embeds.botao_precisa_ser_assim": {
+    "modulo": "embeds",
+    "padrao": "O botão {numero} precisa ser assim: **Texto | https://link**",
+    "tipo": "resposta",
+    "vars": [
+     "numero"
+    ]
+   },
+   "embeds.cole_link_mensagem_botao": {
+    "modulo": "embeds",
+    "padrao": "Cole o **link** da mensagem (botão direito na mensagem → Copiar link da mensagem).",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "embeds.achei_essa_mensagem_neste": {
+    "modulo": "embeds",
+    "padrao": "Não achei essa mensagem neste servidor.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "embeds.so_editar_embeds_enviados": {
+    "modulo": "embeds",
+    "padrao": "Só dá para editar embeds enviados por mim.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "embeds.criador_embeds": {
+    "modulo": "embeds",
+    "padrao": "Criador de embeds",
+    "tipo": "texto",
+    "vars": []
+   },
+   "embeds.cor_invalida_use_rrggbb": {
+    "modulo": "embeds",
+    "padrao": "cor inválida (use #RRGGBB)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "embeds.link_imagem_precisa_comecar": {
+    "modulo": "embeds",
+    "padrao": "o link da imagem precisa começar com https://",
+    "tipo": "texto",
+    "vars": []
+   },
+   "aniversarios.msg_parabens_padrao": {
+    "modulo": "aniversarios",
+    "padrao": "🎂 Hoje é aniversário de {usuario}! Parabéns! 🎉",
+    "tipo": "texto",
+    "vars": [
+     "usuario"
+    ]
+   },
+   "aniversarios.america_sao_paulo": {
+    "modulo": "aniversarios",
+    "padrao": "America/Sao_Paulo",
+    "tipo": "texto",
+    "vars": []
+   },
+   "aniversarios.de": {
+    "modulo": "aniversarios",
+    "padrao": "{dia} de {mes}",
+    "tipo": "texto",
+    "vars": [
+     "dia",
+     "mes"
+    ]
+   },
+   "aniversarios.tem_dia": {
+    "modulo": "aniversarios",
+    "padrao": "{mes} não tem dia {dia}.",
+    "tipo": "resposta",
+    "vars": [
+     "mes",
+     "dia"
+    ]
+   },
+   "aniversarios.aniversario_salvo": {
+    "modulo": "aniversarios",
+    "padrao": "Aniversário salvo: **{data}**. 🎂",
+    "tipo": "resposta",
+    "vars": [
+     "data"
+    ]
+   },
+   "aniversarios.seu_aniversario_foi_apagado": {
+    "modulo": "aniversarios",
+    "padrao": "Seu aniversário foi apagado.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "aniversarios.voce_ainda_cadastrou_use": {
+    "modulo": "aniversarios",
+    "padrao": "Você ainda não cadastrou. Use `/aniversario definir`.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "aniversarios.ainda_cadastrou_aniversario": {
+    "modulo": "aniversarios",
+    "padrao": "{usuario} ainda não cadastrou o aniversário.",
+    "tipo": "texto",
+    "vars": [
+     "usuario"
+    ]
+   },
+   "aniversarios.hoje": {
+    "modulo": "aniversarios",
+    "padrao": "**é hoje!** 🎉",
+    "tipo": "texto",
+    "vars": []
+   },
+   "aniversarios.faltam_dia": {
+    "modulo": "aniversarios",
+    "padrao": "faltam {falta} dia(s)",
+    "tipo": "texto",
+    "vars": [
+     "falta"
+    ]
+   },
+   "aniversarios.ninguem_cadastrou_aniversario_ainda": {
+    "modulo": "aniversarios",
+    "padrao": "Ninguém cadastrou o aniversário ainda. Use `/aniversario definir`.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "aniversarios.hoje_2": {
+    "modulo": "aniversarios",
+    "padrao": "**hoje!**",
+    "tipo": "texto",
+    "vars": []
+   },
+   "aniversarios.dia": {
+    "modulo": "aniversarios",
+    "padrao": "em {falta} dia(s)",
+    "tipo": "texto",
+    "vars": [
+     "falta"
+    ]
+   },
+   "aniversarios.proximos_aniversarios": {
+    "modulo": "aniversarios",
+    "padrao": "🎂 Próximos aniversários",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "aniversarios.so_quem_tem_gerenciar": {
+    "modulo": "aniversarios",
+    "padrao": "Só quem tem **Gerenciar servidor** pode configurar.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "aniversarios.escolha_cargo_comum_sem": {
+    "modulo": "aniversarios",
+    "padrao": "Escolha um cargo comum (sem administrador).",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "aniversarios.meu_cargo_precisa_ficar": {
+    "modulo": "aniversarios",
+    "padrao": "Meu cargo precisa ficar acima de {cargo}.",
+    "tipo": "resposta",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "aniversarios.escolha_pelo_menos_opcao": {
+    "modulo": "aniversarios",
+    "padrao": "Escolha pelo menos uma opção (canal, cargo ou mensagem).",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "aniversarios.escolha_canal": {
+    "modulo": "aniversarios",
+    "padrao": "— (escolha um canal)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "aniversarios.cargo_dia": {
+    "modulo": "aniversarios",
+    "padrao": " · cargo do dia <@&{cargo}>",
+    "tipo": "texto",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "aniversarios.aniversarios_parabens": {
+    "modulo": "aniversarios",
+    "padrao": "Aniversários: parabéns em {canal}{cargo}.",
+    "tipo": "resposta",
+    "vars": [
+     "canal",
+     "cargo"
+    ]
+   },
+   "aniversarios.aniversarios": {
+    "modulo": "aniversarios",
+    "padrao": "Aniversários",
+    "tipo": "texto",
+    "vars": []
+   },
+   "aniversarios.definido_aniversario_configurar": {
+    "modulo": "aniversarios",
+    "padrao": "não definido (`/aniversario configurar`)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "aniversarios.parabens": {
+    "modulo": "aniversarios",
+    "padrao": "Parabéns em: {canal}",
+    "tipo": "texto",
+    "vars": [
+     "canal"
+    ]
+   },
+   "aniversarios.nenhum": {
+    "modulo": "aniversarios",
+    "padrao": "nenhum",
+    "tipo": "texto",
+    "vars": []
+   },
+   "aniversarios.cargo_dia_2": {
+    "modulo": "aniversarios",
+    "padrao": "Cargo do dia: {cargo}",
+    "tipo": "texto",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "aniversarios.aniversario_cadastrado": {
+    "modulo": "aniversarios",
+    "padrao": "{total} aniversário(s) cadastrado(s)",
+    "tipo": "texto",
+    "vars": [
+     "total"
+    ]
+   },
+   "minecraft.endereco_invalido": {
+    "modulo": "minecraft",
+    "padrao": "❌ Endereço inválido: `{endereco}`",
+    "tipo": "descricao",
+    "vars": [
+     "endereco"
+    ]
+   },
+   "minecraft.jogadores": {
+    "modulo": "minecraft",
+    "padrao": "Jogadores",
+    "tipo": "campo",
+    "vars": []
+   },
+   "minecraft.versao": {
+    "modulo": "minecraft",
+    "padrao": "Versão",
+    "tipo": "campo",
+    "vars": []
+   },
+   "minecraft.ping": {
+    "modulo": "minecraft",
+    "padrao": "Ping",
+    "tipo": "campo",
+    "vars": []
+   },
+   "minecraft.ms": {
+    "modulo": "minecraft",
+    "padrao": "{latencia} ms",
+    "tipo": "texto",
+    "vars": [
+     "latencia"
+    ]
+   },
+   "minecraft.atualizado": {
+    "modulo": "minecraft",
+    "padrao": "Atualizado",
+    "tipo": "rodape",
+    "vars": []
+   },
+   "minecraft.online_agora": {
+    "modulo": "minecraft",
+    "padrao": "Online agora",
+    "tipo": "campo",
+    "vars": []
+   },
+   "minecraft.servidor_offline_ou_respondeu": {
+    "modulo": "minecraft",
+    "padrao": "Servidor **offline** ou não respondeu.",
+    "tipo": "descricao",
+    "vars": []
+   },
+   "minecraft.so_quem_tem_gerenciar": {
+    "modulo": "minecraft",
+    "padrao": "Só quem tem **Gerenciar servidor** pode criar painéis.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "minecraft.maximo_paineis_apague_mensagem": {
+    "modulo": "minecraft",
+    "padrao": "No máximo {limite} painéis. Apague a mensagem de um para liberar.",
+    "tipo": "resposta",
+    "vars": [
+     "limite"
+    ]
+   },
+   "minecraft.consegui_enviar_nesse_canal": {
+    "modulo": "minecraft",
+    "padrao": "❌ Não consegui enviar nesse canal.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "minecraft.painel_criado_ele_atualiza": {
+    "modulo": "minecraft",
+    "padrao": "✅ Painel criado em {canal}. Ele se atualiza a cada 2 minutos (para tirar, apague a mensagem).",
+    "tipo": "texto",
+    "vars": [
+     "canal"
+    ]
+   },
+   "minecraft.status_minecraft": {
+    "modulo": "minecraft",
+    "padrao": "Status Minecraft",
+    "tipo": "texto",
+    "vars": []
+   },
+   "minecraft.em": {
+    "modulo": "minecraft",
+    "padrao": "`{endereco}` em <#{canal}>",
+    "tipo": "texto",
+    "vars": [
+     "endereco",
+     "canal"
+    ]
+   },
+   "minecraft.nenhum_painel_minecraft_painel": {
+    "modulo": "minecraft",
+    "padrao": "Nenhum painel (`/minecraft painel`)",
+    "tipo": "texto",
+    "vars": []
+   },
+   "utilidades.nenhuma": {
+    "modulo": "utilidades",
+    "padrao": "Nenhuma",
+    "tipo": "texto",
+    "vars": []
+   },
+   "utilidades.baixa": {
+    "modulo": "utilidades",
+    "padrao": "Baixa",
+    "tipo": "texto",
+    "vars": []
+   },
+   "utilidades.media": {
+    "modulo": "utilidades",
+    "padrao": "Média",
+    "tipo": "texto",
+    "vars": []
+   },
+   "utilidades.alta": {
+    "modulo": "utilidades",
+    "padrao": "Alta",
+    "tipo": "texto",
+    "vars": []
+   },
+   "utilidades.muito_alta": {
+    "modulo": "utilidades",
+    "padrao": "Muito alta",
+    "tipo": "texto",
+    "vars": []
+   },
+   "utilidades.id": {
+    "modulo": "utilidades",
+    "padrao": "ID",
+    "tipo": "campo",
+    "vars": []
+   },
+   "utilidades.conta_criada": {
+    "modulo": "utilidades",
+    "padrao": "Conta criada",
+    "tipo": "campo",
+    "vars": []
+   },
+   "utilidades.entrou_servidor": {
+    "modulo": "utilidades",
+    "padrao": "Entrou no servidor",
+    "tipo": "campo",
+    "vars": []
+   },
+   "utilidades.apelido": {
+    "modulo": "utilidades",
+    "padrao": "Apelido",
+    "tipo": "campo",
+    "vars": []
+   },
+   "utilidades.cargos": {
+    "modulo": "utilidades",
+    "padrao": "Cargos ({cargos_total})",
+    "tipo": "campo",
+    "vars": [
+     "cargos_total"
+    ]
+   },
+   "utilidades.impulsiona_desde": {
+    "modulo": "utilidades",
+    "padrao": "Impulsiona desde",
+    "tipo": "campo",
+    "vars": []
+   },
+   "utilidades.dono": {
+    "modulo": "utilidades",
+    "padrao": "Dono",
+    "tipo": "campo",
+    "vars": []
+   },
+   "utilidades.criado": {
+    "modulo": "utilidades",
+    "padrao": "Criado em",
+    "tipo": "campo",
+    "vars": []
+   },
+   "utilidades.membros": {
+    "modulo": "utilidades",
+    "padrao": "Membros",
+    "tipo": "campo",
+    "vars": []
+   },
+   "utilidades.online": {
+    "modulo": "utilidades",
+    "padrao": " · {online} online",
+    "tipo": "texto",
+    "vars": [
+     "online"
+    ]
+   },
+   "utilidades.canais": {
+    "modulo": "utilidades",
+    "padrao": "Canais",
+    "tipo": "campo",
+    "vars": []
+   },
+   "utilidades.texto_voz_categorias": {
+    "modulo": "utilidades",
+    "padrao": "{canais_texto} texto · {canais_voz} voz · {categorias} categorias",
+    "tipo": "texto",
+    "vars": [
+     "canais_texto",
+     "canais_voz",
+     "categorias"
+    ]
+   },
+   "utilidades.cargos_2": {
+    "modulo": "utilidades",
+    "padrao": "Cargos",
+    "tipo": "campo",
+    "vars": []
+   },
+   "utilidades.emojis": {
+    "modulo": "utilidades",
+    "padrao": "Emojis",
+    "tipo": "campo",
+    "vars": []
+   },
+   "utilidades.impulsos": {
+    "modulo": "utilidades",
+    "padrao": "Impulsos",
+    "tipo": "campo",
+    "vars": []
+   },
+   "utilidades.nivel": {
+    "modulo": "utilidades",
+    "padrao": "{impulsos} (nível {nivel})",
+    "tipo": "texto",
+    "vars": [
+     "impulsos",
+     "nivel"
+    ]
+   },
+   "utilidades.verificacao": {
+    "modulo": "utilidades",
+    "padrao": "Verificação",
+    "tipo": "campo",
+    "vars": []
+   },
+   "utilidades.abrir_navegador": {
+    "modulo": "utilidades",
+    "padrao": "Abrir no navegador",
+    "tipo": "botao",
+    "vars": []
+   },
+   "utilidades.avatar_global": {
+    "modulo": "utilidades",
+    "padrao": "Avatar global",
+    "tipo": "botao",
+    "vars": []
+   },
+   "utilidades.avatar": {
+    "modulo": "utilidades",
+    "padrao": "Avatar de {nome}",
+    "tipo": "titulo",
+    "vars": [
+     "nome"
+    ]
+   },
+   "utilidades.tempo_invalido_ex_10m": {
+    "modulo": "utilidades",
+    "padrao": "Tempo inválido (ex.: 10m, 2h, 1d; entre 30s e 1 ano).",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "utilidades.voce_ja_tem_20": {
+    "modulo": "utilidades",
+    "padrao": "Você já tem 20 lembretes pendentes.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "utilidades.combinado_te_lembro": {
+    "modulo": "utilidades",
+    "padrao": "Combinado! Te lembro {quando} (em {duracao}).",
+    "tipo": "resposta",
+    "vars": [
+     "quando",
+     "duracao"
+    ]
+   },
+   "utilidades.utilidades": {
+    "modulo": "utilidades",
+    "padrao": "Utilidades",
+    "tipo": "texto",
+    "vars": []
+   },
+   "utilidades.voce_pediu_eu_te": {
+    "modulo": "utilidades",
+    "padrao": "⏰ <@{usuario}>, você pediu para eu te lembrar ({quando}):\n> {lembrete}",
+    "tipo": "texto",
+    "vars": [
+     "usuario",
+     "quando",
+     "lembrete"
+    ]
+   },
+   "diversao.cara": {
+    "modulo": "diversao",
+    "padrao": "Cara",
+    "tipo": "texto",
+    "vars": []
+   },
+   "diversao.coroa": {
+    "modulo": "diversao",
+    "padrao": "Coroa",
+    "tipo": "texto",
+    "vars": []
+   },
+   "diversao.moeda_girou_girou_deu": {
+    "modulo": "diversao",
+    "padrao": "🪙 A moeda girou, girou… e deu **{lado}**!",
+    "tipo": "descricao",
+    "vars": [
+     "lado"
+    ]
+   },
+   "diversao.saiu": {
+    "modulo": "diversao",
+    "padrao": "Saiu **{total}**!",
+    "tipo": "texto",
+    "vars": [
+     "total"
+    ]
+   },
+   "diversao.certeza": {
+    "modulo": "diversao",
+    "padrao": "Com certeza!",
+    "tipo": "texto",
+    "vars": []
+   },
+   "diversao.sem_duvida": {
+    "modulo": "diversao",
+    "padrao": "Sem dúvida.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "diversao.pode_apostar": {
+    "modulo": "diversao",
+    "padrao": "Pode apostar.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "diversao.sim": {
+    "modulo": "diversao",
+    "padrao": "Sim.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "diversao.tudo_indica_sim": {
+    "modulo": "diversao",
+    "padrao": "Tudo indica que sim.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "diversao.parece_sim": {
+    "modulo": "diversao",
+    "padrao": "Parece que sim.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "diversao.pergunta_novo_mais_tarde": {
+    "modulo": "diversao",
+    "padrao": "Pergunta de novo mais tarde.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "diversao.melhor_te_contar_agora": {
+    "modulo": "diversao",
+    "padrao": "Melhor não te contar agora.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "diversao.consigo_prever_agora": {
+    "modulo": "diversao",
+    "padrao": "Não consigo prever agora.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "diversao.concentra_pergunta_novo": {
+    "modulo": "diversao",
+    "padrao": "Concentra e pergunta de novo.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "diversao.nem_pensar": {
+    "modulo": "diversao",
+    "padrao": "Nem pensar.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "diversao.minha_resposta": {
+    "modulo": "diversao",
+    "padrao": "Minha resposta é não.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "diversao.minhas_fontes_dizem": {
+    "modulo": "diversao",
+    "padrao": "Minhas fontes dizem que não.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "diversao.acho_dificil": {
+    "modulo": "diversao",
+    "padrao": "Acho difícil.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "diversao.muito_duvidoso": {
+    "modulo": "diversao",
+    "padrao": "Muito duvidoso.",
+    "tipo": "texto",
+    "vars": []
+   },
+   "diversao.bola": {
+    "modulo": "diversao",
+    "padrao": "🎱 Bola 8",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "diversao.pergunta": {
+    "modulo": "diversao",
+    "padrao": "Pergunta",
+    "tipo": "campo",
+    "vars": []
+   },
+   "diversao.resposta": {
+    "modulo": "diversao",
+    "padrao": "Resposta",
+    "tipo": "campo",
+    "vars": []
+   },
+   "diversao.coloque_pelo_menos_opcoes": {
+    "modulo": "diversao",
+    "padrao": "Coloque pelo menos 2 opções separadas por **|**.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "diversao.entre_eu_escolho": {
+    "modulo": "diversao",
+    "padrao": "🤔 Entre {opcoes}…\nEu escolho: **{escolha}**!",
+    "tipo": "descricao",
+    "vars": [
+     "opcoes",
+     "escolha"
+    ]
+   },
+   "diversao.casal_perfeito": {
+    "modulo": "diversao",
+    "padrao": "Casal perfeito! 💞",
+    "tipo": "texto",
+    "vars": []
+   },
+   "diversao.tem_muito_futuro": {
+    "modulo": "diversao",
+    "padrao": "Tem muito futuro! 💖",
+    "tipo": "texto",
+    "vars": []
+   },
+   "diversao.pode_dar_certo": {
+    "modulo": "diversao",
+    "padrao": "Pode dar certo… 💗",
+    "tipo": "texto",
+    "vars": []
+   },
+   "diversao.melhor_como_amigos": {
+    "modulo": "diversao",
+    "padrao": "Melhor como amigos. 🤝",
+    "tipo": "texto",
+    "vars": []
+   },
+   "diversao.nem_tenta": {
+    "modulo": "diversao",
+    "padrao": "Nem tenta. 💔",
+    "tipo": "texto",
+    "vars": []
+   },
+   "diversao.diversao": {
+    "modulo": "diversao",
+    "padrao": "Diversão",
+    "tipo": "texto",
+    "vars": []
+   },
+   "personalizar.so_dono": {
+    "modulo": "personalizar",
+    "padrao": "Só o dono do bot (quem criou a aplicação no Developer Portal) pode personalizar.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "personalizar.baixar_ok": {
+    "modulo": "personalizar",
+    "padrao": "Aqui está o arquivo com todos os textos do bot ({total} personalizado(s) até agora).\n\n**Como editar:** abra o **Personalizar bot.html** (está na pasta do bot), clique em **Abrir arquivo** e escolha este arquivo. Depois de salvar, use `/personalizar aplicar`.",
+    "tipo": "resposta",
+    "vars": [
+     "total"
+    ]
+   },
+   "personalizar.arquivo_json": {
+    "modulo": "personalizar",
+    "padrao": "Envie o arquivo **.json** salvo pelo Personalizar bot.html.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "personalizar.arquivo_grande": {
+    "modulo": "personalizar",
+    "padrao": "Esse arquivo é grande demais (máximo 2 MB).",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "personalizar.arquivo_ler": {
+    "modulo": "personalizar",
+    "padrao": "Não consegui baixar o arquivo do Discord. Tente de novo.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "personalizar.arquivo_invalido": {
+    "modulo": "personalizar",
+    "padrao": "Esse arquivo não é um JSON válido. Salve de novo pelo Personalizar bot.html.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "personalizar.aplicado": {
+    "modulo": "personalizar",
+    "padrao": "Personalização aplicada: **{total}** item(ns) diferente(s) do padrão. Já está valendo.",
+    "tipo": "resposta",
+    "vars": [
+     "total"
+    ]
+   },
+   "personalizar.aplicado_paineis": {
+    "modulo": "personalizar",
+    "padrao": "\nOs painéis já enviados estão sendo atualizados.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "personalizar.avisos": {
+    "modulo": "personalizar",
+    "padrao": "\n\n⚠️ Ignorei:\n{lista}",
+    "tipo": "resposta",
+    "vars": [
+     "lista"
+    ]
+   },
+   "personalizar.resetar_pergunta": {
+    "modulo": "personalizar",
+    "padrao": "Isto apaga **toda** a personalização (textos, botões, cores, status, painéis e formulários criados) e volta ao padrão. Tem certeza?",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "personalizar.resetar_botao": {
+    "modulo": "personalizar",
+    "padrao": "Sim, voltar ao padrão",
+    "tipo": "botao",
+    "vars": []
+   },
+   "personalizar.resetado": {
+    "modulo": "personalizar",
+    "padrao": "Pronto: tudo voltou ao padrão.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "personalizar.ver": {
+    "modulo": "personalizar",
+    "padrao": "Personalização atual: **{textos}** texto(s), **{botoes}** botão(ões), **{visuais}** aparência(s) de embed, **{emojis}** emoji(s), **{cores}** cor(es), **{paineis}** painel(éis) e **{formularios}** formulário(s) criados{status}.",
+    "tipo": "resposta",
+    "vars": [
+     "textos",
+     "botoes",
+     "visuais",
+     "emojis",
+     "cores",
+     "paineis",
+     "formularios",
+     "status"
+    ]
+   },
+   "personalizar.ver_status": {
+    "modulo": "personalizar",
+    "padrao": " e o status do bot",
+    "tipo": "texto",
+    "vars": []
+   },
+   "personalizar.painel_nao_existe": {
+    "modulo": "personalizar",
+    "padrao": "Esse painel não existe mais. Crie ou ajuste no Personalizar bot.html.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "personalizar.item_nao_existe": {
+    "modulo": "personalizar",
+    "padrao": "Essa opção não existe mais neste painel.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "personalizar.painel_enviado": {
+    "modulo": "personalizar",
+    "padrao": "Painel **{nome}** enviado em {canal}.",
+    "tipo": "resposta",
+    "vars": [
+     "nome",
+     "canal"
+    ]
+   },
+   "personalizar.painel_sem_permissao": {
+    "modulo": "personalizar",
+    "padrao": "Não consigo enviar mensagens em {canal}.",
+    "tipo": "resposta",
+    "vars": [
+     "canal"
+    ]
+   },
+   "personalizar.nenhum_painel": {
+    "modulo": "personalizar",
+    "padrao": "Nenhum painel criado para este servidor. Crie no **Personalizar bot.html** (aba Painéis) e aplique com `/personalizar aplicar`.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "personalizar.lista_titulo": {
+    "modulo": "personalizar",
+    "padrao": "🧩 Painéis criados",
+    "tipo": "titulo",
+    "vars": []
+   },
+   "personalizar.lista_linha": {
+    "modulo": "personalizar",
+    "padrao": "**{nome}** · {tipo} · {itens} opção(ões){enviado}",
+    "tipo": "texto",
+    "vars": [
+     "nome",
+     "tipo",
+     "itens",
+     "enviado"
+    ]
+   },
+   "personalizar.lista_enviado": {
+    "modulo": "personalizar",
+    "padrao": " · enviado {vezes}x",
+    "tipo": "texto",
+    "vars": [
+     "vezes"
+    ]
+   },
+   "personalizar.tipo_botoes": {
+    "modulo": "personalizar",
+    "padrao": "botões",
+    "tipo": "texto",
+    "vars": []
+   },
+   "personalizar.tipo_menu": {
+    "modulo": "personalizar",
+    "padrao": "menu",
+    "tipo": "texto",
+    "vars": []
+   },
+   "personalizar.lista_formularios": {
+    "modulo": "personalizar",
+    "padrao": "Formulários criados: {total}",
+    "tipo": "rodape",
+    "vars": [
+     "total"
+    ]
+   },
+   "personalizar.atualizados": {
+    "modulo": "personalizar",
+    "padrao": "{total} painel(éis) atualizado(s).",
+    "tipo": "resposta",
+    "vars": [
+     "total"
+    ]
+   },
+   "personalizar.cargo_nao_existe": {
+    "modulo": "personalizar",
+    "padrao": "O cargo deste botão não existe mais. Avise a equipe.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "personalizar.cargo_acima": {
+    "modulo": "personalizar",
+    "padrao": "Não consigo mexer nesse cargo: ele está acima do meu. Avise a equipe.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "personalizar.cargo_ganhou": {
+    "modulo": "personalizar",
+    "padrao": "Você ganhou o cargo {cargo}.",
+    "tipo": "resposta",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "personalizar.cargo_perdeu": {
+    "modulo": "personalizar",
+    "padrao": "Você saiu do cargo {cargo}.",
+    "tipo": "resposta",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "personalizar.cargo_ja_tem": {
+    "modulo": "personalizar",
+    "padrao": "Você já tem o cargo {cargo}.",
+    "tipo": "resposta",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "personalizar.cargo_nao_tem": {
+    "modulo": "personalizar",
+    "padrao": "Você não tem o cargo {cargo}.",
+    "tipo": "resposta",
+    "vars": [
+     "cargo"
+    ]
+   },
+   "personalizar.sem_mensagem": {
+    "modulo": "personalizar",
+    "padrao": "👍",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "personalizar.formulario_nao_existe": {
+    "modulo": "personalizar",
+    "padrao": "Esse formulário não existe mais.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "personalizar.formulario_enviado": {
+    "modulo": "personalizar",
+    "padrao": "Formulário enviado! Obrigado.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "personalizar.formulario_sem_canal": {
+    "modulo": "personalizar",
+    "padrao": "Recebi, mas o canal de respostas não está configurado. Avise a equipe.",
+    "tipo": "resposta",
+    "vars": []
+   },
+   "personalizar.formulario_resposta_titulo": {
+    "modulo": "personalizar",
+    "padrao": "📝 {titulo}",
+    "tipo": "titulo",
+    "vars": [
+     "titulo"
+    ]
+   },
+   "personalizar.formulario_resposta_rodape": {
+    "modulo": "personalizar",
+    "padrao": "ID: {usuario_id}",
+    "tipo": "rodape",
+    "vars": [
+     "usuario_id"
+    ]
+   },
+   "personalizar.ticket_sem_modulo": {
+    "modulo": "personalizar",
+    "padrao": "Este bot não tem o módulo de Tickets.",
+    "tipo": "resposta",
+    "vars": []
+   }
+  },
+  "visuais": {
+   "moderacao.dm": {
+    "modulo": "moderacao",
+    "nome": "Aviso de punição na DM",
+    "vars": [
+     "servidor_icone"
+    ],
+    "padrao": {}
+   },
+   "verificacao.painel": {
+    "modulo": "verificacao",
+    "nome": "Painel de verificação",
+    "vars": [
+     "servidor_icone"
+    ],
+    "padrao": {}
+   },
+   "boasvindas.entrada": {
+    "modulo": "boasvindas",
+    "nome": "Mensagem de entrada",
+    "vars": [
+     "avatar",
+     "servidor_icone"
+    ],
+    "padrao": {
+     "miniatura": "{avatar}"
+    }
+   },
+   "boasvindas.saida": {
+    "modulo": "boasvindas",
+    "nome": "Mensagem de saída",
+    "vars": [
+     "avatar",
+     "servidor_icone"
+    ],
+    "padrao": {
+     "miniatura": "{avatar}"
+    }
+   },
+   "boasvindas.dm": {
+    "modulo": "boasvindas",
+    "nome": "Mensagem na DM de quem entra",
+    "vars": [
+     "avatar",
+     "servidor_icone"
+    ],
+    "padrao": {}
+   },
+   "niveis.rank": {
+    "modulo": "niveis",
+    "nome": "/rank (nível do membro)",
+    "vars": [
+     "avatar",
+     "servidor_icone"
+    ],
+    "padrao": {
+     "miniatura": "{avatar}"
+    }
+   },
+   "tickets.painel": {
+    "modulo": "tickets",
+    "nome": "Painel com o botão de abrir ticket",
+    "vars": [
+     "servidor_icone"
+    ],
+    "padrao": {}
+   },
+   "tickets.aberto": {
+    "modulo": "tickets",
+    "nome": "Mensagem dentro do ticket aberto",
+    "vars": [
+     "avatar",
+     "servidor_icone"
+    ],
+    "padrao": {}
+   },
+   "avaliacoes.pedido": {
+    "modulo": "avaliacoes",
+    "nome": "Pedido de avaliação na DM",
+    "vars": [
+     "servidor_icone"
+    ],
+    "padrao": {}
+   },
+   "formularios.painel": {
+    "modulo": "formularios",
+    "nome": "Painel com o botão de preencher",
+    "vars": [
+     "servidor_icone"
+    ],
+    "padrao": {}
+   },
+   "sugestoes.sugestao": {
+    "modulo": "sugestoes",
+    "nome": "Sugestão publicada",
+    "vars": [
+     "avatar",
+     "servidor_icone"
+    ],
+    "padrao": {}
+   },
+   "enquetes.enquete": {
+    "modulo": "enquetes",
+    "nome": "Mensagem da enquete",
+    "vars": [],
+    "padrao": {}
+   },
+   "sorteios.sorteio": {
+    "modulo": "sorteios",
+    "nome": "Mensagem do sorteio",
+    "vars": [],
+    "padrao": {}
+   },
+   "cargos.painel": {
+    "modulo": "cargos",
+    "nome": "Painel de cargos",
+    "vars": [
+     "servidor_icone"
+    ],
+    "padrao": {}
+   },
+   "destaques.destaque": {
+    "modulo": "destaques",
+    "nome": "Mensagem em destaque",
+    "vars": [
+     "avatar",
+     "servidor_icone"
+    ],
+    "padrao": {}
+   },
+   "anuncios.anuncio": {
+    "modulo": "anuncios",
+    "nome": "Anúncio agendado",
+    "vars": [],
+    "padrao": {}
+   },
+   "aniversarios.parabens": {
+    "modulo": "aniversarios",
+    "nome": "Parabéns no aniversário",
+    "vars": [
+     "avatar",
+     "servidor_icone"
+    ],
+    "padrao": {
+     "miniatura": "{avatar}"
+    }
+   },
+   "minecraft.status": {
+    "modulo": "minecraft",
+    "nome": "Painel de status (online)",
+    "vars": [],
+    "padrao": {
+     "miniatura": "ícone do servidor de Minecraft"
+    }
+   }
+  },
+  "botoes": {
+   "verificacao.iniciar": {
+    "modulo": "verificacao",
+    "nome": "Verificar (painel)",
+    "rotulo": "verificacao.verificar",
+    "rotuloInfo": null,
+    "emoji": "✅",
+    "estilo": "Success",
+    "ocultavel": false,
+    "emojiFixo": false
+   },
+   "antiraid.fim": {
+    "modulo": "antiraid",
+    "nome": "Encerrar modo raid",
+    "rotulo": "antiraid.encerrar_modo_raid",
+    "rotuloInfo": null,
+    "emoji": "✅",
+    "estilo": "Success",
+    "ocultavel": false,
+    "emojiFixo": false
+   },
+   "tickets.abrir": {
+    "modulo": "tickets",
+    "nome": "Abrir ticket (painel)",
+    "rotulo": "tickets.abrir_ticket",
+    "rotuloInfo": null,
+    "emoji": "🎫",
+    "estilo": "Primary",
+    "ocultavel": false,
+    "emojiFixo": false
+   },
+   "tickets.fechar": {
+    "modulo": "tickets",
+    "nome": "Fechar ticket",
+    "rotulo": "tickets.fechar",
+    "rotuloInfo": null,
+    "emoji": "🔒",
+    "estilo": "Danger",
+    "ocultavel": false,
+    "emojiFixo": false
+   },
+   "tickets.assumir": {
+    "modulo": "tickets",
+    "nome": "Assumir ticket",
+    "rotulo": "tickets.assumir",
+    "rotuloInfo": "Depois de assumido, o texto vira o de \"Assumido\".",
+    "emoji": "🙋",
+    "estilo": "Primary",
+    "ocultavel": true,
+    "emojiFixo": false
+   },
+   "tickets.confirmar": {
+    "modulo": "tickets",
+    "nome": "Confirmar fechamento",
+    "rotulo": "tickets.sim_fechar",
+    "rotuloInfo": null,
+    "emoji": "-",
+    "estilo": "Danger",
+    "ocultavel": false,
+    "emojiFixo": false
+   },
+   "avaliacoes.nota": {
+    "modulo": "avaliacoes",
+    "nome": "Botões de nota (1 a 5)",
+    "rotulo": null,
+    "rotuloInfo": "O texto é o número da nota. Sem cor escolhida: 4 e 5 verdes, 3 cinza, 1 e 2 vermelhos.",
+    "emoji": "⭐",
+    "estilo": "Secondary",
+    "ocultavel": false,
+    "emojiFixo": false
+   },
+   "avaliacoes.comentar": {
+    "modulo": "avaliacoes",
+    "nome": "Deixar comentário",
+    "rotulo": "avaliacoes.comentar",
+    "rotuloInfo": null,
+    "emoji": "💬",
+    "estilo": "Primary",
+    "ocultavel": true,
+    "emojiFixo": false
+   },
+   "formularios.aprovar": {
+    "modulo": "formularios",
+    "nome": "Aprovar resposta",
+    "rotulo": "formularios.aprovar",
+    "rotuloInfo": null,
+    "emoji": "✅",
+    "estilo": "Success",
+    "ocultavel": false,
+    "emojiFixo": false
+   },
+   "formularios.recusar": {
+    "modulo": "formularios",
+    "nome": "Recusar resposta",
+    "rotulo": "formularios.recusar",
+    "rotuloInfo": null,
+    "emoji": "❌",
+    "estilo": "Danger",
+    "ocultavel": false,
+    "emojiFixo": false
+   },
+   "formularios.preencher": {
+    "modulo": "formularios",
+    "nome": "Preencher formulário (painel)",
+    "rotulo": "formularios.preencher",
+    "rotuloInfo": null,
+    "emoji": "📝",
+    "estilo": "Primary",
+    "ocultavel": false,
+    "emojiFixo": false
+   },
+   "sugestoes.sim": {
+    "modulo": "sugestoes",
+    "nome": "Votar a favor",
+    "rotulo": null,
+    "rotuloInfo": "O texto é a contagem de votos.",
+    "emoji": "👍",
+    "estilo": "Success",
+    "ocultavel": false,
+    "emojiFixo": false
+   },
+   "sugestoes.nao": {
+    "modulo": "sugestoes",
+    "nome": "Votar contra",
+    "rotulo": null,
+    "rotuloInfo": "O texto é a contagem de votos.",
+    "emoji": "👎",
+    "estilo": "Danger",
+    "ocultavel": false,
+    "emojiFixo": false
+   },
+   "sugestoes.analisar": {
+    "modulo": "sugestoes",
+    "nome": "Equipe (aprovar/recusar)",
+    "rotulo": "sugestoes.equipe",
+    "rotuloInfo": null,
+    "emoji": "🛡️",
+    "estilo": "Secondary",
+    "ocultavel": false,
+    "emojiFixo": false
+   },
+   "sugestoes.aprovar": {
+    "modulo": "sugestoes",
+    "nome": "Aprovar sugestão",
+    "rotulo": "sugestoes.aprovar",
+    "rotuloInfo": null,
+    "emoji": "✅",
+    "estilo": "Success",
+    "ocultavel": false,
+    "emojiFixo": false
+   },
+   "sugestoes.recusar": {
+    "modulo": "sugestoes",
+    "nome": "Recusar sugestão",
+    "rotulo": "sugestoes.recusar",
+    "rotuloInfo": null,
+    "emoji": "❌",
+    "estilo": "Danger",
+    "ocultavel": false,
+    "emojiFixo": false
+   },
+   "enquetes.votar": {
+    "modulo": "enquetes",
+    "nome": "Botões das opções",
+    "rotulo": null,
+    "rotuloInfo": "O texto é a opção da enquete e o emoji é a letra (🇦, 🇧…). Aqui você muda a cor.",
+    "emoji": null,
+    "estilo": "Secondary",
+    "ocultavel": false,
+    "emojiFixo": true
+   },
+   "sorteios.entrar": {
+    "modulo": "sorteios",
+    "nome": "Participar do sorteio",
+    "rotulo": "sorteios.participar",
+    "rotuloInfo": "Quando o sorteio acaba, o texto vira o de \"Encerrado\".",
+    "emoji": "🎉",
+    "estilo": "Primary",
+    "ocultavel": false,
+    "emojiFixo": false
+   },
+   "cargos.cargo": {
+    "modulo": "cargos",
+    "nome": "Botões do painel de cargos",
+    "rotulo": null,
+    "rotuloInfo": "O texto e o emoji de cada botão vêm do /cargos. Aqui você muda a cor de todos.",
+    "emoji": null,
+    "estilo": "Secondary",
+    "ocultavel": false,
+    "emojiFixo": false
+   },
+   "destaques.ver": {
+    "modulo": "destaques",
+    "nome": "Ver mensagem original (link)",
+    "rotulo": "destaques.ver_mensagem",
+    "rotuloInfo": null,
+    "emoji": "-",
+    "estilo": "Link",
+    "ocultavel": true,
+    "emojiFixo": false
+   },
+   "utilidades.navegador": {
+    "modulo": "utilidades",
+    "nome": "Abrir no navegador (/avatar)",
+    "rotulo": "utilidades.abrir_navegador",
+    "rotuloInfo": null,
+    "emoji": "-",
+    "estilo": "Link",
+    "ocultavel": true,
+    "emojiFixo": false
+   },
+   "utilidades.global": {
+    "modulo": "utilidades",
+    "nome": "Avatar global (/avatar)",
+    "rotulo": "utilidades.avatar_global",
+    "rotuloInfo": null,
+    "emoji": "-",
+    "estilo": "Link",
+    "ocultavel": true,
+    "emojiFixo": false
+   },
+   "personalizar.resetar": {
+    "modulo": "personalizar",
+    "nome": "Confirmar reset",
+    "rotulo": "personalizar.resetar_botao",
+    "rotuloInfo": null,
+    "emoji": null,
+    "estilo": "Danger",
+    "ocultavel": false,
+    "emojiFixo": false
+   }
+  },
+  "modais": {
+   "avaliacoes.comentario": {
+    "modulo": "avaliacoes",
+    "nome": "Comentário da avaliação",
+    "textos": [
+     "avaliacoes.ticket_2",
+     "avaliacoes.achou_atendimento",
+     "avaliacoes.dica_comentario"
+    ]
+   },
+   "formularios.recusa": {
+    "modulo": "formularios",
+    "nome": "Motivo da recusa",
+    "textos": [
+     "formularios.recusar",
+     "formularios.motivo_vai_dm_pessoa",
+     "formularios.dica_motivo"
+    ]
+   },
+   "sugestoes.motivo": {
+    "modulo": "sugestoes",
+    "nome": "Aprovar/recusar com motivo",
+    "textos": [
+     "sugestoes.aprovar_sugestao",
+     "sugestoes.recusar_sugestao",
+     "sugestoes.motivo_opcional",
+     "sugestoes.dica_motivo"
+    ]
+   },
+   "embeds.criador": {
+    "modulo": "embeds",
+    "nome": "Criador de embed (/embed)",
+    "textos": [
+     "embeds.criador_embed",
+     "embeds.titulo",
+     "embeds.texto_aceita_negrito_listas",
+     "embeds.cor_ex_5865f2",
+     "embeds.link_imagem_grande_opcional",
+     "embeds.rodape_opcional"
+    ]
+   }
+  },
+  "emojis": {
+   "sucesso": "✅",
+   "erro": "❌",
+   "aviso": "⚠️",
+   "info": "ℹ️"
+  },
+  "cores": {
+   "padrao": "",
+   "sucesso": "#22c55e",
+   "erro": "#ef4444",
+   "aviso": "#f59e0b"
+  },
+  "presenca": {
+   "tipos": [
+    "personalizado",
+    "jogando",
+    "ouvindo",
+    "assistindo",
+    "competindo"
+   ],
+   "status": [
+    "online",
+    "idle",
+    "dnd"
+   ]
+  }
+ },
+ "servidores": [
+  {
+   "id": "1487651128043901000",
+   "nome": "Servidor de Fuxicoos",
+   "cargos": [
+    {
+     "id": "1571214873231364116",
+     "nome": "Verificado",
+     "cor": "#2ecc71"
+    }
+   ],
+   "canais": [
+    {
+     "id": "1487651128899534910",
+     "nome": "Canais de Texto",
+     "tipo": "categoria"
+    },
+    {
+     "id": "1487651128899534911",
+     "nome": "Canais de Voz",
+     "tipo": "categoria"
+    },
+    {
+     "id": "1487651128899534912",
+     "nome": "geral",
+     "tipo": "texto"
+    },
+    {
+     "id": "1571215806576984155",
+     "nome": "saída",
+     "tipo": "texto"
+    },
+    {
+     "id": "1571216556665475082",
+     "nome": "logs",
+     "tipo": "texto"
+    }
+   ]
+  }
+ ],
+ "valores": {
+  "textos": {},
+  "visuais": {
+   "tickets.aberto": {
+    "rodape": "sadfsdf"
+   }
+  },
+  "emojis": {},
+  "cores": {},
+  "presenca": {},
+  "botoes": {},
+  "criados": {
+   "paineis": [],
+   "formularios": []
+  }
+ }
+}

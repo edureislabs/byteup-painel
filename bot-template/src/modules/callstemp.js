@@ -41,7 +41,7 @@ const tx = textos('callstemp', {
 const salas = colecao('salas_temporarias'); // guild -> canalId -> { dono, criada }
 const PADRAO = { criador: null, categoria: null, nome: null, limite: 0 };
 const cfg = (guildId) => ajustes(guildId, 'callstemp', PADRAO);
-const nomeSala = (c) => modeloOu(c.nome, 'Sala de {nome}', tx('nome_sala_padrao'));
+const nomeSala = () => tx('nome_sala_padrao'); // o nome muda só no Personalizar bot
 const espera = new Map(); // anti-spam: userId -> quando criou a última
 
 const salaDe = (guildId, canalId) => salas.ler(guildId, canalId);
@@ -162,7 +162,6 @@ const salasCmd = {
         .setDescription('Escolhe a call "Criar sala" (ou cria uma)')
         .addChannelOption((o) => o.setName('canal').setDescription('Call que cria as salas (vazio = eu crio uma)').addChannelTypes(ChannelType.GuildVoice))
         .addChannelOption((o) => o.setName('categoria').setDescription('Onde as salas aparecem (padrão: a mesma da call)').addChannelTypes(ChannelType.GuildCategory))
-        .addStringOption((o) => o.setName('nome').setDescription('Nome das salas. Variáveis: {nome} {usuario}').setMaxLength(80))
         .addIntegerOption((o) => o.setName('limite').setDescription('Limite padrão de pessoas (0 = sem limite)').setMinValue(0).setMaxValue(99))
     )
     .addSubcommand((s) => s.setName('desligar').setDescription('Para de criar salas (as abertas continuam até esvaziar)')),
@@ -183,8 +182,6 @@ const salasCmd = {
     }
     c.criador = canal.id;
     if (categoria) c.categoria = categoria.id;
-    const nome = i.options.getString('nome');
-    if (nome) c.nome = nome;
     const limite = i.options.getInteger('limite');
     if (limite !== null) c.limite = limite;
     salvarAjustes();

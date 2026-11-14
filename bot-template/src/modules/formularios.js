@@ -243,7 +243,6 @@ const formulario = {
         .setDescription('Envia o painel com o botão para responder')
         .addStringOption((o) => o.setName('formulario').setDescription('Qual formulário').setRequired(true).setAutocomplete(true))
         .addChannelOption((o) => o.setName('canal').setDescription('Onde enviar (padrão: aqui)').addChannelTypes(ChannelType.GuildText))
-        .addStringOption((o) => o.setName('mensagem').setDescription('Texto do painel').setMaxLength(1500))
     )
     .addSubcommand((s) => s.setName('lista').setDescription('Mostra os formulários e as perguntas'))
     .addSubcommand((s) =>
@@ -309,7 +308,7 @@ const formulario = {
     const canal = i.options.getChannel('canal') ?? i.channel;
     const msg = await canal
       .send({
-        embeds: [vis(embed(i.guildId).setTitle(`📝 ${f.titulo}`).setDescription(i.options.getString('mensagem') || tx('clique_botao_abaixo_preencher')), 'painel', imagens({ guild: i.guild }))],
+        embeds: [vis(embed(i.guildId).setTitle(`📝 ${f.titulo}`).setDescription(tx('clique_botao_abaixo_preencher')), 'painel', imagens({ guild: i.guild }))],
         components: [new ActionRowBuilder().addComponents(bt('preencher').setCustomId(`fm:abrir:${id}`))],
       })
       .catch(() => null);

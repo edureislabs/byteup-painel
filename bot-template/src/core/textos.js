@@ -52,7 +52,10 @@ const catalogoModais = new Map();
 
 const vazio = () => ({ textos: {}, visuais: {}, emojis: {}, cores: {}, presenca: {}, botoes: {}, criados: { paineis: [], formularios: [] } });
 let valores = vazio();
-let ativo = false;
+let completo = false; // true com o módulo Personalização; sem ele, só as mensagens valem
+/** Mensagens que todo bot pode mudar no painel (modo Mensagens, sem o módulo Personalização). */
+const basicas = new Set();
+const usa = (chave) => completo || basicas.has(chave);
 
 const varsDe = (s) => [...new Set([...String(s).matchAll(/\{(\w+)\}/g)].map((m) => m[1]))];
 
@@ -78,7 +81,7 @@ export function textos(modulo, padroes) {
 export function texto(chaveCompleta, vars = {}) {
   const item = catalogo.get(chaveCompleta);
   if (!item) return chaveCompleta;
-  const personalizado = ativo ? valores.textos[chaveCompleta] : undefined;
+  const personalizado = usa(chaveCompleta) ? valores.textos[chaveCompleta] : undefined;
   const modelo = typeof personalizado === 'string' && personalizado.trim() ? personalizado : item.padrao;
   return cortarEm(preencher(modelo, vars), LIMITES[item.tipo] ?? LIMITES.texto);
 }
@@ -99,7 +102,7 @@ const ehUrl = (s) => /^https?:\/\/\S+$/i.test(s);
 
 /** Aplica o que o dono personalizou neste embed. "-" remove o item. */
 export function aplicarVisual(e, chaveCompleta, vars = {}) {
-  if (!ativo) return e;
+  if (!completo) return e;
   const v = valores.visuais[chaveCompleta];
   if (!v) return e;
   if (v.cor && /^#[0-9a-f]{6}$/i.test(v.cor)) e.setColor(parseInt(v.cor.slice(1), 16));
@@ -141,7 +144,7 @@ export function botoes(modulo, defs) {
 export function criarBotao(chaveCompleta, extra = {}) {
   const d = catalogoBotoes.get(chaveCompleta);
   if (!d) throw new Error(`botão desconhecido: ${chaveCompleta}`);
-  const v = (ativo && valores.botoes[chaveCompleta]) || {};
+  const v = (completo && valores.botoes[chaveCompleta]) || {};
   if (d.ocultavel && v.oculto) return null;
   const b = new ButtonBuilder();
   const rotulo = extra.rotulo ?? (d.rotulo ? texto(`${d.modulo}.${d.rotulo}`) : '');
@@ -169,14 +172,14 @@ export function modais(modulo, defs) {
 }
 
 /** Painéis e formulários criados pelo dono no Personalizar bot.html. */
-export const criados = () => (ativo ? valores.criados : { paineis: [], formularios: [] });
+export const criados = () => (completo ? valores.criados : { paineis: [], formularios: [] });
 
 /** Emoji das respostas rápidas (sucesso, erro, aviso, info). */
-export const emojiTipo = (tipo) => (ativo && valores.emojis[tipo]) || EMOJIS_PADRAO[tipo] || '';
+export const emojiTipo = (tipo) => (completo && valores.emojis[tipo]) || EMOJIS_PADRAO[tipo] || '';
 
 /** Cor personalizada ("padrao", "sucesso", "erro", "aviso") como número, ou null. */
 export function corPersonalizada(tipo) {
-  const c = (ativo && valores.cores[tipo]) || CORES_PADRAO[tipo];
+  const c = (completo && valores.cores[tipo]) || CORES_PADRAO[tipo];
   return c && /^#[0-9a-f]{6}$/i.test(c) ? parseInt(c.slice(1), 16) : null;
 }
 
@@ -200,17 +203,24 @@ function gravar() {
   fs.renameSync(tmp, ARQUIVO);
 }
 
-/** Liga a personalização (o módulo Personalização chama isto ao carregar). */
+/** Liga o modo completo (o módulo Personalização chama isto ao carregar). */
 export function ativarPersonalizacao() {
-  ativo = true;
-  carregar();
+  completo = true;
 }
-export const personalizacaoAtiva = () => ativo;
+export const personalizacaoAtiva = () => completo;
+
+/**
+ * Marca as mensagens de um módulo que todo bot pode mudar no painel (modo Mensagens).
+ * Ex.: mensagens('boasvindas', ['msg_entrada_padrao', 'msg_saida_padrao'])
+ */
+export function mensagens(modulo, chaves) {
+  for (const k of chaves) basicas.add(`${modulo}.${k}`);
+}
 export const valoresAtuais = () => structuredClone(valores);
 
 /** Status do bot (o que aparece embaixo do nome). */
 export function presenca(padraoTexto) {
-  const p = ativo ? valores.presenca : {};
+  const p = completo ? valores.presenca : {};
   return {
     texto: p.texto?.trim() || padraoTexto || '',
     tipo: PRESENCA_TIPOS.includes(p.tipo) ? p.tipo : 'personalizado',
@@ -226,6 +236,8 @@ export function exportar({ nomeBot, modulos, servidores = [] }) {
     formato: 'byteup-personalizacao',
     versao: 1,
     bot: nomeBot,
+    modo: completo ? 'completo' : 'mensagens',
+    basicas: [...basicas].filter((k) => catalogo.has(k)),
     gerado: new Date().toISOString(),
     modulos: grupos,
     limites: LIMITES,
@@ -258,13 +270,27 @@ export function importar(arquivo) {
   const avisos = [];
   let total = 0;
 
+  let soCompleto = 0; // itens que precisam do módulo Personalização
   for (const [k, s] of Object.entries(v.textos ?? {})) {
     const item = catalogo.get(k);
     if (!item) { avisos.push(`texto "${k}" não existe neste bot (ignorado)`); continue; }
+    if (!usa(k)) { if (typeof s === 'string' && s.trim() && s !== item.padrao) soCompleto++; continue; }
     if (typeof s !== 'string' || !s.trim() || s === item.padrao) continue;
     if (s.length > 6000) { avisos.push(`texto "${k}" grande demais (ignorado)`); continue; }
     novo.textos[k] = s;
     total++;
+  }
+  if (!completo) {
+    // sem o módulo, o resto do arquivo fica de fora (o que já estava salvo continua guardado)
+    soCompleto += Object.keys(v.visuais ?? {}).length + Object.keys(v.botoes ?? {}).length + Object.keys(v.emojis ?? {}).length + Object.keys(v.cores ?? {}).length;
+    soCompleto += (v.criados?.paineis?.length ?? 0) + (v.criados?.formularios?.length ?? 0) + (v.presenca?.texto ? 1 : 0);
+    for (const k of Object.keys(valores.textos)) if (!usa(k)) novo.textos[k] = valores.textos[k];
+    for (const campo of ['visuais', 'botoes', 'emojis', 'cores', 'presenca']) novo[campo] = valores[campo];
+    novo.criados = valores.criados;
+    if (soCompleto) avisos.push(`${soCompleto} item(ns) além das mensagens precisam do módulo Personalização (ignorados)`);
+    valores = novo;
+    gravar();
+    return { ok: true, avisos, total };
   }
   for (const [k, x] of Object.entries(v.visuais ?? {})) {
     if (!catalogoVisuais.has(k)) { avisos.push(`aparência "${k}" não existe neste bot (ignorada)`); continue; }
@@ -414,9 +440,13 @@ function limparCriados(c, avisos) {
 
 /** Volta tudo ao padrão (apaga a personalização). */
 export function resetar() {
-  valores = vazio();
+  if (completo) valores = vazio();
+  else for (const k of Object.keys(valores.textos)) if (basicas.has(k)) delete valores.textos[k];
   gravar();
 }
+
+// o arquivo é lido ao ligar (todo bot tem o modo Mensagens)
+carregar();
 
 /**
  * Mensagens que cada servidor pode trocar no /config (boas-vindas, nível...).

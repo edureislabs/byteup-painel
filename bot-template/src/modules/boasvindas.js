@@ -1,15 +1,16 @@
 import { ChannelType, GatewayIntentBits, Partials, PermissionFlagsBits } from 'discord.js';
 import { ajustes, salvarAjustes, embed, responder, preencher, cortar, foiRemovida, imagens } from '../core/util.js';
-import { textos, modeloOu, visuais } from '../core/textos.js';
+import { textos, visuais } from '../core/textos.js';
 
 // Textos deste módulo (o dono do bot pode trocar todos no "Personalizar bot.html")
 const tx = textos('boasvindas', {
+  msg_dm_padrao: ['Bem-vindo(a) ao **{servidor}**, {nome}! Leia as regras e divirta-se. 💜', 'descricao'],
   msg_entrada_padrao: 'Seja bem-vindo(a) ao **{servidor}**, {usuario}! Agora somos **{membros}** membros. 🎉',
   msg_saida_padrao: '**{tag}** saiu do servidor. Agora somos **{membros}** membros.',
   alguem: 'alguém',
   mensagem: 'Mensagem de {nome} em {canal}.',
   mensagem_desligada: 'Mensagem de {nome} desligada.',
-  mensagem_dm_definida: 'Mensagem na DM definida.',
+  mensagem_dm_definida: 'Mensagem na DM ligada. O texto dela muda no Personalizar bot.',
   mensagem_dm_desligada: 'Mensagem na DM desligada.',
   esse_cargo_pode_ser: ['Esse cargo não pode ser dado manualmente.', 'resposta'],
   sera_mais_dado_automaticamente: ['{cargo} não será mais dado automaticamente.', 'resposta'],
@@ -43,18 +44,18 @@ const vis = visuais('boasvindas', {
 
 const PADRAO = {
   entradaCanal: null,
-  entradaMensagem: null, // vazio = texto do bot (personalizável)
+  entradaMensagem: null, // não é mais usado: o texto vem do Personalizar bot
   saidaCanal: null,
   saidaMensagem: null,
-  dmMensagem: null,
+  dm: null, // ligada/desligada pelo /config boasvindas dm
   cargos: [],
 };
 const cfg = (guildId) => ajustes(guildId, 'boasvindas', PADRAO);
-// mensagens padrão de versões anteriores (gravadas nos dados): contam como "sem mensagem própria"
-const ANTIGA_ENTRADA = 'Seja bem-vindo(a) ao **{servidor}**, {usuario}! Agora somos **{membros}** membros. 🎉';
-const ANTIGA_SAIDA = '**{tag}** saiu do servidor. Agora somos **{membros}** membros.';
-const msgEntrada = (c) => modeloOu(c.entradaMensagem, ANTIGA_ENTRADA, tx('msg_entrada_padrao'));
-const msgSaida = (c) => modeloOu(c.saidaMensagem, ANTIGA_SAIDA, tx('msg_saida_padrao'));
+// As mensagens são só do Personalizar bot (texto padrão sem a Personalização).
+const msgEntrada = () => tx('msg_entrada_padrao');
+const msgSaida = () => tx('msg_saida_padrao');
+// a DM antes era ligada escrevendo a mensagem: quem tinha mensagem continua com a DM ligada
+const dmLigada = (c) => c.dm ?? Boolean(c.dmMensagem);
 
 const variaveis = (member) => ({
   usuario: `<@${member.id}>`,
@@ -81,8 +82,8 @@ async function aoEntrar(member) {
   if (foiRemovida(`membro:${member.guild.id}:${member.id}`)) return; // barrado pelo anti-raid
   const c = cfg(member.guild.id);
   if (c.entradaCanal) await enviarEntrada(member, c.entradaCanal, msgEntrada(c)).catch(() => {});
-  if (c.dmMensagem && !member.user.bot) {
-    await member.send({ embeds: [vis(embed(member.guild.id).setTitle(member.guild.name).setDescription(preencher(c.dmMensagem, variaveis(member))), 'dm', imagens({ user: member.user, guild: member.guild }))] }).catch(() => {});
+  if (dmLigada(c) && !member.user.bot) {
+    await member.send({ embeds: [vis(embed(member.guild.id).setTitle(member.guild.name).setDescription(preencher(tx('msg_dm_padrao'), variaveis(member))), 'dm', imagens({ user: member.user, guild: member.guild }))] }).catch(() => {});
   }
   const cargos = c.cargos.filter((id) => member.guild.roles.cache.get(id)?.editable);
   if (cargos.length) await member.roles.add(cargos, 'Cargo automático').catch(() => {});
@@ -102,9 +103,6 @@ async function aoSair(member) {
 }
 
 // ---------------- /config boasvindas ----------------
-const opMensagem = (o) =>
-  o.setName('mensagem').setDescription('Variáveis: {usuario} {nome} {tag} {servidor} {membros}').setMaxLength(1500);
-
 const config = {
   grupo: 'boasvindas',
   montar: (g) =>
@@ -113,22 +111,20 @@ const config = {
       .addSubcommand((s) =>
         s
           .setName('entrada')
-          .setDescription('Canal e mensagem quando alguém entra')
+          .setDescription('Canal da mensagem de entrada (o texto muda no Personalizar bot)')
           .addChannelOption((o) => o.setName('canal').setDescription('Vazio desliga').addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement))
-          .addStringOption(opMensagem)
       )
       .addSubcommand((s) =>
         s
           .setName('saida')
-          .setDescription('Canal e mensagem quando alguém sai')
+          .setDescription('Canal da mensagem de saída (o texto muda no Personalizar bot)')
           .addChannelOption((o) => o.setName('canal').setDescription('Vazio desliga').addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement))
-          .addStringOption(opMensagem)
       )
       .addSubcommand((s) =>
         s
           .setName('dm')
-          .setDescription('Mensagem enviada na DM de quem entra')
-          .addStringOption((o) => o.setName('mensagem').setDescription('Vazio desliga. Variáveis: {usuario} {nome} {servidor}').setMaxLength(1500))
+          .setDescription('Liga ou desliga a mensagem na DM de quem entra')
+          .addBooleanOption((o) => o.setName('ligar').setDescription('Ligar a DM de boas-vindas?').setRequired(true))
       )
       .addSubcommand((s) =>
         s.setName('cargo').setDescription('Cargo dado automaticamente a quem entra (usar de novo remove)').addRoleOption((o) => o.setName('cargo').setDescription('Cargo').setRequired(true))
@@ -138,17 +134,15 @@ const config = {
     const c = cfg(i.guildId);
     if (sub === 'entrada' || sub === 'saida') {
       const canal = i.options.getChannel('canal');
-      const mensagem = i.options.getString('mensagem');
       c[`${sub}Canal`] = canal?.id ?? null;
-      if (mensagem) c[`${sub}Mensagem`] = mensagem;
       salvarAjustes();
       const nome = sub === 'entrada' ? 'entrada' : 'saída';
       return responder(i, canal ? tx('mensagem', { nome, canal }) : tx('mensagem_desligada', { nome }), 'sucesso');
     }
     if (sub === 'dm') {
-      c.dmMensagem = i.options.getString('mensagem') || null;
+      c.dm = i.options.getBoolean('ligar');
       salvarAjustes();
-      return responder(i, c.dmMensagem ? tx('mensagem_dm_definida') : tx('mensagem_dm_desligada'), 'sucesso');
+      return responder(i, c.dm ? tx('mensagem_dm_definida') : tx('mensagem_dm_desligada'), 'sucesso');
     }
     if (sub === 'cargo') {
       const r = i.options.getRole('cargo');
@@ -176,7 +170,7 @@ const config = {
     return [
       tx('entrada', { entrada: c.entradaCanal ? `<#${c.entradaCanal}>` : tx('desligada') }),
       tx('saida', { saida: c.saidaCanal ? `<#${c.saidaCanal}>` : tx('desligada') }),
-      tx('dm', { dm: c.dmMensagem ? tx('ligada') : tx('desligada') }),
+      tx('dm', { dm: dmLigada(c) ? tx('ligada') : tx('desligada') }),
       tx('cargos_automaticos', { cargos: c.cargos.length ? c.cargos.map((r) => `<@&${r}>`).join(' ') : tx('nenhum') }),
     ];
   },

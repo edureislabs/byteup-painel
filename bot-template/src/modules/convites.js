@@ -40,7 +40,7 @@ const tx = textos('convites', {
 const dados = colecao('convites'); // guild -> { membros: {userId: {por, codigo, em, saiu}}, contas: {inviterId: {total, saiu, falsos}} }
 const PADRAO = { canal: null, mensagem: null, diasFalso: 7 };
 const cfg = (guildId) => ajustes(guildId, 'convites', PADRAO);
-const msgEntrada = (c) => modeloOu(c.mensagem, '📥 {usuario} entrou · convidado(a) por {convidou} ({convites} convite(s))', tx('msg_entrada_padrao'));
+const msgEntrada = () => tx('msg_entrada_padrao'); // o texto muda só no Personalizar bot
 const usos = new Map(); // guildId -> Map(codigo -> { usos, dono })
 const mapa = (lista) => new Map(lista.map((inv) => [inv.code, { usos: inv.uses ?? 0, dono: inv.inviterId ?? inv.inviter?.id ?? null }]));
 
@@ -139,7 +139,6 @@ const convites = {
         .setName('configurar')
         .setDescription('(Equipe) Canal que avisa quem entrou e por qual convite')
         .addChannelOption((o) => o.setName('canal').setDescription('Canal dos avisos').addChannelTypes(ChannelType.GuildText))
-        .addStringOption((o) => o.setName('mensagem').setDescription('Variáveis: {usuario} {nome} {convidou} {convites} {codigo}').setMaxLength(300))
         .addIntegerOption((o) => o.setName('dias-falso').setDescription('Conta com menos dias que isso conta como falsa (padrão 7)').setMinValue(0).setMaxValue(90))
     ),
   async executar(i) {
@@ -148,10 +147,8 @@ const convites = {
       if (!i.member.permissions.has(PermissionFlagsBits.ManageGuild)) return responder(i, tx('so_quem_tem_gerenciar'), 'erro');
       const c = cfg(i.guildId);
       const canal = i.options.getChannel('canal');
-      const msg = i.options.getString('mensagem');
       const dias = i.options.getInteger('dias-falso');
       if (canal) c.canal = canal.id;
-      if (msg) c.mensagem = msg;
       if (dias !== null) c.diasFalso = dias;
       salvarAjustes();
       const ok = await carregarConvites(i.guild);

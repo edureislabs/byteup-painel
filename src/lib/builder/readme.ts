@@ -20,7 +20,7 @@ const PRIMEIROS_PASSOS: Record<string, string[]> = {
     "`/config boasvindas saida canal:#saidas` — mensagem quando alguém sai",
     "`/config boasvindas cargo cargo:@Membro` — cargo automático (até 5)",
     "`/config boasvindas testar` — mostra como fica",
-    "Variáveis nas mensagens: `{usuario}` `{nome}` `{tag}` `{servidor}` `{membros}`",
+    "`/config boasvindas dm ligar:True` — liga a mensagem na DM de quem entra",
   ],
   logs: [
     "`/config logs canal canal:#logs` — liga os registros",
@@ -42,7 +42,7 @@ const PRIMEIROS_PASSOS: Record<string, string[]> = {
     "`/config tickets equipe cargo:@Suporte` — quem atende (padrão: o cargo do /config staff)",
     "`/config tickets registro canal:#tickets-log` — recebe o histórico em .txt",
     "`/ticket painel` — envia o painel com o botão **Abrir ticket**",
-    "Com assuntos: `/ticket assunto adicionar nome:Compras emoji:🛒 categoria:Vendas equipe:@Vendas` (até 25; cada um pode ter categoria, equipe e mensagem própria)",
+    "Com assuntos: `/ticket assunto adicionar nome:Compras emoji:🛒 categoria:Vendas equipe:@Vendas` (até 25; cada um pode ter categoria e equipe próprias)",
     "Depois `/ticket painel modo:Menu de assuntos` — a pessoa escolhe o assunto num menu. `/ticket assunto lista` mostra todos",
   ],
   sugestoes: ["`/config sugestoes canal canal:#sugestoes` — onde as sugestões são publicadas"],
@@ -93,7 +93,7 @@ const PRIMEIROS_PASSOS: Record<string, string[]> = {
   ],
   callstemp: [
     "`/salas configurar` — cria a call **➕ Criar sala** (ou escolha uma com `canal:`)",
-    "`nome:Sala de {nome}` e `limite:5` mudam o padrão das salas",
+    "`limite:5` muda quantas pessoas cabem por padrão",
     "Dentro da própria sala, o dono usa `/sala nome`, `/sala limite`, `/sala trancar`, `/sala permitir`, `/sala expulsar`",
     "Se o dono sair, outra pessoa pode usar `/sala reivindicar`",
   ],
@@ -140,7 +140,7 @@ const PRIMEIROS_PASSOS: Record<string, string[]> = {
   enquetes: ["`/enquete pergunta:... opcoes:Sim | Não | Talvez duracao:1d` — cria uma enquete"],
   sorteios: ["`/sorteio criar premio:... duracao:2d vencedores:1` — cria um sorteio"],
   cargos: [
-    "`/cargos painel titulo:Escolha seus cargos` — cria o painel",
+    "`/cargos painel` — cria o painel",
     "`/cargos adicionar painel:<link da mensagem> cargo:@Cargo emoji:🎮` — coloca um botão",
   ],
 };
@@ -215,6 +215,12 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
   L.push("- `/ajuda` — lista todos os comandos");
   L.push("");
   L.push("**Importante:** em *Configurações do servidor → Cargos*, arraste o cargo do bot para **cima** dos cargos que ele vai dar, tirar ou punir.", "");
+  L.push(
+    mods.some((m) => m.id === "personalizar")
+      ? "Os comandos configuram canais, cargos e o que fica ligado. **Os textos das mensagens** (boas-vindas, nível, tickets, painéis...) mudam no **Personalizar bot** (veja em Personalizar)."
+      : "Os comandos configuram canais, cargos e o que fica ligado. Os textos das mensagens já vêm prontos; para trocar, adicione o módulo **Personalização** na loja.",
+    "",
+  );
 
   L.push("## Módulos", "");
   for (const m of mods) {
@@ -313,7 +319,7 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
     L.push("3. Edite e clique em **Salvar**.");
     L.push("4. No Discord: `/personalizar aplicar` com o arquivo salvo. Vale na hora.");
     L.push("5. Painéis criados: publique com `/painel enviar` (veja todos com `/painel lista`).", "");
-    L.push("A personalização fica em `data/personalizacao.json` (o Transferidor de dados leva junto). Se um servidor definir uma mensagem própria no `/config` (ex.: boas-vindas), ela tem prioridade nele.", "");
+    L.push("A personalização fica em `data/personalizacao.json` (o Transferidor de dados leva junto). Os textos das mensagens (boas-vindas, nível, aniversário, tickets, painéis...) só mudam por aqui: os comandos configuram canais, cargos e o que fica ligado.", "");
   }
 
   L.push("## Problemas comuns", "");

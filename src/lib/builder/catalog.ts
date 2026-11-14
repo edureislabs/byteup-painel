@@ -89,7 +89,7 @@ export const BUILDER_MODULES: BuilderModule[] = [
     bit: 2,
     name: "Boas-vindas",
     emoji: "👋",
-    description: "Mensagem de entrada e saída personalizável, mensagem na DM de quem entra e até 5 cargos automáticos.",
+    description: "Mensagem de entrada e de saída, mensagem na DM de quem entra e até 5 cargos automáticos. O texto das mensagens muda com o módulo Personalização.",
     priceCents: 790,
     commands: [],
     configGroup: "boasvindas",
@@ -158,7 +158,7 @@ export const BUILDER_MODULES: BuilderModule[] = [
     priceCents: 1490,
     commands: ["/ticket"],
     configGroup: "tickets",
-    configSubs: ["categoria", "equipe", "registro", "mensagem", "limite"],
+    configSubs: ["categoria", "equipe", "registro", "limite"],
     privileged: ["content"],
   },
   {

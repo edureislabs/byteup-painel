@@ -13,7 +13,7 @@ import {
 } from 'discord.js';
 import { colecao } from '../core/db.js';
 import { ajustes, salvarAjustes, embed, responder, preencher, ehStaff, cortar, CORES, sinais, imagens } from '../core/util.js';
-import { textos, modeloOu, visuais, botoes, fileira, fileiras, emojiDeBotaoOk } from '../core/textos.js';
+import { textos, visuais, botoes, fileira, fileiras, emojiDeBotaoOk } from '../core/textos.js';
 
 // Textos deste módulo (o dono do bot pode trocar todos no "Personalizar bot.html")
 const tx = textos('tickets', {
@@ -31,7 +31,6 @@ const tx = textos('tickets', {
   assunto_linha: '{emoji}**{nome}**{descricao}{extras}',
   assunto_extra_categoria: ' · categoria {categoria}',
   assunto_extra_equipe: ' · equipe {equipe}',
-  assunto_extra_mensagem: ' · mensagem própria',
   assunto_indisponivel: ['Esse assunto não existe mais. Peça para a equipe enviar o painel de novo.', 'resposta'],
   resumo_assuntos: 'Assuntos: {total}',
   aguardando: ['aguardando', 'valor'],
@@ -88,7 +87,6 @@ const tx = textos('tickets', {
   tickets_usam_cargo_config: 'Os tickets usam o cargo de /config staff.',
   historico_tickets_vai: 'Histórico dos tickets vai para {canal}.',
   registro_tickets_desligado: 'Registro de tickets desligado.',
-  mensagem_ticket_atualizada: 'Mensagem do ticket atualizada.',
   cada_pessoa_pode_ter: 'Cada pessoa pode ter até **{limite}** ticket(s) aberto(s).',
   nenhuma: 'nenhuma',
   categoria: 'Categoria: {categoria}',
@@ -130,7 +128,7 @@ const PADRAO = {
   assuntos: [], // { id, nome, emoji, descricao, categoria, equipe, mensagem } (menu do painel)
 };
 const cfg = (guildId) => ajustes(guildId, 'tickets', PADRAO);
-const msgTicket = (c) => modeloOu(c.mensagem, 'Olá {usuario}! Descreva o que você precisa com o máximo de detalhes. A equipe já foi avisada e responde assim que puder.', tx('msg_ticket_padrao'));
+const msgTicket = () => tx('msg_ticket_padrao'); // o texto muda só no Personalizar bot ({assunto} mostra o assunto escolhido)
 const dados = (guildId, canalId) => tickets.ler(guildId, canalId);
 
 function podeAtender(member) {
@@ -213,7 +211,7 @@ async function abrir(i, assunto = null) {
 
   const e = embed(i.guildId)
     .setTitle(tx('ticket_3', { numero }))
-    .setDescription(preencher(assunto?.mensagem || msgTicket(c), { usuario: `${i.user}`, nome: i.member.displayName, servidor: i.guild.name, assunto: assunto?.nome ?? '' }))
+    .setDescription(preencher(assunto?.mensagem || msgTicket(), { usuario: `${i.user}`, nome: i.member.displayName, servidor: i.guild.name, assunto: assunto?.nome ?? '' }))
     .addFields({ name: tx('aberto'), value: `${i.user}`, inline: true }, { name: tx('atendente'), value: tx('aguardando'), inline: true })
     .setTimestamp();
   if (nomeAssunto) e.addFields({ name: tx('assunto_campo'), value: nomeAssunto, inline: true }); // 3º campo (o 2º é o atendente)
@@ -295,7 +293,7 @@ const componentes = {
     if (acao === 'assunto' && i.isStringSelectMenu()) {
       const a = cfg(i.guildId).assuntos.find((x) => x.id === i.values[0]);
       if (!a) return responder(i, tx('assunto_indisponivel'), 'erro');
-      return abrir(i, a);
+      return abrir(i, { ...a, mensagem: '' }); // a mensagem de abertura vem só do Personalizar bot
     }
     if (acao === 'fechar') {
       const t = dados(i.guildId, i.channelId);
@@ -333,9 +331,6 @@ const ticket = {
         .setName('painel')
         .setDescription('Envia o painel com o botão de abrir ticket (equipe)')
         .addChannelOption((o) => o.setName('canal').setDescription('Padrão: este canal').addChannelTypes(ChannelType.GuildText))
-        .addStringOption((o) => o.setName('titulo').setDescription('Título do painel').setMaxLength(100))
-        .addStringOption((o) => o.setName('descricao').setDescription('Texto do painel').setMaxLength(1500))
-        .addStringOption((o) => o.setName('botao').setDescription('Texto do botão').setMaxLength(60))
         .addStringOption((o) =>
           o.setName('modo').setDescription('Botão (padrão) ou menu com os assuntos').addChoices({ name: 'Botão', value: 'botao' }, { name: 'Menu de assuntos', value: 'menu' })
         )
@@ -353,7 +348,6 @@ const ticket = {
             .addStringOption((o) => o.setName('descricao').setDescription('Texto pequeno embaixo do nome no menu').setMaxLength(100))
             .addChannelOption((o) => o.setName('categoria').setDescription('Categoria dos tickets deste assunto').addChannelTypes(ChannelType.GuildCategory))
             .addRoleOption((o) => o.setName('equipe').setDescription('Cargo que atende este assunto'))
-            .addStringOption((o) => o.setName('mensagem').setDescription('Mensagem de abertura. Variáveis: {usuario} {nome} {servidor} {assunto}').setMaxLength(1500))
         )
         .addSubcommand((s) =>
           s.setName('remover').setDescription('Apaga um assunto').addStringOption((o) => o.setName('nome').setDescription('Assunto').setRequired(true).setAutocomplete(true))
@@ -382,8 +376,8 @@ const ticket = {
       if (menu && !c.assuntos.length) return responder(i, tx('crie_assuntos'), 'erro');
       const canal = i.options.getChannel('canal') ?? i.channel;
       const e = embed(i.guildId)
-        .setTitle(i.options.getString('titulo') || tx('atendimento'))
-        .setDescription(i.options.getString('descricao') || tx('precisa_ajuda_clique_botao'));
+        .setTitle(tx('atendimento'))
+        .setDescription(tx('precisa_ajuda_clique_botao')); // título, texto e botão mudam só no Personalizar bot
       vis(e, 'painel', imagens({ guild: i.guild }));
       const row = menu
         ? new ActionRowBuilder().addComponents(
@@ -399,7 +393,7 @@ const ticket = {
                 })
               )
           )
-        : new ActionRowBuilder().addComponents(bt('abrir', i.options.getString('botao') ? { rotulo: i.options.getString('botao') } : undefined).setCustomId('tk:abrir'));
+        : new ActionRowBuilder().addComponents(bt('abrir').setCustomId('tk:abrir'));
       await canal.send({ embeds: [e], components: [row] });
       return responder(i, tx('painel_enviado', { canal }), 'sucesso');
     }
@@ -452,7 +446,6 @@ function assuntos(i, sub) {
       descricao: i.options.getString('descricao') || '',
       categoria: i.options.getChannel('categoria')?.id ?? null,
       equipe: i.options.getRole('equipe')?.id ?? null,
-      mensagem: i.options.getString('mensagem') || '',
     });
     salvarAjustes();
     return responder(i, tx('assunto_adicionado', { nome, total: c.assuntos.length }), 'sucesso');
@@ -473,7 +466,7 @@ function assuntos(i, sub) {
       extras:
         (a.categoria ? tx('assunto_extra_categoria', { categoria: `<#${a.categoria}>` }) : '') +
         (a.equipe ? tx('assunto_extra_equipe', { equipe: `<@&${a.equipe}>` }) : '') +
-        (a.mensagem ? tx('assunto_extra_mensagem') : ''),
+        '',
     })
   );
   return i.reply({ embeds: [embed(i.guildId).setTitle(tx('assuntos_titulo')).setDescription(linhas.join('\n') || tx('assuntos_vazio'))], flags: MessageFlags.Ephemeral });
@@ -493,9 +486,6 @@ const config = {
         s.setName('registro').setDescription('Canal que recebe o histórico dos tickets fechados').addChannelOption((o) => o.setName('canal').setDescription('Vazio desliga').addChannelTypes(ChannelType.GuildText))
       )
       .addSubcommand((s) =>
-        s.setName('mensagem').setDescription('Mensagem de boas-vindas do ticket').addStringOption((o) => o.setName('texto').setDescription('Variáveis: {usuario} {nome} {servidor}').setRequired(true).setMaxLength(1500))
-      )
-      .addSubcommand((s) =>
         s.setName('limite').setDescription('Tickets abertos ao mesmo tempo por pessoa').addIntegerOption((o) => o.setName('quantidade').setDescription('De 1 a 5').setRequired(true).setMinValue(1).setMaxValue(5))
       ),
   async executar(i, sub) {
@@ -513,9 +503,6 @@ const config = {
       const ch = i.options.getChannel('canal');
       c.registro = ch?.id ?? null;
       msg = ch ? tx('historico_tickets_vai', { canal: ch }) : tx('registro_tickets_desligado');
-    } else if (sub === 'mensagem') {
-      c.mensagem = i.options.getString('texto');
-      msg = tx('mensagem_ticket_atualizada');
     } else if (sub === 'limite') {
       c.limite = i.options.getInteger('quantidade');
       msg = tx('cada_pessoa_pode_ter', { limite: c.limite });

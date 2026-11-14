@@ -414,7 +414,7 @@ function cartaoTexto(chave) {
   const alterado = valor !== c.padrao;
   const limite = (dados.limites || LIMITES_PADRAO)[c.tipo] ?? 2000;
   const linhas = Math.min(8, Math.max(1, Math.ceil(valor.length / 90), valor.split('\n').length));
-  const dicaPadrao = /^(msg_|nome_sala_padrao)/.test(chave.split('.')[1]) ? '<div class="alerta" style="color:var(--muted)">Usado quando o servidor não definiu uma mensagem própria no /config.</div>' : '';
+  const dicaPadrao = /^(msg_|nome_sala_padrao)/.test(chave.split('.')[1]) ? '<div class="alerta" style="color:var(--muted)">Mensagem principal do módulo: só muda por aqui (vale para todos os servidores do bot).</div>' : '';
   return `<div class="cartao ${alterado ? 'alterado' : ''}" data-chave="${esc(chave)}">
     <div class="cab"><span class="tag tipo">${esc(TIPOS[c.tipo] || 'Texto')}</span><span class="chave">${esc(chave)}</span><span class="esp"></span>
       ${alterado ? '<button class="btn peq" data-acao="restaurar">Voltar ao padrão</button>' : ''}</div>
