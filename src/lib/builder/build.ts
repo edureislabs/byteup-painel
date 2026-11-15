@@ -1,7 +1,9 @@
 import { slugify } from "@/lib/storeShared";
 import { BUILDER_MODULES, botModulesOnly, builderModule, type BuilderOptions } from "./catalog";
 import { generateReadme } from "./readme";
-import { TEMPLATE_FILES, TEMPLATE_VERSION } from "./templateFiles";
+import { TEMPLATE_FILES, TEMPLATE_INTENTS, TEMPLATE_OFUSCADO, TEMPLATE_VERSION } from "./templateFiles";
+import { createHash } from "node:crypto";
+import { ofuscarPorteiro } from "./ofuscar";
 import { createZip, type ZipEntry } from "./zip";
 import { chavePublica, emitirLicenca, empacotar } from "./licenca";
 
@@ -15,14 +17,7 @@ export function generatedFiles(opts: BuilderOptions, siteUrl: string): Record<(t
   const modulos = botModulesOnly(opts.modulos); // ferramentas extras não entram no config.json
   pkg.description = `${opts.nome}: bot para Discord (módulos: ${modulos.join(", ")})`;
   // o código vai criptografado: o Inicializador lê daqui as permissões especiais (intents) que os módulos precisam
-  const fontes = modulos.map((id) => TEMPLATE_FILES[`src/modules/${id}.js`] ?? "").join("\n");
-  const intents = [
-    ["members", "GatewayIntentBits.GuildMembers"],
-    ["content", "GatewayIntentBits.MessageContent"],
-    ["presence", "GatewayIntentBits.GuildPresences"],
-  ]
-    .filter(([, marca]) => fontes.includes(marca))
-    .map(([nome]) => nome);
+  const intents = [...new Set(modulos.flatMap((id) => TEMPLATE_INTENTS[id] ?? []))];
   const config = { nome: opts.nome, cor: opts.cor, status: "Use /ajuda", modulos, intents };
   const nomeHost = opts.nome.replace(/[\r\n=]/g, " ").slice(0, 32);
   return {
@@ -45,6 +40,17 @@ const destinoNoBot = (nome: string) => nome.replace(/^extras\/[\w-]+\//, "");
 
 /** Arquivos do Windows (.bat, .ps1) precisam de quebra de linha CRLF. */
 const paraWindows = (nome: string, conteudo: string) => (/\.(bat|cmd|ps1)$/i.test(nome) ? conteudo.replace(/\r?\n/g, "\r\n") : conteudo);
+
+/** Vai dentro do bot.pack: se o index.js (porteiro) for alterado, o bot não liga. */
+const SELO = `import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+let h = '';
+try { h = createHash('sha256').update(readFileSync(new URL('../../index.js', import.meta.url))).digest('hex'); } catch {}
+if (h !== '__HASH__') {
+  console.error('❌ O arquivo index.js foi alterado. Baixe o bot de novo em Minhas compras.');
+  process.exit(1);
+}
+`;
 
 /** Arquivos que vão criptografados no bot.pack (o código do bot). */
 const vaiNoPacote = (nome: string) => nome === "index.js" || /^src\/.+\.js$/.test(nome);
@@ -74,7 +80,7 @@ export function buildBotZip(opts: BuilderOptions, siteUrl: string, licenca: Lice
     const modulo = moduleOfFile(nome);
     if (modulo && (!vendidos.has(modulo) || !escolhidos.has(modulo))) continue;
     if (vaiNoPacote(nome)) {
-      codigo[nome === "index.js" ? "principal.js" : nome] = conteudo;
+      codigo[nome === "index.js" ? "principal.js" : nome] = TEMPLATE_OFUSCADO[nome] ?? conteudo;
       continue;
     }
     // ferramentas "fora" (ex.: Inicializador) ficam na raiz do .zip, ao lado da pasta do bot
@@ -84,9 +90,16 @@ export function buildBotZip(opts: BuilderOptions, siteUrl: string, licenca: Lice
 
   const lic = emitirLicenca({ id: licenca.id, comprador: licenca.comprador, bot: opts.nome, site: siteUrl });
   entries.push({ name: `${slug}/licenca.json`, data: `${JSON.stringify(lic, null, 2)}\n` });
-  entries.push({ name: `${slug}/bot.pack`, data: empacotar(codigo, licenca.id) });
-  const carregador = TEMPLATE_FILES["protegido/index.js"].replace("__CHAVE_PUBLICA__", chavePublica()).replace("__VERSAO__", TEMPLATE_VERSION);
+  // o "porteiro" (index.js) é embaralhado de um jeito diferente em cada download
+  const carregador = ofuscarPorteiro(
+    TEMPLATE_FILES["protegido/index.js"].replace("__CHAVE_PUBLICA__", chavePublica()).replace("__VERSAO__", TEMPLATE_VERSION),
+  );
   entries.push({ name: `${slug}/index.js`, data: carregador });
+  // selo: o código de dentro confere se o porteiro não foi mexido
+  const hash = createHash("sha256").update(carregador).digest("hex");
+  codigo["src/core/selo.js"] = ofuscarPorteiro(SELO.replace("__HASH__", hash), true);
+  codigo["principal.js"] = `import './src/core/selo.js';\n${codigo["principal.js"]}`;
+  entries.push({ name: `${slug}/bot.pack`, data: empacotar(codigo, licenca.id) });
 
   return { fileName: `${slug}.zip`, buffer: createZip(entries), version: TEMPLATE_VERSION };
 }
