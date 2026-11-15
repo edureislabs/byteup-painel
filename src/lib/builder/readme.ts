@@ -186,7 +186,7 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
   if (temInicializador) {
     L.push("### 2. Ligue com o Inicializador (sem terminal)", "");
     L.push("1. Extraia este .zip numa pasta (por exemplo, em Documentos).");
-    L.push("2. Dê **dois cliques em `Iniciar bot.bat`**. Abre o **Bots ByteUP** e ele cria o atalho **Bots ByteUP** na Área de Trabalho e no Menu Iniciar: da próxima vez, abra por ele (sem janela preta).");
+    L.push("2. Dê **dois cliques em `Abrir Bots ByteUP.bat`**. Na primeira vez ele cria o atalho **Bots ByteUP** (com ícone, sem janela preta) na Área de Trabalho, no Menu Iniciar e aqui na pasta, e esconde o `.bat`. Depois, abra sempre pelo atalho **Bots ByteUP**.");
     L.push("3. Escolha o bot e clique em **Ligar**. Na primeira vez abre a configuração, com 4 passos que ficam verdes quando estão certos:");
     L.push("    - **Node.js:** se faltar, um botão baixa e instala sozinho.");
     L.push("    - **Token:** cole o token do passo 1. Ele confere com o Discord na hora (e avisa se o bot foi criado em outra conta).");
@@ -243,7 +243,7 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
   for (const m of extras) {
     L.push(`### ${m.emoji} ${m.name}`, "", m.description, "");
     if (m.id === "inicializador") {
-      L.push("O **`Iniciar bot.bat`** fica fora da pasta do bot. Na primeira vez ele abre o **Bots ByteUP** e cria o atalho **Bots ByteUP** (com ícone, sem janela preta) na Área de Trabalho e no Menu Iniciar. Ele:", "");
+      L.push("O **`Abrir Bots ByteUP.bat`** fica fora da pasta do bot. Na primeira vez ele abre o **Bots ByteUP**, cria o atalho **Bots ByteUP** (com ícone, sem janela preta) na Área de Trabalho, no Menu Iniciar e na pasta, e esconde o `.bat`. Depois é só o atalho. Ele:", "");
       L.push("1. Procura no seu PC **só os bots comprados na loja** (os que têm `licenca.json`; na primeira vez demora um pouco, depois ele lembra) e mostra se cada um está **Ligado**, **Desligado** ou falta **Configurar**.");
       L.push("2. **Ligar:** na primeira vez, configura tudo por janelas (Node.js, token, permissões, servidor), instala o que precisa e liga o bot sem terminal.");
       L.push("3. **Parar** (salva os dados e tira o bot do ar na hora), **Configurar** (trocar token ou servidor), **Registro**, **Ligar com o Windows**.");
@@ -267,7 +267,7 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
     L.push("1. Desligue o bot antigo e extraia este .zip numa pasta **nova**.");
     L.push("2. Na pasta nova, dê **dois cliques em `Transferir dados.bat`**.");
     L.push("3. Escolha a pasta do bot antigo e confirme. Ele copia a `data` e o `.env`, guarda uma cópia de segurança e já roda o `npm install`.");
-    L.push(temInicializador ? "4. Ligue o bot novo pelo **Iniciar bot.bat** (o antigo aparece como cópia antiga na lista)." : "4. Ligue o bot novo com `npm start`.");
+    L.push(temInicializador ? "4. Ligue o bot novo pelo atalho **Bots ByteUP** (o antigo aparece como cópia antiga na lista)." : "4. Ligue o bot novo com `npm start`.");
   } else {
     L.push("1. Desligue o bot antigo e extraia este .zip numa pasta **nova**.");
     L.push("2. Copie a pasta **`data`** e o arquivo **`.env`** do bot antigo para a pasta nova.");

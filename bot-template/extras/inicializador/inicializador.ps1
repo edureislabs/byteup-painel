@@ -1,4 +1,4 @@
-﻿# Bots ByteUP: o Inicializador (aberto pelo atalho "Bots ByteUP" ou pelo "Iniciar bot.bat").
+﻿# Bots ByteUP: o Inicializador (aberto pelo atalho "Bots ByteUP" ou pelo "Abrir Bots ByteUP.bat").
 # Acha no PC os bots comprados na loja ByteUP (os que têm licenca.json), faz a primeira configuração
 # por janelas (Node.js, token, intents, servidor), instala o que falta, liga o bot sem terminal e deixa
 # parar, ver o registro, ligar com o Windows, personalizar e trazer os dados de outro bot.
@@ -9,7 +9,27 @@ $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 Add-Type -AssemblyName Microsoft.VisualBasic
+# Telas com zoom (125%, 150%): deixa o texto nítido em vez de embaçado (precisa rodar antes de abrir qualquer janela)
+try {
+  Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+public static class ByteupDpi {
+  [DllImport("user32.dll")] public static extern bool SetProcessDpiAwarenessContext(IntPtr v);
+  [DllImport("shcore.dll")] public static extern int SetProcessDpiAwareness(int v);
+  [DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
+  public static void Ativar() {
+    try { if (SetProcessDpiAwarenessContext((IntPtr)(-4))) return; } catch {}
+    try { if (SetProcessDpiAwarenessContext((IntPtr)(-3))) return; } catch {}
+    try { if (SetProcessDpiAwareness(2) == 0) return; } catch {}
+    try { SetProcessDPIAware(); } catch {}
+  }
+}
+'@ -ErrorAction Stop
+  [ByteupDpi]::Ativar()
+} catch {}
 [System.Windows.Forms.Application]::EnableVisualStyles()
+[System.Windows.Forms.Application]::SetCompatibleTextRenderingDefault($false)
 try { [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12 } catch {}
 
 $titulo = 'Bots ByteUP'
@@ -33,7 +53,7 @@ function Esperar([int]$ms) {
 }
 
 # ---------------- visual (cores da ByteUP) ----------------
-$C = @{
+$Cor = @{
   Fundo     = [System.Drawing.Color]::FromArgb(12, 10, 18)
   Painel    = [System.Drawing.Color]::FromArgb(22, 18, 31)
   Painel2   = [System.Drawing.Color]::FromArgb(33, 27, 46)
@@ -74,16 +94,16 @@ function EstiloBotao($b, [string]$tipo = 'normal') {
   $b.UseVisualStyleBackColor = $false
   switch ($tipo) {
     'primario' {
-      $b.BackColor = $C.RoxoEsc; $b.ForeColor = [System.Drawing.Color]::White; $b.FlatAppearance.BorderColor = $C.Roxo
-      $b.FlatAppearance.MouseOverBackColor = $C.Roxo; $b.FlatAppearance.MouseDownBackColor = $C.RoxoEsc
+      $b.BackColor = $Cor.RoxoEsc; $b.ForeColor = [System.Drawing.Color]::White; $b.FlatAppearance.BorderColor = $Cor.Roxo
+      $b.FlatAppearance.MouseOverBackColor = $Cor.Roxo; $b.FlatAppearance.MouseDownBackColor = $Cor.RoxoEsc
     }
     'perigo' {
-      $b.BackColor = $C.Painel; $b.ForeColor = $C.Vermelho; $b.FlatAppearance.BorderColor = $C.Borda
-      $b.FlatAppearance.MouseOverBackColor = [System.Drawing.Color]::FromArgb(58, 22, 32); $b.FlatAppearance.MouseDownBackColor = $C.Painel2
+      $b.BackColor = $Cor.Painel; $b.ForeColor = $Cor.Vermelho; $b.FlatAppearance.BorderColor = $Cor.Borda
+      $b.FlatAppearance.MouseOverBackColor = [System.Drawing.Color]::FromArgb(58, 22, 32); $b.FlatAppearance.MouseDownBackColor = $Cor.Painel2
     }
     default {
-      $b.BackColor = $C.Painel; $b.ForeColor = $C.Texto; $b.FlatAppearance.BorderColor = $C.Borda
-      $b.FlatAppearance.MouseOverBackColor = $C.Painel2; $b.FlatAppearance.MouseDownBackColor = $C.Borda
+      $b.BackColor = $Cor.Painel; $b.ForeColor = $Cor.Texto; $b.FlatAppearance.BorderColor = $Cor.Borda
+      $b.FlatAppearance.MouseOverBackColor = $Cor.Painel2; $b.FlatAppearance.MouseDownBackColor = $Cor.Borda
     }
   }
   $b.Tag = "estilo:$tipo"
@@ -93,12 +113,12 @@ function Tematizar($ctl) {
   foreach ($c in @($ctl.Controls)) {
     switch ($c.GetType().Name) {
       'Button' { if (-not ([string]$c.Tag).StartsWith('estilo:')) { EstiloBotao $c 'normal' } }
-      'TextBox' { $c.BackColor = $C.Painel2; $c.ForeColor = $C.Texto; $c.BorderStyle = 'FixedSingle' }
-      'LinkLabel' { $c.LinkColor = $C.Roxo; $c.ActiveLinkColor = $C.Texto; $c.DisabledLinkColor = $C.Suave; $c.BackColor = [System.Drawing.Color]::Transparent }
-      'Label' { $c.ForeColor = $C.Texto; $c.BackColor = [System.Drawing.Color]::Transparent }
-      'CheckBox' { $c.ForeColor = $C.Texto; $c.BackColor = [System.Drawing.Color]::Transparent }
-      'ListBox' { $c.BackColor = $C.Painel; $c.ForeColor = $C.Texto; $c.BorderStyle = 'None' }
-      'GroupBox' { $c.BackColor = $C.Fundo; Tematizar $c; $c.ForeColor = $C.Roxo; foreach ($x in @($c.Controls)) { if ($x -is [System.Windows.Forms.Label] -and -not ($x -is [System.Windows.Forms.LinkLabel])) { $x.ForeColor = $C.Texto } } }
+      'TextBox' { $c.BackColor = $Cor.Painel2; $c.ForeColor = $Cor.Texto; $c.BorderStyle = 'FixedSingle' }
+      'LinkLabel' { $c.LinkColor = $Cor.Roxo; $c.ActiveLinkColor = $Cor.Texto; $c.DisabledLinkColor = $Cor.Suave; $c.BackColor = [System.Drawing.Color]::Transparent }
+      'Label' { $c.ForeColor = $Cor.Texto; $c.BackColor = [System.Drawing.Color]::Transparent }
+      'CheckBox' { $c.ForeColor = $Cor.Texto; $c.BackColor = [System.Drawing.Color]::Transparent }
+      'ListBox' { $c.BackColor = $Cor.Painel; $c.ForeColor = $Cor.Texto; $c.BorderStyle = 'None' }
+      'GroupBox' { $c.BackColor = $Cor.Fundo; Tematizar $c; $c.ForeColor = $Cor.Roxo; foreach ($x in @($c.Controls)) { if ($x -is [System.Windows.Forms.Label] -and -not ($x -is [System.Windows.Forms.LinkLabel])) { $x.ForeColor = $Cor.Texto } } }
       'Panel' { Tematizar $c }
     }
   }
@@ -108,9 +128,10 @@ function NovaJanela([string]$texto, [int]$l, [int]$a) {
   $f.Text = $texto
   $f.Size = New-Object System.Drawing.Size($l, $a)
   $f.StartPosition = 'CenterScreen'
-  $f.BackColor = $C.Fundo
-  $f.ForeColor = $C.Texto
+  $f.BackColor = $Cor.Fundo
+  $f.ForeColor = $Cor.Texto
   $f.Font = $FONTE
+  $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::None
   try {
     if (-not $script:iconeJanela) { $script:iconeJanela = [System.Drawing.Icon]::FromHandle((DesenharLogo 32).GetHicon()) }
     $f.Icon = $script:iconeJanela
@@ -120,7 +141,7 @@ function NovaJanela([string]$texto, [int]$l, [int]$a) {
       param($s, $e)
       try {
         $v = 1; [void][ByteupDwm]::DwmSetWindowAttribute($s.Handle, 20, [ref]$v, 4)
-        $cor = 0x120A0C; [void][ByteupDwm]::DwmSetWindowAttribute($s.Handle, 35, [ref]$cor, 4)
+        $corTitulo = 0x120A0C; [void][ByteupDwm]::DwmSetWindowAttribute($s.Handle, 35, [ref]$corTitulo, 4)
       } catch {}
     })
   }
@@ -143,7 +164,7 @@ function DesenharLogo([int]$t) {
   $g = [System.Drawing.Graphics]::FromImage($bmp)
   $g.SmoothingMode = 'AntiAlias'
   $g.Clear([System.Drawing.Color]::Transparent)
-  $fundo = New-Object System.Drawing.Drawing2D.LinearGradientBrush((New-Object System.Drawing.PointF(0, 0)), (New-Object System.Drawing.PointF($t, $t)), $C.Roxo, [System.Drawing.Color]::FromArgb(59, 18, 120))
+  $fundo = New-Object System.Drawing.Drawing2D.LinearGradientBrush((New-Object System.Drawing.PointF(0, 0)), (New-Object System.Drawing.PointF($t, $t)), $Cor.Roxo, [System.Drawing.Color]::FromArgb(59, 18, 120))
   $g.FillPath($fundo, (Arredondado 0 0 ($t - 1) ($t - 1) ($t * 0.24)))
   $branco = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::White)
   $olho = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(76, 29, 149))
@@ -214,7 +235,17 @@ function AtualizarAtalhos {
     if ($k -gt 0 -and -not $primeira -and -not (Test-Path -LiteralPath $lnk)) { continue }
     try { CriarAtalho $lnk $argumentos $descricao $PSScriptRoot } catch {}
   }
-  if ($primeira) { try { Set-Content -LiteralPath $marca -Value (Get-Date -Format o) } catch {} }
+  if ($primeira) {
+    try { Set-Content -LiteralPath $marca -Value (Get-Date -Format o) } catch {}
+    # deixa na pasta só o atalho "Bots ByteUP": esconde o .bat e este .ps1 (continuam funcionando)
+    try {
+      foreach ($arq in (Get-ChildItem -LiteralPath $PSScriptRoot -File -Force -ErrorAction SilentlyContinue)) {
+        if ($arq.Extension -ieq '.bat' -or $arq.Name -ieq (Split-Path $PSCommandPath -Leaf)) {
+          $arq.Attributes = $arq.Attributes -bor [System.IO.FileAttributes]::Hidden
+        }
+      }
+    } catch {}
+  }
   return $primeira
 }
 
@@ -622,8 +653,8 @@ function NovoBotaoEm($pai, [string]$texto, [int]$x, [int]$y, [int]$l) {
   $pai.Controls.Add($b)
   return $b
 }
-$VERDE = $C.Verde
-$VERMELHO = $C.Vermelho
+$VERDE = $Cor.Verde
+$VERMELHO = $Cor.Vermelho
 
 # Abre o assistente. Devolve $true se o bot ficou pronto para ligar.
 function Assistente($bot) {
@@ -721,7 +752,7 @@ function Assistente($bot) {
     }
     # 4
     $g = $w.gid.Text.Trim()
-    if (-not $g) { $w.st4.Text = 'Pode deixar vazio.'; $w.st4.ForeColor = $C.Suave }
+    if (-not $g) { $w.st4.Text = 'Pode deixar vazio.'; $w.st4.ForeColor = $Cor.Suave }
     elseif ($g -match '^\d{17,20}$') { $w.st4.Text = '✔ ID válido.'; $w.st4.ForeColor = $VERDE }
     else { $w.st4.Text = '✖ O ID tem só números (17 a 20).'; $w.st4.ForeColor = $VERMELHO }
     $gidOk = (-not $g) -or ($g -match '^\d{17,20}$')
@@ -732,7 +763,7 @@ function Assistente($bot) {
     $t = $w.tk.Text.Trim()
     $w.tokenOk = $false
     if (-not $t) { $w.st2.Text = 'Cole o token do bot.'; $w.st2.ForeColor = $VERMELHO; & $w.atualizar; return }
-    $w.st2.Text = 'Conferindo com o Discord...'; $w.st2.ForeColor = $C.Suave
+    $w.st2.Text = 'Conferindo com o Discord...'; $w.st2.ForeColor = $Cor.Suave
     $w.form.Cursor = [System.Windows.Forms.Cursors]::WaitCursor; [System.Windows.Forms.Application]::DoEvents()
     $r = ConferirToken $t
     $w.form.Cursor = [System.Windows.Forms.Cursors]::Default
@@ -978,23 +1009,23 @@ $form = NovaJanela $titulo 1080 660
 $form.MinimumSize = New-Object System.Drawing.Size(980, 560)
 
 $topo = New-Object System.Windows.Forms.Panel
-$topo.Dock = 'Top'; $topo.Height = 84; $topo.BackColor = $C.Painel
+$topo.Dock = 'Top'; $topo.Height = 84; $topo.BackColor = $Cor.Painel
 $form.Controls.Add($topo)
 $logo = New-Object System.Windows.Forms.PictureBox
 $logo.Location = New-Object System.Drawing.Point(22, 18); $logo.Size = New-Object System.Drawing.Size(48, 48)
 $logo.SizeMode = 'StretchImage'; $logo.Image = DesenharLogo 96
 $topo.Controls.Add($logo)
 $nomeApp = New-Object System.Windows.Forms.Label
-$nomeApp.Text = 'Bots ByteUP'; $nomeApp.Font = $FONTE_T; $nomeApp.ForeColor = $C.Texto
+$nomeApp.Text = 'Bots ByteUP'; $nomeApp.Font = $FONTE_T; $nomeApp.ForeColor = $Cor.Texto
 $nomeApp.Location = New-Object System.Drawing.Point(82, 12); $nomeApp.AutoSize = $true
 $topo.Controls.Add($nomeApp)
 $rotulo = New-Object System.Windows.Forms.Label
 $rotulo.Location = New-Object System.Drawing.Point(84, 50); $rotulo.Size = New-Object System.Drawing.Size(960, 22)
-$rotulo.Anchor = 'Top, Left, Right'; $rotulo.ForeColor = $C.Suave; $rotulo.Font = $FONTE
+$rotulo.Anchor = 'Top, Left, Right'; $rotulo.ForeColor = $Cor.Suave; $rotulo.Font = $FONTE
 $rotulo.Text = 'Escolha o bot e use os botões abaixo.'
 $topo.Controls.Add($rotulo)
 $faixa = New-Object System.Windows.Forms.Panel
-$faixa.Dock = 'Top'; $faixa.Height = 3; $faixa.BackColor = $C.RoxoEsc
+$faixa.Dock = 'Top'; $faixa.Height = 3; $faixa.BackColor = $Cor.RoxoEsc
 $form.Controls.Add($faixa)
 $faixa.BringToFront()
 
@@ -1002,7 +1033,7 @@ $grade = New-Object System.Windows.Forms.DataGridView
 $grade.Location = New-Object System.Drawing.Point(22, 106)
 $grade.Size = New-Object System.Drawing.Size(1020, 330)
 $grade.Anchor = 'Top, Bottom, Left, Right'
-$grade.BackgroundColor = $C.Painel; $grade.BorderStyle = 'None'; $grade.GridColor = $C.Borda
+$grade.BackgroundColor = $Cor.Painel; $grade.BorderStyle = 'None'; $grade.GridColor = $Cor.Borda
 $grade.CellBorderStyle = 'SingleHorizontal'
 $grade.RowHeadersVisible = $false
 $grade.AllowUserToAddRows = $false; $grade.AllowUserToDeleteRows = $false; $grade.AllowUserToResizeRows = $false; $grade.AllowUserToOrderColumns = $false
@@ -1010,14 +1041,14 @@ $grade.ReadOnly = $true; $grade.SelectionMode = 'FullRowSelect'; $grade.MultiSel
 $grade.EnableHeadersVisualStyles = $false
 $grade.ColumnHeadersBorderStyle = 'None'
 $grade.ColumnHeadersHeightSizeMode = 'DisableResizing'; $grade.ColumnHeadersHeight = 40
-$grade.ColumnHeadersDefaultCellStyle.BackColor = $C.Painel2
-$grade.ColumnHeadersDefaultCellStyle.ForeColor = $C.Suave
-$grade.ColumnHeadersDefaultCellStyle.SelectionBackColor = $C.Painel2
+$grade.ColumnHeadersDefaultCellStyle.BackColor = $Cor.Painel2
+$grade.ColumnHeadersDefaultCellStyle.ForeColor = $Cor.Suave
+$grade.ColumnHeadersDefaultCellStyle.SelectionBackColor = $Cor.Painel2
 $grade.ColumnHeadersDefaultCellStyle.Font = $FONTE_B
 $grade.ColumnHeadersDefaultCellStyle.Padding = New-Object System.Windows.Forms.Padding(10, 0, 0, 0)
-$grade.DefaultCellStyle.BackColor = $C.Painel
-$grade.DefaultCellStyle.ForeColor = $C.Texto
-$grade.DefaultCellStyle.SelectionBackColor = $C.Selecao
+$grade.DefaultCellStyle.BackColor = $Cor.Painel
+$grade.DefaultCellStyle.ForeColor = $Cor.Texto
+$grade.DefaultCellStyle.SelectionBackColor = $Cor.Selecao
 $grade.DefaultCellStyle.SelectionForeColor = [System.Drawing.Color]::White
 $grade.DefaultCellStyle.Font = $FONTE
 $grade.DefaultCellStyle.Padding = New-Object System.Windows.Forms.Padding(10, 0, 0, 0)
@@ -1055,7 +1086,7 @@ $btProcurar = NovoBotao 'Procurar de novo' 546 $y2 170
 $btApagar = NovoBotao 'Apagar (Lixeira)' 724 $y2 170 'perigo'
 $dica = New-Object System.Windows.Forms.Label
 $dica.Location = New-Object System.Drawing.Point(24, 552); $dica.Size = New-Object System.Drawing.Size(1000, 40)
-$dica.Anchor = 'Bottom, Left, Right'; $dica.ForeColor = $C.Suave; $dica.Font = $FONTE_P
+$dica.Anchor = 'Bottom, Left, Right'; $dica.ForeColor = $Cor.Suave; $dica.Font = $FONTE_P
 $dica.Text = 'Dica: abra pelo atalho "Bots ByteUP" (Área de Trabalho ou Menu Iniciar). O bot continua ligado depois que você fecha esta janela.'
 $form.Controls.Add($dica)
 
@@ -1065,7 +1096,7 @@ function TextoEstado([string]$e) {
   switch ($e) { 'Ligado' { return '●  Ligado' } 'Configurar' { return '⚙  Configurar' } default { return '○  Desligado' } }
 }
 function CorEstado([string]$e) {
-  switch ($e) { 'Ligado' { return $C.Verde } 'Configurar' { return $C.Amarelo } default { return $C.Suave } }
+  switch ($e) { 'Ligado' { return $Cor.Verde } 'Configurar' { return $Cor.Amarelo } default { return $Cor.Suave } }
 }
 function Preencher {
   $grade.Rows.Clear()
@@ -1076,8 +1107,8 @@ function Preencher {
     $linha = $grade.Rows[$i]
     $linha.Tag = $b
     $linha.Cells[1].Style.ForeColor = (CorEstado $e)
-    if ($b.Situacao -like '*antigo' -or $b.Antigo) { $linha.DefaultCellStyle.ForeColor = $C.Suave }
-    if ($b.Antigo) { $linha.Cells[2].Style.ForeColor = $C.Amarelo }
+    if ($b.Situacao -like '*antigo' -or $b.Antigo) { $linha.DefaultCellStyle.ForeColor = $Cor.Suave }
+    if ($b.Antigo) { $linha.Cells[2].Style.ForeColor = $Cor.Amarelo }
   }
   $grade.ClearSelection()
   if ($grade.Rows.Count -gt 0) {

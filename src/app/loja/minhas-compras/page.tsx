@@ -80,7 +80,7 @@ export default async function MinhasComprasPage() {
           </p>
           <p className="mt-3 rounded-2xl border border-[#f2c96d]/25 bg-[#f2c96d]/5 px-4 py-3 text-sm text-[#d8cfb4]">
             <b className="text-[#f2c96d]">Windows:</b> antes de extrair o .zip, clique nele com o botão direito → <b>Propriedades</b> → marque{" "}
-            <b>Desbloquear</b> → OK. Sem isso, o Windows pode bloquear o <code>Iniciar bot.bat</code>.
+            <b>Desbloquear</b> → OK. Sem isso, o Windows pode bloquear o <code>Abrir Bots ByteUP.bat</code>.
           </p>
           <p className="mt-3 rounded-2xl border border-[#b64cff]/25 bg-[#b64cff]/5 px-4 py-3 text-sm text-[#d6c8e6]">
             <b className="text-[#d9b4ff]">🔒 Bots licenciados para você:</b> cada bot só liga com um aplicativo criado na <b>sua conta do Discord</b> (a
