@@ -9,6 +9,7 @@ import { prisma } from "@/lib/prisma";
 import { daysAgo, formatBytes, formatPrice } from "@/lib/storeShared";
 import { builderModule, parseModules, readBuilderOptions, readUpgradeOptions } from "@/lib/builder/catalog";
 import { BuIcon } from "@/components/BuIcon";
+import { TutorialInstalacao } from "./TutorialInstalacao";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Minhas compras | Loja ByteUP", robots: { index: false } };
@@ -50,6 +51,7 @@ export default async function MinhasComprasPage() {
   // Pedidos pendentes antigos (link vencido) não interessam
   const cutoff = daysAgo(1);
   const visible = orders.filter((o) => o.status !== "pending" || o.createdAt > cutoff);
+  const temBot = visible.some((o) => o.status === "paid" && o.items.some((it) => !it.productId && readBuilderOptions(it.options)));
 
   // "Adicionar módulos" pagos: somam aos módulos do bot original
   const extrasDoBot = new Map<string, string[]>();
@@ -180,6 +182,8 @@ export default async function MinhasComprasPage() {
               );
             })}
           </div>
+
+          {temBot && <TutorialInstalacao />}
         </div>
       </section>
       <LandingFooter />
