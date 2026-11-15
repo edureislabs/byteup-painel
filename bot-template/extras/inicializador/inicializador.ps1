@@ -228,7 +228,10 @@ function AtualizarAtalhos {
   $descricao = 'Liga, configura e personaliza os seus bots da loja ByteUP'
   $marca = Join-Path $pastaCache 'atalhos.ok'
   $primeira = -not (Test-Path -LiteralPath $marca)
-  $locais = @($PSScriptRoot, [Environment]::GetFolderPath('Desktop'), [Environment]::GetFolderPath('Programs'))
+  # os arquivos ficam na subpasta "Bots ByteUP"; o atalho do topo vai para a pasta de cima (ao lado do bot)
+  $topo = Split-Path $PSScriptRoot -Parent
+  if (-not $topo) { $topo = $PSScriptRoot }
+  $locais = @($topo, [Environment]::GetFolderPath('Desktop'), [Environment]::GetFolderPath('Programs'))
   for ($k = 0; $k -lt $locais.Count; $k++) {
     if (-not $locais[$k]) { continue }
     $lnk = Join-Path $locais[$k] 'Bots ByteUP.lnk'

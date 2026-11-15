@@ -186,7 +186,7 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
   if (temInicializador) {
     L.push("### 2. Ligue com o Inicializador (sem terminal)", "");
     L.push("1. Extraia este .zip numa pasta (por exemplo, em Documentos).");
-    L.push("2. Dê **dois cliques em `Abrir Bots ByteUP.bat`**. Na primeira vez ele cria o atalho **Bots ByteUP** (com ícone, sem janela preta) na Área de Trabalho, no Menu Iniciar e aqui na pasta, e esconde o `.bat`. Depois, abra sempre pelo atalho **Bots ByteUP**.");
+    L.push("2. Abra a pasta **`Bots ByteUP`** e dê **dois cliques em `Abrir Bots ByteUP.bat`**. Na primeira vez ele cria o atalho **Bots ByteUP** (com ícone, sem janela preta) ao lado da pasta do bot, na Área de Trabalho e no Menu Iniciar, e esconde o `.bat`. Depois, abra sempre por esse atalho — não precisa mais entrar na pasta `Bots ByteUP`.");
     L.push("3. Escolha o bot e clique em **Ligar**. Na primeira vez abre a configuração, com 4 passos que ficam verdes quando estão certos:");
     L.push("    - **Node.js:** se faltar, um botão baixa e instala sozinho.");
     L.push("    - **Token:** cole o token do passo 1. Ele confere com o Discord na hora (e avisa se o bot foi criado em outra conta).");
@@ -243,7 +243,7 @@ export function generateReadme(opts: BuilderOptions, siteUrl: string): string {
   for (const m of extras) {
     L.push(`### ${m.emoji} ${m.name}`, "", m.description, "");
     if (m.id === "inicializador") {
-      L.push("O **`Abrir Bots ByteUP.bat`** fica fora da pasta do bot. Na primeira vez ele abre o **Bots ByteUP**, cria o atalho **Bots ByteUP** (com ícone, sem janela preta) na Área de Trabalho, no Menu Iniciar e na pasta, e esconde o `.bat`. Depois é só o atalho. Ele:", "");
+      L.push("O launcher fica na subpasta **`Bots ByteUP`** (com o `Abrir Bots ByteUP.bat`). Na primeira vez que você abre esse `.bat`, ele cria o atalho **Bots ByteUP** (com ícone, sem janela preta) ao lado da pasta do bot, na Área de Trabalho e no Menu Iniciar, e esconde o `.bat`. Depois é só o atalho. Ele:", "");
       L.push("1. Procura no seu PC **só os bots comprados na loja** (os que têm `licenca.json`; na primeira vez demora um pouco, depois ele lembra) e mostra se cada um está **Ligado**, **Desligado** ou falta **Configurar**.");
       L.push("2. **Ligar:** na primeira vez, configura tudo por janelas (Node.js, token, permissões, servidor), instala o que precisa e liga o bot sem terminal.");
       L.push("3. **Parar** (salva os dados e tira o bot do ar na hora), **Configurar** (trocar token ou servidor), **Registro**, **Ligar com o Windows**.");

@@ -37,7 +37,7 @@ function dosDateTime(d: Date) {
   return { time, date };
 }
 
-export type ZipEntry = { name: string; data: Buffer | string };
+export type ZipEntry = { name: string; data: Buffer | string; hidden?: boolean };
 
 export function createZip(entries: ZipEntry[], when = new Date()): Buffer {
   const { time, date } = dosDateTime(when);
@@ -71,7 +71,7 @@ export function createZip(entries: ZipEntry[], when = new Date()): Buffer {
 
     const central = Buffer.alloc(46);
     central.writeUInt32LE(0x02014b50, 0);
-    central.writeUInt16LE(0x0314, 4); // feito por: Unix, versão 2.0 (permite guardar permissões)
+    central.writeUInt16LE(entry.hidden ? 0x0014 : 0x0314, 4); // feito por: DOS (oculto) ou Unix (permissões)
     central.writeUInt16LE(20, 6);
     central.writeUInt16LE(0x0800, 8);
     central.writeUInt16LE(method, 10);
@@ -85,7 +85,7 @@ export function createZip(entries: ZipEntry[], when = new Date()): Buffer {
     central.writeUInt16LE(0, 32); // comentário
     central.writeUInt16LE(0, 34); // disco
     central.writeUInt16LE(0, 36); // atributos internos
-    central.writeUInt32LE((0o100644 << 16) >>> 0, 38); // arquivo comum, rw-r--r--
+    central.writeUInt32LE(entry.hidden ? 0x22 : ((0o100644 << 16) >>> 0), 38); // oculto+arquivo (DOS) ou rw-r--r-- (Unix)
     central.writeUInt32LE(offset, 42);
     centrals.push(central, name);
 

@@ -83,9 +83,16 @@ export function buildBotZip(opts: BuilderOptions, siteUrl: string, licenca: Lice
       codigo[nome === "index.js" ? "principal.js" : nome] = TEMPLATE_OFUSCADO[nome] ?? conteudo;
       continue;
     }
-    // ferramentas "fora" (ex.: Inicializador) ficam na raiz do .zip, ao lado da pasta do bot
+    // ferramentas "fora" (ex.: Inicializador) ficam ao lado da pasta do bot, no topo do .zip.
+    // O Inicializador vai numa subpasta "Bots ByteUP": o topo mostra só o bot (e, depois do 1º uso, o atalho).
     const fora = modulo ? builderModule(modulo)?.fora : false;
-    entries.push({ name: fora ? destinoNoBot(nome) : `${slug}/${destinoNoBot(nome)}`, data: paraWindows(nome, conteudo) });
+    // o .ps1 nasce oculto no Windows (a pasta mostra só o .bat)
+    const hidden = /\.ps1$/i.test(nome);
+    let destino: string;
+    if (modulo === "inicializador") destino = `Bots ByteUP/${destinoNoBot(nome)}`;
+    else if (fora) destino = destinoNoBot(nome);
+    else destino = `${slug}/${destinoNoBot(nome)}`;
+    entries.push({ name: destino, data: paraWindows(nome, conteudo), hidden });
   }
 
   const lic = emitirLicenca({ id: licenca.id, comprador: licenca.comprador, bot: opts.nome, site: siteUrl });
