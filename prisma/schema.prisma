@@ -722,3 +722,72 @@ model StoreTester {
   note      String   @default("")
   createdAt DateTime @default(now())
 }
+
+// ============================================================================
+// Plugins de Minecraft (ByteUpCore): rastreamento e licenças
+// ============================================================================
+
+/// Catálogo dos plugins (gratuitos e pagos). slug = ID do plugin (ex.: "byteuphud").
+/// Plugin pago: o StoreProduct da loja com o mesmo slug.
+model McPlugin {
+  slug          String   @id
+  nome          String
+  ultimaVersao  String   @default("")
+  urlDownload   String   @default("") // página para baixar a versão nova
+  maxServidores Int      @default(3)  // servidores por licença (plugins pagos)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+/// Um servidor de Minecraft com a ByteUpCore. id = UUID criado pela lib na primeira vez.
+model McServidor {
+  id          String         @id
+  software    String         @default("") // Paper, Purpur...
+  mcVersion   String         @default("")
+  javaVersion String         @default("")
+  coreVersion String         @default("")
+  onlineMode  Boolean        @default(true)
+  players     Int            @default(0)
+  maxPlayers  Int            @default(0)
+  country     String         @default("") // país pelo IP (a Vercel informa); o IP não é guardado
+  firstSeen   DateTime       @default(now())
+  lastSeen    DateTime       @default(now())
+  instalacoes McInstalacao[]
+
+  @@index([lastSeen])
+}
+
+/// Um plugin instalado num servidor.
+model McInstalacao {
+  id         String     @id @default(uuid())
+  servidorId String
+  servidor   McServidor @relation(fields: [servidorId], references: [id], onDelete: Cascade)
+  plugin     String
+  versao     String     @default("")
+  edicao     String     @default("free") // free | premium
+  licencaId  String?    // StoreOrderItem.id (plugins pagos)
+  firstSeen  DateTime   @default(now())
+  lastSeen   DateTime   @default(now())
+
+  @@unique([servidorId, plugin])
+  @@index([plugin, lastSeen])
+  @@index([licencaId])
+}
+
+/// Um registro por servidor, plugin e dia (para o gráfico de servidores por dia).
+model McPingDia {
+  dia        DateTime @db.Date
+  servidorId String
+  plugin     String
+
+  @@id([dia, servidorId, plugin])
+  @@index([plugin, dia])
+}
+
+/// Estado da licença de um plugin pago (a licença em si é o item do pedido: StoreOrderItem.id).
+model McLicenca {
+  itemId        String   @id
+  bloqueada     Boolean  @default(false)
+  maxServidores Int?     // null = o padrão do plugin (McPlugin.maxServidores)
+  updatedAt     DateTime @updatedAt
+}
