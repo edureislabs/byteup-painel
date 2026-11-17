@@ -41,6 +41,7 @@ export default async function MinhasComprasPage() {
             select: {
               slug: true,
               kind: true,
+              category: true,
               files: { where: { status: "ready" }, orderBy: { createdAt: "asc" }, select: { id: true, fileName: true, sizeBytes: true } },
             },
           },
@@ -159,7 +160,11 @@ export default async function MinhasComprasPage() {
                           {(item.product?.files ?? []).map((f) => (
                             <a
                               key={f.id}
-                              href={`/api/store/download/${f.id}`}
+                              href={
+                                item.product?.category === "plugin" && /\.jar$/i.test(f.fileName)
+                                  ? `/api/store/plugin/${item.id}?arquivo=${f.id}` // jar com a licença de quem comprou
+                                  : `/api/store/download/${f.id}`
+                              }
                               className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm hover:border-[#b64cff]/50"
                             >
                               <span className="truncate">📦 {f.fileName}</span>

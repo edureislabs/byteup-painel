@@ -109,6 +109,22 @@ export async function presignGet(key: string, opts: { fileName?: string; expires
   );
 }
 
+/** Baixa um arquivo inteiro do R2 para a memória (para montar os jars dos plugins). */
+export async function getObjectBytes(key: string): Promise<Buffer | null> {
+  try {
+    const res = await r2().send(new GetObjectCommand({ Bucket: bucket(), Key: key }));
+    if (!res.Body) return null;
+    return Buffer.from(await res.Body.transformToByteArray());
+  } catch {
+    return null;
+  }
+}
+
+/** Grava um arquivo no R2 (jar montado de um plugin). */
+export async function putObject(key: string, body: Buffer, contentType: string) {
+  await r2().send(new PutObjectCommand({ Bucket: bucket(), Key: key, Body: body, ContentType: contentType }));
+}
+
 export async function headObject(key: string): Promise<{ size: number; contentType: string } | null> {
   try {
     const res = await r2().send(new HeadObjectCommand({ Bucket: bucket(), Key: key }));

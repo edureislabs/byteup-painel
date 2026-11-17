@@ -31,7 +31,15 @@ function Lista({ titulo, itens }: { titulo: string; itens: Contagem[] }) {
 export default async function PluginsAdminPage({ searchParams }: { searchParams: Promise<{ salvo?: string; erro?: string }> }) {
   if (!(await getAdminUserId())) notFound();
   const { salvo, erro } = await searchParams;
-  const [estat, catalogo] = await Promise.all([estatisticasPlugins(), prisma.mcPlugin.findMany({ orderBy: { nome: "asc" } })]);
+  const [estat, catalogo, pagos] = await Promise.all([
+    estatisticasPlugins(),
+    prisma.mcPlugin.findMany({ orderBy: { nome: "asc" } }),
+    prisma.storeProduct.findMany({
+      where: { category: "plugin" },
+      select: { id: true, slug: true, name: true, files: { where: { status: "ready" }, select: { id: true, fileName: true }, orderBy: { createdAt: "desc" } } },
+      orderBy: { name: "asc" },
+    }),
+  ]);
   const nomes = new Map(catalogo.map((p) => [p.slug, p.nome]));
   let chave = "";
   try {
@@ -116,6 +124,34 @@ export default async function PluginsAdminPage({ searchParams }: { searchParams:
               <input name="maxServidores" type="number" min={0} defaultValue={p?.maxServidores ?? 3} title="Servidores por licença" className={campo} />
               <button className="rounded-xl bg-[#b64cff] px-4 py-2 text-sm font-bold">{p ? "Salvar" : "Adicionar"}</button>
             </form>
+          ))}
+        </div>
+
+        <h2 className="mt-10 text-2xl font-black">Plugins pagos na loja</h2>
+        <p className="mt-1 text-sm text-[#aaa3b5]">
+          Envie o jar <strong>premium</strong> (com o porteiro) como arquivo do produto. Quem compra baixa o jar com a própria licença, montado na hora.
+          <strong> Prévia</strong> = o mesmo jar com uma licença de teste sua, para testar no seu servidor.
+        </p>
+        <div className="mt-4 space-y-2">
+          {pagos.length === 0 && <p className="text-sm text-[#7d7588]">Nenhum produto da loja com a categoria plugin.</p>}
+          {pagos.map((p) => (
+            <div key={p.id} className="rounded-2xl border border-white/10 p-4 text-sm">
+              <div className="font-bold">
+                {p.name} <code className="ml-1 text-xs font-normal text-[#7d7588]">{p.slug}</code>
+                {!nomes.has(p.slug) && <span className="ml-2 rounded-full bg-[#f0b878]/20 px-2 py-0.5 text-xs text-[#f0d4b8]">falta no catálogo</span>}
+              </div>
+              <ul className="mt-2 space-y-1">
+                {p.files.filter((f) => /\.jar$/i.test(f.fileName)).map((f) => (
+                  <li key={f.id} className="flex items-center justify-between gap-3">
+                    <span className="truncate text-[#aaa3b5]">📦 {f.fileName}</span>
+                    <a href={`/api/admin/plugin-previa/${f.id}`} className="shrink-0 rounded-xl border border-white/10 px-3 py-1 text-xs text-[#d9b4ff] hover:border-[#b64cff]/50">
+                      Baixar prévia ↓
+                    </a>
+                  </li>
+                ))}
+                {!p.files.some((f) => /\.jar$/i.test(f.fileName)) && <li className="text-xs text-[#7d7588]">Sem arquivo .jar.</li>}
+              </ul>
+            </div>
           ))}
         </div>
 
