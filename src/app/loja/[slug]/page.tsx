@@ -122,14 +122,20 @@ export default async function ProductPage({ params }: { params: Params }) {
               </div>
 
               <div className="mt-6">
-                <BuyButton
-                  productId={product.id}
-                  free={product.priceCents === 0}
-                  isService={isService}
-                  loggedIn={Boolean(userId)}
-                  owned={owned}
-                  paymentsReady={anyPaymentConfigured()}
-                />
+                
+<BuyButton
+  productId={product.id}
+  free={product.priceCents === 0}
+  isService={isService}
+  loggedIn={Boolean(userId)}
+  owned={owned}
+  paymentsReady={anyPaymentConfigured()}
+  files={product.files.map((file) => ({
+    id: file.id,
+    fileName: file.fileName,
+  }))}
+/>
+
               </div>
 
               <ul className="mt-6 space-y-2 border-t border-white/10 pt-5 text-sm text-[#aaa3b5]">

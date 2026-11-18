@@ -68,7 +68,8 @@ export default async function AdminLojaPage() {
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-bold">{p.name}</div>
                   <div className="text-xs text-[#7d7588]">
-                    {cat.label} • {p.kind === "servico" ? "serviço por ticket" : `${p._count.files} arquivo(s)`} • /loja/{p.slug}
+{cat.label} • {p.kind === "servico" ? "serviço por ticket" : `${p._count.files} arquivo(s)`}
+• ⬇ {p.downloadCount} downloads • /loja/{p.slug}
                   </div>
                 </div>
                 <div className="text-sm font-bold">{p.priceCents === 0 ? "Grátis" : formatPrice(p.priceCents)}</div>
